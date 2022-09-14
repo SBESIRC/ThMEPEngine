@@ -12,7 +12,6 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
         {
             var property = new TCHWallProperty(objectId)
             {
-                Material = "材质",
                 EnumMaterial = EnumTCHWallMaterial.Aeratedconcrete,
                 Height = -1,
                 BottomElevation = 0.0,
@@ -41,7 +40,6 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
                 {
                     case 1:
                         var enumInt = int.Parse(strData);
-                        property.Material = strData;
                         property.EnumMaterial = (EnumTCHWallMaterial)enumInt;
                         break;
                     case 2:

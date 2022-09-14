@@ -3,6 +3,8 @@ using Autodesk.AutoCAD.Geometry;
 using ProtoBuf;
 using System;
 using System.Collections.Generic;
+using ThCADExtension;
+using ThMEPTCH.PropertyServices.PropertyEnums;
 
 namespace ThMEPTCH.Model
 {
@@ -14,6 +16,7 @@ namespace ThMEPTCH.Model
         /// </summary>
         [ProtoMember(21)]
         public List<ThTCHSlabDescendingData> Descendings { get; set; }
+
         private ThTCHSlab()
         {
 
@@ -39,6 +42,7 @@ namespace ThMEPTCH.Model
             Height = thickness;
             ExtrudedDirection = extVector;
             Descendings = new List<ThTCHSlabDescendingData>();
+            EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
         }
 
         public object Clone()
@@ -50,6 +54,7 @@ namespace ThMEPTCH.Model
             clone.ZOffSet = this.ZOffSet;
             clone.ExtrudedDirection = this.ExtrudedDirection;
             clone.Height = this.Height;
+            clone.EnumMaterial = this.EnumMaterial;
             if (this.Outline != null)
                 clone.Outline = this.Outline.Clone() as Entity;
             if (null != this.Descendings)

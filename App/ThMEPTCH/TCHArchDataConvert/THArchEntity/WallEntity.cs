@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
+using ThMEPTCH.PropertyServices.PropertyEnums;
 
 namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
 {
@@ -14,6 +15,7 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
         public double LeftWidth { get; set; }
         public double RightWidth { get; set; }
         public double Height { get; set; }
+        public EnumTCHWallMaterial EnumMaterial { get; set; }
 
         public WallEntity(TArchEntity dbWall):base(dbWall)
         {

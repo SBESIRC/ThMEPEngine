@@ -12,7 +12,6 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
         {
             var property = new SlabProperty(objectId)
             {
-                Material = "材质",
                 EnumMaterial = EnumSlabMaterial.ReinforcedConcrete,
                 TopElevation = 0.0,
                 Thickness = 100.0,
@@ -43,7 +42,6 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
                 {
                     case 1:
                         var enumInt = int.Parse(strData);
-                        property.Material = strData;
                         property.EnumMaterial = (EnumSlabMaterial)enumInt;
                         break;
                     case 2:

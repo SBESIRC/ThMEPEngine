@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
+using ThMEPTCH.PropertyServices.PropertyEnums;
 
 namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
@@ -12,6 +13,7 @@ namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
         public double Bulge { get; set; }
         public double Height { get; set; }
         public double Elevation { get; set; }
+        public EnumTCHWallMaterial EnumMaterial { get; set; }
 
         public override bool IsValid()
         {

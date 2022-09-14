@@ -3,6 +3,8 @@ using Autodesk.AutoCAD.Geometry;
 using ProtoBuf;
 using System;
 using System.Collections.Generic;
+using ThCADExtension;
+using ThMEPTCH.PropertyServices.PropertyEnums;
 
 namespace ThMEPTCH.Model
 {
@@ -29,6 +31,7 @@ namespace ThMEPTCH.Model
         {
 
         }
+
         public ThTCHWall(Point3d startPt, Point3d endPt, double width, double height)
         {
             Init();
@@ -38,6 +41,7 @@ namespace ThMEPTCH.Model
             XVector = (endPt - startPt).GetNormal();
             Origin = startPt + XVector.MultiplyBy(Length / 2);
         }
+
         public ThTCHWall(Polyline outPline, double height)
         {
             Init();
@@ -45,12 +49,14 @@ namespace ThMEPTCH.Model
             Outline = outPline;
             Height = height;
         }
+
         void Init()
         {
             Doors = new List<ThTCHDoor>();
             Windows = new List<ThTCHWindow>();
             Openings = new List<ThTCHOpening>();
             ExtrudedDirection = Vector3d.ZAxis;
+            EnumMaterial = EnumTCHWallMaterial.Aeratedconcrete.GetDescription();
         }
 
         public object Clone()
@@ -76,6 +82,7 @@ namespace ThMEPTCH.Model
             if (cloneWall != null)
             {
                 cloneWall.Uuid = this.Uuid;
+                cloneWall.EnumMaterial = this.EnumMaterial;
                 foreach (var item in this.Openings)
                 {
                     cloneWall.Openings.Add(item.Clone() as ThTCHOpening);

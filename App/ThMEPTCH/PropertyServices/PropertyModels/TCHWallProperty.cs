@@ -5,12 +5,10 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
 {
     class TCHWallProperty : PropertyBase
     {
-        public EnumTCHWallMaterial EnumMaterial { get; set; }
-
         /// <summary>
         /// 材质
         /// </summary>
-        public string Material { get; set; }
+        public EnumTCHWallMaterial EnumMaterial { get; set; }
 
         /// <summary>
         /// 墙高
@@ -31,7 +29,6 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         {
             var clone = new TCHWallProperty(this.ObjId)
             {
-                Material = this.Material,
                 EnumMaterial = this.EnumMaterial,
                 Height = this.Height,
                 BottomElevation = this.BottomElevation,

@@ -149,6 +149,7 @@ namespace ThMEPTCH.Services
                             if (item.Property is SlabProperty slabProp)
                             {
                                 slab.ZOffSet = slabProp.TopElevation;
+                                slab.EnumMaterial = slabProp.EnumMaterial.GetDescription();
                             }
                             slab.Uuid = prjId + item.Id;
                             allSlabs.Add(slab);

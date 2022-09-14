@@ -38,6 +38,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             wallEntity.LeftWidth = arch.LeftWidth;
             wallEntity.RightWidth = arch.RightWidth;
             wallEntity.Height = arch.Height;
+            wallEntity.EnumMaterial = arch.EnumMaterial;
             if (arch.IsArc)
             {
                 var sp = wallEntity.StartPoint;

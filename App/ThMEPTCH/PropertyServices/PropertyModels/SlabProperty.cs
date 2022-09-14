@@ -5,12 +5,10 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
 {
     class SlabProperty : PropertyBase
     {
-        public EnumSlabMaterial EnumMaterial { get; set; }
-
         /// <summary>
         /// 材质
         /// </summary>
-        public string Material { get; set; }
+        public EnumSlabMaterial EnumMaterial { get; set; }
 
         /// <summary>
         /// 建筑顶标高
@@ -36,7 +34,6 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         {
             var clone = new SlabProperty(this.ObjId)
             {
-                Material = this.Material,
                 EnumMaterial = this.EnumMaterial,
                 TopElevation = this.TopElevation,
                 Thickness = this.Thickness,

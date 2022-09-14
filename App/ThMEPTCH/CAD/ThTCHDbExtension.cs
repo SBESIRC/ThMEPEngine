@@ -232,6 +232,7 @@ namespace ThMEPTCH.CAD
             wall.Height = property.Height;
             wall.EndPoint = new Point3d(wall.EndPoint.X, wall.EndPoint.Y, property.BottomElevation);
             wall.StartPoint = new Point3d(wall.StartPoint.X, wall.StartPoint.Y, property.BottomElevation);
+            wall.EnumMaterial = property.EnumMaterial;
         }
 
         private static ResultBuffer GetDXFData(ObjectId tch)
@@ -244,6 +245,7 @@ namespace ThMEPTCH.CAD
 
             return rb;
         }
+
         private static DoorTypeOperationEnum GetOperationType(TypedValue tv)
         {
             var name = Convert.ToString(tv.Value);

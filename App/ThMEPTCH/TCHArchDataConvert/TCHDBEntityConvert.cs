@@ -35,7 +35,9 @@ namespace ThMEPTCH.TCHArchDataConvert
                 var entity = DBToTHEntityCommon.TArchWallToEntityWall(item, 0, 0, 0, 0, moveOffSet);
                 wallEntityDic.Add(entity.Outline, entity);
                 if (entity.CenterCurve != null && (entity.CenterCurve is Line || entity.CenterCurve is Arc))
+                {
                     wallCurveDic.Add(entity.CenterCurve, entity);
+                }
                 addDBColl.Add(entity.Outline);
             }
             var wallCurves = wallCurveDic.Select(c => c.Key).ToList();
@@ -402,6 +404,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             var newWall = new ThTCHWall(pl, entity.Height);
             newWall.Uuid = projectId + entity.DBId;
             newWall.Width = entity.LeftWidth + entity.RightWidth;
+            newWall.EnumMaterial = entity.EnumMaterial.GetDescription();
             //var newWall = new ThTCHWall(entity.StartPoint,entity.EndPoint,entity.RightWidth+entity.LeftWidth, entity.WallHeight);
             return newWall;
         }
