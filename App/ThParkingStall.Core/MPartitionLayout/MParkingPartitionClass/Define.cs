@@ -36,6 +36,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             HasImpactOnDepthForPillarConstruct = VMStock.ColumnAdditionalInfluenceLaneWidth;
             DisAllowMaxLaneLength = VMStock.DisAllowMaxLaneLength;
             //LayoutMode = ((int)VMStock.RunMode);
+            AllowCompactedLane = VMStock.BoundaryShrink;
 
             //其它参数设置
             GeneratePillars = PillarSpacing < DisVertCarWidth ? false : GeneratePillars;
