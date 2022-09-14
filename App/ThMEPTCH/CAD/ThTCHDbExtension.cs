@@ -251,7 +251,7 @@ namespace ThMEPTCH.CAD
             {
                 return ThTCHDbCommon.DoorTypeOperationMapping[name];
             }
-            return DoorTypeOperationEnum.SWING;
+            return DoorTypeOperationEnum.SWING0001;
         }
 
         private static WindowTypeEnum GetWindowType(TypedValue tv)
