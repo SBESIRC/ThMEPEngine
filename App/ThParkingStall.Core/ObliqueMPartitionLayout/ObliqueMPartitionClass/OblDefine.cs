@@ -261,6 +261,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         }
         private void ClearNecessaryElements()
         {
+            ParentDir = Vector2D.Zero;
             IniLanes = new List<Lane>();
             OutputLanes = new List<LineSegment>();
             OutEnsuredLanes = new List<LineSegment>();
@@ -292,7 +293,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             CarBoxesPlus = add_carBoxes_plus.Distinct().ToList();
             CarModules = add_modules.Distinct().ToList();
             CarBoxesSpatialIndex = new MNTSSpatialIndex(CarBoxes);
-            CarBoxesSpatialIndex.Update(IniLanes.Select(e => PolyFromLine(e.Line)).ToArray(), new List<Polygon>());
+            //CarBoxesSpatialIndex.Update(IniLanes.Select(e => PolyFromLine(e.Line)).ToArray(), new List<Polygon>());
+            CarBoxesSpatialIndex.Update(IniLanes.Where(e => Boundary.ClosestPoint(e.Line.MidPoint).Distance(e.Line.MidPoint) > 10).
+                Select(e => PolyFromLines(e.Line, e.Line.Translation(e.Vec.Normalize() * DisCarAndHalfLaneBackBack))).ToArray(), new List<Polygon>());
             foreach (var ln in IniLanes)
             {
                 ln.CanExtend = true;
