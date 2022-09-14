@@ -160,7 +160,7 @@ namespace ThMEPTCH.Services
                             railingColls.Add(pLine);
                             var railing = CreateRailing(pLine);
                             var prop = item.Property as RailingProperty;
-                            if(railingToRegion)
+                            if (railingToRegion)
                             {
                                 var centerline = railing.Outline as Polyline;
                                 var outlines = centerline.BufferFlatPL(railing.Width / 2.0);
@@ -540,7 +540,7 @@ namespace ThMEPTCH.Services
         private List<FloorCurveEntity> BuildFloorSlab(List<FloorCurveEntity> data, DBObjectCollection textColl)
         {
             var dicData = new Dictionary<Polyline, FloorCurveEntity>();
-            foreach (var item in data) 
+            foreach (var item in data)
             {
                 dicData.Add(item.EntityCurve as Polyline, item);
             }
@@ -553,12 +553,12 @@ namespace ThMEPTCH.Services
             {
                 var itemTemp = dicData[item];
                 var addSlab = new SlabPolyline(item, slabThickness);
-                if (itemTemp.Property is SlabProperty slabProp) 
+                if (itemTemp.Property is SlabProperty slabProp)
                 {
                     addSlab.Thickness = slabProp.Thickness + slabProp.SurfaceThickness;
                     addSlab.OutPolyline.Elevation = slabProp.TopElevation;
                 }
-                else if(itemTemp.Property is DescendingProperty desProp)
+                else if (itemTemp.Property is DescendingProperty desProp)
                 {
                     addSlab.Thickness = desProp.WrapThickness + desProp.SurfaceThickness;
                     addSlab.SurroundingThickness = desProp.WrapThickness + desProp.SurfaceThickness;
@@ -878,21 +878,32 @@ namespace ThMEPTCH.Services
 
         private ThTCHSlab CreateSlab(SlabPolyline slabPolyline, Matrix3d matrix)
         {
+            // 楼板
             var outPLine = slabPolyline.OutPolyline.GetTransformedCopy(matrix) as Polyline;
             var slab = new ThTCHSlab(outPLine, slabPolyline.Thickness, Vector3d.ZAxis);
+            var outPLineColl = new DBObjectCollection { outPLine };
             foreach (var item in slabPolyline.InnerSlabOpenings)
             {
+                // 降板
                 var innerPLine = item.OutPolyline.GetTransformedCopy(matrix) as Polyline;
+                // 裁剪外围部分
+                innerPLine = innerPLine.Intersection(outPLineColl).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
+                if (innerPLine.IsNull())
+                {
+                    continue;
+                }
+
                 if (!item.IsOpening)
                 {
+                    // 降板外轮廓
                     var outlineBuffer = innerPLine.Buffer(item.SurroundingThickness).OfType<Polyline>()
                         .OrderByDescending(p => p.Area).FirstOrDefault();
                     if (outlineBuffer.IsNull())
                     {
                         continue;
                     }
-                    outlineBuffer = outlineBuffer.Intersection(new DBObjectCollection { outPLine}).OfType<Polyline>()
-                        .OrderByDescending(p => p.Area).FirstOrDefault();
+                    outlineBuffer = outlineBuffer.Intersection(outPLineColl).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
+                    outlineBuffer = ThMEPFrameService.Normalize(outlineBuffer);
                     if (outlineBuffer.IsNull())
                     {
                         continue;
