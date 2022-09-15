@@ -107,16 +107,18 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     poly.ColorIndex = colorIndex;
                     var objid = acadDatabase.ModelSpace.Add(poly);
 
-
                     var ids = new ObjectIdCollection();
                     ids.Add(objid);
                     var hatch = new Hatch();
                     hatch.PatternScale = 1;
                     hatch.ColorIndex = colorIndex;
+                    hatch.Layer = layer;
                     hatch.CreateHatch(HatchPatternType.PreDefined, "SOLID", true);
                     hatch.AppendLoop(HatchLoopTypes.Outermost, ids);
+                    hatch.Transparency = new Autodesk.AutoCAD.Colors.Transparency((byte)51); //80%
                     hatch.EvaluateHatch(true);
 
+                    poly.Erase();
                 }
 
             }

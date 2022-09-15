@@ -498,7 +498,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             var roomBoundarySimplify = RoomBoundary.Select(x => ThGeomUtil.ProcessMpoly(x, 20)).ToList();
             RoomBoundary.Clear();
             RoomBoundary.AddRange(roomBoundarySimplify);
-            
+
         }
 
         private void PairRoomSetWithOriginalRoom()
@@ -615,6 +615,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         public void Reset()
         {
+           
+
         }
 
 

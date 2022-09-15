@@ -167,13 +167,18 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                                                     ThFloorHeatingCommon.Layer_Coil };
                     ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
+                    VM.CleanSelectFrameAndData();
 
-                    //if (ProcessedData.PipeList == null || ProcessedData.PipeList.Count == 0)
-                    //{
-                    ////如果没做过，先生成singleRegion (sr)
-                    //if (ProcessedData.RegionList == null || ProcessedData.RegionList.Count == 0)
-                    //{
-                    var dataQuery = ThFloorHeatingCreateService.CreateSRData(VM, ref SelectFrames, ref Transformer, WithUI);
+                    var SelectFrames = ThSelectFrameUtil.SelectPolyline();
+                    if (SelectFrames.Count == 0)
+                    {
+                        return;
+                    }
+                    SelectFrames.ForEach(x => VM.SelectFrame.Add(x));
+                   
+                    Transformer = ThFloorHeatingCoilUtilServices.GetTransformer(SelectFrames, false);
+
+                    var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, SelectFrames, Transformer, WithUI);
                     dataQuery.Print();
 
                     if (ThFloorHeatingCreateService.CheckValidDataSet(dataQuery.RoomSet))
@@ -186,8 +191,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                         var createSR = new UserInteraction();
                         createSR.PipelineB(dataQuery.RoomSet[0]);
                     }
-                    //}
-
+                    
                     var needUpdateSR = false;
                     if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
                     {
@@ -212,14 +216,17 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                         }
                         ThFloorHeatingCreateService.UpdateSRSuggestBlock(ProcessedData.RegionList, ProcessedData.PipeList, RoomPlSuggestDict, updateWaterSeparatorRoom, Transformer);
                     }
-                    //}
-
+                    
                     if (ProcessedData.PipeList != null && ProcessedData.PipeList.Count > 0)
                     {
                         //打印最终结果
+                        CleanPreviousPrintCoil();
                         PrintCoil();
+                        CleanPreviousPrintCoilBlk();
                         PrintCoilBlk();
-                        UpdateWaterSeparatorNumber(dataQuery);
+
+                        UpdateWaterSeparatorNumber(dataQuery.RoomSet);
+                        CreateRoomSeparatorAtDoor(dataQuery.RoomSet);
 
                         VM.CleanSelectFrameAndData();
                     }
@@ -243,8 +250,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
         private void PrintCoil()
         {
-            CleanPreviousPrintCoil();
-
             var pipes = ProcessedData.PipeList.SelectMany(x => x.ResultPolys).Distinct().ToList();
             var printPipe = new List<Polyline>();
 
@@ -264,8 +269,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
         private void PrintCoilBlk()
         {
-            CleanPreviousPrintCoilBlk();
-
             var pipes = ProcessedData.PipeList.Where(x => x.ResultPolys != null && x.ResultPolys.Count > 0 && x.ResultPolys[0].Length > 1).ToList();
 
             for (int i = 0; i < pipes.Count; i++)
@@ -387,9 +390,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             }
         }
 
-        private void UpdateWaterSeparatorNumber(ThFloorHeatingDataProcessService dataQuery)
+        private void UpdateWaterSeparatorNumber(List<ThRoomSetModel> RoomSet)
         {
-            if (ThFloorHeatingCreateService.CheckValidDataSet(dataQuery.RoomSet))
+            if (ThFloorHeatingCreateService.CheckValidDataSet(RoomSet))
             {
                 var pipes = ProcessedData.PipeList.Where(x => x.ResultPolys != null && x.ResultPolys.Count > 0 && x.ResultPolys[0].Length > 1).ToList();
 
@@ -398,7 +401,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                         { ThFloorHeatingCommon.BlkSettingAttrName_WaterSeparator, routeNum } ,
                     };
 
-                var w = dataQuery.RoomSet[0].WaterSeparator;
+                var w = RoomSet[0].WaterSeparator;
                 w.Blk.UpgradeOpen();
                 foreach (var dyn in dynDic)
                 {
@@ -407,6 +410,62 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 w.Blk.DowngradeOpen();
 
             }
+        }
+
+        private void CreateRoomSeparatorAtDoor(List<ThRoomSetModel> RoomSet)
+        {
+            var lines = new List<Polyline>();
+
+            var connectDoor = GetConnectDoor(RoomSet[0]);
+
+            foreach (var door in connectDoor)
+            {
+                var pt0 = door.GetPoint3dAt(0);
+                var pt1 = door.GetPoint3dAt(1);
+                var pt2 = door.GetPoint3dAt(2);
+                var ptLong0 = new Point3d();
+                var ptLong1 = new Point3d();
+                var ptDir2 = new Point3d();
+                if (pt0.DistanceTo(pt1) > pt1.DistanceTo(pt2))
+                {
+                    ptLong0 = pt0;
+                    ptLong1 = pt1;
+                    ptDir2 = pt2;
+                }
+                else
+                {
+                    ptLong0 = pt1;
+                    ptLong1 = pt2;
+                    ptDir2 = door.GetPoint3dAt(3);
+                }
+                var dir = (ptDir2 - ptLong1) / 2;
+
+                var line = new Polyline();
+                line.AddVertexAt(0, (ptLong0 + dir).ToPoint2D(), 0, 0, 0);
+                line.AddVertexAt(0, (ptLong1 + dir).ToPoint2D(), 0, 0, 0);
+
+                lines.Add(line);
+
+            }
+
+            lines.ForEach(x => Transformer.Reset(x));
+            ThFloorHeatingCoilInsertService.InsertPolyline(lines, ThFloorHeatingCommon.Layer_RoomSeparate);
+        }
+
+        private static List<Polyline> GetConnectDoor(ThRoomSetModel roomSet)
+        {
+            var doorConnect = new List<Polyline>();
+
+            foreach (var door in roomSet.Door)
+            {
+                var touchedRoom = roomSet.Room.Where(x => x.RoomBoundary.Intersects(door));
+                if (touchedRoom.Count() >= 2) //和2个以上的房间相邻
+                {
+                    doorConnect.Add(door);
+                }
+            }
+
+            return doorConnect;
         }
     }
 

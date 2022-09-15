@@ -110,6 +110,17 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
                 this.RaisePropertyChanged();
             }
         }
+        private int _BathRadiatorWidth { get; set; }
+        public int BathRadiatorWidth
+        {
+            get { return _BathRadiatorWidth; }
+            set
+            {
+                _BathRadiatorWidth = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         private int _SuggestDist { get; set; }
         public int SuggestDist
         {
@@ -248,6 +259,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             TotalLenthConstraint = 120;
             RouteNum = 5;
             RouteNumList = new ObservableCollection<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+            BathRadiatorWidth = 300;
             SuggestDist = 250;
             SuggestDistDefualt = 200;
             ConvexEdgeTol = 150;
@@ -268,6 +280,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             SaveSetting();
             FocusToCAD();
             ThFloorHeatingSubCmd.CheckRoomConnectivity(this);
+            Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
+        }
+        public ICommand CleanRoomConnectivityCmd => new RelayCommand(CleanRoomConnectivity);
+        private void CleanRoomConnectivity()
+        {
+            ThFloorHeatingSubCmd.CleanRoomConnectivityHatch(this);
+            CleanSelectFrameAndData();
+            Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
         }
 
         public ICommand ShowRouteCmd => new RelayCommand(ShowRoute);
@@ -276,14 +296,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             SaveSetting();
             FocusToCAD();
             ThFloorHeatingSubCmd.ShowRoute(this);
+            Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
         }
 
-        public ICommand CleanSelectFrameCmd => new RelayCommand(CleanSelectFrameAndData);
         public void CleanSelectFrameAndData()
         {
             SelectFrame.Clear();
             ProcessedData.Clear();
-            //  RoomPlSuggestDict.Clear();
         }
 
         public ICommand PickRoomOutlineCmd => new RelayCommand(PickRoomOutline);
@@ -376,7 +395,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             FocusToCAD();
             ThFloorHeatingSubCmd.InsertWaterSeparatorBlk(this);
         }
-
+        public ICommand InsertBathRadiatorCmd => new RelayCommand(InsertBathRadiator);
+        private void InsertBathRadiator()
+        {
+            FocusToCAD();
+            ThFloorHeatingSubCmd.InsertBathRadiatorBlk(this);
+        }
         public ICommand InsertSuggestBlkCmd => new RelayCommand(InsertSuggestBlk);
         private void InsertSuggestBlk()
         {
@@ -406,6 +430,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         private void SaveObstacleFrame()
         {
             ThFloorHeatingSubCmd.SaveObstacleFrame(this);
+            Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
         }
 
         #endregion

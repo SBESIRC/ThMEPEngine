@@ -34,30 +34,30 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
         /// <param name="selectFrames"></param>
         /// <param name="transformer"></param>
         /// <returns></returns>
-        public static ThFloorHeatingDataProcessService CreateSRData(ThFloorHeatingCoilViewModel vm, ref List<Polyline> selectFrames, ref ThMEPOriginTransformer transformer,bool withUI)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                if (vm.SelectFrame.Count == 0)
-                {
-                    ThSelectFrameUtil.SelectPolyline().ForEach(x => vm.SelectFrame.Add(x));
-                }
-                selectFrames.AddRange(vm.SelectFrame.ToList());
-                if (selectFrames.Count == 0)
-                {
-                    transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
-                    return new ThFloorHeatingDataProcessService();
-                }
+        //public static ThFloorHeatingDataProcessService CreateSRData(ThFloorHeatingCoilViewModel vm, ref List<Polyline> selectFrames, ref ThMEPOriginTransformer transformer,bool withUI)
+        //{
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
+        //        if (vm.SelectFrame.Count == 0)
+        //        {
+        //            ThSelectFrameUtil.SelectPolyline().ForEach(x => vm.SelectFrame.Add(x));
+        //        }
+        //        selectFrames.AddRange(vm.SelectFrame.ToList());
+        //        if (selectFrames.Count == 0)
+        //        {
+        //            transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+        //            return new ThFloorHeatingDataProcessService();
+        //        }
 
-                //transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
-                //transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
-                transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames,false);
+        //        //transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
+        //        //transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+        //        transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames,false);
 
-                var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer, withUI);
+        //        var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer, withUI);
 
-                return dataQuery;
-            }
-        }
+        //        return dataQuery;
+        //    }
+        //}
 
         public static bool CheckValidDataSet(List<ThRoomSetModel> roomSet)
         {

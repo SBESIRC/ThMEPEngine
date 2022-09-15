@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ThMEPEngineCore.Algorithm;
+
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Model
@@ -11,7 +13,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
     public class ThFloorHeatingRoom
     {
         public Polyline RoomBoundary { get; private set; }
-        public Polyline OriginalBoundary { get; private set; }
+        public Polyline OriginalBoundary { get; private set; } //dataqueray.RoomBoundary
         public List<string> Name { get; private set; }
         public double SuggestDist { get; private set; }
 
@@ -42,6 +44,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             OriginalBoundary = originalBoundary;
         }
 
+        public void Reset(ThMEPOriginTransformer transformer)
+        {
+            transformer.Reset(RoomBoundary);
+            transformer.Reset(OriginalBoundary);
+        }
 
     }
 }

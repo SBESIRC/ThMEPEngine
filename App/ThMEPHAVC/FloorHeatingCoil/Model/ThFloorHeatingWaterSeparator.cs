@@ -74,6 +74,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             transformer.Transform(OBB);
             StartPts = StartPts.Select(x => transformer.Transform(x)).ToList();
         }
+        public void Reset(ThMEPOriginTransformer transformer)
+        {
+            //transformer.Transform(Blk);
+            transformer.Reset(OBB);
+            StartPts = StartPts.Select(x => transformer.Reset(x)).ToList();
+        }
 
         private static Polyline GetOBB(BlockReference blk)
         {
@@ -158,11 +164,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
         public void Transform(ThMEPOriginTransformer transformer)
         {
-            //transformer.Transform(Blk);
             transformer.Transform(OBB);
             StartPts = StartPts.Select(x => transformer.Transform(x)).ToList();
         }
 
+        public void Reset(ThMEPOriginTransformer transformer)
+        {
+            transformer.Reset(OBB);
+            StartPts = StartPts.Select(x => transformer.Reset(x)).ToList();
+        }
 
     }
 }

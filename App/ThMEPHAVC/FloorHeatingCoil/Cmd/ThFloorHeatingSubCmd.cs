@@ -15,6 +15,8 @@ using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
 using Linq2Acad;
 using ThCADCore.NTS;
 using AcHelper;
+using NFox.Cad;
+
 using Dreambuild.AutoCAD;
 using ThCADExtension;
 
@@ -26,7 +28,6 @@ using ThMEPHVAC.FloorHeatingCoil.Data;
 using ThMEPHVAC.FloorHeatingCoil.Service;
 using ThMEPHVAC.FloorHeatingCoil.Model;
 using ThMEPHVAC.FloorHeatingCoil.Heating;
-
 
 namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 {
@@ -43,13 +44,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
                 var withUI = ThFloorHeatingCoilSetting.Instance.WithUI;
                 var selectFrames = ThSelectFrameUtil.SelectPolyline();
-
+                selectFrames.ForEach(x => vm.SelectFrame.Add(x));
                 if (selectFrames.Count == 0)
                 {
                     return;
                 }
 
-                var transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames, true);//暂用（0，0，0） 需要改！
+                var transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames, false);//暂用（0，0，0） 需要改！
 
                 var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer, withUI);
 
@@ -59,19 +60,85 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     checkConnectiviry.PipelineA(dataQuery.RoomSet[0]);
 
                     var roomGraph = checkConnectiviry.RegionGraphList;
-                    PrintConnectivity(roomGraph, dataQuery.RoomSet[0]);
+                    PrintConnectivity(roomGraph, dataQuery.RoomSet[0], transformer);
                 }
             }
         }
 
-        private static void PrintConnectivity(List<List<int>> roomGraph, ThRoomSetModel roomSet)
+        public static void CleanRoomConnectivityHatch(ThFloorHeatingCoilViewModel vm)
+        {
+            var selectFrames = vm.SelectFrame.ToList();
+
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                //extract
+                var elementLayer = new List<string>() { ThFloorHeatingCommon.Layer_RoomSetFrame };
+                var hatch = ThFloorHeatingDataFactory.ExtractHatch(elementLayer);
+
+                //transform
+                var transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames, false);//暂用（0，0，0） 需要改！
+                selectFrames.ForEach(x => transformer.Transform(x));
+                var itemDict = new Dictionary<Hatch, Hatch>(); //key:trans value:ori
+                foreach (var item in hatch)
+                {
+                    var tranItem = item.Clone() as Hatch;
+                    transformer.Transform(tranItem);
+                    itemDict.Add(tranItem, item);
+                }
+
+                //select
+                var obj = itemDict.Select(x => x.Key).ToCollection();
+                var idx = new ThCADCoreNTSSpatialIndex(obj);
+                var selectItem = new List<Hatch>();
+
+                foreach (var frame in selectFrames)
+                {
+                    var selectobj = idx.SelectCrossingPolygon(frame);
+                    selectItem.AddRange(selectobj.OfType<Hatch>());
+                }
+                selectItem = selectItem.Distinct().ToList();
+
+                //remove
+                foreach (var tranItem in selectItem)
+                {
+                    var item = itemDict[tranItem];
+                    item.UpgradeOpen();
+                    item.Erase();
+                    item.DowngradeOpen();
+                }
+            }
+
+        }
+        private static void PrintConnectivity(List<List<int>> roomGraph, ThRoomSetModel roomSet, ThMEPOriginTransformer transformer)
         {
             for (int i = 0; i < roomGraph.Count; i++)
             {
                 var graph = roomGraph[i];
-                var roomPl = graph.Select(x => roomSet.Room[x].RoomBoundary.Clone() as Polyline).ToList();
-                ThFloorHeatingCoilInsertService.ShowConnectivity(roomPl, ThFloorHeatingCommon.Layer_RoomSetFrame, i % 6);
+                var roomPl = graph.Select(x => roomSet.Room[x].OriginalBoundary.Clone() as Polyline).ToList();
+                RemoveDuplicate(ref roomPl);
+                roomPl.ForEach(x => transformer.Reset(x));
+                ThFloorHeatingCoilInsertService.ShowConnectivity(roomPl, ThFloorHeatingCommon.Layer_RoomSetFrame, (i + 1) % 6);
             }
+        }
+
+        private static void RemoveDuplicate(ref List<Polyline> plList)
+        {
+            var cleanList = new List<Polyline>();
+            for (int i = 0; i < plList.Count; i++)
+            {
+                var currPl = plList[i];
+                for (int j = i + 1; j < plList.Count; j++)
+                {
+                    var compPl = plList[j];
+                    if (currPl.IsSimilar(compPl, 0.9))
+                    {
+                        cleanList.Add(currPl);
+                        break;
+                    }
+                }
+            }
+            plList = plList.Except(cleanList).ToList();
         }
 
         public static void ShowRoute(ThFloorHeatingCoilViewModel vm)
@@ -107,6 +174,29 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     };
 
                     ThFloorHeatingCoilInsertService.InsertBlk(wcsPt, ThFloorHeatingCommon.BlkName_WaterSeparator, dynDic);
+                }
+            }
+        }
+        public static void InsertBathRadiatorBlk(ThFloorHeatingCoilViewModel vm)
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blkList = new List<string> { ThFloorHeatingCommon.BlkName_BathRadiator };
+                var layerList = new List<string> { ThFloorHeatingCommon.BlkLayerDict[ThFloorHeatingCommon.BlkName_BathRadiator] };
+                ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
+
+                var ppo = Active.Editor.GetPoint("\n选择插入点");
+                if (ppo.Status == PromptStatus.OK)
+                {
+                    var wcsPt = ppo.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                    double width = vm.BathRadiatorWidth;
+                    var dynDic = new Dictionary<string, object>() {
+                        { ThFloorHeatingCommon.BlkSettingAttrName_Radiator_width , width } ,
+
+                    };
+
+                    ThFloorHeatingCoilInsertService.InsertBlk(wcsPt, ThFloorHeatingCommon.BlkName_BathRadiator, dynDic);
                 }
             }
         }

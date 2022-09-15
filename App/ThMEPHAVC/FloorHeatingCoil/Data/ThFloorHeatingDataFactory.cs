@@ -155,6 +155,20 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             return polys;
         }
 
+        public static List<Hatch> ExtractHatch(List<string> layerName)
+        {
+            using (var docLock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var hatchList = acadDatabase.ModelSpace
+                      .OfType<Hatch>()
+                      .Where(o => IsElementLayer(o.Layer, layerName))
+                      .ToList();
+
+                return hatchList;
+            }
+        }
+
         private static bool IsElementLayer(string layer, List<string> layers)
         {
             var breturn = false;

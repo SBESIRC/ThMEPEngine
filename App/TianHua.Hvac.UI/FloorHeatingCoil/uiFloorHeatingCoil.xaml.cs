@@ -32,6 +32,7 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
         ThFloorHeatingCoilViewModel CoilViewModel;
         public static UiFloorHeatingCoil Instance;
         uiFloorHeatingCoilObstacle ObstacleUI;
+        uiFloorHeatingCoilSubSetting SubSettingUI;
 
         static UiFloorHeatingCoil()
         {
@@ -59,7 +60,7 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
             this.Hide();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void ObstacleButton_Click(object sender, RoutedEventArgs e)
         {
             if (ObstacleUI == null)
             {
@@ -71,11 +72,25 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
             ObstacleUI.WindowStartupLocation =
                 System.Windows.WindowStartupLocation.CenterScreen;
 
-            Autodesk.AutoCAD.ApplicationServices.Application.ShowModelessWindow  (ObstacleUI);
-        //  ObstacleUI.ShowDialog();
+            Autodesk.AutoCAD.ApplicationServices.Application.ShowModelessWindow(ObstacleUI);
+            //  ObstacleUI.ShowDialog();
 
-            
+
         }
+
+        private void SubSettingButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SubSettingUI == null)
+            {
+                SubSettingUI = new uiFloorHeatingCoilSubSetting(CoilViewModel);
+            }
+
+            ObstacleUI.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+
+            SubSettingUI.ShowDialog();
+        }
+
+
     }
 
     public class TrueFalseConverter : IValueConverter

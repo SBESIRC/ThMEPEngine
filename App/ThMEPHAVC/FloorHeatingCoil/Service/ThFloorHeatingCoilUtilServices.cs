@@ -121,8 +121,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             Parameter.PrivatePublicMode = vm.PrivatePublicMode;
             Parameter.TotalLength = vm.TotalLenthConstraint * 1000;
 
-            //  Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
-
+            ////---sub setting
+            //Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
+            //Parameter.??? = vm.ConvexEdgeTol;
+            //Parameter.SuggestDistanceWall = vm.SuggestDistWall;
+            //Parameter.???= vm.FilletRadius;
         }
 
         public static void PairRoomWithRoomSuggest(ref List<ThRoomSetModel> roomSet, Dictionary<Polyline, BlockReference> roomPlSuggestDict, double suggestDistDefualt)
@@ -242,5 +245,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             return pt;
 
         }
+
+
     }
 }

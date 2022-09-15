@@ -8,13 +8,13 @@
              BorderThickness="1"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              Title="障碍物配置"
-             Width="200" Height="540" MaxHeight="535"
+             Width="200" Height="530"
              Closing="ThCustomWindow_Closing"
              >
-    <Grid Margin="10 5 10 10">
+    <Grid Margin ="10 5 10 0">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="41*"/>
-            <ColumnDefinition Width="9*"/>
+            <ColumnDefinition Width="8*"/>
+            <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
@@ -27,7 +27,7 @@
         <Label Content="图块配置" Height="24"/>
         <DataGrid Grid.Row="1" Grid.Column="0"  Margin=" 0 0 5 0"
                       MinHeight="200"  MaxHeight="200" RowHeight="24"
-                        Background="Transparent" CanUserAddRows="False" 
+                      Background="Transparent" CanUserAddRows="False" 
                       HeadersVisibility="None" SelectionMode ="Single"
                       VerticalScrollBarVisibility="Auto" 
                       HorizontalScrollBarVisibility="Auto" 
@@ -48,7 +48,8 @@
 
             </Button>
         </StackPanel>
-        <Label Grid.Row="2"  Grid.ColumnSpan="2" Margin="0 10 0 0" Content="图层配置" Height="24"/>
+        <Label Grid.Row="2"  Grid.ColumnSpan="2" Margin="0 5 0 0" Height="24" 
+               Content="图层配置" />
         <DataGrid Grid.Row="3" Grid.Column="0" Margin=" 0 0 5 0"
                       MinHeight="200"  MaxHeight="200" RowHeight="24"
                       Background="Transparent" CanUserAddRows="False" 
@@ -69,9 +70,9 @@
                     Command="{Binding RemoveObstacleLayerCmd}">
             </Button>
         </StackPanel>
-        <Button Grid.Row="4" Grid.Column="1"   Content="保存" 
-                Width="30" Height="24"
-               Margin="1,10,1,0"
+        <Button Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Right" Content="保存" 
+                Width="100" Height="24"
+                Margin="0 5 0 0"
                 Command="{Binding SaveObstacleFrameCmd}"/>
 
     </Grid>
