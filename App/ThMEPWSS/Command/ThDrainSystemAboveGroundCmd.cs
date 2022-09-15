@@ -500,9 +500,10 @@ namespace ThMEPWSS.Command
             //获取户型分割线
             using (var adb = AcadDatabase.Active())
             {
-                var plys = adb.ModelSpace.OfType<Polyline>().Where(e => e.Layer.Equals("AI-户型分割线"));
+                var splitLayerNames = new string[] { "AI-户型分割线" , "AI-单元分割线" };
+                var plys = adb.ModelSpace.OfType<Polyline>().Where(e => splitLayerNames.Contains(e.Layer));
                 _roomTypeSplitLines.AddRange(plys);
-                var lines = adb.ModelSpace.OfType<Line>().Where(e => e.Layer.Equals("AI-户型分割线"));
+                var lines = adb.ModelSpace.OfType<Line>().Where(e => splitLayerNames.Contains(e.Layer));
                 _roomTypeSplitLines.AddRange(lines.Select(e => FloorFramedSpliter.PolyFromLine(e)));
             }
         }
