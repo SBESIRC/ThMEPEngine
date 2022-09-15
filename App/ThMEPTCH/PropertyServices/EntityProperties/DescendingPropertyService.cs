@@ -11,9 +11,10 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
         {
             var property = new DescendingProperty(objectId)
             {
-                Thickness = 100.0,
-                WrapThickness = 100.0,
+                StructureThickness = 100.0,
                 SurfaceThickness = 50.0,
+                StructureWrapThickness = 100.0,
+                WrapSurfaceThickness = 0.0,
             };
             return property;
         }
@@ -22,9 +23,10 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
             var descendingProp = property as DescendingProperty;
             TypedValueList valueList = new TypedValueList
             {
-                { (int)DxfCode.ExtendedDataAsciiString, descendingProp.Thickness.ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, descendingProp.WrapThickness.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, descendingProp.StructureThickness.ToString()},
                 { (int)DxfCode.ExtendedDataAsciiString, descendingProp.SurfaceThickness.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, descendingProp.StructureWrapThickness.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, descendingProp.WrapSurfaceThickness.ToString()},
             };
             return valueList;
         }
@@ -38,13 +40,16 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
                 switch (i)
                 {
                     case 1:
-                        property.Thickness = double.Parse(strData);
+                        property.StructureThickness = double.Parse(strData);
                         break;
                     case 2:
-                        property.WrapThickness = double.Parse(strData);
+                        property.SurfaceThickness = double.Parse(strData);
                         break;
                     case 3:
-                        property.SurfaceThickness = double.Parse(strData);
+                        property.StructureWrapThickness = double.Parse(strData);
+                        break;
+                    case 4:
+                        property.WrapSurfaceThickness = double.Parse(strData);
                         break;
                 }
             }

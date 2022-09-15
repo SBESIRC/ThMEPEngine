@@ -5,47 +5,47 @@ using System;
 namespace ThMEPTCH.Model
 {
     [ProtoContract]
-    public class ThTCHSlabDescendingData : ICloneable
+    public class ThTCHDescending : ICloneable
     {
         /// <summary>
         /// 降板高度
         /// </summary>
-        [ProtoMember(11)]
+        [ProtoMember(21)]
         public double DescendingHeight { get; set; }
 
         /// <summary>
         /// 降板厚度
         /// </summary>
-        [ProtoMember(12)]
+        [ProtoMember(22)]
         public double DescendingThickness { get; set; }
 
         /// <summary>
         /// 降板包围厚度
         /// </summary>
-        [ProtoMember(13)]
+        [ProtoMember(23)]
         public double DescendingWrapThickness { get; set; }
 
         /// <summary>
         /// 是否是降板
         /// </summary>
-        [ProtoMember(14)]
+        [ProtoMember(24)]
         public bool IsDescending { get; set; }
 
         /// <summary>
         /// 降板内轮廓线
         /// </summary>
-        [ProtoMember(15)]
+        [ProtoMember(25)]
         public Polyline Outline { get; set; }
 
         /// <summary>
         /// 降板外轮廓线
         /// </summary>
-        [ProtoMember(16)]
+        [ProtoMember(26)]
         public Polyline OutlineBuffer { get; set; }
 
         public object Clone()
         {
-            var clone = new ThTCHSlabDescendingData();
+            var clone = new ThTCHDescending();
             if (this.Outline != null)
                 clone.Outline = this.Outline.Clone() as Polyline;
             if (this.OutlineBuffer != null)

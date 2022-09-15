@@ -15,7 +15,7 @@ namespace ThMEPTCH.Model
         /// 降板信息
         /// </summary>
         [ProtoMember(21)]
-        public List<ThTCHSlabDescendingData> Descendings { get; set; }
+        public List<ThTCHDescending> Descendings { get; set; }
 
         private ThTCHSlab()
         {
@@ -33,7 +33,8 @@ namespace ThMEPTCH.Model
             Outline = polygon;
             Height = thickness;
             ExtrudedDirection = extVector;
-            Descendings = new List<ThTCHSlabDescendingData>();
+            Descendings = new List<ThTCHDescending>();
+            EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
         }
 
         public ThTCHSlab(Polyline pline, double thickness, Vector3d extVector)
@@ -41,14 +42,14 @@ namespace ThMEPTCH.Model
             Outline = pline;
             Height = thickness;
             ExtrudedDirection = extVector;
-            Descendings = new List<ThTCHSlabDescendingData>();
+            Descendings = new List<ThTCHDescending>();
             EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
         }
 
         public object Clone()
         {
             var clone = new ThTCHSlab();
-            clone.Descendings = new List<ThTCHSlabDescendingData>();
+            clone.Descendings = new List<ThTCHDescending>();
             clone.Uuid = this.Uuid;
             clone.Usage = this.Usage;
             clone.ZOffSet = this.ZOffSet;
@@ -61,7 +62,7 @@ namespace ThMEPTCH.Model
             {
                 foreach (var item in this.Descendings)
                 {
-                    clone.Descendings.Add(item.Clone() as ThTCHSlabDescendingData);
+                    clone.Descendings.Add(item.Clone() as ThTCHDescending);
                 }
             }
             foreach (var item in this.Properties)

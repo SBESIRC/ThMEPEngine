@@ -89,7 +89,7 @@ namespace ThMEPIFC
                 {
                     if (GetDescendingHeight(pline, sp, out double height))
                     {
-                        slab.Descendings.Add(new ThTCHSlabDescendingData()
+                        slab.Descendings.Add(new ThTCHDescending()
                         {
                             Outline = pline,
                             IsDescending = true,
@@ -100,7 +100,7 @@ namespace ThMEPIFC
                     }
                     else
                     {
-                        slab.Descendings.Add(new ThTCHSlabDescendingData()
+                        slab.Descendings.Add(new ThTCHDescending()
                         {
                             Outline = pline,
                         });

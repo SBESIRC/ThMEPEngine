@@ -2,6 +2,7 @@
 using System.Reflection;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using System;
 
 namespace ThPlatform3DCui
 {
@@ -20,6 +21,15 @@ namespace ThPlatform3DCui
             // Load assemblies from the specified path
             // https://docs.microsoft.com/en-us/dotnet/framework/deployment/best-practices-for-assembly-loading
             ThCuiAssemblyService.SubscribeAssemblyResolve();
+
+            // Redirecting Assembly Loads at Runtime
+            // https://blog.slaks.net/2013-12-25/redirecting-assembly-loads-at-runtime/
+            RedirectAssemblies();
+        }
+
+        private void RedirectAssemblies()
+        {
+            ThCuiAssemblyService.RedirectAssembly("System.Memory", new Version(4, 0, 1, 2));
         }
 
         public void Terminate()

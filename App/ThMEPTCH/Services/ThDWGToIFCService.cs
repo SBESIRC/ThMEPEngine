@@ -145,14 +145,19 @@ namespace ThMEPTCH.Services
                     {
                         if (item.FloorEntity != null && item.FloorEntity is SlabPolyline slab1)
                         {
-                            var slab = CreateSlab(slab1, matrix);
-                            if (item.Property is SlabProperty slabProp)
+                            var struAndArchSlab = CreateStruAndArchSlab(slab1, matrix);
+                            var n = 1;
+                            struAndArchSlab.ForEach(slab =>
                             {
-                                slab.ZOffSet = slabProp.TopElevation;
-                                slab.EnumMaterial = slabProp.EnumMaterial.GetDescription();
-                            }
-                            slab.Uuid = prjId + item.Id;
-                            allSlabs.Add(slab);
+                                if (item.Property is SlabProperty slabProp)
+                                {
+                                    slab.ZOffSet += slabProp.TopElevation;
+                                    slab.EnumMaterial = slabProp.EnumMaterial.GetDescription();
+                                }
+                                slab.Uuid = prjId + item.Id + n;
+                                n++;
+                                allSlabs.Add(slab);
+                            });
                         }
                     }
                     else if (item.EntitySystem.Contains("栏杆"))
@@ -233,7 +238,7 @@ namespace ThMEPTCH.Services
                         }
 
                         var opening = thisOpeningEntities[polyline];
-                            wall.Openings.Add(opening);
+                        wall.Openings.Add(opening);
                         if (!polyline.Closed)
                         {
                             // 更新外轮廓
@@ -596,16 +601,19 @@ namespace ThMEPTCH.Services
             foreach (var item in slabPolylines)
             {
                 var itemTemp = dicData[item];
-                var addSlab = new SlabPolyline(item, slabThickness);
+                var addSlab = new SlabPolyline(item);
                 if (itemTemp.Property is SlabProperty slabProp)
                 {
-                    addSlab.Thickness = slabProp.Thickness + slabProp.SurfaceThickness;
+                    addSlab.StructureThickness = slabProp.Thickness;
+                    addSlab.SurfaceThickness = slabProp.SurfaceThickness;
                     addSlab.OutPolyline.Elevation = slabProp.TopElevation;
                 }
                 else if (itemTemp.Property is DescendingProperty desProp)
                 {
-                    addSlab.Thickness = desProp.WrapThickness + desProp.SurfaceThickness;
-                    addSlab.SurroundingThickness = desProp.WrapThickness + desProp.SurfaceThickness;
+                    addSlab.StructureThickness = desProp.StructureThickness;
+                    addSlab.SurfaceThickness = desProp.SurfaceThickness;
+                    addSlab.StructureWrapThickness = desProp.StructureWrapThickness;
+                    addSlab.WrapSurfaceThickness = desProp.WrapSurfaceThickness;
                 }
                 var insertText = slabTextSpIndex.SelectCrossingPolygon(item);
                 var insertText1 = slabTextSpIndex.SelectWindowPolygon(item);
@@ -939,11 +947,13 @@ namespace ThMEPTCH.Services
             return railing;
         }
 
-        private ThTCHSlab CreateSlab(SlabPolyline slabPolyline, Matrix3d matrix)
+        private List<ThTCHSlab> CreateStruAndArchSlab(SlabPolyline slabPolyline, Matrix3d matrix)
         {
-            // 楼板
+            var slabs = new List<ThTCHSlab>();
             var outPLine = slabPolyline.OutPolyline.GetTransformedCopy(matrix) as Polyline;
-            var slab = new ThTCHSlab(outPLine, slabPolyline.Thickness, Vector3d.ZAxis);
+            var structureSlab = new ThTCHSlab(outPLine, slabPolyline.StructureThickness, Vector3d.ZAxis);
+            structureSlab.ZOffSet = -slabPolyline.SurfaceThickness;
+            var architectureSlab = new ThTCHSlab(outPLine, slabPolyline.SurfaceThickness, Vector3d.ZAxis);
             var outPLineColl = new DBObjectCollection { outPLine };
             foreach (var item in slabPolyline.InnerSlabOpenings)
             {
@@ -956,10 +966,11 @@ namespace ThMEPTCH.Services
                     continue;
                 }
 
+                // 结构降板
                 if (!item.IsOpening)
                 {
                     // 降板外轮廓
-                    var outlineBuffer = innerPLine.Buffer(item.SurroundingThickness).OfType<Polyline>()
+                    var outlineBuffer = innerPLine.Buffer(item.StructureWrapThickness).OfType<Polyline>()
                         .OrderByDescending(p => p.Area).FirstOrDefault();
                     if (outlineBuffer.IsNull())
                     {
@@ -971,19 +982,55 @@ namespace ThMEPTCH.Services
                     {
                         continue;
                     }
-                    slab.Descendings.Add(new ThTCHSlabDescendingData()
+                    structureSlab.Descendings.Add(new ThTCHDescending()
                     {
                         Outline = innerPLine,
                         OutlineBuffer = outlineBuffer,
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
-                        DescendingThickness = item.Thickness,
-                        DescendingWrapThickness = item.SurroundingThickness,
+                        DescendingThickness = item.StructureThickness,
+                        DescendingWrapThickness = item.StructureWrapThickness,
                     });
                 }
                 else
                 {
-                    slab.Descendings.Add(new ThTCHSlabDescendingData()
+                    structureSlab.Descendings.Add(new ThTCHDescending()
+                    {
+                        Outline = innerPLine,
+                        IsDescending = false,
+                        DescendingHeight = Math.Abs(item.LowerPlateHeight),
+                    });
+                }
+
+                // 建筑降板
+                if (!item.IsOpening)
+                {
+                    // 降板内轮廓
+                    var outlineBuffer = innerPLine.Buffer(-item.SurfaceThickness).OfType<Polyline>()
+                        .OrderByDescending(p => p.Area).FirstOrDefault();
+                    if (outlineBuffer.IsNull())
+                    {
+                        continue;
+                    }
+                    outlineBuffer = outlineBuffer.Intersection(outPLineColl).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
+                    outlineBuffer = ThMEPFrameService.Normalize(outlineBuffer);
+                    if (outlineBuffer.IsNull())
+                    {
+                        continue;
+                    }
+                    architectureSlab.Descendings.Add(new ThTCHDescending()
+                    {
+                        Outline = outlineBuffer,
+                        OutlineBuffer = innerPLine,
+                        IsDescending = true,
+                        DescendingHeight = Math.Abs(item.LowerPlateHeight),
+                        DescendingThickness = item.SurfaceThickness,
+                        DescendingWrapThickness = item.WrapSurfaceThickness,
+                    });
+                }
+                else
+                {
+                    architectureSlab.Descendings.Add(new ThTCHDescending()
                     {
                         Outline = innerPLine,
                         IsDescending = false,
@@ -991,7 +1038,9 @@ namespace ThMEPTCH.Services
                     });
                 }
             }
-            return slab;
+            slabs.Add(structureSlab);
+            slabs.Add(architectureSlab);
+            return slabs;
         }
 
         private ThTCHSlabData CreateSlabData(SlabPolyline slabPolyline, Matrix3d matrix)
@@ -1001,7 +1050,7 @@ namespace ThMEPTCH.Services
             slab.BuildElement = new ThTCHBuiltElementData();
             slab.BuildElement.Root = new ThTCHRootData();
             slab.BuildElement.Outline = outPLine.ToTCHPolyline();
-            slab.BuildElement.Height = slabPolyline.Thickness;
+            slab.BuildElement.Height = slabPolyline.StructureThickness;
             foreach (var item in slabPolyline.InnerSlabOpenings)
             {
                 var descendingWrapThickness = 50.0;
@@ -1025,7 +1074,7 @@ namespace ThMEPTCH.Services
                         Outline = innerPLine.ToTCHPolyline(),
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
-                        DescendingThickness = item.Thickness,
+                        DescendingThickness = item.StructureThickness,
                         DescendingWrapThickness = 50,
                         OutlineBuffer = outlineBuffer.ToTCHPolyline(),
                     });

@@ -177,7 +177,7 @@
     <Compile Include="Model\ThTCHTwtBlock.cs" />
     <Compile Include="Model\ThTCHTwtPipe.cs" />
     <Compile Include="Model\ThTCHSymbMultiLeader.cs" />
-    <Compile Include="Model\ThTCHSlabDescendingData.cs" />
+    <Compile Include="Model\ThTCHDescending.cs" />
     <Compile Include="Model\ThTCHDoor.cs" />
     <Compile Include="Model\ThTCHBuildingStorey.cs" />
     <Compile Include="Model\ThTCHRailing.cs" />
