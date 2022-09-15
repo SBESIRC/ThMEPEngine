@@ -33,7 +33,8 @@
     <Compile Include="Command\ThArchitecturePlaneCmd.cs" />
     <Compile Include="Command\ThStructurePlaneCmd.cs" />
     <Compile Include="Converter\EnumBooleanConverter.cs" />
-    <Compile Include="EventMonitor\ObjectSelectEvent.cs" />
+    <Compile Include="EventMonitor\Platform3DMainEvent.cs" />
+    <Compile Include="Platform3DMainService.cs" />
     <Compile Include="Platform3DUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructurePlane\DrawingParameterSetModel.cs" />
