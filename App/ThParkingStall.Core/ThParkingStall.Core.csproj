@@ -120,6 +120,12 @@
     <Compile Include="OTools\Vector2DEx.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SuperPartition\LaneGenerateion.cs" />
+    <Compile Include="SuperPartition\LaneInitialization.cs" />
+    <Compile Include="SuperPartition\Parameter.cs" />
+    <Compile Include="SuperPartition\Preprocessing.cs" />
+    <Compile Include="SuperPartition\SClasses.cs" />
+    <Compile Include="SuperPartition\SPartition.cs" />
     <Compile Include="Tools\ListEx.cs" />
     <Compile Include="Tools\PolygonEx.cs" />
     <Compile Include="Tools\GeometryEx.cs" />

@@ -19,7 +19,21 @@ namespace ThParkingStall.Core.MPartitionLayout
             vec = new Vector2D(vec.X, vec.Y);
             return vec;
         }
-        public static bool IsAdverseVector(Vector2D a, Vector2D b,double tol=0.000001)
+        /// <summary>
+        /// 两条直线有端点相连
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static bool IsConnectedLine(LineSegment a, LineSegment b, double tol = 0)
+        {
+            if (a.P0.Distance(b.P0) <= tol) return true;
+            else if (a.P0.Distance(b.P1) <= tol) return true;
+            else if (a.P1.Distance(b.P0) <= tol) return true;
+            else if (a.P1.Distance(b.P1) <= tol) return true;
+            return false;
+        }
+        public static bool IsAdverseVector(Vector2D a, Vector2D b, double tol = 0.000001)
         {
             var value = a.X + b.X + a.Y + b.Y;
             if (Math.Abs(value) < tol) return true;
@@ -771,12 +785,6 @@ namespace ThParkingStall.Core.MPartitionLayout
                 if (t.ClosestPoint(pt).Distance(pt) < distance) return true;
             }
             return false;
-        }
-        public static bool IsConnectedLines(LineSegment a, LineSegment b)
-        {
-            if (a.P0.Distance(b.P0) < 1 || a.P0.Distance(b.P1) < 1
-                || a.P1.Distance(b.P0) < 1 || a.P1.Distance(b.P1) < 1) return true;
-            else return false;
         }
         public static double ClosestDistanceBetweenTwoParallelLines(LineSegment a, LineSegment b)
         {

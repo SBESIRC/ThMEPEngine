@@ -9,6 +9,7 @@ using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.ObliqueMPartitionLayout;
 using ThParkingStall.Core.OTools;
+using ThParkingStall.Core.SuperPartition;
 using static ThParkingStall.Core.IO.ReadWriteEx;
 namespace ThParkingStall.Core.OInterProcess
 {
@@ -56,6 +57,9 @@ namespace ThParkingStall.Core.OInterProcess
             {
                 try
                 {
+                    var sPartition = new SPartition(Walls, VaildLanes, Buildings, Region);
+                    sPartition.Process();
+
                     obliqueMPartition = new ObliqueMPartition(Walls, VaildLanes, Buildings, Region);
                     obliqueMPartition.OutputLanes = new List<LineSegment>();
                     obliqueMPartition.OutBoundary = Region;
