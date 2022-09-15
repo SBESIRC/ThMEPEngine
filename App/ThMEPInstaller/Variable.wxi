@@ -35,8 +35,4 @@
     <?define GTEPath = "$(var.ProjectDir)\..\..\Externals\GTE" ?>
     <!-- CGAL path -->
     <?define CGALPath = "$(var.ProjectDir)\..\..\Externals\CGAL" ?>
-    <!-- Xbim Geometry Engine path -->
-    <?define XbimGeoEngine = "$(var.ProjectDir)\..\..\Externals\Xbim.Geometry.Engine" ?>
-    <!-- Elevation Generator path -->
-    <?define ElevationGeneratorPath = "$(var.ProjectDir)\..\..\Externals\ElevationGenerator" ?>
 </Include>

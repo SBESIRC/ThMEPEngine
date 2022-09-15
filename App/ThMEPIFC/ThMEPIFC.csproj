@@ -98,34 +98,34 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Xbim.Common">
-      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Common.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Essentials\5.x\Xbim.Common.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc">
-      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Ifc.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Essentials\5.x\Xbim.Ifc.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc2x3">
-      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Ifc2x3.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Essentials\5.x\Xbim.Ifc2x3.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Ifc4">
-      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Ifc4.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Essentials\5.x\Xbim.Ifc4.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.IO.Esent">
-      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.IO.Esent.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Essentials\5.x\Xbim.IO.Esent.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.IO.MemoryModel">
-      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.IO.MemoryModel.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Essentials\5.x\Xbim.IO.MemoryModel.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Tessellator">
-      <HintPath>..\..\Externals\Xbim.Essentials\Xbim.Tessellator.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Essentials\5.x\Xbim.Tessellator.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Geometry.Engine64">
-      <HintPath>..\..\Externals\Xbim.Geometry\Xbim.Geometry.Engine64.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Geometry\5.x\Xbim.Geometry.Engine64.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.ModelGeometry.Scene">
-      <HintPath>..\..\Externals\Xbim.Geometry\Xbim.ModelGeometry.Scene.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Geometry\5.x\Xbim.ModelGeometry.Scene.dll</HintPath>
     </Reference>
     <Reference Include="Xbim.Geometry.Engine.Interop">
-      <HintPath>..\..\Externals\Xbim.Geometry\Xbim.Geometry.Engine.Interop.dll</HintPath>
+      <HintPath>..\..\Externals\Xbim.Geometry\5.x\Xbim.Geometry.Engine.Interop.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Choose>
