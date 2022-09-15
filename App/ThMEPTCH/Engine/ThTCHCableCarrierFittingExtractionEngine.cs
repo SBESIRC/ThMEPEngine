@@ -1,17 +1,14 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPTCH.Engine
 {
