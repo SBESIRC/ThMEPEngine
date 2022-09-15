@@ -148,71 +148,59 @@ namespace ThMEPIFC
         [CommandMethod("TIANHUACAD", "THDB2Push", CommandFlags.Modal)]
         public void THDB2Push()
         {
-            Active.Database.GetEditor().WriteMessage($"Start");
-            var isDB = (Convert.ToInt16(CADApp.Application.GetSystemVariable("USERR3")) == 1);
-            var filePath = "";
-            if (isDB)
-            {
-                // 拾取天正 DB文件
-                filePath = OpenDBFile();
-                if (string.IsNullOrEmpty(filePath))
-                {
-                    return;
-                }
-            }
-            Active.Database.GetEditor().WriteMessage($"开始读入并解析TGL XML文件");
+            Active.Editor.WriteLine($"开始读入图纸。");
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            // 读入并解析TGL XML文件
-            var service = new ThDWGToIFCService(filePath);
+            var service = new ThDWGToIFCService("");
             var project = service.DWGToProject(true, false);
-            if (project == null)
+            if (project != null)
             {
-                return;
+                sw.Stop();
+                Active.Editor.WriteLine($"读入并解析图纸完成，耗时{sw.ElapsedMilliseconds}毫秒。");
+
+                sw.Reset();
+                Active.Editor.WriteLine($"开始传输数据。");
+                sw.Start();
+
+                using (var pipeClient = new NamedPipeClientStream(".",
+                    "THDB2Push_TestPipe",
+                    PipeDirection.Out,
+                    PipeOptions.None,
+                    TokenImpersonationLevel.Impersonation))
+                {
+                    try
+                    {
+                        pipeClient.Connect(5000);
+                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Point3d)))
+                        {
+                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Point3d), false).SetSurrogate(typeof(Point3DSurrogate));
+                        }
+                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Vector3d)))
+                        {
+                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Vector3d), false).SetSurrogate(typeof(Vector3DSurrogate));
+                        }
+                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Matrix3d)))
+                        {
+                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Matrix3d), false).SetSurrogate(typeof(Matrix3DSurrogate));
+                        }
+                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Polyline)))
+                        {
+                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Polyline), false).SetSurrogate(typeof(PolylineSurrogate));
+                        }
+                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Entity)))
+                        {
+                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Entity), false).SetSurrogate(typeof(PolylineSurrogate));
+                        }
+                        Serializer.Serialize(pipeClient, project);
+                        Active.Editor.WriteLine($"传输数据完成，耗时{sw.ElapsedMilliseconds}毫秒。");
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Active.Editor.WriteLine($"传输数据失败：{ex.Message}。");
+                    }
+                }
             }
             sw.Stop();
-            Active.Database.GetEditor().WriteMessage($"读入并解析TGL XML文件完成，共用时{sw.ElapsedMilliseconds}ms");
-            sw.Reset();
-            Active.Database.GetEditor().WriteMessage($"开始序列化project.");
-            sw.Start();
-
-            // 管道
-            //"THDB2Push_TestPipe" 作为管道名称，两端管道名称需一致
-            var pipeClient = new NamedPipeClientStream(".", "THDB2Push_TestPipe",
-                        PipeDirection.Out, PipeOptions.None,
-                        TokenImpersonationLevel.Impersonation);
-            try
-            {
-                pipeClient.Connect(5000);
-                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Point3d)))
-                {
-                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Point3d), false).SetSurrogate(typeof(Point3DSurrogate));
-                }
-                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Vector3d)))
-                {
-                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Vector3d), false).SetSurrogate(typeof(Vector3DSurrogate));
-                }
-                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Matrix3d)))
-                {
-                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Matrix3d), false).SetSurrogate(typeof(Matrix3DSurrogate));
-                }
-                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Polyline)))
-                {
-                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Polyline), false).SetSurrogate(typeof(PolylineSurrogate));
-                }
-                if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Entity)))
-                {
-                    ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Entity), false).SetSurrogate(typeof(PolylineSurrogate));
-                }
-                Serializer.Serialize(pipeClient, project);
-                pipeClient.Close();
-                Active.Database.GetEditor().WriteMessage("已发送至Viewer\r\n");
-            }
-            catch (System.Exception ex)
-            {
-                pipeClient.Dispose();
-                Active.Database.GetEditor().WriteMessage("未连接到Viewer\r\n");
-            }
         }
 
         [CommandMethod("TIANHUACAD", "THIFCModelMerge", CommandFlags.Modal)]
