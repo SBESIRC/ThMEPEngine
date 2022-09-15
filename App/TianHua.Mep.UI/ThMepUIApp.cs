@@ -2,13 +2,15 @@
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using TianHua.Mep.UI.UI;
 using TianHua.Mep.UI.FrameCompare;
+using TianHua.Mep.UI.Command;
 
 namespace TianHua.Mep.UI
 {
     public class ThMepUIApp : IExtensionApplication
     {
         private RoomOutlineUI uiRoomOutline;
-        private ExtractRoomOutlineUI uiExtractRoomOutline;
+        private ThExtractRoomConfigCmd _extractRoomConfigCmd = new ThExtractRoomConfigCmd();
+
         public void Initialize()
         {
             //add code to run when the ExtApp initializes. Here are a few examples:
@@ -18,7 +20,13 @@ namespace TianHua.Mep.UI
             //  Loading some dependents explicitly which are not taken care of automatically;
             //  Subscribing to some events which are important for the whole session;
             //  Etc.
+
+            AcadApp.DocumentManager.DocumentActivated += _extractRoomConfigCmd.DocumentActivated;
+            AcadApp.DocumentManager.DocumentToBeDestroyed += _extractRoomConfigCmd.DocumentToBeDestroyed;
+            AcadApp.DocumentManager.DocumentDestroyed += _extractRoomConfigCmd.DocumentDestroyed;
         }
+
+        
 
         public void Terminate()
         {
@@ -49,13 +57,12 @@ namespace TianHua.Mep.UI
         [CommandMethod("TIANHUACAD", "THEROC", CommandFlags.Modal)]
         public void ThExtractRoomOutlineConfig()
         {
-            if (uiExtractRoomOutline != null && uiExtractRoomOutline.IsLoaded)
-                return;
-            uiExtractRoomOutline = new ExtractRoomOutlineUI();
-            uiExtractRoomOutline.WindowStartupLocation = System.Windows.
-                WindowStartupLocation.CenterScreen;
-            AcadApp.ShowModelessWindow(uiExtractRoomOutline);
+            using (var cmd = new ThExtractRoomConfigCmd())
+            {
+                cmd.Execute();
+            }
         }
+
         /// <summary>
         /// 梁配置
         /// </summary>

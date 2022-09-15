@@ -11,13 +11,22 @@ using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Mep.UI.Data
 {
-    public class ThOtherShearWallExtractionVisitor : ThBuildingElementExtractionVisitor
+    internal class ThOtherShearWallExtractionVisitor : ThBuildingElementExtractionVisitor, ISetContainer
     {
         private const double ArcTessellationLength = 100.0;
         public List<ThBuildingElementExtractionVisitor> BlackVisitors { get; set; }
+
+        private List<ContainerInfo> _containers;
+        public List<ContainerInfo> Containers => _containers;
+
         public ThOtherShearWallExtractionVisitor()
         {
             BlackVisitors = new List<ThBuildingElementExtractionVisitor>();
+        }
+
+        public override bool IsBuildElementBlockReference(BlockReference blockReference)
+        {
+            return blockReference.ObjectId.IsValid;
         }
 
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -56,31 +65,44 @@ namespace TianHua.Mep.UI.Data
             }
         }
 
+        public void SetContainers(List<ContainerInfo> containers)
+        {
+            _containers = containers;
+        }
+
+        public override bool IsBuildElement(Entity entity)
+        {
+            return base.IsBuildElement(entity) && 
+                entity.Visible && 
+                entity.Bounds.HasValue && 
+                !IsExistInBlacks(entity) &&
+                HasContainer();
+        }
+
         private List<ThRawIfcBuildingElementData> HandleHatch(Hatch hatch, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
-            if (IsSolid(hatch) && !IsExistInBlacks(hatch) && IsBuildElement(hatch) &&
-                CheckLayerValid(hatch) && hatch.Visible && hatch.Bounds.HasValue)
+            if (CheckLayerValid(hatch) && IsBuildElement(hatch))
             {
-                var polygons = HatchToPolygons(hatch.GetTransformedCopy(matrix) as Hatch);
-                polygons.OfType<Entity>().ForEach(e =>
+                if(hatch.PatternName.ToUpper() == "SOLID")
                 {
-                    results.Add(new ThRawIfcBuildingElementData()
+                    var polygons = HatchToPolygons(hatch.GetTransformedCopy(matrix) as Hatch);
+                    polygons.OfType<Entity>().ForEach(e =>
                     {
-                        Geometry = e,
+                        results.Add(new ThRawIfcBuildingElementData()
+                        {
+                            Geometry = e,
+                        });
                     });
-                });
+                }                
             }
             return results;
         }
 
-
-
         private List<ThRawIfcBuildingElementData> HandleSolid(Solid solid, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
-            if (!IsExistInBlacks(solid) && IsBuildElement(solid) &&
-                CheckLayerValid(solid) && solid.Visible && solid.Bounds.HasValue)
+            if (CheckLayerValid(solid) && IsBuildElement(solid))
             {
                 // 可能存在2D Solid不规范的情况
                 // 这里将原始2d Solid“清洗”处理
@@ -110,9 +132,19 @@ namespace TianHua.Mep.UI.Data
             }
         }
 
-        private bool IsSolid(Hatch hatch)
+        private bool HasContainer()
         {
-            return hatch.PatternName.ToUpper() == "SOLID";
+            bool result = false;
+            foreach (var item in _containers)
+            {
+                if (item.Layer.ToUpper().StartsWith("__覆盖_S") || 
+                    item.Layer.ToUpper().StartsWith("__附着_S"))
+                {
+                    result = true;
+                    break;
+                }
+            }
+            return result;
         }
     }
 }

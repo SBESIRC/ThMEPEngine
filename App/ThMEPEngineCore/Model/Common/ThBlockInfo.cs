@@ -2,23 +2,26 @@
 
 namespace ThMEPEngineCore.Model.Common
 {
-    public class ThLayerInfo
+    public class ThBlockInfo
     {
-        private string _layer = "";
-        public string Layer
+        private string _name = "";
+        /// <summary>
+        /// 全称
+        /// </summary>
+        public string Name
         {
-            get => _layer;
+            get => _name;
             set
             {
-                _layer = value;
-                var newLayer = ThMEPXRefService.OriginalFromXref(_layer);
-                if (newLayer.Length != _layer.Length)
+                _name = value;
+                var newName = ThMEPXRefService.OriginalFromXref(_name);
+                if(newName.Length!= _name.Length)
                 {
-                    _display = "*|" + newLayer;
+                    _display = "*|" + newName;
                 }
                 else
                 {
-                    _display = _layer;
+                    _display = _name;
                 }
             }
         }
@@ -32,7 +35,6 @@ namespace ThMEPEngineCore.Model.Common
                 _isSelected = value;
             }
         }
-
 
         private string _display = "";
         public string Display

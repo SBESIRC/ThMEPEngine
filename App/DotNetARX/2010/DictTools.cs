@@ -39,6 +39,36 @@ namespace DotNetARX
             return idXrec; // 返回添加的扩展记录的的Id
         }
 
+        public static ObjectId UpdateXrecord(this ObjectId id, string searchKey, TypedValueList values)
+        {
+            DBObject obj = id.GetObject(OpenMode.ForRead);//打开对象
+            // 判断对象是否已经拥有扩展字典,若无扩展字典，则
+            if (obj.ExtensionDictionary.IsNull)
+            {
+                return AddXrecord(id, searchKey, values);
+            }
+            else
+            {
+                // 打开对象的扩展字典
+                DBDictionary dict = (DBDictionary)obj.ExtensionDictionary.GetObject(OpenMode.ForRead);
+                // 如果扩展字典中已包含指定的扩展记录对象，则返回
+                if (!dict.Contains(searchKey))
+                {
+                    return AddXrecord(id, searchKey, values);
+                }
+                else
+                {
+                    dict.UpgradeOpen(); // 将扩展字典切换成写的状态
+                    var idXrec = dict.GetAt(searchKey);
+                    var xrec = (Xrecord)idXrec.GetObject(OpenMode.ForWrite);
+                    xrec.Data = values;
+                    xrec.DowngradeOpen();
+                    dict.DowngradeOpen();
+                    return idXrec;
+                }
+            }             
+        }
+
         /// <summary>
         /// 获取扩展记录
         /// </summary>
@@ -82,6 +112,26 @@ namespace DotNetARX
                 db.TransactionManager.AddNewlyCreatedDBObject(dict, true);
             }
             return id; // 返回添加的字典项的Id
+        }
+
+        /// <summary>
+        /// 添加有名对象字典项
+        /// </summary>
+        /// <param name="db">数据库</param>
+        /// <param name="searchKey">有名对象字典项的名称</param>
+        /// <returns>返回添加的有名对象字典项的Id</returns>
+        public static ObjectId GetNamedDictionary(this Database db, string searchKey)
+        {
+            //打开数据库的有名对象字典
+            DBDictionary dicts = (DBDictionary)db.NamedObjectsDictionaryId.GetObject(OpenMode.ForRead);
+            if (dicts.Contains(searchKey)) // 如果不存在指定关键字的字典项
+            {
+                return dicts.GetAt(searchKey);
+            }
+            else
+            {
+                return ObjectId.Null;
+            }
         }
     }
 }
