@@ -99,7 +99,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 if(obj is Circle circle)
                 {
-                    if(circle.Radius > 50 && circle.Radius < 120)
+                    if(circle.Radius > 45 && circle.Radius < 120)
                     {
                         DBObjs.Add(circle);
                         return;
@@ -121,21 +121,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     verticals.Add(key, value);
                 }
             }
-            //DBObjs.Cast<Entity>()
-            //    .ForEach(e => verticals.Add(new Point3dEx((e as Circle).Center), (e as Circle).Radius));
             return verticals;
-        }
-
-        public ThCADCoreNTSSpatialIndex CreateVerticalSpatialIndex()
-        {
-            var rects = new DBObjectCollection();
-            foreach(var obj in DBObjs)
-            {
-                var circle = obj as Circle;
-                var rect = circle.Center.GetRect(100);
-                rects.Add(rect);
-            }
-            return new ThCADCoreNTSSpatialIndex(rects);
         }
     }
 }
