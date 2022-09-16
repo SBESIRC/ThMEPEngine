@@ -1007,7 +1007,7 @@ namespace ThMEPTCH.Services
                 if (!item.IsOpening)
                 {
                     // 降板内轮廓
-                    var outlineBuffer = innerPLine.Buffer(-item.SurfaceThickness).OfType<Polyline>()
+                    var outlineBuffer = innerPLine.Buffer(-item.WrapSurfaceThickness).OfType<Polyline>()
                         .OrderByDescending(p => p.Area).FirstOrDefault();
                     if (outlineBuffer.IsNull())
                     {

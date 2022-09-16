@@ -6,7 +6,7 @@ namespace ThMEPTCH.PropertyServices.PropertyEnums
     {
         [Description("未选择")]
         UnSelect = -1,
-        [Description("钢筋混凝土")]
+        [Description("TH-钢筋混凝土")]
         ReinforcedConcrete = 1,
     }
 
@@ -14,7 +14,7 @@ namespace ThMEPTCH.PropertyServices.PropertyEnums
     {
         [Description("未选择")]
         UnSelect = -1,
-        [Description("加气混凝土")]
+        [Description("TH-加气混凝土")]
         Aeratedconcrete = 1,
     }
 }
