@@ -59,10 +59,16 @@ namespace Tianhua.Platform3D.UI
         private void PlatformAddEvents() 
         {
             AcadApp.DocumentManager.DocumentActivated += Platform3DMainEvent.DocumentManager_DocumentActivated;
+            AcadApp.DocumentManager.DocumentToBeDestroyed += Platform3DMainEvent.DocumentManager_DocumentToBeDestroyed;
+            AcadApp.DocumentManager.DocumentDestroyed += Platform3DMainEvent.DocumentManager_DocumentDestroyed;
+            AcadApp.DocumentManager.DocumentToBeActivated += Platform3DMainEvent.DocumentManager_DocumentToBeActivated;
         }
         private void PlatformRemoveEvents()
         {
             AcadApp.DocumentManager.DocumentActivated -= Platform3DMainEvent.DocumentManager_DocumentActivated;
+            AcadApp.DocumentManager.DocumentToBeDestroyed -= Platform3DMainEvent.DocumentManager_DocumentToBeDestroyed;
+            AcadApp.DocumentManager.DocumentDestroyed -= Platform3DMainEvent.DocumentManager_DocumentDestroyed;
+            AcadApp.DocumentManager.DocumentToBeActivated -= Platform3DMainEvent.DocumentManager_DocumentToBeActivated;
         }
         #endregion
     }

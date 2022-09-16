@@ -6,20 +6,22 @@ using Autodesk.AutoCAD.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Tianhua.Platform3D.UI.Interfaces;
 using Tianhua.Platform3D.UI.UI;
 using Tianhua.Platform3D.UI.ViewModels;
 
 namespace Tianhua.Platform3D.UI
 {
-    class Platform3DMainService
+    class Platform3DMainService:IMultiDocument
     {
         PaletteSet mainPaletteSet = null;
+        PlatformMainUI platformMainUI = null;
         public static Platform3DMainService Instace = new Platform3DMainService();
         Platform3DMainService() 
         {
             mainPaletteSet = new PaletteSet("天华三维设计面板");
-            var mainUControl = new PlatformMainUI();
-            mainPaletteSet.AddVisual("", mainUControl);
+            platformMainUI = new PlatformMainUI();
+            mainPaletteSet.AddVisual("", platformMainUI);
             mainPaletteSet.KeepFocus = true;
             mainPaletteSet.Visible = true;
             mainPaletteSet.DockEnabled = DockSides.Left;
@@ -38,19 +40,12 @@ namespace Tianhua.Platform3D.UI
                 AddSelectEvent();
             }
         }
-        public void ActivatDocumentChange() 
-        {
-            if (!mainPaletteSet.Visible)
-                return;
-            if (string.IsNullOrEmpty(CurrentDocumentId()))
-                mainPaletteSet.Visible = false;
-            AddSelectEvent();
-        }
         public void ShowUI() 
         {
             if (mainPaletteSet.Visible)
                 return;
             mainPaletteSet.Visible = true;
+            MainUIShowInDocument();
         }
         public void HideUI() 
         {
@@ -87,6 +82,8 @@ namespace Tianhua.Platform3D.UI
         }
         private void Doc_ImpliedSelctionChanged(object sender, EventArgs e)
         {
+            if (!mainPaletteSet.Visible)
+                return;
             List<ObjectId> selectIds = new List<ObjectId>();
             var doc = sender as Document;
             if (null != doc && doc.IsActive)
@@ -101,6 +98,38 @@ namespace Tianhua.Platform3D.UI
                 }
             }
             PropertiesViewModel.Instacne.SelectIds(selectIds);
+        }
+        public void DocumentActivated(DocumentCollectionEventArgs e) 
+        {
+            if (!mainPaletteSet.Visible)
+                return;
+            if (string.IsNullOrEmpty(CurrentDocumentId()))
+                mainPaletteSet.Visible = false;
+            platformMainUI.DocumentActivated(e);
+            AddSelectEvent();
+        }
+        public void DocumentDestroyed(DocumentDestroyedEventArgs e) 
+        {
+            if (!mainPaletteSet.Visible)
+                return;
+            platformMainUI.DocumentDestroyed(e);
+        }
+        public void DocumentToBeActivated(DocumentCollectionEventArgs e) 
+        {
+            if (!mainPaletteSet.Visible)
+                return;
+            platformMainUI.DocumentToBeActivated(e);
+        }
+        public void DocumentToBeDestroyed(DocumentCollectionEventArgs e) 
+        {
+            if (!mainPaletteSet.Visible)
+                return;
+            platformMainUI.DocumentToBeDestroyed(e);
+        }
+
+        public void MainUIShowInDocument()
+        {
+            platformMainUI.MainUIShowInDocument();
         }
     }
 }

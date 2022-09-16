@@ -14,7 +14,20 @@ namespace Tianhua.Platform3D.UI.EventMonitor
     {
         public static void DocumentManager_DocumentActivated(object sender, DocumentCollectionEventArgs e)
         {
-            Platform3DMainService.Instace.ActivatDocumentChange();
+            Platform3DMainService.Instace.DocumentActivated(e);
+        }
+        public static void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
+        {
+            Platform3DMainService.Instace.DocumentToBeDestroyed(e);
+        }
+        public static void DocumentManager_DocumentToBeActivated(object sender, DocumentCollectionEventArgs e)
+        {
+            Platform3DMainService.Instace.DocumentToBeActivated(e);
+        }
+
+        public static void DocumentManager_DocumentDestroyed(object sender, DocumentDestroyedEventArgs e)
+        {
+            Platform3DMainService.Instace.DocumentDestroyed(e);
         }
     }
 }

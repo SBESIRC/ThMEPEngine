@@ -1,24 +1,26 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
-using HandyControl.Interactivity;
+using Autodesk.AutoCAD.ApplicationServices;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using Tianhua.Platform3D.UI.Interfaces;
 using Tianhua.Platform3D.UI.UControls;
 using Tianhua.Platform3D.UI.ViewModels;
-using hControl = HandyControl.Controls;
 
 namespace Tianhua.Platform3D.UI.UI
 {
     /// <summary>
     /// PlatformMainUI.xaml 的交互逻辑
     /// </summary>
-    public partial class PlatformMainUI : UserControl
+    public partial class PlatformMainUI : UserControl, IMultiDocument
     {
         MainFunctionViewModel mainViewModel;
+        private List<IMultiDocument> cacheFuctionPages;
         public PlatformMainUI()
         {
             InitializeComponent();
+            cacheFuctionPages = new List<IMultiDocument>();
             this.Loaded += PlatformMainUI_Loaded;
         }
 
@@ -35,6 +37,7 @@ namespace Tianhua.Platform3D.UI.UI
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("设计", new DesignUControl()));
             tabTopFunction.DataContext = mainViewModel;
             tabTopFunction.SelectedIndex = 1;
+            cacheFuctionPages = AllTablePage();
         }
 
         private void InitPropertyViewModel() 
@@ -64,5 +67,58 @@ namespace Tianhua.Platform3D.UI.UI
         {
 
         }
+
+        #region 多文档相关事件
+        public void MainUIShowInDocument()
+        {
+            if (cacheFuctionPages.Count < 1)
+                return;
+            foreach (var item in cacheFuctionPages)
+                item.MainUIShowInDocument();
+        }
+        public void DocumentActivated(DocumentCollectionEventArgs e)
+        {
+            if (cacheFuctionPages.Count < 1)
+                return;
+            foreach (var item in cacheFuctionPages)
+                item.DocumentActivated(e);
+        }
+
+        public void DocumentDestroyed(DocumentDestroyedEventArgs e)
+        {
+            if (cacheFuctionPages.Count < 1)
+                return;
+            foreach (var item in cacheFuctionPages)
+                item.DocumentDestroyed(e);
+        }
+
+        public void DocumentToBeActivated(DocumentCollectionEventArgs e)
+        {
+            if (cacheFuctionPages.Count < 1)
+                return;
+            foreach (var item in cacheFuctionPages)
+                item.DocumentToBeActivated(e);
+        }
+
+        public void DocumentToBeDestroyed(DocumentCollectionEventArgs e)
+        {
+            if (cacheFuctionPages.Count < 1)
+                return;
+            foreach (var item in cacheFuctionPages)
+                item.DocumentToBeDestroyed(e);
+        }
+        private List<IMultiDocument> AllTablePage() 
+        {
+            var res = new List<IMultiDocument>();
+            foreach (var item in mainViewModel.FunctionTableItems) 
+            {
+                var iMutil = item as IMultiDocument;
+                if (iMutil == null)
+                    continue;
+                res.Add(iMutil);
+            }
+            return res;
+        }
+        #endregion
     }
 }
