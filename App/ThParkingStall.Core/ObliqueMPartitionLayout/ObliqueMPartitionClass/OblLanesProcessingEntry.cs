@@ -57,8 +57,15 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     break;
                 }
             }
+            if (LoopThroughEnd)
+                ProcessLanes();
         }
-
+        private void ProcessLanes()
+        {
+            RemoveDuplicatedLanes(IniLanes);
+            JoinLoopThroughLanes();
+            ThinInvalidLanesAndSpaceForNewLoopThroughLanes();
+        }
         public void GenerateLanesSuperFast()
         {
             SortLaneByDirection(IniLanes, LayoutMode, ParentDir);

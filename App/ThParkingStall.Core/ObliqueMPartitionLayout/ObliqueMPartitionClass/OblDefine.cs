@@ -160,6 +160,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public static double LayoutScareFactor_betweenBuilds = 0.7;
         public static double LayoutScareFactor_SingleVert = 0.7;
 
+        public static bool LoopThroughEnd = true;//尽端环通
+        public double DisAllowMaxLaneLength = 50000;//允许生成车道最大长度-尽端环通车道条件判断长度
         public bool AllowCompactedLane = false;
         public bool hasCompactedLane = false;
         private int CalCompactLaneCount = 0;

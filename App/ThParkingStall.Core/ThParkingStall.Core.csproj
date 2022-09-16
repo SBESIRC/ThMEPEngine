@@ -104,6 +104,7 @@
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPreProcess.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPillarPostProcess.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OLaneCompaction.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OLoopThroughEnd.cs" />
     <Compile Include="ObliqueMPartitionLayout\OPostProcess\GlobalBusiness.cs" />
     <Compile Include="ObliqueMPartitionLayout\OPostProcess\OGlobalProcess.cs" />
     <Compile Include="ObliqueMPartitionLayout\OPostProcess\OPostProcessingEndLanes.cs" />
