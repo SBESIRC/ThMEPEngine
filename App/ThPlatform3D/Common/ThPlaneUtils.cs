@@ -148,6 +148,25 @@ namespace ThPlatform3D.Common
             }
             return 0.0;
         }
+
+        public static double GetFloorBottomElevation(this Dictionary<string, string> properties,List<ThFloorInfo> floorInfos)
+        {
+            if (properties.ContainsKey(ThSvgPropertyNameManager.FloorNamePropertyName))
+            {
+                var flrName = properties[ThSvgPropertyNameManager.FloorNamePropertyName];
+                var res = floorInfos.Where(o => o.FloorName == flrName);
+                if(res.Count()==1)
+                {
+                    double dValue = 0.0;
+                    if (double.TryParse(res.First().Bottom_elevation, out dValue))
+                    {
+                        return dValue;
+                    }
+                }                
+            }
+            return 0.0;
+        }
+
         public static Extents2d ToExtents2d(this DBObjectCollection objs)
         {
             var extents = new Extents2d();

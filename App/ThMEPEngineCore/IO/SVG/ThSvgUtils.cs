@@ -204,6 +204,10 @@ namespace ThMEPEngineCore.IO.SVG
             //https://www.jianshu.com/p/c819ae16d29b
             //注：大写的字母是绝对坐标，小写的字母是相对坐标
             var curves = new List<Curve>();
+            if(svgPath.PathData==null)
+            {
+                return curves;
+            }
             for (int i = 0; i < svgPath.PathData.Count; i++)
             {
                 var currentSegment = svgPath.PathData[i];
