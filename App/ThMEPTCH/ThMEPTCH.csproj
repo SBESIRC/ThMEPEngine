@@ -287,7 +287,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Google.Protobuf">
-      <Version>3.21.5</Version>
+      <Version>3.21.6</Version>
     </PackageReference>
     <PackageReference Include="HandyControl">
       <Version>3.3.0</Version>
