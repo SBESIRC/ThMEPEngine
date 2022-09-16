@@ -104,8 +104,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         private void ProcessLanes()
         {
             RemoveDuplicatedLanes(IniLanes);
-            JoinLoopThroughLanes();
-            ThinInvalidLanesAndSpaceForNewLoopThroughLanes();
+            JoinLoopThroughLanes(ref IniLanes);
+            ThinInvalidLanesAndSpaceForNewLoopThroughLanes(ref IniLanes, ref CarBoxes, ref CarBoxesPlus, ref CarModules, ref CarBoxesSpatialIndex);
         }
     }
 }

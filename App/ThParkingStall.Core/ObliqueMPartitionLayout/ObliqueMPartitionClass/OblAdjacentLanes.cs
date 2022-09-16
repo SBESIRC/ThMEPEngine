@@ -75,6 +75,89 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             }
             return generate_lane_length;
         }
+        /// <summary>
+        /// laneVec:车道线的移动方向;p:车道线在墙上的点;lineVec:从墙上的点到车道线另一端方向单位向量
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="p"></param>
+        /// <param name="lineVec"></param>
+        /// <returns></returns>
+        private double CalOffsetDistanceForSingleLaneNearNonPerpWall(Vector2D laneVec, Coordinate p, Vector2D lineVec)
+        {
+            var length = DisCarAndHalfLane + CollisionD - CollisionTOP;
+            double distance = 0;
+            var pt = p;
+            var ps= pt.Translation(lineVec.Normalize() * length);
+            //拿邻近wall的方向和线段
+            var _nearwall_seg = new LineSegment();
+            var vec = laneVec;
+            foreach (var wall in Walls)
+            {
+                if (wall.Coordinates.Count() >= 2)
+                {
+                    var found = false;
+                    for (int i = 0; i < wall.Coordinates.Count() - 1; i++)
+                    {
+                        var wl = new LineSegment(wall.Coordinates[i], wall.Coordinates[i + 1]);
+                        if (wl.ClosestPoint(pt).Distance(pt) < 10)
+                        {
+                            _nearwall_seg = wl;
+                            if (wl.Length < LengthCanGAdjLaneConnectSingle * 0.8) continue;
+                            var angle = Math.Abs(Vector(wl).AngleTo(new Vector2D(pt, ps)) / Math.PI * 180);
+                            angle = Math.Min(angle, 180 - angle);
+                            //如果角度大于135(180-45),不生成
+                            double angletol = 45;
+                            if (wl.P0.Distance(pt) < wl.P1.Distance(pt))
+                            {
+                                if (angle < angletol)
+                                {
+                                    var ptest = ps.Translation(Vector(wl).Normalize() * (ps.Distance(pt)));
+                                    var vec_a = new Vector2D(ps, pt);
+                                    var vec_b = new Vector2D(ps, ptest);
+                                    //判断同向
+                                    if (vec_a.Dot(vec_b) < 0) continue;
+                                }
+                                found = true;
+                                vec = Vector(wl);
+                            }
+                            else
+                            {
+                                if (angle < angletol)
+                                {
+                                    var ptest = ps.Translation(-Vector(wl).Normalize() * (ps.Distance(pt)));
+                                    var vec_a = new Vector2D(ps, pt);
+                                    var vec_b = new Vector2D(ps, ptest);
+                                    if (vec_a.Dot(vec_b) < 0) continue;
+                                }
+                                found = true;
+                                vec = -Vector(wl);
+                            }
+                            break;
+                        }
+                    }
+                    if (found) break;
+                }
+            }
+            //根据墙线与车道线的角度，调整从墙线偏移出的距离（1车位+半车道的三角函数值）——如果墙线与车道线不垂直,多偏移1mm，避免墙线微斜的精度问题
+            var pt_closest_onwall = _nearwall_seg.ClosestPoint(ps, true);
+            var angle_pspt_pswall = new Vector2D(ps, pt).AngleTo(new Vector2D(ps, pt_closest_onwall));
+            var _nearwall_endpt = _nearwall_seg.P0.Distance(pt_closest_onwall) < _nearwall_seg.P1.Distance(pt_closest_onwall) ?
+                _nearwall_seg.P1 : _nearwall_seg.P0;
+            var pt_on_lane_project = new LineSegment(pt, ps).ClosestPoint(_nearwall_endpt, true);
+            distance = pt_on_lane_project.Distance(pt);
+            var extend_offset_distance = distance < 100 && distance < _nearwall_seg.Length / 100 && distance > 0;
+            var angle_pspt_pswall_2 = new Vector2D(pt, pt_closest_onwall).AngleTo(new Vector2D(pt, _nearwall_endpt));
+            if (Math.Abs(angle_pspt_pswall_2) / Math.PI * 180 < 0.1)
+            {
+                angle_pspt_pswall += Math.Abs(angle_pspt_pswall_2);
+            }
+            if (!extend_offset_distance)
+            {
+                distance = 1;
+            }
+            length = (DisCarAndHalfLane + distance + CollisionD - CollisionTOP) / Math.Cos(angle_pspt_pswall);
+            return length;
+        }
         private double GenerateAdjacentLanesFunc(ref GenerateLaneParas paras, Lane lane, int index, bool isStart)
         {
             double generate_lane_length = -1;

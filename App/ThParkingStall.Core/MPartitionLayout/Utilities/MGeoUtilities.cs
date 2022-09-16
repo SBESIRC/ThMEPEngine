@@ -45,6 +45,11 @@ namespace ThParkingStall.Core.MPartitionLayout
             double angle = Math.Abs(Vector(a).AngleTo(Vector(b)));
             return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
         }
+        public static bool IsParallelVector(Vector2D a, Vector2D b, double degreetol = 1)
+        {
+            double angle = Math.Abs(a.AngleTo(b));
+            return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
+        }
         public static bool IsPerpLine(LineSegment a, LineSegment b, double degreetol = 1)
         {
             double angle = Math.Abs(Vector(a).AngleTo(Vector(b)));

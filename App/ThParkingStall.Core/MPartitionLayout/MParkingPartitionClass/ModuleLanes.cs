@@ -829,7 +829,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                                     
 
 
-                                    splitback = split.Translation(-vec.Normalize() * DisBackBackModulus);
+                                    splitback = split.Translation(-vec.Normalize() * DisBackBackModulus/2);
                                 }
                             }
                         }

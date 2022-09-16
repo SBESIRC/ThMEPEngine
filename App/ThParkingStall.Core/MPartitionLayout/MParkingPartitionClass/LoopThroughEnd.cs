@@ -17,7 +17,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         /// <summary>
         /// 将尽端环通的车道线在能连通的地方连同为一条
         /// </summary>
-        private void JoinLoopThroughLanes()
+        public static void JoinLoopThroughLanes(ref List<Lane> IniLanes)
         {
             var loopLanes = IniLanes.Where(e => e.IsGeneratedForLoopThrough || e.IsAdjLaneForProcessLoopThroughEnd).ToList();
             IniLanes = IniLanes.Except(loopLanes).ToList();
@@ -28,8 +28,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     for (int j = i + 1; j < loopLanes.Count; j++)
                     {
                         var existLane = loopLanes[i];
-                        var lane = loopLanes[j];
-                        if (existLane.Vec.IsParallel(lane.Vec) && existLane.Vec.Dot(lane.Vec) > 0)
+                        var lane = loopLanes[j];            
+                        if (IsParallelVector(existLane.Vec, lane.Vec) && existLane.Vec.Dot(lane.Vec) > 0)
                         {
                             var tol = 1;
                             if (existLane.Line.P0.Distance(lane.Line.P0) < tol || existLane.Line.P0.Distance(lane.Line.P1) < tol
@@ -39,7 +39,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                                 var line_b = lane.Line;
                                 var linstrings = JoinCurves(new List<LineString>(), new List<LineSegment>() { line_a, line_b }).First();
                                 var line = new LineSegment(linstrings.StartPoint.Coordinate, linstrings.EndPoint.Coordinate);
-                                loopLanes[i].Line=line;
+                                loopLanes[i].Line = line;
                                 loopLanes.RemoveAt(j);
                                 j--;
                             }
@@ -53,7 +53,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         /// <summary>
         /// 剔除因生成环通车道而导致的原始车道线及模块生成的无效区域
         /// </summary>
-        private void ThinInvalidLanesAndSpaceForNewLoopThroughLanes()
+        public static void ThinInvalidLanesAndSpaceForNewLoopThroughLanes(ref List<Lane> IniLanes, ref List<Polygon> CarBoxes,
+            ref List<CarBoxPlus> CarBoxesPlus, ref List<CarModule> CarModules, ref MNTSSpatialIndex CarBoxesSpatialIndex)
         {
             var dis_singleModule_depth = DisCarAndHalfLane + CollisionD - CollisionTOP;
             var loopLanes = IniLanes.Where(e => e.IsGeneratedForLoopThrough || e.IsAdjLaneForProcessLoopThroughEnd).ToList();
@@ -63,14 +64,14 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var rec_sc = rec.Scale(ScareFactorForCollisionCheck);
                 for (int i = 0; i < IniLanes.Count; i++)
                 {
-                    if (/*IniLanes[i].Line.ToLineString().Intersects(rec_sc)*/PolyFromLines(IniLanes[i].Line, IniLanes[i].Line.Translation(IniLanes[i].Vec.Normalize()*100)).Intersects(rec_sc))
+                    if (/*IniLanes[i].Line.ToLineString().Intersects(rec_sc)*/PolyFromLines(IniLanes[i].Line, IniLanes[i].Line.Translation(IniLanes[i].Vec.Normalize() * 100)).Intersects(rec_sc))
                     {
                         var splits = SplitLine(IniLanes[i].Line, rec).Where(e => !e.ToLineString().Intersects(rec_sc));
-                        if (splits.Count() >0)
+                        if (splits.Count() > 0)
                         {
-                            if(splits.Count()==2)
-                                IniLanes[i].Line = splits.First();
-                            else if(splits.Count()==1)
+                            if (splits.Count() == 2)
+                                IniLanes[i].Line = splits.OrderByDescending(e => e.MidPoint.Distance(e.ClosestPoint(rec.Centroid.Coordinate,true))).First();
+                            else if (splits.Count() == 1)
                                 IniLanes[i].Line = splits.First();
                         }
                         else
@@ -89,7 +90,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                          var splits = SplitCurve(e, rec).Where(t => !t.Intersects(rec_sc));
                          if (splits.Count() > 0)
                          {
-                             var coords=splits.First().Coordinates;
+                             var coords = splits.First().Coordinates;
                              var pl = PolyFromPoints(coords.ToList());
                              return pl;
                          }
@@ -98,7 +99,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                     CarBoxes.AddRange(crossedBox);
                     CarBoxesSpatialIndex = new MNTSSpatialIndex(CarBoxes);
                 }
-                var crossedBoxPlus = CarBoxesPlus.Where(e => e.Box!=null && e.Box.Intersects(rec_sc));
+                var crossedBoxPlus = CarBoxesPlus.Where(e => e.Box != null && e.Box.Intersects(rec_sc));
                 if (crossedBoxPlus.Count() > 0)
                 {
                     CarBoxesPlus = CarBoxesPlus.Except(crossedBoxPlus).ToList();
@@ -118,13 +119,13 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
                 for (int i = 0; i < CarModules.Count; i++)
                 {
-                    var module=CarModules[i];
+                    var module = CarModules[i];
                     if (/*module.Line.ToLineString().Intersects(rec_sc)*/PolyFromLines(module.Line, module.Line.Translation(module.Vec.Normalize() * 100)).Intersects(rec_sc))
                     {
                         var splits = SplitLine(module.Line, rec).Where(e => !e.ToLineString().Intersects(rec_sc));
                         if (splits.Count() > 0)
                         {
-                            CarModules[i].Line=splits.First();
+                            CarModules[i].Line = splits.First();
                         }
                         else
                         {
@@ -140,7 +141,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                         {
                             var coords = splits.First().Coordinates;
                             var pl = PolyFromPoints(coords.ToList());
-                            CarModules[i].Box=pl;
+                            CarModules[i].Box = pl;
                         }
                         else
                         {

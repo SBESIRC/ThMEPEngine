@@ -362,6 +362,76 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 }
                 if (GetCommonLengthForTwoParallelLinesOnPerpDirection(split, lane) < 1) continue;
 
+                #region 针对尽端环通的处理
+                var split_un_loopthrough_cut = new LineSegment(split);
+                var generated_LoopThroughEnd = false;
+                if (LoopThroughEnd)
+                {
+                    var distance_allow_generate_loopthrough_end = DisAllowMaxLaneLength;
+                    if (split.Length >= distance_allow_generate_loopthrough_end)
+                    {
+                        var dis_singleModule_depth = DisCarAndHalfLane + CollisionD - CollisionTOP;
+                        // 只有尽端和原始车道线尽端对齐(在允许值范围内)，才生成尽端环通的车道线
+                        double dis_to_iniLane_end_allow_generate = 20000;//大概值
+                                                                                      //起点不连通
+                        var cond_start_disconnected = !IsConnectedToLane(split, true, IniLanes);
+                        //终点不连通
+                        var cond_end_disconnected = !IsConnectedToLane(split, false, IniLanes);
+                        if (cond_start_disconnected || cond_end_disconnected)
+                        {
+                            Coordinate p_on_wall = split.P0;
+                            var lineVec = Vector(split).Normalize();
+                            if (cond_end_disconnected)
+                            {
+                                p_on_wall=split.P1;
+                                lineVec = -lineVec;
+                            }
+                            var length = CalOffsetDistanceForSingleLaneNearNonPerpWall(-vec, p_on_wall, Vector(split).Normalize());
+                            dis_singleModule_depth = length;
+                            var generateLanePt = split.P0.Translation(Vector(split).Normalize() * dis_singleModule_depth);
+                            var initial_lane= TranslateReservedConnection(split,-vec.Normalize()*DisBackBackModulus);
+                            var generateLanePt_on_iniLane = initial_lane.P0.Translation(Vector(split).Normalize() * dis_singleModule_depth);
+                            if (cond_end_disconnected)
+                            {
+                                generateLanePt = split.P1.Translation(-Vector(split).Normalize() * dis_singleModule_depth);
+                                generateLanePt_on_iniLane= initial_lane.P1.Translation(-Vector(split).Normalize() * dis_singleModule_depth);
+                            }
+           
+                            
+                            if (splitback.P0.Distance(generateLanePt_on_iniLane) < dis_to_iniLane_end_allow_generate || splitback.P1.Distance(generateLanePt_on_iniLane) < dis_to_iniLane_end_allow_generate)
+                            {
+                                var generateLane = new LineSegment(generateLanePt, generateLanePt_on_iniLane);
+                                var generateLane_buffer = PolyFromLines(generateLane.Translation(Vector(split).Normalize() * DisLaneWidth / 2),
+                                    generateLane.Translation(-Vector(split).Normalize() * DisLaneWidth / 2));
+                                generateLane_buffer = generateLane_buffer.Scale(ScareFactorForCollisionCheck);
+                                var cond = ObstaclesSpatialIndex.SelectCrossingGeometry(generateLane_buffer).Count == 0;
+                                cond = cond && Boundary.IntersectPoint(generateLane_buffer).Count() == 0;
+                                foreach (var testlane in IniLanes)
+                                    cond = cond && testlane.Line.IntersectPoint(generateLane_buffer).Count() == 0;
+                                if (cond)
+                                {
+                                    generated_LoopThroughEnd = true;
+                                    var perpVec = Vector(generateLane).GetPerpendicularVector().Normalize();
+                                    var p_test_in = generateLane.MidPoint.Translation(perpVec * dis_singleModule_depth);
+                                    var p_test_out = generateLane.MidPoint.Translation(-perpVec * dis_singleModule_depth);
+                                    if (Boundary.ClosestPoint(p_test_out).Distance(p_test_out) < Boundary.ClosestPoint(p_test_in).Distance(p_test_in))
+                                        perpVec = -perpVec;
+                                    //if (cond_end_disconnected)
+                                    //    perpVec = Vector(split).Normalize();
+                                    Lane endthrough_lane = new Lane(generateLane, perpVec);
+                                    endthrough_lane.IsGeneratedForLoopThrough = true;
+                                    paras.LanesToAdd.Add(endthrough_lane);
+                                    split = new LineSegment(generateLanePt, split.P1);
+                                    if (cond_end_disconnected)
+                                        split = new LineSegment(split_un_loopthrough_cut.P0, generateLanePt);
+                                    splitback = split.Translation(-vec.Normalize() * DisBackBackModulus/2);
+                                }
+                            }
+                        }
+                    }
+                }
+                #endregion
+
                 #region 参数赋值
                 paras.SetNotBeMoved = i;
                 //split1模块车道线，splitback半模块车道线
@@ -440,7 +510,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     if (segs.First().Length - segs.Last().Length > 10)
                     {
                         paras.CarBoxesToAdd.Add(pl);
-                        Lane ln = new Lane(split, vec);
+                        Lane ln = new Lane(split_un_loopthrough_cut, vec);
                         paras.LanesToAdd.Add(ln);
                         Lane _ln = new Lane(split, -vec);
                         paras.LanesToAdd.Add(_ln);
@@ -451,7 +521,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         CarModule module = new CarModule(pl, split, -vec);
                         module.IsInBackBackModule = true;
                         paras.CarModulesToAdd.Add(module);
-                        Lane ln = new Lane(split, vec);
+                        Lane ln = new Lane(split_un_loopthrough_cut, vec);
                         paras.LanesToAdd.Add(ln);
                     }
                 }
