@@ -146,7 +146,7 @@ namespace ThMEPHVAC.Command
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacModelDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blockName), true);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blockName), false);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), true);
             }
         }
