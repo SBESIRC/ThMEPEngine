@@ -8,37 +8,37 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         static ThTCHBlockMapConfig()
         {
             DoorBlkMap = new Dictionary<string, string>();            
-            DoorBlkMap.Add("$DorLib2D$00000001", ThArchPrintBlockManager.ADoor1);
-            DoorBlkMap.Add("$DorLib2D$00000002", ThArchPrintBlockManager.ADoor2);
-            DoorBlkMap.Add("$DorLib2D$00000003", ThArchPrintBlockManager.ADoor1);
-            DoorBlkMap.Add("$DorLib2D$00000004", ThArchPrintBlockManager.ADoor2);
-            DoorBlkMap.Add("$DorLib2D$00000005", ThArchPrintBlockManager.ADoor6);
-            DoorBlkMap.Add("$DorLib2D$00000006", ThArchPrintBlockManager.ADoor7);
-            DoorBlkMap.Add("$DorLib2D$00000009", ThArchPrintBlockManager.ADoor1);
-            DoorBlkMap.Add("$DorLib2D$00000010", ThArchPrintBlockManager.ADoor1);
-            DoorBlkMap.Add("$DorLib2D$00000011", ThArchPrintBlockManager.ADoor2);
-            DoorBlkMap.Add("$DorLib2D$00000012", ThArchPrintBlockManager.ADoor2);
-            DoorBlkMap.Add("$DorLib2D$00000021", "");
+            DoorBlkMap.Add("1", ThArchPrintBlockManager.ADoor1);
+            DoorBlkMap.Add("2", ThArchPrintBlockManager.ADoor2);
+            DoorBlkMap.Add("3", ThArchPrintBlockManager.ADoor1);
+            DoorBlkMap.Add("4", ThArchPrintBlockManager.ADoor2);
+            DoorBlkMap.Add("5", ThArchPrintBlockManager.ADoor6);
+            DoorBlkMap.Add("6", ThArchPrintBlockManager.ADoor7);
+            DoorBlkMap.Add("9", ThArchPrintBlockManager.ADoor1);
+            DoorBlkMap.Add("10", ThArchPrintBlockManager.ADoor1);
+            DoorBlkMap.Add("11", ThArchPrintBlockManager.ADoor2);
+            DoorBlkMap.Add("12", ThArchPrintBlockManager.ADoor2);
+            DoorBlkMap.Add("21", "");
 
-            DoorBlkMap.Add("$DorLib2D$00000114", ThArchPrintBlockManager.ADoor6);
-            DoorBlkMap.Add("$DorLib2D$00000116", ThArchPrintBlockManager.ADoor7);
-            DoorBlkMap.Add("$DorLib2D$00000127", ThArchPrintBlockManager.ADoor4);
-            DoorBlkMap.Add("$DorLib2D$00000128", ThArchPrintBlockManager.ADoor4);
-            DoorBlkMap.Add("$DorLib2D$00000129", ThArchPrintBlockManager.ADoor4);
-            DoorBlkMap.Add("$DorLib2D$00000130", ThArchPrintBlockManager.ADoor4);
-            DoorBlkMap.Add("$DorLib2D$00000131", ThArchPrintBlockManager.ADoor4);
-            DoorBlkMap.Add("$DorLib2D$00000132", "");
-            DoorBlkMap.Add("$DorLib2D$00000134", ThArchPrintBlockManager.ADoor4);
-            DoorBlkMap.Add("$DorLib2D$00000135", ThArchPrintBlockManager.ADoor4);
-            DoorBlkMap.Add("$DorLib2D$00000138", ThArchPrintBlockManager.ADoor5);
+            DoorBlkMap.Add("114", ThArchPrintBlockManager.ADoor6);
+            DoorBlkMap.Add("116", ThArchPrintBlockManager.ADoor7);
+            DoorBlkMap.Add("127", ThArchPrintBlockManager.ADoor4);
+            DoorBlkMap.Add("128", ThArchPrintBlockManager.ADoor4);
+            DoorBlkMap.Add("129", ThArchPrintBlockManager.ADoor4);
+            DoorBlkMap.Add("130", ThArchPrintBlockManager.ADoor4);
+            DoorBlkMap.Add("131", ThArchPrintBlockManager.ADoor4);
+            DoorBlkMap.Add("132", "");
+            DoorBlkMap.Add("134", ThArchPrintBlockManager.ADoor4);
+            DoorBlkMap.Add("135", ThArchPrintBlockManager.ADoor4);
+            DoorBlkMap.Add("138", ThArchPrintBlockManager.ADoor5);
 
-            DoorBlkMap.Add("$DorLib2D$00000222", "");
-            DoorBlkMap.Add("$DorLib2D$00000223", "");
-            DoorBlkMap.Add("$DorLib2D$00000224", ThArchPrintBlockManager.ADoor3);
-            DoorBlkMap.Add("$DorLib2D$00000225", ThArchPrintBlockManager.ADoor3);
-            DoorBlkMap.Add("$DorLib2D$00000226", ThArchPrintBlockManager.ADoor3);
-            DoorBlkMap.Add("$DorLib2D$00000228", ThArchPrintBlockManager.ADoor6);
-            DoorBlkMap.Add("$DorLib2D$00000231", ThArchPrintBlockManager.ADoor7);
+            DoorBlkMap.Add("222", "");
+            DoorBlkMap.Add("223", "");
+            DoorBlkMap.Add("224", ThArchPrintBlockManager.ADoor3);
+            DoorBlkMap.Add("225", ThArchPrintBlockManager.ADoor3);
+            DoorBlkMap.Add("226", ThArchPrintBlockManager.ADoor3);
+            DoorBlkMap.Add("228", ThArchPrintBlockManager.ADoor6);
+            DoorBlkMap.Add("231", ThArchPrintBlockManager.ADoor7);
         }
 
         public static string GetDoorBlkName(string tchDoorBlkName)
