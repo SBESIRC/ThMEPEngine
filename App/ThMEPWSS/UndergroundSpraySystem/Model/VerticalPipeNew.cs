@@ -111,8 +111,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Dictionary<Point3dEx, double> GetVerticals()
         {
             var verticals = new Dictionary<Point3dEx,double>();
-            DBObjs.Cast<Entity>()
-                .ForEach(e => verticals.Add(new Point3dEx((e as Circle).Center), (e as Circle).Radius));
+            foreach(var vertical in DBObjs)
+            {
+                var circle = vertical as Circle;
+                var key = new Point3dEx(circle.Center);
+                var value = circle.Radius;
+                if (!verticals.ContainsKey(key))
+                {
+                    verticals.Add(key, value);
+                }
+            }
+            //DBObjs.Cast<Entity>()
+            //    .ForEach(e => verticals.Add(new Point3dEx((e as Circle).Center), (e as Circle).Radius));
             return verticals;
         }
 
