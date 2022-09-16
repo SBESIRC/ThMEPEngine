@@ -45,12 +45,12 @@ namespace Tianhua.Platform3D.UI.UI
         #region 页面相应事件
         private void btnPushToSU_Click(object sender, RoutedEventArgs e)
         {
-            SendCommand("THSUPush");
+            SendCommand("THCAD2SUPUSH");
         }
 
         private void btnPushToViewer_Click(object sender, RoutedEventArgs e)
         {
-            SendCommand("THDB2Push");
+            SendCommand("THCAD2P3DPUSH");
         }
         private void SendCommand(string cmdName) 
         {

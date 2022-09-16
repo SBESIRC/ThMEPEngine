@@ -25,7 +25,6 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THJGHM" Global="THJGHM" />
                 <Command Local="THDB2IFC" Global="THDB2IFC" />
-                <Command Local="THDB2Push" Global="THDB2Push" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -36,7 +35,6 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THJGHM" Global="THJGHM" />
                 <Command Local="THDB2IFC" Global="THDB2IFC" />
-                <Command Local="THDB2Push" Global="THDB2Push" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -50,6 +48,8 @@
 				<Command Local="THLBHZ" Global="THLBHZ" />
 				<Command Local="THLGHZ" Global="THLGHZ" />
 				<Command Local="THQDHZ" Global="THQDHZ" />
+				<Command Local="THCAD2SUPUSH" Global="THCAD2SUPUSH" />
+				<Command Local="THCAD2P3DPUSH" Global="THCAD2P3DPUSH" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -63,6 +63,8 @@
 				<Command Local="THLBHZ" Global="THLBHZ" />
 				<Command Local="THLGHZ" Global="THLGHZ" />
 				<Command Local="THQDHZ" Global="THQDHZ" />
+				<Command Local="THCAD2SUPUSH" Global="THCAD2SUPUSH" />
+				<Command Local="THCAD2P3DPUSH" Global="THCAD2P3DPUSH" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -73,6 +75,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="TH3D" Global="TH3D" />
                 <Command Local="THSMBTUI" Global="THSMBTUI" />
+                <Command Local="THAMBTUI" Global="THAMBTUI" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -83,6 +86,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="TH3D" Global="TH3D" />
                 <Command Local="THSMBTUI" Global="THSMBTUI" />
+                <Command Local="THAMBTUI" Global="THAMBTUI" />
             </Commands>
         </ComponentEntry>
     </Components>
