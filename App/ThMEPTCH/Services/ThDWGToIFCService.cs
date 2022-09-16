@@ -493,8 +493,9 @@ namespace ThMEPTCH.Services
                         continue;
                     foreach (var polyline in crossRailings)
                     {
-                        if (hisPLines.Any(c => c == polyline))
+                        if (hisPLines.Any(c => c == polyline)) 
                             continue;
+                        hisPLines.Add(polyline);
                         var railing = thisRailingEntitys[polyline];
                         railing.BuildElement.Outline.ZOffSet(wall.BuildElement.Height);
                         railing.BuildElement.Height = 800;
