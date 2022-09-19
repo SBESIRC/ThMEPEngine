@@ -54,12 +54,12 @@ namespace ThMEPTCH.Services
             }
         }
 
-        public List<THStructureEntity> GetDBStructureEntities()
+        public List<THStructureEntity> GetDBStructureEntities(List<Polyline> outLines)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var building = new ThDBStructureElementBuilding();
-                var structureElements = building.BuildingFromMS(acdb.Database);
+                var structureElements = building.BuildingFromMS(acdb.Database, outLines);
 
                 return structureElements;
                 //return engine.Elements.Results.Select(o => o.Data as THStructureEntity).ToList();
@@ -104,7 +104,7 @@ namespace ThMEPTCH.Services
             }
             LoadCustomElements();
             var allEntities = null != archDBData ? archDBData.AllTArchEntitys() : GetArchEntities();
-            var allDBEntities = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities();
+            var allDBEntities = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities(floorOrigin.Select(o => o.FloorOutLine).ToList());
             InitFloorDBEntity(allEntities, allDBEntities);
             var entityConvert = new TCHDBEntityConvert(prjId);
             foreach (var floor in floorOrigin)
@@ -439,7 +439,7 @@ namespace ThMEPTCH.Services
             }
             LoadCustomElements();
             var allEntitys = null != archDBData ? archDBData.AllTArchEntitys() : GetArchEntities();
-            var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities();
+            var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities(floorOrigin.Select(o => o.FloorOutLine).ToList());
             InitFloorDBEntity(allEntitys, allDBEntitys);
             var entityConvert = new TCHDBEntityConvert(prjId);
             foreach (var floor in floorOrigin)

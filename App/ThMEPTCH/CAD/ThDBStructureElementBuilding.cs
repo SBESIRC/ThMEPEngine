@@ -17,12 +17,12 @@ namespace ThMEPTCH.CAD
 {
     public class ThDBStructureElementBuilding
     {
-        public List<THStructureEntity> BuildingFromMS(Database database)
+        public List<THStructureEntity> BuildingFromMS(Database database, List<Polyline> outLines)
         {
             var result = new List<THStructureEntity>();
 
             var engine = new ThDBStructureElementExtractionEngine();
-            engine.ExtractFromMS(database);
+            engine.ExtractFromMS(database, outLines);
 
             var beamLines = new List<Line>();
             var beamMarks = new List<THStructureDBText>();
