@@ -117,7 +117,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
     class PublicValue
     {
         static public List<TopoTreeNode> RegionTree = new List<TopoTreeNode>();
-
+        static public int ChangeSDis = 0; //
+        static public int Clear0 = 1; //RoomBuffer修线
+        static public int Clear1 = 1; //导向路径修线
     }
 
     class Parameter

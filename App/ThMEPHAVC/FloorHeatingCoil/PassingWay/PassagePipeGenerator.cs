@@ -103,10 +103,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
             equispacedWayCalculator.ShowDirWay();
 
             // 调整推荐间距
-            equispacedWayCalculator.AdjustCommandBuffer();
-            buffer = equispacedWayCalculator.buffer;
-            room_buffer = equispacedWayCalculator.room_buffer;
-
+            if (PublicValue.ChangeSDis == 1)
+            {
+                equispacedWayCalculator.AdjustCommandBuffer();
+                buffer = equispacedWayCalculator.buffer;
+                room_buffer = equispacedWayCalculator.room_buffer;
+            }
             // 计算均匀分布路径
             equispaced_segments = new List<List<Polyline>>();
             equispaced_lines = new List<List<Line>>();
@@ -211,7 +213,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         void CalculateMainWay()
         {
             PipeOutput main_output = null;
-            if (main_has_output)
+            if (main_has_output && !ProcessedData.HaveVirtualPipe)
             {
                 MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
                 mainPipeGet.Pipeline2();
@@ -228,6 +230,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
                 mainPipeGet.Pipeline3();
                 main_output = new PipeOutput();
+                if (main_pipe_input == null)
+                    main_pipe_input = pipe_inputs[main_index];
+
                 main_output.pipe_id = main_pipe_input.pipe_id;
                 main_output.skeleton = new List<Polyline>();
 

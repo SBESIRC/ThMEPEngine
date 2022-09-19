@@ -148,6 +148,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     }
                     // set distribution
                     pipe_segments[i][depth].equispaced = (pipe_num - 0.5) * buffer + 2 * room_buffer > Math.Abs(e - s);
+                    if (!pipe_segments[i][depth].equispaced)
+                        pipe_segments[i][depth].max_pw = (Math.Abs(e - s) - 2 * room_buffer) / (4 * pipe_num - 2);
                     // set segment width
                     if (pipe_segments[i][depth].equispaced)
                         pipe_segments[i][depth].pw = Math.Abs(e - s) / (4 * pipe_num + 2);
@@ -334,7 +336,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     else
                         pipe_segments[index].Add(new PipeSegment(pipe_inputs[index].end_dir, pipe_inputs[index].out_buffer));
                 }
-                if (pipe_segments[index][i].equispaced || i == pipe_segments[index].Count - 1)
+                if (pipe_segments[index][i].equispaced || i == pipe_segments[index].Count - 1 || Math.Abs(pipe_segments[index][i].max_pw - buffer / 4) < 1e-3)  
                 {
                     lines.Add(BuildLine(dir, axis));
                     idxs.Add(i);

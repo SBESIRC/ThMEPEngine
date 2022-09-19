@@ -136,7 +136,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             for (int i = 0; i < RegionList.Count; i++)
             {
-                if (i == 7)
+                if (i == 1)
                 {
                     int stop = 5;
                 }
@@ -643,7 +643,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 buff.RemoveAt(0);
             }
 
-
+            if (ptList.Count == 2 && (ptList[0] - ptList[1]).Length < 1) 
+            {
+                ptList[1] = ptList[0] + dirOut * 5; 
+            }
             BufferPoly bp = new BufferPoly(ptList, buff);
             newChatou = bp.Buffer();
             DrawUtils.ShowGeometry(newChatou, "l5OtherChaTou", 200, 30);

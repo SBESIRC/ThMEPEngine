@@ -17,6 +17,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public bool close_to = true;    // T:端点靠近末端范围终点/F:端点靠近末端范围起点
         public double offset;           // 偏移条数
         public double pw;               // 该段管道宽度
+        public double max_pw = -1;      // 该管道最大均匀分布宽度
         // 计算导向路径所需信息
         public bool equispaced;         // T:均匀间距分布/F:推荐间距分布
         public PipeSegment() { }

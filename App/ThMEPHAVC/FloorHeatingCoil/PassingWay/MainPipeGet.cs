@@ -81,19 +81,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
             MainPipeIn = mainPipeRoad.GetPoint3dAt(0);
         }
 
-        public void Pipeline() 
+        public void Pipeline()
         {
             MainRegion = GetMainPipeArea();
             Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
             //PassageShowUtils.ShowEntity(PassageWayUtils.Copy(MainRegion), 4);
-            //AdjustRoom();
-            //PassageShowUtils.ShowEntity(MainRegion, 5);
+            AdjustRoom();
+            PassageShowUtils.ShowEntity(MainRegion, 5);
 
             if (!IfFind) return;
             DrawUtils.ShowGeometry(MainRegion, "l2AdjustedRoom", 4, lineWeightNum: 30);
             buffer_tree = GetBufferTree(MainRegion);
             GetSkeleton(buffer_tree);
-            
+
             AdjustPolyline adjustPolyline = new AdjustPolyline(Skeleton, Connector, clonedMainRegion, Buffer * 0.85);
             adjustPolyline.Pipeline3();
             Skeleton = adjustPolyline.Skeleton;

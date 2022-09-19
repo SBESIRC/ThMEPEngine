@@ -80,7 +80,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             double tmpDis = 0;
             double tmpX = 0;
 
-            if (downDoor.Length < pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1) + 2 * pipeSpaceing)
+            if (downDoor.Length < pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1))
             {
                 tmpDis = downDoor.Length / (nowDoor.PipeIdList.Count * 2 + 1);
                 tmpDis = ((int)tmpDis / 10) * 10;
@@ -257,7 +257,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     
                     int tend = UpperTopologicalTendency(nowDoor);
 
-                    if (nowDoor.DoorId == 3)
+                    if (nowDoor.DoorId == 2)
                     {
                         int stop = 0;
                     }
@@ -416,7 +416,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     Vector3d upDoor = nowDoor.UpSecond - nowDoor.UpFirst;
                     Vector3d downDoor = nowDoor.DownFirst - nowDoor.DownSecond;
 
-                    if (nowDoor.DoorId == 3)
+                    if (nowDoor.DoorId == 2)
                     {
                         int stop = 0;
                     }
@@ -466,8 +466,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                             int offsetOk = CheckOffsetReasonable(nowDoor, offsetLeft);
                             if (offsetOk == 0) 
                             {
-                                offsetLeft = upDoor.Length * (leftAdjacentPipeNum * 2 + 1) / (leftAdjacentPipeNum * 2 + nowDoor.PipeIdList.Count * 2 + 1); 
-                                FixPointAVG(nowDoor, 0, offsetLeft, 0 , doorType.Type);
+                                offsetLeft = upDoor.Length * (leftAdjacentPipeNum * 2 + 1) / (leftAdjacentPipeNum * 2 + nowDoor.PipeIdList.Count * 2 + 1);
+                                offsetRight = upDoor.Length / (leftAdjacentPipeNum * 2 + nowDoor.PipeIdList.Count * 2 + 1);
+                                FixPointAVG(nowDoor, 0, offsetLeft, offsetRight , doorType.Type);
                                 //FixPointNew(nowDoor, 1, - 1, 0, doorType.Type);
                             }
                             else
@@ -477,13 +478,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         }
                         else if (offsetRight > 0)
                         {
-                            FixPointNew(nowDoor, 1, doorType.Index, offsetRight, doorType.Type);
+                            //FixPointNew(nowDoor, 1, doorType.Index, offsetRight, doorType.Type);
 
                             int offsetOk = CheckOffsetReasonable(nowDoor, offsetRight);
                             if (offsetOk == 0)
                             {
                                 offsetRight = upDoor.Length * (rightAdjacentPipeNum * 2 + 1) / (rightAdjacentPipeNum * 2 + nowDoor.PipeIdList.Count * 2 + 1);
-                                FixPointAVG(nowDoor, 1, 0, offsetRight, doorType.Type);
+                                offsetLeft =  upDoor.Length/ (rightAdjacentPipeNum * 2 + nowDoor.PipeIdList.Count * 2 + 1);
+                                FixPointAVG(nowDoor, 1, offsetLeft, offsetRight, doorType.Type);
                                 //FixPointNew(nowDoor, 0,nowDoor.PipeIdList.Count-1 , 0, doorType.Type);
                             }
                             else
@@ -685,7 +687,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public int CheckOffsetReasonable(SingleDoor nowDoor, double offset) 
         {
             Vector3d upDoor = nowDoor.UpSecond - nowDoor.UpFirst;
-            if (upDoor.Length < offset + Parameter.SuggestDistanceWall 
+            if (upDoor.Length < offset + Parameter.SuggestDistanceWall * 2
                 + (nowDoor.PipeIdList.Count * 2 - 1) * nowDoor.DownstreamRegion.SuggestDist) 
             {
                 return 0;

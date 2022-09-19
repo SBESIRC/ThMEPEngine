@@ -82,35 +82,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             MainPipeIn = mainPipeRoad.GetPoint3dAt(0);
         }
 
-        public void Pipeline()
-        {
-            MainRegion = GetMainPipeArea(0,1);
-           
-            Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
-            //PassageShowUtils.ShowEntity(PassageWayUtils.Copy(MainRegion), 4);
-            //AdjustRoom();
-            //PassageShowUtils.ShowEntity(MainRegion, 5);
-
-            if (!IfFind) return;
-            DrawUtils.ShowGeometry(MainRegion, "l2AdjustedRoom", 4, lineWeightNum: 30);
-
-            for (int i = 0; i < MainReigonList.Count; i++)
-            {
-                buffer_tree = GetBufferTree(MainReigonList[i]);
-                GetSkeleton(buffer_tree);
-                AdjustPolyline adjustPolyline = new AdjustPolyline(TmpSkeleton, Connector, clonedMainRegion, Buffer * 0.85);
-                adjustPolyline.Pipeline3();
-                TmpSkeleton.Clear();
-                Skeleton.AddRange(adjustPolyline.Skeleton);
-            }
-            if (!Skeleton.Contains(MainPipeRoad)) 
-            {
-                Skeleton.Add(MainPipeRoad);
-            }
-
-            DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
-        }
-
         //主导管线带出口
         public void Pipeline2() 
         {
@@ -125,7 +96,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             for (int i = 0; i < MainReigonList.Count; i++)
             {
                 Polyline mainReigonListRoom = PassageWayUtils.Buffer(MainReigonList[i].Clone() as Polyline, 0.25 *Buffer+ Parameter.SuggestDistanceWall).First();
-                DrawUtils.ShowGeometry(mainReigonListRoom, "l2AdjustedRoom", 4, lineWeightNum: 30);
+                DrawUtils.ShowGeometry(mainReigonListRoom, "l4AdjustedRoom", 4, lineWeightNum: 30);
                 MainRegionListRoom.Add(mainReigonListRoom);
             }
 
@@ -184,8 +155,21 @@ namespace ThMEPHVAC.FloorHeatingCoil
             List<Polyline> MainRegionListRoom = new List<Polyline>();
             for (int i = 0; i < MainReigonList.Count; i++)
             {
+                //if (ProcessedData.HaveVirtualPipe) 
+                //{
+                //    Polyline mainPipeBuffer = PipeList[main_index].Buffer(1);
+                //    DrawUtils.ShowGeometry(mainPipeBuffer, "l8MainPipeBuffer", 4, lineWeightNum: 30);
+
+                //    DBObjectCollection shape = new DBObjectCollection();
+                //    shape.Add(mainPipeBuffer);
+                //    shape.Add(MainReigonList[i]);
+
+                //    MainReigonList[i] = shape.UnionPolygons().Cast<Polyline>().ToList().FindByMax(x => x.Area);
+                //    DrawUtils.ShowGeometry(MainReigonList[i], "l8UnionedPl", 4, lineWeightNum: 30);
+                //}
+
                 Polyline mainReigonListRoom = PassageWayUtils.Buffer(MainReigonList[i].Clone() as Polyline, Parameter.SuggestDistanceWall).First();
-                DrawUtils.ShowGeometry(mainReigonListRoom, "l2AdjustedRoom", 4, lineWeightNum: 30);
+                DrawUtils.ShowGeometry(mainReigonListRoom, "l4AdjustedRoom", 4, lineWeightNum: 30);
 
                 double disToStart = mainReigonListRoom.GetClosestPointTo(point,false).DistanceTo(point);
                 if (disToStart < 2000)
@@ -209,7 +193,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             {
                 Point3d pin = new Point3d();
                 double halfBuffer = PipeList[main_index].buff[0];
-                DrawUtils.ShowGeometry(point, "l4SPin", 0, 30, (int)halfBuffer);
+                DrawUtils.ShowGeometry(point, "l4SPin", 5, 30, (int)halfBuffer);
 
                 List<DrawPipeData> pipeInList = new List<DrawPipeData>();
                 pipeInList.Add(new DrawPipeData(point, halfBuffer, 0, 20));
@@ -1097,5 +1081,44 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             return flag;
         }
+
+
+
+
+
+
+
+
+
+
+        //废弃
+        //public void Pipeline()
+        //{
+        //    MainRegion = GetMainPipeArea(0,1);
+
+        //    Polyline clonedMainRegion = MainRegion.Clone() as Polyline;
+        //    //PassageShowUtils.ShowEntity(PassageWayUtils.Copy(MainRegion), 4);
+        //    //AdjustRoom();
+        //    //PassageShowUtils.ShowEntity(MainRegion, 5);
+
+        //    if (!IfFind) return;
+        //    DrawUtils.ShowGeometry(MainRegion, "l2AdjustedRoom", 4, lineWeightNum: 30);
+
+        //    for (int i = 0; i < MainReigonList.Count; i++)
+        //    {
+        //        buffer_tree = GetBufferTree(MainReigonList[i]);
+        //        GetSkeleton(buffer_tree);
+        //        AdjustPolyline adjustPolyline = new AdjustPolyline(TmpSkeleton, Connector, clonedMainRegion, Buffer * 0.85);
+        //        adjustPolyline.Pipeline3();
+        //        TmpSkeleton.Clear();
+        //        Skeleton.AddRange(adjustPolyline.Skeleton);
+        //    }
+        //    if (!Skeleton.Contains(MainPipeRoad)) 
+        //    {
+        //        Skeleton.Add(MainPipeRoad);
+        //    }
+
+        //    DrawUtils.ShowGeometry(Skeleton, "l2skeleton", 2, lineWeightNum: 30);
+        //}
     }
 }

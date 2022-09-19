@@ -129,6 +129,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void PipelineB(ThRoomSetModel roomSet)
         {
+            ParameterSetting();
+
             //数据处理
             RawData singleRawdata = new RawData(roomSet);
             DataPreprocess dataPreprocess = new DataPreprocess(singleRawdata);
@@ -163,6 +165,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void PipelineC()
         {
+            ParameterSetting();
+
             LeftRightIndex = 0;
             //Update
             CreateTmpPipeList();
@@ -546,5 +550,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         }
 
 
+        public void ParameterSetting() 
+        {
+            PublicValue.ChangeSDis = 0;
+            PublicValue.Clear0 = 1;
+            PublicValue.Clear1 = 1;
+        
+        }
     }
 }

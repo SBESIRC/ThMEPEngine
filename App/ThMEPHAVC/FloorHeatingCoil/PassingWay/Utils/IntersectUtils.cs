@@ -111,7 +111,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
         }
     }
-    class Point3dComparer:IEqualityComparer<Point3d>
+    public class Point3dComparer:IEqualityComparer<Point3d>
     {
         public bool Equals(Point3d a,Point3d b)
         {
