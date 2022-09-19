@@ -9,8 +9,12 @@
                     Title="提取房间框线"
                     SizeToContent="WidthAndHeight"
                     ResizeMode="CanResize"
-                    MinWidth="350"
-                    MinHeight="400"
+                    Width="400"
+                    Height="500"
+                    MinWidth="400"
+                    MinHeight="500"
+                    MaxWidth="500"
+                    MaxHeight="600"
              mc:Ignorable="d" Closed="ThCustomWindow_Closed">
     <Window.Resources>
         <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
@@ -22,14 +26,20 @@
             </Border>
         </ControlTemplate>
     </Window.Resources>
-    <StackPanel Margin="3,5" Orientation="Vertical">
-        <Grid>
+    <Grid Margin="3">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="0.70*"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="0.3*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.3*"/>
-                <ColumnDefinition Width="0.7*"/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Label Grid.Row="0" Grid.Column="0" Content="墙体图层配置" HorizontalAlignment="Left"></Label>
             <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
@@ -37,9 +47,9 @@
                 <Button Name="btnDeleteLayer" Width="60" Margin="5,0" Content="删除图层" Template="{StaticResource ButtonTemplate}" Height="20" Click="btnDeleteLayer_Click"></Button>
             </StackPanel>
         </Grid>
-        <ListBox x:Name="listBox" Height="200"
-                                         ScrollViewer.HorizontalScrollBarVisibility="Visible"
-                                         ScrollViewer.VerticalScrollBarVisibility="Visible"
+        <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBox" 
+                             ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                             ScrollViewer.VerticalScrollBarVisibility="Visible"
                              SelectionMode="Multiple" ItemsSource="{Binding LayerInfos}" Margin="5">
             <ListBox.ItemTemplate>
                 <DataTemplate>
@@ -53,20 +63,21 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <CheckBox HorizontalAlignment="Right" Margin="0,5,5,0" x:Name="chkYnAddShearWall" IsThreeState="False" Content="自动提取剪力墙"
-                          IsChecked="{Binding YnExtractShearWall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
-        <Grid>
+        <CheckBox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="0,5,5,0"
+                  x:Name="chkYnAddShearWall" IsThreeState="False" Content="自动提取剪力墙"
+                  IsChecked="{Binding YnExtractShearWall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+        <Grid Grid.Row="3" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.6*"/>
-                <ColumnDefinition Width="0.4*"/>
+                <ColumnDefinition Width="0.50*"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Row="0" Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition/>
-                    <RowDefinition/>
+                    <RowDefinition Height="24"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="0.5*"/>
@@ -80,7 +91,7 @@
                     <Image x:Name="imgShowDoorOutline" Margin="5,2,0,0" Width="16" Height="16" Source="/TianHua.Mep.UI;component/Resource/Image/关闭.png" MouseUp="imgShowDoorOutline_MouseUp" MouseDown="imgShowDoorOutline_MouseDown"/>
                 </StackPanel>
                 <ListBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" 
-                         x:Name="lbDoorBlkConfig" Height="100"
+                         x:Name="lbDoorBlkConfig" 
                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
                              SelectionMode="Multiple" ItemsSource="{Binding DoorBlkInfos}" Margin="5">
@@ -100,22 +111,23 @@
             <Grid Grid.Row="0" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
-                    <RowDefinition/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.3*"/>
+                    <ColumnDefinition Width="0.35*"/>
                     <ColumnDefinition Width="5"/>
-                    <ColumnDefinition Width="0.7*"/>
+                    <ColumnDefinition Width="0.65*"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Row="1" Grid.Column="0" HorizontalAlignment="Left" Height="24" Content="  提取墙线  "  Name="btnExtractWall" Template="{StaticResource ButtonTemplate}" Click="btnExtractWall_Click"/>
-                <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" Height="24" Content="  自动识门  "  Name="btnExtractDoor" Template="{StaticResource ButtonTemplate}" Click="btnBuildDoors_Click"/>
-                <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Left" Height="24" Content="  视频教程  "  Name="btnHelp" Template="{StaticResource ButtonTemplate}" Click="btnHelp_Click"/>
-                <Button Grid.Row="1" Grid.Column="2" HorizontalAlignment="Left" Height="24" Content="提取房间框线（批量）"  Name="btnMultiBuildRoomOutline"  Template="{StaticResource ButtonTemplate}" Click="btnMultiBuildRoomOutline_Click"/>
-                <Button Grid.Row="2" Grid.Column="2" HorizontalAlignment="Left" Height="24" Content="生成房间框线（点选）"  Name="btnSingleBuildRoomOutline" Template="{StaticResource ButtonTemplate}" Click="btnSingleBuildRoomOutline_Click"/>
-                <Button Grid.Row="3" Grid.Column="2" HorizontalAlignment="Left" Height="24" Content="  保存配置  "  Name="btnSaveConfig" Template="{StaticResource ButtonTemplate}"  Click="btnSaveConfig_Click"/>
+                <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Bottom" Orientation="Vertical">
+                    <Button Margin="0,0,0,10" HorizontalAlignment="Right" Height="24" Content="  提取墙线  "  Name="btnExtractWall" Template="{StaticResource ButtonTemplate}" Click="btnExtractWall_Click"/>
+                    <Button Margin="0,0,0,10" HorizontalAlignment="Right" Height="24" Content="  自动识门  "  Name="btnExtractDoor" Template="{StaticResource ButtonTemplate}" Click="btnBuildDoors_Click"/>
+                    <Button Margin="0,0,0,5" HorizontalAlignment="Right" Height="24" Content="  保存配置  "  Name="btnSaveConfig" Template="{StaticResource ButtonTemplate}"  Click="btnSaveConfig_Click"/>
+                </StackPanel>
+                <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Bottom" Orientation="Vertical">
+                    <Button Margin="0,0,0,10" HorizontalAlignment="Right" Height="24" Content="提取房间框线（批量）"  Name="btnMultiBuildRoomOutline"  Template="{StaticResource ButtonTemplate}" Click="btnMultiBuildRoomOutline_Click"/>
+                    <Button Margin="0,0,0,10" HorizontalAlignment="Right" Height="24" Content="生成房间框线（点选）"  Name="btnSingleBuildRoomOutline" Template="{StaticResource ButtonTemplate}" Click="btnSingleBuildRoomOutline_Click"/>
+                    <Button Margin="0,0,0,5" HorizontalAlignment="Right" Height="24" Content="  视频教程  "  Name="btnHelp" Template="{StaticResource ButtonTemplate}" Click="btnHelp_Click"/>
+                </StackPanel>                
             </Grid>
         </Grid>
-    </StackPanel>
+    </Grid>    
 </cus:ThCustomWindow>
