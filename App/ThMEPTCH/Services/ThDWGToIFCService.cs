@@ -511,6 +511,7 @@ namespace ThMEPTCH.Services
                         }
                     }
                 }
+
                 //用墙的索引找栏杆没有找到
                 var railingSpatialIndex = new ThCADCoreNTSSpatialIndex(railingColls);
                 var openingSpatialIndex = new ThCADCoreNTSSpatialIndex(openingColls);
@@ -1121,7 +1122,8 @@ namespace ThMEPTCH.Services
         {
             var slabs = new List<ThTCHSlabData>();
             var outPLine = slabPolyline.OutPolyline.GetTransformedCopy(matrix) as Polyline;
-            
+            outPLine = ThMEPFrameService.Normalize(outPLine);
+            outPLine = outPLine.DPSimplify(10);
             var structureSlab = new ThTCHSlabData();
             structureSlab.BuildElement = new ThTCHBuiltElementData();
             structureSlab.BuildElement.Root = new ThTCHRootData();
@@ -1142,6 +1144,8 @@ namespace ThMEPTCH.Services
             {
                 // 降板
                 var innerPLine = item.OutPolyline.GetTransformedCopy(matrix) as Polyline;
+                innerPLine = ThMEPFrameService.Normalize(innerPLine);
+                innerPLine = innerPLine.DPSimplify(10);
                 // 裁剪外围部分
                 innerPLine = innerPLine.Intersection(outPLineColl).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
                 if (innerPLine.IsNull())
@@ -1165,7 +1169,7 @@ namespace ThMEPTCH.Services
                     {
                         continue;
                     }
-                    structureSlab.Descendings.Add(new ThTCHDescendingData()
+                    var descending = new ThTCHDescendingData()
                     {
                         Outline = innerPLine.ToTCHPolyline(),
                         OutlineBuffer = outlineBuffer.ToTCHPolyline(),
@@ -1173,23 +1177,28 @@ namespace ThMEPTCH.Services
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                         DescendingThickness = item.StructureThickness,
                         DescendingWrapThickness = item.StructureWrapThickness,
-                    });
+                    };
+                    descending.Outline.ZOffSet(-slabPolyline.SurfaceThickness);
+                    descending.OutlineBuffer.ZOffSet(-slabPolyline.SurfaceThickness);
+                    structureSlab.Descendings.Add(descending);
                 }
                 else
                 {
-                    structureSlab.Descendings.Add(new ThTCHDescendingData()
+                    var descending = new ThTCHDescendingData()
                     {
                         Outline = innerPLine.ToTCHPolyline(),
                         IsDescending = false,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
-                    });
+                    };
+                    descending.Outline.ZOffSet(-slabPolyline.SurfaceThickness);
+                    structureSlab.Descendings.Add(descending);
                 }
 
                 // 建筑降板
                 if (!item.IsOpening)
                 {
                     // 降板内轮廓
-                    var outlineBuffer = innerPLine.Buffer(-item.SurfaceThickness).OfType<Polyline>()
+                    var outlineBuffer = innerPLine.Buffer(-item.WrapSurfaceThickness).OfType<Polyline>()
                         .OrderByDescending(p => p.Area).FirstOrDefault();
                     if (outlineBuffer.IsNull())
                     {

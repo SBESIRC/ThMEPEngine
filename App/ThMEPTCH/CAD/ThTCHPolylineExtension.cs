@@ -21,34 +21,37 @@ namespace ThMEPTCH.CAD
             for (int k = 0; k < segments.Count; k++)
             {
                 var segment = segments[k];
-                var tchSegment = new ThTCHSegment();
-                tchSegment.Index.Add(ptIndex);
-                if (k == segments.Count - 1 && polyline.Closed)
+                if (segment.StartPoint.GetDistanceTo(segment.EndPoint) > 10)
                 {
-                    tchSegment.Index.Add(0);
-                    tchPolyline.Segments.Add(tchSegment);
-                }
-                else if (segment.IsLinear)
-                {
-                    // 直线段
-                    tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint());
-                    tchSegment.Index.Add(++ptIndex);
-                    tchPolyline.Segments.Add(tchSegment);
-                }
-                else
-                {
-                    // 圆弧段
-                    var arc = segment.ToCircularArc();
-                    // 圆弧中点
-                    double p1 = arc.GetParameterOf(arc.StartPoint);
-                    double p2 = arc.GetParameterOf(arc.EndPoint);
-                    var midPoint = arc.EvaluatePoint(p1 + (p2 - p1) / 2.0);
+                    var tchSegment = new ThTCHSegment();
+                    tchSegment.Index.Add(ptIndex);
+                    if (k == segments.Count - 1 && polyline.Closed)
+                    {
+                        tchSegment.Index.Add(0);
+                        tchPolyline.Segments.Add(tchSegment);
+                    }
+                    else if (segment.IsLinear)
+                    {
+                        // 直线段
+                        tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint());
+                        tchSegment.Index.Add(++ptIndex);
+                        tchPolyline.Segments.Add(tchSegment);
+                    }
+                    else
+                    {
+                        // 圆弧段
+                        var arc = segment.ToCircularArc();
+                        // 圆弧中点
+                        double p1 = arc.GetParameterOf(arc.StartPoint);
+                        double p2 = arc.GetParameterOf(arc.EndPoint);
+                        var midPoint = arc.EvaluatePoint(p1 + (p2 - p1) / 2.0);
 
-                    tchPolyline.Points.Add(midPoint.ToTCHPoint());
-                    tchSegment.Index.Add(++ptIndex);
+                        tchPolyline.Points.Add(midPoint.ToTCHPoint());
+                        tchSegment.Index.Add(++ptIndex);
 
-                    tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint());
-                    tchSegment.Index.Add(++ptIndex);
+                        tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint());
+                        tchSegment.Index.Add(++ptIndex);
+                    }
                 }
             }
             return tchPolyline;
