@@ -12,7 +12,7 @@ namespace ThParkingStall.Core.MPartitionLayout
 {
     public static partial class MLayoutPostProcessing
     {
-        public static void RemoveInvalidPillars(ref List<Polygon> pillars,List<InfoCar>cars)
+        public static void RemoveInvalidPillars(ref List<Polygon> pillars, List<InfoCar> cars)
         {
             List<Polygon> tmps = new List<Polygon>();
             foreach (var t in pillars)

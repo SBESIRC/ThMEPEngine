@@ -36,6 +36,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess;
 using static ThMEPArchitecture.PartitionLayout.DisplayTools;
+using ThParkingStall.Core.ObliqueMPartitionLayout;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -254,17 +255,8 @@ namespace ThMEPArchitecture.MultiProcess
             var subAreas = OInterParameter.GetOSubAreas(solution);
             subAreas.ForEach(s => s.UpdateParkingCnts(true));
             var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
-            
-            //OPostProcessEntry postProcessEntry = new OPostProcessEntry(subAreas);
-            //var obliqueMPartition = postProcessEntry.Execute();
-            foreach (var subArea in subAreas)
-            {
-                MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
-                subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
-            }
-            GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
-            var caledBound= globalBusiness.CalBound();
-            Display(caledBound);
+            Polygon caledBound = new Polygon(new LinearRing(new Coordinate[0]));
+            ProcessPartitionGlobally(subAreas, ref caledBound);
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
@@ -302,6 +294,26 @@ namespace ThMEPArchitecture.MultiProcess
             DisplayParkingStall.MoveAddedEntities(moveDistance);
             //SubAreaParkingCnt.Clear();
             ReclaimMemory();
+        }
+        void ProcessPartitionGlobally(List<OSubArea> subAreas, ref Polygon caledBound)
+        {
+            GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
+            caledBound = globalBusiness.CalBound();
+            Display(caledBound);
+            if (ObliqueMPartition.AllowProcessEndLanes)
+            {
+                var integralObliqueMPartition = globalBusiness.ProcessEndLanes();
+                MultiProcessTestCommand.DisplayMParkingPartitionPros(integralObliqueMPartition.ConvertToMParkingPartitionPro());
+                integralObliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+            }
+            else
+            {
+                foreach (var subArea in subAreas)
+                {
+                    MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
+                    subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                }
+            }
         }
         private void ShowTitle(int ParkingStallCount, double areaPerStall, double TotalSeconds)
         {

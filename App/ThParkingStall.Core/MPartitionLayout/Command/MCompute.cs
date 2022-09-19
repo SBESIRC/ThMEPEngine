@@ -76,9 +76,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                     lanes.AddRange(subArea.mParkingPartitionPro.IniLanes.Select(e => e.Line));
                     obstacles.AddRange(subArea.mParkingPartitionPro.Obstacles);
                 }
-                //RemoveDuplicatedLines(lanes);
+                RemoveDuplicatedLines(lanes);
                 //MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
-                ////MLayoutPostProcessing.PostProcessLanes(ref lanes, cars.Select(e => e.Polyline).ToList(), iniPillars, obsVertices);
                 //MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
                 //MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref cars);
                 //MLayoutPostProcessing.RemoveInvalidPillars(ref pillars, cars);
@@ -98,7 +97,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
                 mParkingPartition.OutEnsuredLanes= ensuredLanes;
                 mParkingPartition.OutUnsuredLanes= unsuredLanes;
-
+                //test
                 return cars.Count;
             }
             return subAreas.Sum(sa => sa.Count);

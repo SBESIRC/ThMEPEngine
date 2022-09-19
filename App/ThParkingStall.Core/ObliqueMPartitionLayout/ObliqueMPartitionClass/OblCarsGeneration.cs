@@ -142,7 +142,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                             foreach (var crossed_back_car in crossedcarsc)
                             {
                                 var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car, crossed_back_car, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
-                                if (g is Polygon && g.Area > 0)
+                                if (g is Polygon && g.Area > 1)
                                 {
                                     var segs_g_shorts = ((Polygon)g).GetEdges().Where(e => IsPerpLine(e, seg));
                                     if (!segs_g_shorts.Any())

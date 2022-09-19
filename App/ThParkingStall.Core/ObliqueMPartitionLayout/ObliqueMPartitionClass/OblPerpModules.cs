@@ -30,6 +30,18 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             lanes.ForEach(e => lengths.Add(e.Line.Length));
             ProcessLanes(ref lanes);
             var align_backback_for_align_rest = false;
+            #region 如果只生成carmodule没有生成车道线，将该车道线添加进车道线结构
+            foreach (var lane in lanes)
+            {
+                var overlay_rec_test = lane.Line.Buffer(DisLaneWidth / 2);
+                overlay_rec_test = overlay_rec_test.Scale(0.8);
+                var overlays = IniLanes.Where(e => overlay_rec_test.Contains(e.Line.MidPoint) || overlay_rec_test.IntersectPoint(e.Line.ToLineString()).Count() > 0);
+                if (!overlays.Any())
+                {
+                    IniLanes.Add(lane);
+                }
+            }
+            #endregion
             for (int i = 0; i < lanes.Count; i++)
             {
                 var vl = lanes[i].Line;
