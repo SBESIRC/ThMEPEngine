@@ -1,31 +1,95 @@
-﻿using System.Linq;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Input;
 using System.Windows.Controls;
+using System.Collections.Generic;
+using Tianhua.Platform3D.UI.Interfaces;
 using TianHua.Platform3D.UI.ViewModels;
+using Autodesk.AutoCAD.ApplicationServices;
+using acadApp = Autodesk.AutoCAD.ApplicationServices;
 
 namespace Tianhua.Platform3D.UI.UI
 {
     /// <summary>
     /// StoreyTableEntrance.xaml 的交互逻辑
     /// </summary>
-    public partial class StoreyElevationSetUI : UserControl
+    public partial class StoreyElevationSetUI : UserControl,IMultiDocument
     {
-        private StoreyElevationSetVM _vm;
-        private string _copySourceTabName = "";
+        
+        private static StoreyElevationSetVM _vm; // 当前文档对应的VM
+        private static Dictionary<string, StoreyElevationSetVM> _documentVMDic;
+        private Document ActiveDoc
+        {
+            get => acadApp.Application.DocumentManager.MdiActiveDocument;
+        }
         public StoreyElevationSetUI()
         {
             InitializeComponent();
-            _vm = new StoreyElevationSetVM();
-            this.DataContext = _vm;
-            LoadTabcontrolItems();            
+            this.Loaded += StoreyElevationSetUI_Loaded;
+        }
+
+        private void StoreyElevationSetUI_Loaded(object sender, RoutedEventArgs e)
+        {
+            Load();
+        }
+
+        static StoreyElevationSetUI()
+        {
+            _documentVMDic = new Dictionary<string, StoreyElevationSetVM>();
+        }
+
+        public void MainUIShowInDocument()
+        {
+            Load();
+        }
+
+        public void DocumentActivated(DocumentCollectionEventArgs e)
+        {
+            Load();            
+        }
+
+        public void DocumentDestroyed(DocumentDestroyedEventArgs e)
+        {
+            //
+        }
+
+        public void DocumentToBeActivated(DocumentCollectionEventArgs e)
+        {
+            //
+        }
+
+        public void DocumentToBeDestroyed(DocumentCollectionEventArgs e)
+        {
+            RemoveFromDocumentVMDic(e.Document.Name);
+        }
+
+        private void Load()
+        {
+            if (ActiveDoc != null)
+            {
+                _vm = GetFromDocumentVMDic(ActiveDoc.Name);
+                if (_vm == null)
+                {
+                    _vm = new StoreyElevationSetVM();
+                    AddToDocumentVMDic(ActiveDoc.Name, _vm);
+                }
+                _vm.CopySourceTabName = "";                
+                this.DataContext = _vm;
+                LoadTabcontrolItems();
+                SetTabControlFocus(_vm.ActiveTabName);
+            }
+        }
+
+        private void tabStorey_SelectionChanging(object sender,MouseButtonEventArgs e)
+        {
+            UpdateTabStoreyActiveTabName();
         }
 
         private void LoadTabcontrolItems()
         {
-            if(_vm.BuildingNames.Count>0)
+            this.tabStorey.Items.Clear();
+            if (_vm.BuildingNames.Count>0)
             {
                 _vm.BuildingNames.ForEach(o => AddTabItem(o));
-                SetTabControlFocus(_vm.BuildingNames.First());
             }
         }
 
@@ -42,8 +106,17 @@ namespace Tianhua.Platform3D.UI.UI
             {
                 _vm.AddNewBuilding(inputVM.InputValue);
                 AddTabItem(inputVM.InputValue);
-                ClearCopySourceTabName();
+                _vm.CopySourceTabName = "";
                 _vm.Save(); // 保存数据
+            }
+        }
+
+        private void UpdateTabStoreyActiveTabName()
+        {
+            if(this.tabStorey.SelectedItem!=null)
+            {
+                var tabItem = this.tabStorey.SelectedItem as TabItem;
+                _vm.ActiveTabName = tabItem.Name;
             }
         }
 
@@ -55,54 +128,45 @@ namespace Tianhua.Platform3D.UI.UI
             };
             var dataSource = _vm.GetBuildingStoreys(head);
             tabItem.Content = new BuildingStoreyTableUI(dataSource);
-            this.tabControl1.Items.Add(tabItem);
+            this.tabStorey.Items.Add(tabItem);
             tabItem.Focus();
-        }
-
-        private void btnModifyBuilding_Click(object sender, RoutedEventArgs e)
-        {
-            
-        }
-
-        private void btnDeleteBuilding_Click(object sender, RoutedEventArgs e)
-        {
-            
+            tabItem.MouseLeftButtonDown += tabStorey_SelectionChanging;
         }
 
         private void copyItem_Click(object sender, RoutedEventArgs e)
         {
-            if(this.tabControl1.SelectedItem==null)
+            if(this.tabStorey.SelectedItem==null)
             {
                 MessageBox.Show("请选择要复制的Tab项","信息提示",MessageBoxButton.OK,MessageBoxImage.Information);
                 return;
             }
-            _copySourceTabName = (this.tabControl1.SelectedItem as TabItem).Header.ToString();            
+            _vm.CopySourceTabName = (this.tabStorey.SelectedItem as TabItem).Header.ToString();            
         }
 
         private void pasteItem_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrEmpty(_copySourceTabName))
+            if (string.IsNullOrEmpty(_vm.CopySourceTabName))
             {
                 MessageBox.Show("请选择要复制的源Tab项！", "信息提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            if (this.tabControl1.SelectedItem == null)
+            if (this.tabStorey.SelectedItem == null)
             {
                 MessageBox.Show("请选择要粘贴的目标Tab项！", "信息提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            var targetTab = this.tabControl1.SelectedItem as TabItem;
+            var targetTab = this.tabStorey.SelectedItem as TabItem;
             var copyTargetTabName = targetTab.Header.ToString();
-            if (_copySourceTabName == copyTargetTabName)
+            if (_vm.CopySourceTabName == copyTargetTabName)
             {
                 MessageBox.Show("复制和粘贴的Tab项不能相同！", "信息提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
-            var tipRes = MessageBox.Show("确定把 "+ _copySourceTabName+" 中的楼层数据复制到 "+ copyTargetTabName+" 中吗？",
+            var tipRes = MessageBox.Show("确定把 "+ _vm.CopySourceTabName + " 中的楼层数据复制到 "+ copyTargetTabName+" 中吗？",
                 "复制提示",MessageBoxButton.OKCancel,MessageBoxImage.Warning);
             if(tipRes == MessageBoxResult.OK)
             {
-                _vm.CopyBuildingStoreys(_copySourceTabName, copyTargetTabName);
+                _vm.CopyBuildingStoreys(copyTargetTabName);
                 var buildingTbleUI = targetTab.Content as BuildingStoreyTableUI;
                 buildingTbleUI.datagrid1.ItemsSource = null;
                 buildingTbleUI.datagrid1.ItemsSource = _vm.GetBuildingStoreys(copyTargetTabName);
@@ -120,11 +184,11 @@ namespace Tianhua.Platform3D.UI.UI
         }
         private void EditStoreyItem()
         {
-            if (this.tabControl1.SelectedItem == null)
+            if (this.tabStorey.SelectedItem == null)
             {
                 return;
             }
-            var tabItem = this.tabControl1.SelectedItem as TabItem;
+            var tabItem = this.tabStorey.SelectedItem as TabItem;
             var buildStoryes = _vm.GetBuildingStoreys(tabItem.Header.ToString());
             // 弹出EditStoreyUI
             var editStoreyVM = new EditStoreyVM(buildStoryes);
@@ -141,50 +205,48 @@ namespace Tianhua.Platform3D.UI.UI
             _vm.Save();
 
             // 清空
-            ClearCopySourceTabName();
-        }
-
-        private void ClearCopySourceTabName()
-        {
-            _copySourceTabName = "";
+            _vm.CopySourceTabName = "";
         }
 
         private void SetTabControlFocus(string head)
         {
-            foreach(TabItem item in this.tabControl1.Items)
+            if (!string.IsNullOrEmpty(head))
             {
-                if(item.Header.ToString() == head)
+                foreach (TabItem item in this.tabStorey.Items)
                 {
-                    item.Focus();
+                    if (item.Header.ToString() == head)
+                    {
+                        item.Focus();
+                    }
                 }
             }
         }
 
         private void deleteItem_Click(object sender, RoutedEventArgs e)
         {
-            if (this.tabControl1.SelectedItem == null)
+            if (this.tabStorey.SelectedItem == null)
             {
                 return;
             }
-            var tabItem = this.tabControl1.SelectedItem as TabItem;
+            var tabItem = this.tabStorey.SelectedItem as TabItem;
             var tipRes = MessageBox.Show("确定要删除 [" + tabItem.Header.ToString() + "] 楼层数据吗？", "删除提示",
                 MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             if (tipRes == MessageBoxResult.OK)
             {
-                this.tabControl1.Items.Remove(tabItem);
+                this.tabStorey.Items.Remove(tabItem);
                 _vm.DeleteBuilding(tabItem.Header.ToString());
-                ClearCopySourceTabName();
+                _vm.CopySourceTabName = "";
                 _vm.Save(); // 保存数据
             }
         }
 
         private void modifyItem_Click(object sender, RoutedEventArgs e)
         {
-            if (this.tabControl1.SelectedItem == null)
+            if (this.tabStorey.SelectedItem == null)
             {
                 return;
             }
-            var tabItem = this.tabControl1.SelectedItem as TabItem;
+            var tabItem = this.tabStorey.SelectedItem as TabItem;
             var tabName = tabItem.Header.ToString();
             var inputVM = new TextInputVM(_vm.BuildingNames)
             {
@@ -197,8 +259,42 @@ namespace Tianhua.Platform3D.UI.UI
             {
                 tabItem.Header = inputVM.InputValue;
                 _vm.UpdateBuildingName(tabName, inputVM.InputValue);
-                ClearCopySourceTabName();
+                _vm.CopySourceTabName = "";
                 _vm.Save(); // 保存数据
+            }
+        }
+
+        private void AddToDocumentVMDic(string docName, StoreyElevationSetVM vm)
+        {
+            if (string.IsNullOrEmpty(docName) || vm == null)
+            {
+                return;
+            }
+            if (_documentVMDic.ContainsKey(docName))
+            {
+                _documentVMDic[docName] = vm;
+            }
+            else
+            {
+                _documentVMDic.Add(docName, vm);
+            }
+        }
+        private void RemoveFromDocumentVMDic(string docName)
+        {
+            if (!string.IsNullOrEmpty(docName) && _documentVMDic.ContainsKey(docName))
+            {
+                _documentVMDic.Remove(docName);
+            }
+        }
+        private StoreyElevationSetVM GetFromDocumentVMDic(string docName)
+        {
+            if (!string.IsNullOrEmpty(docName) && _documentVMDic.ContainsKey(docName))
+            {
+                return _documentVMDic[docName];
+            }
+            else
+            {
+                return null;
             }
         }
     }

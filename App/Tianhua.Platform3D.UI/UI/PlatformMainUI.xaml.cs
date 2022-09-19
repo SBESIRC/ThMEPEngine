@@ -112,10 +112,10 @@ namespace Tianhua.Platform3D.UI.UI
             var res = new List<IMultiDocument>();
             foreach (var item in mainViewModel.FunctionTableItems) 
             {
-                var iMutil = item as IMultiDocument;
-                if (iMutil == null)
-                    continue;
-                res.Add(iMutil);
+                if(item.UControl is IMultiDocument iMutil)
+                {
+                    res.Add(iMutil);
+                }
             }
             return res;
         }
