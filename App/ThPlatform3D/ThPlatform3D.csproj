@@ -126,6 +126,8 @@
     <Compile Include="StructPlane\ThStructurePlaneCommon.cs" />
     <Compile Include="StructPlane\ThStructurePlaneGenerator.cs" />
     <Compile Include="ThPlatform3DApp.cs" />
+    <Compile Include="ThPlatform3dDefaultContextMenuExtension.cs" />
+    <Compile Include="ThPlatform3DDrawCmds.cs" />
     <Compile Include="ThPlatform3DIPCCmds.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1,10 +1,15 @@
 ﻿using Autodesk.AutoCAD.Runtime;
-using ThPlatform3D.Command;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThPlatform3D
 {
     public class ThPlatform3DApp : IExtensionApplication
     {
+        /// <summary>
+        /// 自定义右键菜单
+        /// </summary>
+        private ThPlatform3dDefaultContextMenuExtension DefaultContextMenuExtension { get; set; }
+
         public void Initialize()
         {
             //add code to run when the ExtApp initializes. Here are a few examples:
@@ -14,6 +19,11 @@ namespace ThPlatform3D
             //  Loading some dependents explicitly which are not taken care of automatically;
             //  Subscribing to some events which are important for the whole session;
             //  Etc.
+
+            // 支持自定义右键菜单
+            // https://spiderinnet1.typepad.com/blog/2012/02/autocad-net-attach-application-default-context-menu-extension.html
+            DefaultContextMenuExtension = new ThPlatform3dDefaultContextMenuExtension();
+            AcadApp.AddDefaultContextMenuExtension(DefaultContextMenuExtension);
         }
 
         public void Terminate()
@@ -24,51 +34,8 @@ namespace ThPlatform3D
             //  Unloading those dependents;
             //  Un-subscribing to those events;
             //  Etc.
-        }
 
-        [CommandMethod("TIANHUACAD", "THBPI", CommandFlags.Modal)]
-        public void THBPI()
-        {
-            using (var cmd = new ThInsertBasePointCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THLGHZ", CommandFlags.Modal)]
-        public void THLGHZ()
-        {
-            using (var cmd = new ThRailDrawCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THQDHZ", CommandFlags.Modal)]
-        public void THQDHZ()
-        {
-            using (var cmd = new ThWallHoleDrawCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THLBHZ", CommandFlags.Modal)]
-        public void THLBHZ()
-        {
-            using (var cmd = new ThSlabDrawCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THJBHZ", CommandFlags.Modal)]
-        public void THJBHZ()
-        {
-            using (var cmd = new ThDropSlabDrawCmd())
-            {
-                cmd.Execute();
-            }
+            AcadApp.RemoveDefaultContextMenuExtension(DefaultContextMenuExtension);
         }
     }
 }
