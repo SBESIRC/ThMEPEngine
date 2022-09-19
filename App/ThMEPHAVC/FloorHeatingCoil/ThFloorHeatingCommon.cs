@@ -29,6 +29,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                                             {BlkName_BathRadiator,Layer_WaterSeparator },
                                                                 };
 
+
+        public static Dictionary<string, string> LayerLineType = new Dictionary<string, string>() {
+                                            {Layer_RoomSeparate,"DASH" },
+                                                                };
+
         public static string BlkSettingAttrName_WaterSeparator = "回路数";
         public static string BlkSettingAttrName_Radiator_width = "散热器宽度";
         public static string BlkSettingAttrName_Radiator_x1 = "水管连接点1 X";

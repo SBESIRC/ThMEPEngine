@@ -188,6 +188,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                         continue;
                     currentDb.Blocks.Import(block, true);
                 }
+
                 foreach (var item in layerNames)
                 {
                     if (string.IsNullOrEmpty(item))
@@ -200,6 +201,18 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     LayerTools.UnLockLayer(database, item);
                     LayerTools.UnFrozenLayer(database, item);
                     LayerTools.UnOffLayer(database, item);
+
+                    ThFloorHeatingCommon.LayerLineType.TryGetValue(item, out var lineType);
+                    if (lineType==null || lineType=="")
+                    {
+                        continue;
+                    }
+                    var lineTypesTemplate = blockDb.Linetypes.ElementOrDefault(lineType);
+                    if (null == lineTypesTemplate)
+                        continue;
+                    currentDb.Linetypes.Import(lineTypesTemplate, true);
+
+                  
                 }
             }
         }
