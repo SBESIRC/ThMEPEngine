@@ -55,7 +55,7 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
 
         private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            CoilViewModel.CleanSelectFrameAndData();
+            CoilViewModel.CleanData();
             e.Cancel = true;
             this.Hide();
         }
@@ -85,7 +85,7 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
                 SubSettingUI = new uiFloorHeatingCoilSubSetting(CoilViewModel);
             }
 
-            ObstacleUI.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
+            SubSettingUI.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
 
             SubSettingUI.ShowDialog();
         }

@@ -531,5 +531,9 @@
       <Version>8.0.0</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\住宅模式.png" />
+    <Resource Include="Images\公建模式.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

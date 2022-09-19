@@ -20,12 +20,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public static string BlkName_BathRadiator = "AI-散热器";
         public static string BlkName_RoomSuggest = "AI-地暖回路指定";
         public static string BlkName_ShowRoute = "AI-地暖回路标注";
+        public static string BlkName_Sample = "AI-地暖示例";
 
         public static Dictionary<string, string> BlkLayerDict = new Dictionary<string, string>() {
                                             {BlkName_RoomSuggest,Layer_RoomSuggest },
-                                             {BlkName_ShowRoute, Layer_ShowRoute},
-                                             {BlkName_WaterSeparator,Layer_WaterSeparator},
-                                             {BlkName_BathRadiator,Layer_WaterSeparator },
+                                            {BlkName_ShowRoute, Layer_ShowRoute},
+                                            {BlkName_WaterSeparator,Layer_WaterSeparator},
+                                            {BlkName_BathRadiator,Layer_WaterSeparator },
                                                                 };
 
         public static string BlkSettingAttrName_WaterSeparator = "回路数";

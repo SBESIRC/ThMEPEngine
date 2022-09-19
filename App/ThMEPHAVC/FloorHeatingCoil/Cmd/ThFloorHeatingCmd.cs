@@ -169,15 +169,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                                                     ThFloorHeatingCommon.Layer_Coil };
                     ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
-                    VM.CleanSelectFrameAndData();
+                    VM.CleanData();
 
-                    var SelectFrames = ThSelectFrameUtil.SelectPolyline();
+                    SelectFrames = ThSelectFrameUtil.SelectPolyline();
                     if (SelectFrames.Count == 0)
                     {
                         return;
                     }
-                    SelectFrames.ForEach(x => VM.SelectFrame.Add(x));
-                   
+
                     Transformer = ThFloorHeatingCoilUtilServices.GetTransformer(SelectFrames, false);
 
                     var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, SelectFrames, Transformer, WithUI);
@@ -193,7 +192,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                         var createSR = new UserInteraction();
                         createSR.PipelineB(dataQuery.RoomSet[0]);
                     }
-                    
+
                     var needUpdateSR = false;
                     if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
                     {
@@ -218,7 +217,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                         }
                         ThFloorHeatingCreateService.UpdateSRSuggestBlock(ProcessedData.RegionList, ProcessedData.PipeList, RoomPlSuggestDict, updateWaterSeparatorRoom, Transformer);
                     }
-                    
+
                     if (ProcessedData.PipeList != null && ProcessedData.PipeList.Count > 0)
                     {
                         //打印最终结果
@@ -230,7 +229,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                         UpdateWaterSeparatorNumber(dataQuery.RoomSet);
                         CreateRoomSeparatorAtDoor(dataQuery.RoomSet);
 
-                        VM.CleanSelectFrameAndData();
+                        VM.CleanData();
                     }
                 }
                 catch (System.Exception ex)
@@ -238,12 +237,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     if (ex.Message == ThFloorHeatingCommon.Error_privateOneDoor)
                     {
                         Active.Editor.WriteMessage(string.Format("\n{0}\n", ex.Message));
-                        VM.CleanSelectFrameAndData();
+                        VM.CleanData();
                         return;
                     }
                     else
                     {
-                        VM.CleanSelectFrameAndData();
+                        VM.CleanData();
                         throw ex;
                     }
                 }

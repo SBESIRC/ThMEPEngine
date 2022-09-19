@@ -124,11 +124,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             }
         }
 
-        public static void InsertBlk(Point3d insertPt, string insertBlkName, Dictionary<string, object> dynValue)
+        public static void InsertBlk(Point3d insertPt, string insertBlkName, Dictionary<string, object> dynValue, Vector3d dir)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                //var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                //var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+                var vec = dir.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
                 var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
                 var blkName = insertBlkName;
                 var pt = insertPt;

@@ -235,23 +235,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         #endregion
 
         #region Data Flow
-        private ObservableCollection<Polyline> _SelectFrame { get; set; }
-        public ObservableCollection<Polyline> SelectFrame
-        {
-            get { return _SelectFrame; }
-            set
-            {
-                _SelectFrame = value;
-                this.RaisePropertyChanged();
-            }
-        }
 
         public List<Polyline> HighlightList { get; set; }
 
         #endregion
         public ThFloorHeatingCoilViewModel()
         {
-            SelectFrame = new ObservableCollection<Polyline>();
             PublicRegionConstraint = 1;
             IndependentRoomConstraint = 1;
             AuxiliaryRoomConstraint = 1;
@@ -274,6 +263,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
 
 
         #region cmd
+        public ICommand InsertSampleCmd => new RelayCommand(InsertSample);
+        private void InsertSample()
+        {
+            FocusToCAD();
+            ThFloorHeatingSubCmd.InsertSample();
+        }
         public ICommand CheckRoomConnectivityCmd => new RelayCommand(CheckRoomConnectivity);
         private void CheckRoomConnectivity()
         {
@@ -286,7 +281,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
         private void CleanRoomConnectivity()
         {
             ThFloorHeatingSubCmd.CleanRoomConnectivityHatch(this);
-            CleanSelectFrameAndData();
+            CleanData();
             Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
         }
 
@@ -299,9 +294,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Model
             Autodesk.AutoCAD.ApplicationServices.Application.UpdateScreen();
         }
 
-        public void CleanSelectFrameAndData()
+        public void CleanData()
         {
-            SelectFrame.Clear();
             ProcessedData.Clear();
         }
 

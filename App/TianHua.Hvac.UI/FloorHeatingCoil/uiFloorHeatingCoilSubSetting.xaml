@@ -7,9 +7,14 @@
              mc:Ignorable="d"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              Title="后台参数设置"
-               Width="300" Height="150"
+             Height ="280" Width ="280"
              Closing="window_Closing">
-    <Grid Margin="5 5 0 5">
+    <Window.Resources>
+        <ResourceDictionary>
+            <local:TrueFalseConverter x:Key="TrueFalseConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="10 0 0 10">
         <Grid.ColumnDefinitions >
             <ColumnDefinition Width="6*"/>
             <ColumnDefinition Width="4*"/>
@@ -19,25 +24,54 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
-        <Label Grid.Column="0" Grid.Row="0" Height="24" Content="1.房间框线凸角处理阀值"/>
-        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="0" >
-            <cus:InputTextBox Width="50" Height="24" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding ConvexEdgeTol,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
+
+
+        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Height="24"
+                Content="回路分配模式："/>
+        <RadioButton Grid.Row="1" Grid.Column="0" Height="24"
+                     GroupName="rbDistributionMode" 
+                     Margin="5 0 0 0"
+                     Content="公区优先" IsChecked="{Binding PublicRegionConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}" />
+        <RadioButton Grid.Row="1" Grid.Column="1" Height="24"
+                     Margin="0 0 0 0"
+                     GroupName="rbDistributionMode" 
+                     Content="平衡优先" IsChecked="{Binding PublicRegionConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}" />
+
+        <Label Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Height="24"
+               Content="是否考虑主要功能房间独立回路："/>
+        <RadioButton Grid.Row="3" Grid.Column="0" Margin="5 0 0 0" GroupName="rbDistributionRoom" Content="是" IsChecked="{Binding IndependentRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
+        <RadioButton Grid.Row="3" Grid.Column="1" GroupName="rbDistributionRoom" Content="否" IsChecked="{Binding IndependentRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
+
+        <Label Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Height="24" 
+               Content="附属房间是否能跨越主房间和别的主房间同回路：" VerticalAlignment="Bottom"  />
+        <!--这里和输入参数TF是反着的：能跨越主房间=没有限制 不能跨越主房间=有限制-->
+        <RadioButton Grid.Row="5" Grid.Column="0" Margin="5 0 0 0" Height="24" GroupName="rbDistributionSubCrossMainRoom" Content="是" IsChecked="{Binding AuxiliaryRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
+        <RadioButton Grid.Row="5" Grid.Column="1" Height="24" GroupName="rbDistributionSubCrossMainRoom" Content="否" IsChecked="{Binding AuxiliaryRoomConstraint,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
+
+        <Label Grid.Column="0" Grid.Row="6" Height="24" Content="房间框线凸角处理阀值"/>
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="6" >
+            <cus:InputTextBox  IsEnabled="False" Width="50" Height="24" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding ConvexEdgeTol,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
             <Label Content="mm"/>
         </StackPanel>
-        <Label Grid.Column="0" Grid.Row="1" Height="24" Content="2.主要功能房间短边最小值"/>
-        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="1" >
-            <cus:InputTextBox Width="50" Height="24" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding MainRoomEdgeTol,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
+        <Label Grid.Column="0" Grid.Row="7" Height="24" Content="主要功能房间短边最小值"/>
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="7" >
+            <cus:InputTextBox  IsEnabled="False" Width="50" Height="24" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding MainRoomEdgeTol,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
             <Label Content="mm"/>
         </StackPanel>
-        <Label Grid.Column="0" Grid.Row="2" Height="24" Content="3.管线距墙距离"/>
+        <!--<Label Grid.Column="0" Grid.Row="2" Height="24" Content="3.管线距墙距离"/>
         <StackPanel IsEnabled="False"  Orientation="Horizontal" Grid.Column="1" Grid.Row="2" >
             <cus:InputTextBox Width="50" Height="24" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDistWall,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
             <Label Content="mm"/>
-        </StackPanel>
-        <Label Grid.Column="0" Grid.Row="3" Height="24" Content="4.圆角半径"/>
-        <StackPanel IsEnabled="False" Orientation="Horizontal" Grid.Column="1" Grid.Row="3" >
-            <cus:InputTextBox Width="50" Height="24" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding FilletRadius,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
+        </StackPanel>-->
+        <Label Grid.Column="0" Grid.Row="8" Height="24" Content="圆角半径"/>
+        <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="8" >
+            <cus:InputTextBox  IsEnabled="False" Width="50" Height="24" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding FilletRadius,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
             <Label Content="mm"/>
         </StackPanel>
     </Grid>

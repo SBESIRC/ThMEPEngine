@@ -33,6 +33,46 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 {
     public class ThFloorHeatingSubCmd
     {
+        public static void InsertSample()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blkList = new List<string> { ThFloorHeatingCommon.BlkName_Sample, ThFloorHeatingCommon.BlkName_WaterSeparator };
+                var layerList = new List<string>() { ThFloorHeatingCommon.BlkLayerDict[ThFloorHeatingCommon.BlkName_WaterSeparator] };
+                ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
+
+                var ppo = Active.Editor.GetPoint("\n选择插入点");
+                if (ppo.Status == PromptStatus.OK)
+                {
+                    var wcsPt = ppo.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                    BlockTable bt = (BlockTable)acadDatabase.Database.BlockTableId.GetObject(OpenMode.ForRead);
+                    var blk = new BlockReference(wcsPt, bt[ThFloorHeatingCommon.BlkName_Sample]);
+
+                    var obj = new DBObjectCollection();
+                    blk.Explode(obj);
+                    foreach (var o in obj)
+                    {
+                        if (o is Entity entity)
+                        {
+                            acadDatabase.ModelSpace.Add(entity);
+                        }
+                    }
+
+                    //插入集分水器
+                    var dir = new Vector3d(5950, 10450, 0);
+                    var pt = wcsPt + dir; //ucs!!!!!
+                    var routeNum = string.Format("{0}路", "5");
+                    var dynDic = new Dictionary<string, object>() {
+                        { ThFloorHeatingCommon.BlkSettingAttrName_WaterSeparator, routeNum } ,
+
+                    };
+
+                    ThFloorHeatingCoilInsertService.InsertBlk(pt, ThFloorHeatingCommon.BlkName_WaterSeparator, dynDic, new Vector3d(0, -1, 0));
+                }
+            }
+        }
+
         public static void CheckRoomConnectivity(ThFloorHeatingCoilViewModel vm)
         {
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
@@ -44,7 +84,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
                 var withUI = ThFloorHeatingCoilSetting.Instance.WithUI;
                 var selectFrames = ThSelectFrameUtil.SelectPolyline();
-                selectFrames.ForEach(x => vm.SelectFrame.Add(x));
                 if (selectFrames.Count == 0)
                 {
                     return;
@@ -67,8 +106,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
         public static void CleanRoomConnectivityHatch(ThFloorHeatingCoilViewModel vm)
         {
-            var selectFrames = vm.SelectFrame.ToList();
-
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -76,33 +113,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 var elementLayer = new List<string>() { ThFloorHeatingCommon.Layer_RoomSetFrame };
                 var hatch = ThFloorHeatingDataFactory.ExtractHatch(elementLayer);
 
-                //transform
-                var transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames, false);//暂用（0，0，0） 需要改！
-                selectFrames.ForEach(x => transformer.Transform(x));
-                var itemDict = new Dictionary<Hatch, Hatch>(); //key:trans value:ori
+                //remove
                 foreach (var item in hatch)
                 {
-                    var tranItem = item.Clone() as Hatch;
-                    transformer.Transform(tranItem);
-                    itemDict.Add(tranItem, item);
-                }
-
-                //select
-                var obj = itemDict.Select(x => x.Key).ToCollection();
-                var idx = new ThCADCoreNTSSpatialIndex(obj);
-                var selectItem = new List<Hatch>();
-
-                foreach (var frame in selectFrames)
-                {
-                    var selectobj = idx.SelectCrossingPolygon(frame);
-                    selectItem.AddRange(selectobj.OfType<Hatch>());
-                }
-                selectItem = selectItem.Distinct().ToList();
-
-                //remove
-                foreach (var tranItem in selectItem)
-                {
-                    var item = itemDict[tranItem];
                     item.UpgradeOpen();
                     item.Erase();
                     item.DowngradeOpen();
@@ -173,7 +186,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
                     };
 
-                    ThFloorHeatingCoilInsertService.InsertBlk(wcsPt, ThFloorHeatingCommon.BlkName_WaterSeparator, dynDic);
+                    ThFloorHeatingCoilInsertService.InsertBlk(wcsPt, ThFloorHeatingCommon.BlkName_WaterSeparator, dynDic, Vector3d.XAxis);
                 }
             }
         }
@@ -196,7 +209,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
                     };
 
-                    ThFloorHeatingCoilInsertService.InsertBlk(wcsPt, ThFloorHeatingCommon.BlkName_BathRadiator, dynDic);
+                    ThFloorHeatingCoilInsertService.InsertBlk(wcsPt, ThFloorHeatingCommon.BlkName_BathRadiator, dynDic, Vector3d.XAxis);
                 }
             }
         }

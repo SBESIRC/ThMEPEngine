@@ -120,11 +120,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             Parameter.AuxiliaryRoomConstraint = Convert.ToBoolean(vm.AuxiliaryRoomConstraint);
             Parameter.PrivatePublicMode = vm.PrivatePublicMode;
             Parameter.TotalLength = vm.TotalLenthConstraint * 1000;
+            Parameter.SuggestDistanceWall = vm.SuggestDistWall;
 
             ////---sub setting
             //Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
             //Parameter.??? = vm.ConvexEdgeTol;
-            //Parameter.SuggestDistanceWall = vm.SuggestDistWall;
+            //
             //Parameter.???= vm.FilletRadius;
         }
 
