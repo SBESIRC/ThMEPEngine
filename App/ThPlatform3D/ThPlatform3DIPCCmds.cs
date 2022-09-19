@@ -13,6 +13,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.Services;
 using ThMEPTCH.Model.SurrogateModel;
+using System.Security.Principal;
 
 namespace ThPlatform3D
 {
@@ -25,7 +26,7 @@ namespace ThPlatform3D
             Stopwatch sw = new Stopwatch();
             sw.Start();
             var service = new ThDWGToIFCService("");
-            var project = service.DWGToProject(true, false);
+            var project = service.DWGToProjectData(true, true);
             if (project != null)
             {
                 sw.Stop();
@@ -36,34 +37,15 @@ namespace ThPlatform3D
                 sw.Start();
 
                 using (var pipeClient = new NamedPipeClientStream(".",
-                    "THDB2Push_TestPipe",
+                    "THCAD2P3DPIPE",
                     PipeDirection.Out,
-                    PipeOptions.None))
+                    PipeOptions.None,
+                    TokenImpersonationLevel.Impersonation))
                 {
                     try
                     {
                         pipeClient.Connect(5000);
-                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Point3d)))
-                        {
-                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Point3d), false).SetSurrogate(typeof(Point3DSurrogate));
-                        }
-                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Vector3d)))
-                        {
-                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Vector3d), false).SetSurrogate(typeof(Vector3DSurrogate));
-                        }
-                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Matrix3d)))
-                        {
-                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Matrix3d), false).SetSurrogate(typeof(Matrix3DSurrogate));
-                        }
-                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Polyline)))
-                        {
-                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Polyline), false).SetSurrogate(typeof(PolylineSurrogate));
-                        }
-                        if (!ProtoBuf.Meta.RuntimeTypeModel.Default.IsDefined(typeof(Entity)))
-                        {
-                            ProtoBuf.Meta.RuntimeTypeModel.Default.Add(typeof(Entity), false).SetSurrogate(typeof(PolylineSurrogate));
-                        }
-                        Serializer.Serialize(pipeClient, project);
+                        project.WriteTo(pipeClient);
                         Active.Editor.WriteLine($"传输数据完成，耗时{sw.ElapsedMilliseconds}毫秒。");
                     }
                     catch (System.Exception ex)
@@ -89,7 +71,7 @@ namespace ThPlatform3D
                 CancellationTokenSource CTS = new CancellationTokenSource();
                 CancellationToken Token = CTS.Token;
                 //这里有一个小坑，只有设置了PipeOptions.Asynchronous，管道才会接受取消令牌的取消请求，不然不会生效
-                var pipeServer = new NamedPipeServerStream("THSUPush_TestPipe", PipeDirection.InOut, 1, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
+                var pipeServer = new NamedPipeServerStream("THCAD2SUPIPE", PipeDirection.InOut, 1, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
                 Task task = new Task(() =>
                 {
                     try

@@ -23,13 +23,13 @@ public static partial class ThSUFaceDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VHZW9tZXRyeS5wcm90bxoWVGhT",
-          "VU1hdGVyaWFsRGF0YS5wcm90byJlCgxUaFNVRmFjZURhdGESHgoEbWVzaBgB",
-          "IAEoCzIQLlRoU1VQb2x5Z29uTWVzaBIoCghtYXRlcmlhbBgCIAEoCzIRLlRo",
-          "U1VNYXRlcmlhbERhdGFIAIgBAUILCglfbWF0ZXJpYWxiBnByb3RvMw=="));
+          "VU1hdGVyaWFsRGF0YS5wcm90byJTCgxUaFNVRmFjZURhdGESHgoEbWVzaBgB",
+          "IAEoCzIQLlRoU1VQb2x5Z29uTWVzaBIjCghtYXRlcmlhbBgCIAEoCzIRLlRo",
+          "U1VNYXRlcmlhbERhdGFiBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThSUGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "Mesh", "Material" }, new[]{ "Material" }, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "Mesh", "Material" }, null, null, null, null)
         }));
   }
   #endregion

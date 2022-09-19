@@ -64,4 +64,5 @@ message ThTCHSegment {
 message ThTCHPolyline {
     repeated ThTCHPoint3d points = 1;
     repeated ThTCHSegment segments = 2; 
+    repeated ThTCHPolyline inner_polylines = 3;
 }

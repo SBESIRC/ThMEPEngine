@@ -1,6 +1,7 @@
 ﻿syntax = "proto3";
 import "ThTCHRootData.proto";
 import "ThTCHGeometry.proto";
+import "ThTCHProperty.proto";
 
 message ThTCHBuiltElementData {
     ThTCHRootData root = 1;
@@ -15,5 +16,11 @@ message ThTCHBuiltElementData {
     ThTCHVector3d x_vector = 6;
 
     // geometry profile
-    optional ThTCHPolyline outline = 7;
+    ThTCHPolyline outline = 7;
+
+    //Material
+    optional string enum_material = 8;
+
+    //Property
+    repeated ThTCHProperty Properties = 9;
 }

@@ -115,5 +115,28 @@ namespace ThMEPTCH.CAD
         {
             return new ThTCHVector3d() { X = vector.X, Y = vector.Y, Z = vector.Z };
         }
+        
+        public static ThTCHMatrix3d ToTCHMatrix3d(this Matrix3d matrix)
+        {
+            return new ThTCHMatrix3d()
+            {
+                Data11 = matrix[0, 0],
+                Data12 = matrix[0, 1],
+                Data13 = matrix[0, 2],
+                Data14 = matrix[0, 3],
+                Data21 = matrix[1, 0],
+                Data22 = matrix[1, 1],
+                Data23 = matrix[1, 2],
+                Data24 = matrix[1, 3],
+                Data31 = matrix[2, 0],
+                Data32 = matrix[2, 1],
+                Data33 = matrix[2, 2],
+                Data34 = matrix[2, 3],
+                Data41 = matrix[3, 0],
+                Data42 = matrix[3, 1],
+                Data43 = matrix[3, 2],
+                Data44 = matrix[3, 3],
+            };
+        }
     }
 }

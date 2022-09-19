@@ -1,5 +1,5 @@
 ﻿syntax = "proto3";
-import "ThTCHRootData.proto";
+import "ThTCHBuiltElementData.proto";
 import "ThTCHWallData.proto";
 import "ThTCHDoorData.proto";
 import "ThTCHGeometry.proto";
@@ -9,7 +9,7 @@ import "ThTCHRailingData.proto";
 import "ThTCHOpeningData.proto";
 
 message ThTCHBuildingStoreyData {
-    ThTCHRootData root = 1;
+    ThTCHBuiltElementData build_element = 1;
 
     // number
     string number = 2;
@@ -25,10 +25,14 @@ message ThTCHBuildingStoreyData {
 
     // base point
     ThTCHPoint3d origin = 6;
+    
+    string memory_storey_id = 7;
 
-    repeated ThTCHWallData walls = 7;
-    repeated ThTCHDoorData doors = 8;
-    repeated ThTCHWindowData windows = 9;
-    repeated ThTCHSlabData slabs = 10;
-    repeated ThTCHRailingData railings = 11;
+    ThTCHMatrix3d memory_matrix3d = 8;
+
+    repeated ThTCHWallData walls = 9;
+    repeated ThTCHDoorData doors = 10;
+    repeated ThTCHWindowData windows = 11;
+    repeated ThTCHSlabData slabs = 12;
+    repeated ThTCHRailingData railings = 13;
 }

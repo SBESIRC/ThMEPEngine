@@ -90,6 +90,7 @@
     <Compile Include="Data\ThTCHGeometry.cs" />
     <Compile Include="Data\ThTCHOpeningData.cs" />
     <Compile Include="Data\ThTCHProjectData.cs" />
+    <Compile Include="Data\ThTCHProperty.cs" />
     <Compile Include="Data\ThTCHRailingData.cs" />
     <Compile Include="Data\ThTCHRootData.cs" />
     <Compile Include="Data\ThTCHSiteData.cs" />
