@@ -36,6 +36,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess;
 using static ThMEPArchitecture.PartitionLayout.DisplayTools;
+using ThParkingStall.Core.Tools;
 using ThParkingStall.Core.ObliqueMPartitionLayout;
 
 namespace ThMEPArchitecture.MultiProcess
@@ -99,7 +100,7 @@ namespace ThMEPArchitecture.MultiProcess
                     if (_CommandMode == CommandMode.WithoutUI)
                     {
                         Logger?.Information($"DEbug--读取复现");
-                        //RunDebug();
+                        RunDebug();
                     }
                     else
                     {
@@ -112,9 +113,14 @@ namespace ThMEPArchitecture.MultiProcess
                         {
                             Run(currentDb);
                         }
-                        else
+                        
+                        else if(ParameterViewModel.CommandType == CommandTypeEnum.RunWithIterationAutomatically)
                         {
                             //RunWithAutoSegLine(currentDb);
+                        }
+                        else if(ParameterViewModel.CommandType == CommandTypeEnum.BuildingAnalysis)
+                        {
+                            BuildingAnalysis(currentDb);
                         }
                     }
                     TableTools.EraseOrgTable();
@@ -207,7 +213,55 @@ namespace ThMEPArchitecture.MultiProcess
             }
             ShowDisplayInfo(blks.Count());
         }
+        public void BuildingAnalysis(AcadDatabase acadDatabase)
+        {
+            var blks = InputData.SelectBlocks(acadDatabase);
+            if (blks == null) return;
+            foreach (var blk in blks)
+            {
+                var blkName = blk.GetEffectiveName();
+                UpdateLogger(blkName);
+                //DisplayParkingStall.Add(blk.Clone() as BlockReference);
+                Logger?.Information("块名：" + blkName);
+                Logger?.Information("文件名：" + DrawingName);
+                Logger?.Information("用户名：" + Environment.UserName);
+                var layoutData = new OLayoutData(blk, Logger, out bool succeed);
+                if (!succeed) return;
+                layoutData.ProcessSegLines();
+                layoutData.MovingBuildingPreProcess();
+                //layoutData.SetInterParam();
+                Converter.GetDataWraper(layoutData, ParameterViewModel);
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
 
+                //ParameterStock.RunMode = MultiSolutionList[i];
+                //var lanes = OInterParameter.GetBoundLanes();
+                var BPA = new BuildingPosAnalysis(ParameterViewModel);
+                //BPA.UpdateParkingCntSP();
+                //BPA.UpdateSolution();
+
+                var BPC = new BuildingPosCalculate(BPA.PotentialMovingVectors);
+                BPC.CalculateBest(true);
+
+                foreach (var subArea in OInterParameter.dynamicSubAreas)
+                {
+                    subArea.UpdateParkingCnts(true);
+                    subArea.Display("MPDebug");
+                    MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
+                    //subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                }
+                GlobalBusiness globalBusiness = new GlobalBusiness(OInterParameter.dynamicSubAreas);
+                var caledBound = globalBusiness.CalBound();
+                Display(caledBound);
+                
+                var moveDistance = 1 * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
+                                    OInterParameter.TotalArea.Coordinates.Min(c => c.X));
+
+                DisplayParkingStall.MoveAddedEntities(moveDistance);
+                //lanes.Get<LineString>(true).ForEach(l => l.ToDbPolyline().AddToCurrentSpace());
+                //ProcessAndDisplay(null, 0, stopWatch);
+            }
+        }
         private void ProcessTheBlock(BlockReference block)
         {
             int fileSize = 64; // 64Mb

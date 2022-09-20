@@ -39,7 +39,10 @@ namespace ThParkingStall.Core.OInterProcess
             Key = new OSubAreaKey(this, IncludeWall);
             BuildingBounds = buildingBounds;
         }
+        public OSubArea()
+        {
 
+        }
         public void UpdateParkingCnts(bool IgnoreCache = false)
         {
             if (OCached.Contains(this) && !IgnoreCache)

@@ -12,7 +12,7 @@ using ThControlLibraryWPF.ControlUtils;
 namespace ThMEPArchitecture.ViewModel
 {
     public enum CommandMode { WithUI, WithoutUI}
-    public enum CommandTypeEnum {RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically}//directly, with splitters, without splitters
+    public enum CommandTypeEnum {RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically,BuildingAnalysis}//directly, with splitters, without splitters
     //public enum CommandRunModeEnum { Auto, Horizental, Vertical }
     public enum CommandRunSpeedEnum { Fast, General, Slow, Advanced }
     public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small}
@@ -118,6 +118,17 @@ namespace ThMEPArchitecture.ViewModel
             { 
                 _LayoutCount = value; 
                 RaisePropertyChanged("LayoutCount"); 
+            }
+        }
+
+        private int _BuildingMoveDistance = 500;
+        public int BuildingMoveDistance
+        {
+            get { return _BuildingMoveDistance; }
+            set
+            {
+                _BuildingMoveDistance = value;
+                RaisePropertyChanged("BuildingMoveDistance");
             }
         }
 
@@ -243,6 +254,7 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("WallLineThickness");
             }
         }
+
         // 建筑物判断容差。将所有建筑物外扩3000做并集，在内缩3000即为建筑外包框
         private int _BuildingTolerance = 3000;
         public int BuildingTolerance
@@ -644,7 +656,16 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("SpecialGeneProp");
             }
         }
-
+        private int _SampleDistance = 25;
+        public int SampleDistance
+        {
+            get => _SampleDistance;
+            set
+            {
+                _SampleDistance = value;
+                RaisePropertyChanged("SampleDistance");
+            }
+        }
         //精英比例
         private double _EliteProp = 0.2;
         public double EliteProp

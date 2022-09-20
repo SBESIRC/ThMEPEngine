@@ -57,6 +57,11 @@ namespace ThParkingStall.Core.OInterProcess
         public static double[] MaxMoveDistances { get { return _MaxMoveDistances; } }//扇形移动最大距离
         private static Coordinate _Center;
         public static Coordinate Center { get { return _Center; } }//点集移动中心
+
+        private static List<Polygon> _MovingBounds;
+        public static List<Polygon> MovingBounds { get { return _MovingBounds; } }//可动建筑框线
+
+        public static List<OSubArea> dynamicSubAreas;//用于障碍物移位的子区域列表
         public static void Init(DataWraper dataWraper)
         {
             var oWarper = dataWraper.oParamWraper;
@@ -65,7 +70,7 @@ namespace ThParkingStall.Core.OInterProcess
             _Buildings = oWarper.Buildings;
             _BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
             _Ramps = oWarper.Ramps;
-
+            _MovingBounds = oWarper.MovingBounds;
             var buildingtol = 3000;
             //var bufferDistance = (VMStock.RoadWidth / 2) - OTools.SegLineEx.SegTol;
             _BuildingBounds = new MultiPolygon(new MultiPolygon(Buildings.ToArray()).Buffer(buildingtol, MitreParam).
@@ -107,30 +112,62 @@ namespace ThParkingStall.Core.OInterProcess
             _BorderLines = borderLines;
         }
         //返回长度为0则为不合理解
-        public static List<OSubArea> GetSubAreas()
+        //public static List<OSubArea> GetSubAreas()
+        //{
+        //    var subAreas = new List<OSubArea>();
+        //    var SegLineStrings = _SegLines.ToLineStrings();
+        //    var areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
+        //    areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
+        //    //var vaildSegSpatialIndex = new MNTSSpatialIndex(SegLineStrings.Cast<Geometry>().ToList());
+        //    //var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
+        //    // 创建子区域列表
+        //    for (int i = 0; i < areas.Count; i++)
+        //    {
+        //        var area = areas[i];
+        //        if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
+        //        //var subLaneLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分区线
+        //        //var subLanes = subLaneLineStrings.GetVaildParts(area);
+
+        //        var subLanes = SegLineStrings.GetCommonParts(area);
+        //        //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
+        //        var walls = SegLineStrings.GetWalls(area.Shell);
+        //        var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
+        //        var subArea = new OSubArea(area,subLanes,walls,subBuildings);
+        //        subAreas.Add(subArea);
+        //    }
+        //    return subAreas;
+        //}
+
+        //完全按照初始分区线获取区域
+        public static Geometry GetBoundLanes()
         {
             var subAreas = new List<OSubArea>();
-            var SegLineStrings = _SegLines.ToLineStrings();
+            var newSegLines = new List<SegLine>();
+            newSegLines = InitSegLines.Select(segLine => segLine.CreateNew()).ToList();
+            var allObjs = TotalArea.Shell.ToLineStrings().Cast<Geometry>().ToList();
+            allObjs.AddRange(Buildings);
+            var boundarySpatialIndex = new MNTSSpatialIndex(allObjs);
+            newSegLines.UpdateSegLines(TotalArea, boundarySpatialIndex);
+            var SegLineStrings = newSegLines.Select(l => l.Splitter).ToList().ToLineStrings();
             var areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
+            var vaildLanes = newSegLines.Select(l => l.VaildLane).ToList().ToLineStrings();
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
-            //var vaildSegSpatialIndex = new MNTSSpatialIndex(SegLineStrings.Cast<Geometry>().ToList());
-            //var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
-            // 创建子区域列表
             for (int i = 0; i < areas.Count; i++)
             {
                 var area = areas[i];
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
-                //var subLaneLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();// 分区线
-                //var subLanes = subLaneLineStrings.GetVaildParts(area);
-
-                var subLanes = SegLineStrings.GetCommonParts(area);
+                var subLanes = vaildLanes.GetCommonParts(area);
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
                 var walls = SegLineStrings.GetWalls(area.Shell);
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
-                var subArea = new OSubArea(area,subLanes,walls,subBuildings);
+                var subRamps = Ramps.Where(r => area.Contains(r.InsertPt)).ToList();
+                var subBuildingBounds = BuildingBoundSPIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
+                var subArea = new OSubArea(area, subLanes, walls, subBuildings, subRamps, subBuildingBounds);
                 subAreas.Add(subArea);
             }
-            return subAreas;
+            dynamicSubAreas = subAreas;
+            var laneMLstr = new MultiLineString(vaildLanes.ToArray());
+            return new MultiLineString(areas.Select(p => p.Shell).ToArray()).Buffer(0.1, MitreParam).Intersection(laneMLstr);
         }
 
         public static List<OSubArea> GetOSubAreas(Genome genome)

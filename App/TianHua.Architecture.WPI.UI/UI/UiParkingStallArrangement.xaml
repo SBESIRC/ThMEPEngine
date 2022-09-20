@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(3.1)" SizeToContent="Height"
+              Title="车位自动排布(3.2)" SizeToContent="Height"
 
               Width="460" MaxWidth="550"  WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
@@ -41,7 +41,14 @@
                         <TextBox Width="25" Height="15" Margin="0,5,0,5" Text="{Binding LayoutCount}"></TextBox>-->
                     </StackPanel>
                 </StackPanel>
-
+                <StackPanel Orientation="Horizontal" >
+                    <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=3}">障碍物最佳位置分析</RadioButton>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=3}" Width="210">
+                        <Label Margin="15,0,0,0">移动距离：</Label>
+                        <TextBox Width="45" Margin="0,5,5,5" Text="{Binding BuildingMoveDistance}"></TextBox>
+                        <Label>mm</Label>
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Vertical">
                 <StackPanel>
@@ -170,6 +177,10 @@
                     <TextBox Width="30" Margin="0,5,5,5" Text="{Binding SpecialGeneProp}"/>
                     <Label Content="基因变异几率"/>
                     <TextBox Width="30" Margin="0,5,5,5" Text="{Binding GeneMutationRate}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Label Content="障碍物移位采样间距"/>
+                    <TextBox Width="30" Margin="0,5,5,5" Text="{Binding SampleDistance}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <Label Content="精英比例"/>

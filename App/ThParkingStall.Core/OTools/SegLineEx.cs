@@ -361,6 +361,21 @@ namespace ThParkingStall.Core.OTools
                 seglines[i].VaildLane = vaildLane;
             }
         }
+        //不输入连接关系，直接将输入分区线作为车道
+        public static void UpdateSegLines(this List<SegLine> segLines,Polygon shell,MNTSSpatialIndex BoundarySpatialIndex)
+        {
+            for (int i = 0; i < segLines.Count; i++)
+            {
+                var splitter = segLines[i].Splitter;
+                var mid = splitter.MidPoint;
+                var splitterLstr = splitter.ToLineString();
+                var intSectionCoors = splitterLstr.Intersection(shell.Shell).Coordinates;
+                var connections = (intSectionCoors.Any(c => !c.PositiveTo(mid)), intSectionCoors.Any(c => c.PositiveTo(mid)));
+                var vaildLane = splitter.GetVaildLane(connections, BoundarySpatialIndex, segLines[i].RoadWidth, null);
+                segLines[i].VaildLane = vaildLane;
+            }
+        }
+
         //求单个有效车道
         //输入 连接到其他线上 + 求中间部分 + 连接到边界的线 
         //     分割线连接到边界的关系

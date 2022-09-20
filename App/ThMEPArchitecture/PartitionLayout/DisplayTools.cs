@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPEngineCore.CAD;
 
 namespace ThMEPArchitecture.PartitionLayout
@@ -51,6 +52,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pl.Layer = layer;
             pl.ColorIndex = colorindex;
             pl.AddToCurrentSpace();
+            DisplayParkingStall.Add(pl);
         }
         public static void Display(IEnumerable<Polygon> polygons, int colorindex = 0, string layer = "0")
         {

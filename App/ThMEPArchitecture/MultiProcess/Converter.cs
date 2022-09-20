@@ -98,6 +98,7 @@ namespace ThMEPArchitecture.MultiProcess
             oWraper.borderLines = oLayoutData.BorderLines;
             oWraper.MaxMoveDistances = oLayoutData.MaxMoveDistances;
             oWraper.Center = oLayoutData.Center;
+            oWraper.MovingBounds = oLayoutData.MovingBounds;
             dataWraper.oParamWraper = oWraper;
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)

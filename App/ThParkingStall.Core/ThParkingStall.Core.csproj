@@ -105,6 +105,7 @@
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPillarPostProcess.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OLaneCompaction.cs" />
     <Compile Include="ObliqueMPartitionLayout\OPostProcess\GlobalBusiness.cs" />
+	<Compile Include="OInterProcess\BuildingPosCalculate.cs" />
     <Compile Include="OInterProcess\OGene.cs" />
     <Compile Include="OInterProcess\OInterParameter.cs" />
     <Compile Include="OInterProcess\ORamp.cs" />

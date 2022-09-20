@@ -102,6 +102,7 @@ namespace ThParkingStall.Core.InterProcess
         public List<LineSegment> borderLines = null;//可动边界
         public double[] MaxMoveDistances;////扇形移动最大距离
         public Coordinate Center;//点集圆心
+        public List<Polygon> MovingBounds;
         //缺一个可动边界的连接关系
     }
     public class ProgramDebug

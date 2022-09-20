@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Geometries.Utilities;
 using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,32 @@ namespace ThParkingStall.Core.OInterProcess
             Area = area;
             if (segLine.RoadWidth == -1) RoadWidth = VMStock.RoadWidth;
             else RoadWidth = segLine.RoadWidth;
+        }
+        public ORamp()
+        {
+
+        }
+        public ORamp Clone()
+        {
+            var clone = new ORamp();
+            clone.InsertPt = InsertPt.Copy() as Point;
+            clone.Vector = (Vector.Item1,Vector.Item2);
+            clone.Area = Area.Copy() as Polygon;
+            clone.RoadWidth = RoadWidth;
+            return clone;
+        }
+
+        public ORamp Transform(Vector2D vector)
+        {
+            AffineTransformation transformation = new AffineTransformation();
+            transformation.SetToTranslation(vector.X, vector.Y);
+            var clone = new ORamp();
+            clone.InsertPt = transformation.Transform(InsertPt) as Point;
+            clone.Vector = (Vector.Item1, Vector.Item2);
+            clone.Area = transformation.Transform(Area) as Polygon;
+            clone.RoadWidth = RoadWidth;
+            return clone;
+
         }
     }
 }

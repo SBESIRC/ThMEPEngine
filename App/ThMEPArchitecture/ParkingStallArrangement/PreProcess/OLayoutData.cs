@@ -40,7 +40,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<Line> CAD_SegLines = new List<Line>();// 提取到的cad分区线
         public List<Polyline> CAD_Obstacles = new List<Polyline>();//提取到的cad障碍物
         public List<Polyline> CAD_Ramps = new List<Polyline>();// 提取到的cad坡道
-
+        public List<Polyline> CAD_MovingBounds = new List<Polyline>();//提取到的cad可动建筑框线
         // NTS 数据结构
         //public Polygon Basement;//地库，面域部分为可布置区域
         public Polygon WallLine;//初始边界线(输入边界）,输入用地红线则为最大可建范围
@@ -48,7 +48,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<LineSegment> BorderLines;//可动边界线
         public List<SegLine> SegLines = new List<SegLine>();// 初始分区线
         public List<Polygon> Obstacles; // 初始障碍物,不包含坡道
-        public List<Polygon> RampPolgons;//坡道polygon
+        public List<Polygon> RampPolygons;//坡道polygon
+        public List<Polygon> MovingBounds;//可动建筑框线
 
         double MaxArea;//最大地库面积
         public Coordinate Center;//点集移动中心
@@ -131,14 +132,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             ParameterStock.AreaMax = MaxArea;
             UpdateObstacles();//更新障碍物
             UpdateRampPolgons();//更新坡道polygon
-            Buildings = Obstacles.Concat(RampPolgons).ToList();
+
+            UpdateMovingBounds();//更新可动建筑框线
+            Buildings = Obstacles.Concat(RampPolygons).ToList();
             //Basement = OverlayNGRobust.Overlay(WallLine, new MultiPolygon(Buildings.ToArray()), SpatialFunction.Difference).
             //    Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             //Basement = WallLine.Difference(new MultiPolygon(Buildings.ToArray())).Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             UpdateSPIndex();//更新空间索引
-            UpdateBasementInfo();
-            //GetSegLineBoundary();
             UpdateBoundaries();
+            UpdateBasementInfo();
+            WallLine.ToDbMPolygon().AddToCurrentSpace();
+            //GetSegLineBoundary();
+
         }
         #region CAD数据提取+转换为需要的NTS数据结构
         private void Extract(BlockReference basement)
@@ -203,6 +208,32 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
+
+            if (layerName.Contains("可动建筑框线"))
+            {
+                if (ent is BlockReference br)
+                {
+                    var dbObjs = new DBObjectCollection();
+                    br.Explode(dbObjs);
+                    foreach (var obj in dbObjs)
+                    {
+                        if (obj is Polyline pline)
+                        {
+                            if (pline.IsVaild(CloseTol))
+                            {
+                                CAD_MovingBounds.Add(pline.GetClosed());
+                            }
+                        }
+                    }
+                }
+                else if (ent is Polyline pline)
+                {
+                    if (pline.IsVaild(CloseTol))
+                    {
+                        CAD_MovingBounds.Add(pline.GetClosed());
+                    }
+                }
+            }
             if (layerName.Contains("坡道"))
             {
                 if (ent is BlockReference br)
@@ -251,14 +282,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 Obstacles = UnionedObstacles.Get<Polygon>(true);
             }
         }
+        private void UpdateMovingBounds()
+        {
+            MovingBounds = new List<Polygon>();
+            if(CAD_MovingBounds.Count > 0)
+            {
+                //输入打成线+求面域+union
+                var UnionedBounds = new MultiPolygon(CAD_MovingBounds.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
+                MovingBounds = UnionedBounds.Get<Polygon>(true);
+            }
+        }
         //更新坡道polygon
         private void UpdateRampPolgons()
         {
-            RampPolgons = new List<Polygon>();
+            RampPolygons = new List<Polygon>();
             if (CAD_Ramps.Count > 0)
             {
                 var UnionedRamps = new MultiPolygon(CAD_Ramps.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
-                RampPolgons = UnionedRamps.Get<Polygon>(true);
+                RampPolygons = UnionedRamps.Get<Polygon>(true);
             }
         }
         //更新空间索引
@@ -266,7 +307,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         {
             //ObstacleSpatialIndex = new MNTSSpatialIndex(Obstacles);
             BuildingSpatialIndex = new MNTSSpatialIndex(Buildings);
-            RampSpatialIndex = new MNTSSpatialIndex(RampPolgons);
+            RampSpatialIndex = new MNTSSpatialIndex(RampPolygons);
             var allObjs = WallLine.Shell.ToLineStrings().Cast<Geometry>().ToList();
             allObjs.AddRange(Buildings);
             BoundarySpatialIndex = new MNTSSpatialIndex(allObjs);
@@ -312,11 +353,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
         private void UpdateBoundaries()
         {
+            var buildingtol = ParameterStock.BuildingTolerance;
+
             var bufferDistance = (ParameterStock.RoadWidth / 2) - SegLineEx.SegTol;
             //var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物c
 
             var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(ParameterStock.BuildingTolerance, MitreParam).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
 
+
+            var unbuffered = new MultiPolygon(BuildingBounds.ToArray()).Buffer(-buildingtol, MitreParam).Get<Polygon>(true);
+            WallLine = WallLine.Union(new MultiPolygon(unbuffered.ToArray())).Get<Polygon>(true).OrderBy(p => p.Area).Last();
             //#################用建筑物外包框和边界求新地库边界#############
             //var newWallLines =  WallLine.Union(new MultiPolygon( BuildingBounds.ToArray()).Buffer(-ParameterStock.BuildingTolerance,MitreParam)).Get<Polygon>(true);
             //var newWallLine = newWallLines.OrderBy(x => x.Area).Last();
@@ -633,18 +679,58 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 SegLines.Slice(groups[i]).ForEach(l => l.Splitter?.MidPoint.MarkPoint());
             }
             SegLines = SegLines.Slice(groups.Last());
+
             //5.判断起始、终结线是否明确 + 更新连接关系
             isVaild = FilteringSegLines(SegLines);
             //6.获取有效车道
             SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex);
             //7.求迭代范围
             SegLines.ForEach(l => l.UpdateLowerUpperBound(WallLine, BuildingSpatialIndex, OuterBoundSPIndex));
+            
             //ShowLowerUpperBound();
             //SegLines = SegLines.Select(l => l.GetMovedLine()).ToList();
             //SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
             //showVaildLanes();
             return true;
         }
+        //可动建筑预处理
+        public void MovingBuildingPreProcess()
+        {
+            if(MovingBounds.Count == 0) return;
+            //var movingBuildings = new List<Polygon>();
+            //MovingBounds.ForEach(b => movingBuildings.AddRange(BuildingSpatialIndex.SelectCrossingGeometry(b).Cast<Polygon>()));
+            
+            for (int i = 0; i < MovingBounds.Count; i++)
+            {
+                var bound = MovingBounds[i];
+                bound = new GeometryCollection(BuildingSpatialIndex.SelectCrossingGeometry(bound).ToArray()).ConvexHull() as Polygon;
+                //var dist = obb.Centroid.Distance(obb.Shell) - 1;
+                //obb = (Polygon)obb.Buffer(-dist, MitreParam);
+                MovingBounds[i] = bound;
+                bound.ToDbMPolygon().AddToCurrentSpace();
+            }
+            var MovingBoundSPindex = new MNTSSpatialIndex(MovingBounds);
+
+            var halfRoadWidth = ParameterStock.RoadWidth / 2;
+
+            foreach (var segLine in SegLines)
+            { 
+                var laneRect = segLine.Splitter.OGetRect(halfRoadWidth);
+                var selected = MovingBoundSPindex.SelectCrossingGeometry(laneRect).Cast<Polygon>();
+                if(selected.Count() == 0) continue;
+                var splitter = segLine.Splitter.ToLineString();
+                var selectedGeo = new MultiPolygon(selected.ToArray());
+                var IntSecCenter = splitter.Intersection(selectedGeo).Centroid;
+                splitter = splitter.Difference(selectedGeo).Get<LineString>().OrderBy(l => l.Length).Last();
+                var coors = splitter.Coordinates.ToList();
+                coors.Add(IntSecCenter.Coordinate);
+                coors = coors.PositiveOrder();
+                segLine.Splitter = new LineSegment(coors.First(), coors.Last());
+            }
+            showVaildLanes();
+            
+        }
+
         public SegLine ToSegLine(Line line,double extendTol = 1)
         {
             var segLine = new SegLine(line.ToNTSLineSegment().OExtend(extendTol),line.Layer.Contains("固定"), -1);
