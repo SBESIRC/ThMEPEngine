@@ -148,8 +148,6 @@ namespace ThMEPWSS.ViewModel
             Blocks.Add("机械车位");
             BlockNameConfigList.Add("机械车位", new List<List<string>>() { new List<string>(), new List<string>() });
 
-
-
             Blocks.Add("空调内机--挂机");
             BlockNameConfigList.Add("空调内机--挂机", new List<List<string>>() { new List<string>(), new List<string>() });
 
@@ -157,10 +155,9 @@ namespace ThMEPWSS.ViewModel
             BlockNameConfigList.Add("空调内机--柜机", new List<List<string>>() { new List<string>(), new List<string>() });
 
             Blocks.Add("门块");
-            //什么鬼XD，写作List实际上是Dict
             BlockNameConfigList.Add("门块", new List<List<string>>() { new List<string>(), new List<string>() });
 
-            UpdateBlockList();
+            //UpdateBlockList();
         }
         static readonly Dictionary<int, string> dict = new Dictionary<int, string>() { { 3, "洗脸盆" }, { 4, "洗涤槽" }, { 5, "拖把池" }, { 6, "洗衣机" }, { 8, "淋浴房" }, { 9, "转角淋浴房" }, { 10, "浴缸" }, { 11, "喷头" }, { 0, "坐便器" }, { 1, "小便器" }, { 2, "蹲便器" }, { 12, "地漏" } };
         public void UpdateBlockList()
