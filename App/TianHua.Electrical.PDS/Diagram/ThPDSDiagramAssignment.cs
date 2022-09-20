@@ -157,12 +157,14 @@ namespace TianHua.Electrical.PDS.Diagram
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
                         {
-                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_1, firstPosition, scale);
+                            var firePowerMonitoring=insertEngine.Insert1(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_1, firstPosition, scale);
+                            tableObjs.Add(firePowerMonitoring);
                         }
                         // 电气火灾监控
                         if (node.Details.ElectricalFireMonitoring)
                         {
-                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_1, firstPosition, scale);
+                            var electricalFireMonitoring = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_1, firstPosition, scale);
+                            tableObjs.Add(electricalFireMonitoring);
                         }
 
                         return Tuple.Create(true, objs.OfType<Polyline>().First());
@@ -239,12 +241,14 @@ namespace TianHua.Electrical.PDS.Diagram
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
                         {
-                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_2, thirdPosition, scale);
+                            var firePowerMonitoring = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_2, thirdPosition, scale);
+                            tableObjs.Add(firePowerMonitoring);
                         }
                         // 电气火灾监控
                         if (node.Details.ElectricalFireMonitoring)
                         {
-                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_2, thirdPosition, scale);
+                            var electricalFireMonitoring = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_2, thirdPosition, scale);
+                            tableObjs.Add(electricalFireMonitoring);
                         }
 
                         return Tuple.Create(true, objs.OfType<Polyline>().First());
@@ -354,12 +358,14 @@ namespace TianHua.Electrical.PDS.Diagram
                         // 消防电源监控
                         if (node.Details.FirePowerMonitoring)
                         {
-                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_2, forthPosition, scale);
+                            var firePowerMonitoring = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.FIRE_POWER_MONITORING_2, forthPosition, scale);
+                            tableObjs.Add(firePowerMonitoring);
                         }
                         // 电气火灾监控
                         if (node.Details.ElectricalFireMonitoring)
                         {
-                            insertEngine.Insert(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_2, forthPosition, scale);
+                            var electricalFireMonitoring = insertEngine.Insert1(activeDb, configDb, ThPDSCommon.ELECTRICAL_FIRE_MONITORING_2, forthPosition, scale);
+                            tableObjs.Add(electricalFireMonitoring);
                         }
 
                         return Tuple.Create(true, objs.OfType<Polyline>().First());
