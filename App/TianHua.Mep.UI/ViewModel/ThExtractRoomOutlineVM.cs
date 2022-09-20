@@ -20,7 +20,6 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model.Common;
-using ThMEPTCH.Services;
 using TianHua.Mep.UI.Data;
 using TianHua.Mep.UI.Command;
 using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
@@ -33,8 +32,6 @@ namespace TianHua.Mep.UI.ViewModel
         private const string AIShearWallLayer = "AI-剪力墙";        
         public ObservableCollection<ThLayerInfo> LayerInfos { get; set; }
         public ObservableCollection<ThBlockInfo> DoorBlkInfos { get; set; }
-
-        private string _isSbndCmd = "";
 
         private bool _isShowDoorOpenState = false;
         public bool IsShowDoorOpenState
@@ -82,11 +79,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void ExtractRoomDatas()
         {
-            if (IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             using (var lockDoc = Active.Document.LockDocument())
             using (ThExtractRoomDataCmd cmd = new ThExtractRoomDataCmd(GetLayers()))
             {
@@ -118,117 +110,78 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void BuildRoomOutline()
         {
-            if (IsSBNDCmd())
+            using (var docLock = Active.Document.LockDocument())
             {
-                ShowSBNDRunCmdTip();
-                return;
-            }
-            _isSbndCmd = "SBND_PICK";
-            try
-            {
-                using (var docLock = Active.Document.LockDocument())
+                SetFocusToDwgView();
+
+                // 0、创建图层（把显示的区域打印到此图层上）
+                Active.Database.CreateAIRoomOutlineLayer();
+
+                // 1、把房间数据获取到
+                var roomDatas = GetRoomDataFromMS();
+                if (roomDatas.Count == 0)
                 {
-                    SetFocusToDwgView();
-
-                    // 0、创建图层（把显示的区域打印到此图层上）
-                    Active.Database.CreateAIRoomOutlineLayer();
-
-                    // 1、把房间数据获取到
-                    var roomDatas = GetRoomDataFromMS();
-                    if (roomDatas.Count == 0)
-                    {
-                        return;
-                    }
-
-                    // 2、再显示已存在的房间区域
-                    var roomAreaIds = ShowExistedRoomAreas(Active.Database);
-
-                    // 3、构建房间区域
-                    using (var cmd = new ThSuperBoundaryCmd(roomDatas))
-                    {
-                        cmd.Execute();
-                    }
-
-                    // 4、删除显示的房间区域
-                    Erase(Active.Database, roomAreaIds);
+                    return;
                 }
-            }
-            catch (Exception ex)
-            {
-                //
-            }
-            finally
-            {
-                _isSbndCmd = "";
+
+                // 2、再显示已存在的房间区域
+                var roomAreaIds = ShowExistedRoomAreas(Active.Database);
+
+                // 3、构建房间区域
+                using (var cmd = new ThSuperBoundaryCmd(roomDatas))
+                {
+                    cmd.Execute();
+                }
+
+                // 4、删除显示的房间区域
+                Erase(Active.Database, roomAreaIds);
             }
         }
         public void BuildRoomOutline1()
         {
-            if (IsSBNDCmd())
+            //借助于SuperBoundary的SBND_ALL命令
+            using (var docLock = Active.Document.LockDocument())
             {
-                ShowSBNDRunCmdTip();
-                return;
-            }
-            _isSbndCmd = "SBND_ALL";
-            try
-            {
-                //借助于SuperBoundary的SBND_ALL命令
-                using (var docLock = Active.Document.LockDocument())
+                SetFocusToDwgView();
+
+                // 0、选取范围
+                var pts = ThAuxiliaryUtils.GetRange();
+
+                // 1、获取房间名称
+                var roomNameTexts = GetRoomNames(Active.Database, pts);
+                if (roomNameTexts.Count == 0)
                 {
-                    SetFocusToDwgView();
-
-                    // 0、选取范围
-                    var pts = ThAuxiliaryUtils.GetRange();
-
-                    // 1、获取房间名称
-                    var roomNameTexts = GetRoomNames(Active.Database, pts);
-                    if (roomNameTexts.Count == 0)
-                    {
-                        MessageBox.Show("未找到任何的房间名称，无法生成房间框线!", "信息提示"
-                                , MessageBoxButton.OK, MessageBoxImage.Information);
-                        return;
-                    }
-
-                    // 2、创建图层（把显示的区域打印到此图层上）
-                    Active.Database.CreateAIRoomOutlineLayer();
-
-                    // 3、把房间数据获取到
-                    var roomDatas = GetRoomDataFromMS(pts);
-                    if (roomDatas.Count == 0)
-                    {
-                        MessageBox.Show("未获取到任何的墙线元素，无法生成房间框线！", "信息提示"
+                    MessageBox.Show("未找到任何的房间名称，无法生成房间框线!", "信息提示"
                             , MessageBoxButton.OK, MessageBoxImage.Information);
-                        return;
-                    }
-
-                    // 4、构建房间区域
-                    using (var cmd = new ThSuperBoundaryCmd(roomDatas, roomNameTexts))
-                    {
-                        cmd.Execute();
-                    }
-
-                    // 5、释放房间名称
-                    roomNameTexts.OfType<Entity>()
-                        .Where(o => o.ObjectId != ObjectId.Null)
-                        .ToCollection().MDispose();
+                    return;
                 }
-            }
-            catch(Exception ex)
-            {
-                //
-            }
-            finally
-            {
-                _isSbndCmd = "";
+
+                // 2、创建图层（把显示的区域打印到此图层上）
+                Active.Database.CreateAIRoomOutlineLayer();
+
+                // 3、把房间数据获取到
+                var roomDatas = GetRoomDataFromMS(pts);
+                if (roomDatas.Count == 0)
+                {
+                    MessageBox.Show("未获取到任何的墙线元素，无法生成房间框线！", "信息提示"
+                        , MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 4、构建房间区域
+                using (var cmd = new ThSuperBoundaryCmd(roomDatas, roomNameTexts))
+                {
+                    cmd.Execute();
+                }
+
+                // 5、释放房间名称
+                roomNameTexts.OfType<Entity>()
+                    .Where(o => o.ObjectId != ObjectId.Null)
+                    .ToCollection().MDispose();
             }
         }
         public void BuildDoors()
         {
-            if (IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             var doorBlkNames = DoorBlkInfos.Select(o => o.Name).ToList();
             using (var lockDoc = Active.Document.LockDocument())
             using (var cmd = new ThBuildDoorsCmd(
@@ -245,11 +198,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void SaveToDatabase()
         {
-            if (IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             using (var lockDoc = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             {
@@ -277,11 +225,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void PickWallLayer()
         {
-            if (IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             using (var docLock = Active.Document.LockDocument())
             using (var acdb = AcadDatabase.Active())
             {
@@ -327,11 +270,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void PickDoorBlock()
         {
-            if(IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             using (var docLock = Active.Document.LockDocument())
             using (var acdbDb = AcadDatabase.Active())
             {
@@ -381,11 +319,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void ShowDoorOutline()
         {
-            if (IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             using (var docLock = Active.Document.LockDocument())
             {
                 if (_doorBlkObbs.Count == 0)
@@ -400,11 +333,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void CloseDoorOutline()
         {
-            if (IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             using (var docLock = Active.Document.LockDocument())
             {
                 ClearTransientGraphics(_doorBlkObbs);
@@ -413,11 +341,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void RemoveLayers(List<string> layers)
         {
-            if (IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             if (layers.Count > 0)
             {
                 var layerInfos = LayerInfos
@@ -429,11 +352,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void RemoveDoorBlocks(List<ThBlockInfo> doorBlkInfos)
         {
-            if (IsSBNDCmd())
-            {
-                ShowSBNDRunCmdTip();
-                return;
-            }
             if (doorBlkInfos.Count > 0)
             {
                 doorBlkInfos.ForEach(o => DoorBlkInfos.Remove(o));
@@ -444,11 +362,6 @@ namespace TianHua.Mep.UI.ViewModel
         {
             MessageBox.Show("正在运行房间轮廓线生成命令，无法执行当前操作！", "信息提示",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
-        }
-
-        private bool IsSBNDCmd()
-        {
-            return _isSbndCmd == "SBND_PICK" || _isSbndCmd == "SBND_ALL";
         }
 
         private DBObjectCollection GetRoomDataFromMS()
