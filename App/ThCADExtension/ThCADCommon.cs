@@ -278,6 +278,11 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "地库指标表格.dwg");
         }
 
+        public static string SuperBoundaryIniPath()
+        {
+            return Path.Combine(SupportPath(), "SuperBoundaryConfig.ini");
+        }
+
         // 运行时根目录
         private static string RootPath()
         {

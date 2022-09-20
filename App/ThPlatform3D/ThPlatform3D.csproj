@@ -68,12 +68,23 @@
     <Compile Include="ArchitecturePlane\Service\ThWindowOutlineCreator.cs" />
     <Compile Include="ArchitecturePlane\ThArchitectureGenerator.cs" />
     <Compile Include="ArchitecturePlane\ThArchitecturePlaneCommon.cs" />
+    <Compile Include="Command\ThDropSlabDrawCmd.cs" />
+    <Compile Include="Command\ThDrawBaseCmd.cs" />
+    <Compile Include="Command\ThSlabDrawCmd.cs" />
+    <Compile Include="Command\ThWallHoleDrawCmd.cs" />
+    <Compile Include="Command\ThRailDrawCmd.cs" />
+    <Compile Include="Command\ThInsertBasePointCmd.cs" />
     <Compile Include="Common\PlaneJsonConfig.cs" />
     <Compile Include="Common\ThPlaneConfig.cs" />
     <Compile Include="Common\ThPlanePrintParameter.cs" />
     <Compile Include="Common\ThPlaneUtils.cs" />
     <Compile Include="Common\ThPrintService.cs" />
-    <Compile Include="Common\ThSvgInput.cs" />
+    <Compile Include="Data\ISetContainer.cs" />
+    <Compile Include="Data\ThAxisBasePointExtractionEngine.cs" />
+    <Compile Include="Data\ThAxisElementExtractionEngine.cs" />
+    <Compile Include="Data\ThAxisElementExtractionVisitor.cs" />
+    <Compile Include="Data\ThAxisBasePointExtractionVisitor.cs" />
+    <Compile Include="Data\ThBlockElementExtractor.cs" />
     <Compile Include="Model\Printer\PrintConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
@@ -115,6 +126,9 @@
     <Compile Include="StructPlane\ThStructurePlaneCommon.cs" />
     <Compile Include="StructPlane\ThStructurePlaneGenerator.cs" />
     <Compile Include="ThPlatform3DApp.cs" />
+    <Compile Include="ThPlatform3dDefaultContextMenuExtension.cs" />
+    <Compile Include="ThPlatform3DDrawCmds.cs" />
+    <Compile Include="ThPlatform3DIPCCmds.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -137,6 +151,13 @@
       <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPTCH\ThMEPTCH.csproj">
+      <Project>{ba9b9213-0d44-4913-94c5-5dc6c0172b31}</Project>
+      <Name>ThMEPTCH</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Service\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

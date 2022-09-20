@@ -6,10 +6,12 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
+using ThMEPTCH.PropertyServices.EntityProperties;
+using ThMEPTCH.PropertyServices.PropertyModels;
 
 namespace ThMEPTCH.CAD
 {
-    public static class ThTCHDbExtension
+    public static partial class ThTCHDbExtension
     {
         public static TArchDoor LoadDoorFromDb(this Database database, ObjectId tch, Matrix3d matrix, int uid)
         {
@@ -64,9 +66,19 @@ namespace ThMEPTCH.CAD
                     }
                 }
 
+                Override(door, tch);
+
                 door.TransformBy(matrix);
                 return door;
             }
+        }
+
+        private static void Override(TArchDoor door, ObjectId tch)
+        {
+            // 从XData获取门底高
+            var service = new TCHDoorPropertyService();
+            var property = service.GetProperty(tch) as TCHDoorProperty;
+            door.Height = property.Height;
         }
 
         public static TArchWindow LoadWindowFromDb(this Database database, ObjectId tch, Matrix3d matrix, int uid)
@@ -117,9 +129,20 @@ namespace ThMEPTCH.CAD
                     }
                 }
 
+                Override(window, tch);
+
                 window.TransformBy(matrix);
                 return window;
             }
+        }
+
+        private static void Override(TArchWindow window, ObjectId tch)
+        {
+            // 从XData获取窗高和底高
+            var service = new TCHWindowPropertyService();
+            var property = service.GetProperty(tch) as TCHWindowProperty;
+            window.Height = property.Height;
+            window.BasePoint = new Point3d(window.BasePoint.X, window.BasePoint.Y, property.BottomElevation);
         }
 
         public static TArchWall LoadWallFromDb(this Database database, ObjectId tch, Matrix3d matrix, int uid)
@@ -184,24 +207,32 @@ namespace ThMEPTCH.CAD
                     Id = (ulong)ThMEPDbUniqueIdService.UniqueId(tch, uid, matrix),
 
                     // 几何信息
-                    StartPointX = transCurve.StartPoint.X,
-                    StartPointY = transCurve.StartPoint.Y,
-                    StartPointZ = transCurve.StartPoint.Z,
-                    EndPointX = transCurve.EndPoint.X,
-                    EndPointY = transCurve.EndPoint.Y,
-                    EndPointZ = transCurve.EndPoint.Z,
+                    StartPoint = transCurve.StartPoint,
+                    EndPoint = transCurve.EndPoint,
                     LeftWidth = acadObj.LeftWidth,
                     RightWidth = acadObj.RightWidth,
                     Height = acadObj.Height,
-                    Elevtion = acadObj.Elevation,
 
                     // 圆弧信息
                     Bulge = Bulge(),
                     IsArc = IsArc(),
                 };
 
+                Override(wall, tch);
+
                 return wall;
             }
+        }
+
+        private static void Override(TArchWall wall, ObjectId tch)
+        {
+            // 从XData获取墙高和底高
+            var service = new TCHWallPropertyService();
+            var property = service.GetProperty(tch) as TCHWallProperty;
+            wall.Height = property.Height;
+            wall.EndPoint = new Point3d(wall.EndPoint.X, wall.EndPoint.Y, property.BottomElevation);
+            wall.StartPoint = new Point3d(wall.StartPoint.X, wall.StartPoint.Y, property.BottomElevation);
+            wall.EnumMaterial = property.EnumMaterial;
         }
 
         private static ResultBuffer GetDXFData(ObjectId tch)
@@ -214,6 +245,7 @@ namespace ThMEPTCH.CAD
 
             return rb;
         }
+
         private static DoorTypeOperationEnum GetOperationType(TypedValue tv)
         {
             var name = Convert.ToString(tv.Value);
@@ -221,7 +253,7 @@ namespace ThMEPTCH.CAD
             {
                 return ThTCHDbCommon.DoorTypeOperationMapping[name];
             }
-            return DoorTypeOperationEnum.SWING;
+            return DoorTypeOperationEnum.SWING0001;
         }
 
         private static WindowTypeEnum GetWindowType(TypedValue tv)

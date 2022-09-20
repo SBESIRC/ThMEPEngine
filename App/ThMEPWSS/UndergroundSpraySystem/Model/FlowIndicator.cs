@@ -32,8 +32,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 var Results = acadDatabase
                     .ModelSpace
-                    .OfType<BlockReference>()
-                    //.Where(o => IsTargetLayer(o.Layer))
+                    .OfType<Entity>()
                     .Where(o => IsTarget(o))
                     .ToList();
                 if (Results.Count == 0) return;
@@ -50,8 +49,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             if (entity is BlockReference blockReference)
             {
                 var blkName = blockReference.GetEffectiveName().ToUpper();
-                return blkName.Equals(BlockName) ||
-                    (blkName.Contains("VALVE") && blkName.Contains("531"));
+                return IsTarget(blkName);
             }
             else if (entity.IsTCHValve())
             {
@@ -60,12 +58,23 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 if (objs[0] is BlockReference bkr)
                 {
                     var blkName = bkr.Name.ToUpper();
-                    return blkName.Contains(BlockName) ||
-                           (blkName.Contains("VALVE") && blkName.Contains("531"));
+                    return IsTarget(blkName);
                 }
             }
             return false;
         }
+
+        private bool IsTarget(string blkName)
+        {
+            return (blkName.Contains("VALVE") && blkName.Contains("531")) ||
+                (blkName.Contains("VALVE") && blkName.Contains("74")) ||
+                (blkName.Contains("VALVE") && blkName.Contains("75")) ||
+                (blkName.Contains("VALVE") && blkName.Contains("76")) ||
+                (blkName.Contains("VALVE") && blkName.Contains("77")) ||
+                (blkName.Contains("VALVE") && blkName.Contains("27")) ||
+                blkName.Contains("信号阀+水流指示器") ;
+        }
+
         private BlockReference ExplodeValve(Entity entity)
         {
             if (entity is BlockReference bkr)
@@ -92,15 +101,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         (bounds.Value.MaxPoint.Y + bounds.Value.MinPoint.Y) / 2);
                     var newpt = pt.ToPoint3d();
                     pts.Add(new Point3dEx(newpt));
-                    sprayIn.FlowTypeDic.Add(new Point3dEx(newpt), br.ObjectId.GetDynBlockValue("可见性"));
+                    try
+                    {
+                        sprayIn.FlowTypeDic.Add(new Point3dEx(newpt), br.ObjectId.GetDynBlockValue("可见性"));
+                    }
+                    catch
+                    {
+                        sprayIn.FlowTypeDic.Add(new Point3dEx(newpt), "");
+                    }
 
                 }
             }
             return pts;
         }
-        public DBObjectCollection CreatBlocks()
+        public List<Polyline> CreatBlocks()
         {
-            DBObjectCollection result = new DBObjectCollection();
+            var result = new List<Polyline>();
             foreach (var db in DBObjs)
             {
                 if (db is BlockReference br)
@@ -118,6 +134,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             flow.Explode(objs);
             var rect1 = new Polyline();//水流指示器
             var rect2 = new Polyline();//阀门
+            bool rst1 = false;
+            bool rst2 = false;
             foreach(var obj in objs)
             {
                 if(obj is BlockReference br)
@@ -125,12 +143,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     if(br.Name.Contains("水流指示器"))
                     {
                         rect1 = br.GetRect();
+                        rst1 = true;
                     }
                     if(br.Name.Contains("阀"))
                     {
                         rect2 = br.GetRect();
+                        rst2 = true;
                     }
                 }
+            }
+            if(!rst1|| !rst2)
+            {
+                return flow.GetRect();
             }
             var centPt1 = rect1.GetCenter();
             var centPt2 = rect2.GetCenter();

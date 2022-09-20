@@ -18,6 +18,19 @@ namespace TianHua.Mep.UI.Data
             CheckQualifiedBlockName = CheckBlockNameIsValid;
         }
 
+        public override bool IsSpatialElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj)
         {
             if (dbObj is BlockReference br)

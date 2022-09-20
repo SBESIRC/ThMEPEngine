@@ -41,8 +41,8 @@ namespace ThMEPHVAC
                 List<DrawPipeData> pipe_in = new List<DrawPipeData>();
                 pipe_in.Add(new DrawPipeData(circle.Center, circle.Radius, 0, 0));
                 // input room_buffer
-                double buffer = 500;
-                double room_buffer = 100;
+                double buffer = 400;
+                double room_buffer = 200;
                 // core process
                 RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(room, pipe_in, buffer, room_buffer);
                 roomPipeGenerator.CalculatePipeline();
@@ -104,7 +104,7 @@ namespace ThMEPHVAC
                     pipe_out_list.Add(new DrawPipeData(circle.Center, circle.Radius, pouts_freedom[i], i));
                 }
 
-                double buffer = 500;
+                double buffer = 600;
                 double room_buffer = 100;
                 // core process
                 PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(room, pipe_in_list, pipe_out_list, main_index, buffer, room_buffer, 0);
@@ -153,11 +153,30 @@ namespace ThMEPHVAC
 
                 Polyline newPl = new Polyline();
                 //PolylineProcessService.ClearBendsTest(pipePl, roomPl, 400,out newPl);
-                newPl = PolylineProcessService.ClearBendsLongFirst(pipePl, roomPl, 400, 0);
-                DrawUtils.ShowGeometry(newPl, "l2PipeClear", 170, lineWeightNum: 30);
+                newPl = ClearSinglePolyline.ClearBendsLongFirstClosed(pipePl, roomPl, 400);
+                DrawUtils.ShowGeometry(newPl, "l8PipeClear", 170, lineWeightNum: 30);
             }
         }
 
+        public void THPIPECLEAR2()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // input polygon
+                var roomSelect = Active.Editor.GetEntity("select room");
+                if (roomSelect.Status != PromptStatus.OK) return;
+                Polyline roomPl = acadDatabase.Element<Polyline>(roomSelect.ObjectId);
+
+                var pipeSelect = Active.Editor.GetEntity("select pipe");
+                if (pipeSelect.Status != PromptStatus.OK) return;
+                Polyline pipePl = acadDatabase.Element<Polyline>(pipeSelect.ObjectId);
+
+                Polyline newPl = new Polyline();
+                //PolylineProcessService.ClearBendsTest(pipePl, roomPl, 400,out newPl);
+                //newPl = ClearSinglePolyline.ClearBendsLongFirstUnClosed(pipePl, roomPl, 400);
+                DrawUtils.ShowGeometry(newPl, "l8PipeClear", 170, lineWeightNum: 30);
+            }
+        }
 
 
         [CommandMethod("TIANHUACAD", "MAINPIPE", CommandFlags.Modal)]

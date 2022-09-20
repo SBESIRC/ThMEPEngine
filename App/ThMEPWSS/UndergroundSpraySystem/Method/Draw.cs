@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
@@ -22,6 +23,49 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
 #endif
         }
+
+        public static void Circle(Circle circle, string layer)
+        {
+#if DEBUG
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                DbHelper.EnsureLayerOn(layer);
+                circle.LayerId = DbHelper.GetLayerId(layer);
+                acadDatabase.CurrentSpace.Add(circle);
+            }
+#endif
+        }
+        public static void Lines(List<Line> lines,string layer)
+        {
+#if DEBUG
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                DbHelper.EnsureLayerOn(layer);
+                foreach (var line in lines)
+                {
+                    line.LayerId = DbHelper.GetLayerId(layer);
+                    acadDatabase.CurrentSpace.Add(line);
+                }
+            }
+#endif
+        }
+
+
+        public static void Rects(List<Polyline> rects, string layer)
+        {
+#if DEBUG
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                DbHelper.EnsureLayerOn(layer);
+                foreach(var rect in rects)
+                {
+                    rect.LayerId = DbHelper.GetLayerId(layer);
+                    acadDatabase.CurrentSpace.Add(rect);
+                }
+            }
+#endif
+        }
+
         public static void MainLoop(AcadDatabase acadDatabase, List<List<Point3dEx>> mainPathList)
         {
 #if DEBUG
@@ -237,7 +281,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         }
 
 
-        public static void Verticals(List<Point3dEx> pts)
+        public static void Verticals(Dictionary<Point3dEx,double> pts)
         {
 #if DEBUG
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -247,9 +291,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 {
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
                 }
-                foreach (var pt in pts)
+                foreach (var pair in pts)
                 {
-                    var circle = new Circle(pt._pt, new Autodesk.AutoCAD.Geometry.Vector3d(0, 0, 1), 500);
+                    var circle = new Circle(pair.Key._pt, new Autodesk.AutoCAD.Geometry.Vector3d(0, 0, 1), pair.Value);
                     circle.LayerId = DbHelper.GetLayerId(layerNames);
                     acadDatabase.CurrentSpace.Add(circle);
                 }

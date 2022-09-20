@@ -28,7 +28,7 @@ namespace ThMEPTCH.CAD
 
         public override bool IsBuildElement(Entity e)
         {
-            return e.IsTCHOpening() && e.IsWindow();
+            return e.IsTCHWindow();
         }
 
         public override bool CheckLayerValid(Entity e)

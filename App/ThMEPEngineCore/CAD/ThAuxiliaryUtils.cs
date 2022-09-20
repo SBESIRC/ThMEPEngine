@@ -7,6 +7,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
@@ -251,6 +252,17 @@ namespace ThMEPEngineCore.CAD
                 }
             });
             return dict;
+        }
+        public static Point3dCollection GetRange()
+        {
+            var frame = ThWindowInteraction.GetPolyline(
+                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
+            if (frame.Area < 1e-4)
+            {
+                return new Point3dCollection();
+            }
+            var nFrame = ThMEPFrameService.Normalize(frame);
+            return nFrame.Vertices();
         }
     }
 }

@@ -148,6 +148,7 @@ namespace ThMEPLighting
 
                 //确定位移中心
                 var transOriPt = ALEOri.Position;
+                //transOriPt = new Autodesk.AutoCAD.Geometry.Point3d(0, 0, 0);
                 var transformer = new ThMEPOriginTransformer(transOriPt);
 
                 //转换框线

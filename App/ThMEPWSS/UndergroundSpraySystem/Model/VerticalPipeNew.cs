@@ -46,28 +46,24 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                    .ToList();
 
                 var spatialIndex1 = new ThCADCoreNTSSpatialIndex(Results1.ToCollection());
-
                 //spatialIndex不支持圆
                 var map = new Dictionary<Polyline, Circle>();
                 Results2.ForEach(o => map.Add(o.ToRectangle(), o));
                 var spatialIndex2 = new ThCADCoreNTSSpatialIndex(map.Keys.ToCollection());
-
                 var spatialIndex3 = new ThCADCoreNTSSpatialIndex(Results3.ToCollection());
+                
+                var dbObjs1 = spatialIndex1.SelectCrossingPolygon(selectArea);
+                var dbObjs2 = spatialIndex2.SelectCrossingPolygon(selectArea);
+                var dbObjs3 = spatialIndex3.SelectCrossingPolygon(selectArea);
 
-                foreach (var polygon in sprayIn.FloorRectDic.Values)
-                {
-                    var dbObjs1 = spatialIndex1.SelectCrossingPolygon(polygon);
-                    var dbObjs2 = spatialIndex2.SelectCrossingPolygon(polygon);
-                    var dbObjs3 = spatialIndex3.SelectCrossingPolygon(polygon);
+                dbObjs1.Cast<Entity>().ForEach(e => ExplodeTchPipe(e));
 
-                    dbObjs1.Cast<Entity>().ForEach(e => ExplodeTchPipe(e));
+                dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(map[e as Polyline]));
 
-                    dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(map[e as Polyline]));
-
-                    dbObjs3.Cast<Entity>().ForEach(e => ExplodeBlock(e));
-                }
+                dbObjs3.Cast<Entity>().ForEach(e => ExplodeBlock(e));
+                
                 sprayIn.Verticals = GetVerticals();
-                //Draw.Verticals(sprayIn.Verticals);
+                Draw.Verticals(sprayIn.Verticals);
             }
         }
 
@@ -103,7 +99,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 if(obj is Circle circle)
                 {
-                    if(circle.Radius > 50 && circle.Radius < 120)
+                    if(circle.Radius > 45 && circle.Radius < 120)
                     {
                         DBObjs.Add(circle);
                         return;
@@ -112,24 +108,20 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
         }
 
-        public List<Point3dEx> GetVerticals()
+        public Dictionary<Point3dEx, double> GetVerticals()
         {
-            var verticals = new List<Point3dEx>();
-            DBObjs.Cast<Entity>()
-                .ForEach(e => verticals.Add(new Point3dEx((e as Circle).Center)));
-            return verticals;
-        }
-
-        public ThCADCoreNTSSpatialIndex CreateVerticalSpatialIndex()
-        {
-            var rects = new DBObjectCollection();
-            foreach(var obj in DBObjs)
+            var verticals = new Dictionary<Point3dEx,double>();
+            foreach(var vertical in DBObjs)
             {
-                var circle = obj as Circle;
-                var rect = circle.Center.GetRect(100);
-                rects.Add(rect);
+                var circle = vertical as Circle;
+                var key = new Point3dEx(circle.Center);
+                var value = circle.Radius;
+                if (!verticals.ContainsKey(key))
+                {
+                    verticals.Add(key, value);
+                }
             }
-            return new ThCADCoreNTSSpatialIndex(rects);
+            return verticals;
         }
     }
 }

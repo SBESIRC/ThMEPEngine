@@ -16,7 +16,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Point3dEx LoopStartPt { get; set; }//环管起点
         public Point3dEx LoopEndPt { get; set; }//环管终点
         public List<Line> PipeLines { get; set; }//管道
-        public List<Point3dEx> Verticals { get; set; }//立管
+        public Dictionary<Point3dEx,double> Verticals { get; set; }//立管
         public List<Line> LeadLines { get; set; }//标注引线
         public List<DBText> PumpTexts { get; set; }
         public Dictionary<Point3dEx, List<Point3dEx>> PtDic { get; set; }//当前点及其邻接点
@@ -61,7 +61,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             LoopStartPt = new Point3dEx();
             LoopEndPt = new Point3dEx();
             PipeLines = new List<Line>();
-            Verticals = new List<Point3dEx>();
+            Verticals = new Dictionary<Point3dEx, double>();
             PumpTexts = new List<DBText>();
             PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();
             PtTypeDic = new Dictionary<Point3dEx, string>();

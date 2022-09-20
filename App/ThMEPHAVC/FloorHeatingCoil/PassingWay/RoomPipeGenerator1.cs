@@ -34,8 +34,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         Polyline input_seg = null;                                  // 入口轮廓
 
         double buffer_coefficent = 0.8;                             // 向内做buffer的系数，需要大于0.5
-
-        //double buffer_eps = 20;                                     // 向内做buffer的容差
+        double buffer_threshold = 150;                                     // 最小间距
 
         RoomPipeGenerator1() { }
 
@@ -62,6 +61,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
             var points = SmoothUtils.SmoothPolygon(PassageWayUtils.GetPolyPoints(poly));
             points.Add(points.First());
             poly = PassageWayUtils.BuildPolyline(points);
+
+            if (PublicValue.Clear0 == 1) 
+            {
+                poly = ClearSinglePolyline.ClearBendsLongFirstClosed(poly, poly, Parameter.ClearSingleBufferDis);
+            }
+
             BufferTreeNode node = new BufferTreeNode(poly, depth, parent);
             List<Polyline> next_buffers = null;
             // 第一层：先生成内层轮廓，后处理框线
@@ -75,7 +80,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     next_buffers = PassageWayUtils.Buffer(poly, flag ? -room_buffer : -buffer / 2 * buffer_coefficent);
                     next_buffers = DealWithNextBuffers(next_buffers, node.depth + 1);
                 }
+
                 DealWithOutShell(node, next_buffers);
+
+
             }
             // 第二层以上：先处理框线，后生成内层轮廓
             if(depth>=2)
@@ -89,12 +97,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (depth != 1)
             {
                 next_buffers = PassageWayUtils.Buffer(poly, flag ? -room_buffer : -buffer / 2);
-                next_buffers = DealWithNextBuffers(next_buffers, node.depth + 1);
+                if (depth > 0) 
+                      next_buffers = DealWithNextBuffers(next_buffers, node.depth + 1);
                 // 容差处理
                 if (next_buffers.Count == 0)
                 {
                     next_buffers = PassageWayUtils.Buffer(poly, flag ? -room_buffer : -buffer / 2 * buffer_coefficent);
-                    next_buffers = DealWithNextBuffers(next_buffers, node.depth + 1);
+
+                    if (depth > 0)
+                        next_buffers = DealWithNextBuffers(next_buffers, node.depth + 1);
                 }
                 // 最外层如果有多个，只保留能连接入口的那个区域
                 if (depth == 0 && next_buffers.Count > 1) 
@@ -148,7 +159,28 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 output = new PipeOutput();
                 output.pipe_id = pipe_input.pipe_id;
                 output.skeleton = new List<Polyline>();
-                output.shape = main_pipe.ToNTSPolygon().Union(input_seg.ToNTSPolygon()).ToDbCollection().Cast<Polyline>().First();
+                if(input_seg.Intersects(main_pipe))
+                    output.shape = main_pipe.ToNTSPolygon().Union(input_seg.ToNTSPolygon()).ToDbCollection().Cast<Polyline>().First();
+                else
+                {
+                    var ls = line.EndPoint;
+                    le = main_pipe.GetClosePoint(ls);
+                    var fixed_le = output_coords.OrderBy(o => o.DistanceTo(le)).First();
+                    fixed_le += (le - fixed_le).GetNormal() * pipe_width;
+                    var dp = fixed_le - le;
+                    ls += dp;
+                    le += dp;
+                    ls += (ls - le).GetNormal() * pipe_input.in_buffer;
+                    le += (le - ls).GetNormal() * pipe_width;
+                    var line2 = new Line(ls, le);
+                    //PassageShowUtils.ShowEntity(line2);
+                    var output_shape = new DBObjectCollection();
+                    output_shape.Add(main_pipe);
+                    output_shape.Add(input_seg);
+                    output_shape.Add(line2.Buffer(pipe_width));
+                    output.shape = output_shape.UnionPolygons().Cast<Polyline>().First();
+                    line2.Dispose();
+                }
             }
         }
         List<Polyline> DealWithNextBuffers(List<Polyline> next_buffers,int depth)
@@ -159,41 +191,46 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 // 内缩外扩得到real_poly
                 var inner_polys = PassageWayUtils.Buffer(next_buffer, -buffer / 4 * buffer_coefficent + 1, 1e-3);
                 var real_polys = new List<Polyline>();
+                double real_area = 0;
                 foreach (var inner_poly in inner_polys)
                 {
                     var real_poly = PassageWayUtils.Buffer(inner_poly, buffer / 4 * buffer_coefficent - 1, 1e-3).Cast<Polyline>().First();
                     real_polys.Add(real_poly);
+                    real_area += real_poly.Area;
                 }
-                // 求差
-                var rest_polys = next_buffer.Difference(real_polys.ToCollection()).Cast<Polyline>().ToList();
-                // 删除：1、与多个real_poly中相交的rest_poly   2、不足推荐宽度的rest_poly
-                for (int i = rest_polys.Count - 1; i >= 0; --i)
+                if (next_buffer.Area - real_area > 5)
                 {
-                    var smaller_rest = PassageWayUtils.Buffer(rest_polys[i], -buffer / 4 * buffer_coefficent + 1, 1e-3);
-                    if(smaller_rest.Count==0)
+                    // 求差
+                    var rest_polys = next_buffer.Difference(real_polys.ToCollection()).Cast<Polyline>().ToList();
+                    // 删除：1、与多个real_poly中相交的rest_poly   2、不足推荐宽度的rest_poly
+                    for (int i = rest_polys.Count - 1; i >= 0; --i)
                     {
-                        rest_polys[i].Dispose();
-                        rest_polys.RemoveAt(i);
-                        continue;
-                    }
-                    int count = 0;
-                    foreach (var real_poly in real_polys)
-                    {
-                        if (rest_polys[i].ToNTSPolygon().Intersects(real_poly.ToNTSPolygon()))
+                        var smaller_rest = PassageWayUtils.Buffer(rest_polys[i], -buffer_threshold / 2 + 1, 1e-3);
+                        if (smaller_rest.Count == 0)
                         {
-                            count++;
-                            if (count > 1)
-                                break;
+                            rest_polys[i].Dispose();
+                            rest_polys.RemoveAt(i);
+                            continue;
+                        }
+                        int count = 0;
+                        foreach (var real_poly in real_polys)
+                        {
+                            if (rest_polys[i].ToNTSPolygon().Intersects(real_poly.ToNTSPolygon()))
+                            {
+                                count++;
+                                if (count > 1)
+                                    break;
+                            }
+                        }
+                        if (count > 1)
+                        {
+                            rest_polys[i].Dispose();
+                            rest_polys.RemoveAt(i);
                         }
                     }
-                    if (count > 1)
-                    {
-                        rest_polys[i].Dispose();
-                        rest_polys.RemoveAt(i);
-                    }
+                    // 添加结果
+                    real_polys.AddRange(rest_polys);
                 }
-                // 添加结果
-                real_polys.AddRange(rest_polys);
                 ret.AddRange(real_polys.ToCollection().UnionPolygons().Cast<Polyline>());
             }
             return ret;
@@ -309,6 +346,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
             coords = SmoothUtils.SmoothPoints(coords);
             node.IsCW = is_clockwise;
+
             node.SetShell(PassageWayUtils.BuildPolyline(coords));
             output_coords.AddRange(coords);
             output_coords = SmoothUtils.SmoothPoints(output_coords);
@@ -558,14 +596,19 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         var inner_poly = PassageWayUtils.BuildPolyline(inner_coords);
                         coords.Add(coords.First());
                         var shell_poly = PassageWayUtils.BuildPolyline(coords);
-                        inner_poly = PassageWayUtils.Buffer(inner_poly, -1).First();
-                        if (!inner_poly.ToNTSLineString().Intersects(shell_poly.ToNTSLineString()))
+                        //PassageShowUtils.ShowEntity(inner_poly);
+                        var buffer_inner_poly = PassageWayUtils.Buffer(inner_poly, -1);
+                        if(buffer_inner_poly.Count>0)
                         {
-                            inner_coords.RemoveAt(inner_coords.Count - 1);
-                            var index = PassageWayUtils.GetPointIndex(inner_coords[0], output_coords);
-                            if (index != -1)
+                            inner_poly = buffer_inner_poly.First();
+                            if (!inner_poly.ToNTSLineString().Intersects(shell_poly.ToNTSLineString()))
                             {
-                                output_coords.InsertRange(index + 1, inner_coords);
+                                inner_coords.RemoveAt(inner_coords.Count - 1);
+                                var index = PassageWayUtils.GetPointIndex(inner_coords[0], output_coords);
+                                if (index != -1)
+                                {
+                                    output_coords.InsertRange(index + 1, inner_coords);
+                                }
                             }
                         }
                         inner_poly.Dispose();
@@ -575,7 +618,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
         }
         /// <summary>
-        /// 找到外轮廓的连接点：1、距离当前轮廓小于buffer/2  2、靠近外轮廓终点  3、距离外轮廓的上一个点大于buffer/2  4、当前轮廓上的点距离上一个点大于buffer/2*buffer_coefficent
+        /// 找到外轮廓的连接点：1、距离当前轮廓小于buffer/2  2、靠近外轮廓终点  3、距离外轮廓的上一个点大于buffer/2  4、当前轮廓上的点距离上一个点大于buffer_threshold
         /// </summary>
         /// <param name="a_coords">多段线点集形式的外轮廓</param>
         /// <param name="b">内轮廓</param>
@@ -608,7 +651,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         continue;
                     var child_dis = close_point.DistanceTo(b_coords[pre_index]);
                     // 条件4
-                    if (child_dis < buffer / 2 * buffer_coefficent - 2) 
+                    if (child_dis < buffer_threshold - 2) 
                         continue;
                     // 条件3
                     var parent_dis = a_coords[i].DistanceTo(a_coords[i - 1]);
@@ -632,8 +675,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     {
                         var b_pre = b_coords[(j - 1+b_coords.Count) % b_coords.Count];
                         if (!PassageWayUtils.IsParallel(point - a_coords[i], b_coords[j] - b_pre)   // 外轮廓与内轮廓断线同向
-                            || point.DistanceTo(a_coords[i]) < buffer / 2 -2                          // 条件3
-                            || b_coords[j].DistanceTo(b_pre) < buffer / 2 * buffer_coefficent-2)      // 条件4
+                            || point.DistanceTo(a_coords[i]) < buffer / 2 - 2                          // 条件3
+                            || b_coords[j].DistanceTo(b_pre) < buffer_threshold - 2)       // 条件4
                             continue;
                         var dis = GetDistancePtoS(a_coords, point);
                         if (dis > last_point_dis)

@@ -28,6 +28,16 @@ namespace ThMEPEngineCore.Algorithm
         public const string DXF_OPENING = "TCH_OPENING";
 
         /// <summary>
+        /// 天正桥架
+        /// </summary>
+        public const string DXF_CABLETRY = "TCH_CABLETRY";
+
+        /// <summary>
+        /// 天正弯通
+        /// </summary>
+        public const string DXF_EFITTING = "TCH_EFITTING";
+
+        /// <summary>
         /// 是否是天正元素
         /// </summary>
         /// <param name="entity"></param>
@@ -169,14 +179,57 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
-        /// 天正开洞（门，窗等）
+        /// 天正窗
         /// </summary>
-        /// <param name="entity"></param>
+        /// <param name="e"></param>
         /// <returns></returns>
-        public static bool IsTCHOpening(this Entity entity)
+        public static bool IsTCHWindow(this Entity e)
+        {
+            return e.IsTCHOpening() && Kind(e).Contains("窗");
+        }
+
+        /// <summary>
+        /// 天正门
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        public static bool IsTCHDoor(this Entity e)
+        {
+            return e.IsTCHOpening() && Kind(e).Contains("门");
+        }
+
+        private static bool IsTCHOpening(this Entity entity)
         {
             var dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("OPENING");
+        }
+
+        private static string Kind(this Entity e)
+        {
+            dynamic obj = e.AcadObject;
+            return obj.GetKind as string;
+        }
+
+        /// <summary>
+        /// 天正桥架
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHCableCarrierSegment(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("CABLETRY");
+        }
+
+        /// <summary>
+        /// 天正弯通（弯通，三通）
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHCableCarrierFitting(this Entity entity)
+        {
+            var dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("EFITTING");
         }
 
         /// <summary>

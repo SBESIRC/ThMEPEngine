@@ -83,6 +83,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public static int WaterDirIndex = -10;
         static public Vector3d WaterOffset = new Vector3d(0, 0, 0);
 
+        //虚拟管道
+        public static bool HaveVirtualPipe = false;
+        public static Point3d VirtualPOut = new Point3d();
+        public static Polyline VirtualPlNow = new Polyline();
+
+
         public ProcessedData()
         {
 
@@ -98,12 +104,22 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             PipeList = null;
             DoorPipeToPointMap = null;
         }
+
+
+        public static void ClearVirtualPipe() 
+        {
+            HaveVirtualPipe = false;
+            VirtualPOut = new Point3d();
+            VirtualPlNow = new Polyline();
+        }
     }
 
     class PublicValue
     {
         static public List<TopoTreeNode> RegionTree = new List<TopoTreeNode>();
-
+        static public int ChangeSDis = 0; //
+        static public int Clear0 = 1; //RoomBuffer修线
+        static public int Clear1 = 1; //导向路径修线
     }
 
     class Parameter
@@ -111,7 +127,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         //用户输入设定
         static public double TotalLength = 115000;
 
-        static public double SuggestDistanceWall = 100;      //推荐靠墙间距
+        static public double SuggestDistanceWall = 200;      //推荐靠墙间距
         static public double SuggestDistanceRoom = 250;      //推荐管道间距
         static public double PipeSpaceing = 50;              //集水器管间距
         static public double KeyRoomShortSide = 2000;        //什么样的房间被认定为单独只出一根管道
@@ -135,7 +151,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         //清理框线
         static public double ClearThreshold = 280;
         static public double ClearExtendLength = 40000;    //清理耳朵时的延长长度
-        
+        static public double ClearSingleBufferDis = 110;    //清理耳朵时的延长长度
+        static public double ClearWholePipeDis = 50;
+
+
         //寻找门
         static public double DoorBufferValue = 500;       //门找区域时的单方向Buffer长度
 

@@ -44,7 +44,8 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                                 id.SetDynBlockValue(dyAttr.Key, dyAttr.Value);
                             }
                         }
-                        createRes.Add(new CreateResult(id, item.createPoint, item.equipmentType, item.floorId, item.tag));
+                        var createResult = new CreateResult(id, item.createPoint, item.equipmentType, item.floorId, item.tag, item.layerName,item.belongBlockId);
+                        createRes.Add(createResult);
                     }
                     catch (Exception ex) 
                     {                    
@@ -90,7 +91,8 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                         var id = acadDatabase.ModelSpace.Add(path);
                         if (null == id || !id.IsValid)
                             continue;
-                        createResults.Add(new CreateResult(id, item.baseCurce.StartPoint, EnumEquipmentType.other, item.floorId, ""));
+                        var createResult = new CreateResult(id, item.baseCurce.StartPoint, EnumEquipmentType.other, item.floorId, item.curveTag, item.layerName,item.belongBlockId);
+                        createResults.Add(createResult);
                     }
                     catch (Exception ex) 
                     { 
@@ -102,7 +104,7 @@ namespace ThMEPWSS.DrainageSystemAG.Services
             return createResults;
         }
 
-        public static List<CreateResult> CreateTextElement(this Database database, List<CreateDBTextElement> basicElements) 
+        public static List<CreateResult> CreateTextElement(this Database database, List<CreateDBTextElement> basicElements)
         {
             var createResults = new List<CreateResult>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -119,7 +121,7 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                             var dbText = acadDatabase.Element<DBText>(id);
                             DrawUtils.SetTextStyle(dbText, item.textStyle);
                         }
-                        createResults.Add(new CreateResult(id, item.dbText.Position, EnumEquipmentType.other, item.floorUid, ""));
+                        createResults.Add(new CreateResult(id, item.dbText.Position, EnumEquipmentType.other, item.floorUid, item.Tag, item.layerName,item.belongBlockId));
                     }
                     catch (Exception ex)
                     {
@@ -130,5 +132,5 @@ namespace ThMEPWSS.DrainageSystemAG.Services
             return createResults;
         }
     }
-    
+
 }

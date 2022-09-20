@@ -25,6 +25,11 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "建筑门窗填充样式文件.dwg");
         }
 
+        public static string CadTemplatePath()
+        {
+            return Path.Combine(SupportPath(), "图层图例.dwg");
+        }
+
         private static string SupportPath()
         {
             return Path.Combine(ContentsPath(), "Support");

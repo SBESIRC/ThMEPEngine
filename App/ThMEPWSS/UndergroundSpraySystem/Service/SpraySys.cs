@@ -100,7 +100,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     Draw.MainLoops(acadDatabase, mainPathList);
                     foreach (var path in mainPathList)
                     {
-                        spraySystem.MainLoops.Add(path);
+                        var ls = new List<Point3dEx>();
+                        foreach(var pt in path)
+                        {
+                            ls.Add(pt);
+                        }
+                        spraySystem.MainLoops.Add(ls);
                     }
                     BranchDeal2.Get(ref visited, sprayIn, spraySystem);
 

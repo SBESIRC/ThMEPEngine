@@ -22,7 +22,7 @@ namespace ThMEPTCH.CAD
                 foreach (string item in description.Split(','))
                 {
                     var fields = item.Split(':');
-                    if (fields.Length ==2 && fields[0].ToUpper() == "MAJOR" && fields[1].ToUpper() =="STRUCTURE")
+                    if (fields.Length ==2 && fields[0].ToUpper() == "MAJOR" && fields[1].TrimStart().ToUpper() =="STRUCTURE")
                     {
                         return true;
                     }

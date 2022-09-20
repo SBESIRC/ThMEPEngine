@@ -24,5 +24,6 @@ namespace ThMEPTCH.TCHTables
         public int IsParallel;//引线平行
         public int IsMask;//背景屏蔽
         public int VertexesPointStartID;//引线点链表起始ID
+        public double LayoutRotation;
     }
 }

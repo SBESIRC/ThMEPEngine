@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -15,7 +14,6 @@ using Dreambuild.AutoCAD;
 using ThCADExtension;
 
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Command;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 
 using ThMEPHVAC.FloorHeatingCoil.Cmd;
@@ -28,9 +26,49 @@ using System.Text.RegularExpressions;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Service
 {
-    internal class ThFloorHeatingCoilUtilServices
+    internal static class ThFloorHeatingCoilUtilServices
     {
-        public static ThFloorHeatingDataProcessService GetData(AcadDatabase acadDatabase, List<Polyline> selectFrames, ThMEPOriginTransformer transformer)
+        /// <summary>
+        /// debugMode: true:return (0,0,0) false:return far away point transformer
+        /// </summary>
+        /// <param name="selectFrames"></param>
+        /// <param name="debugMode"></param>
+        /// <returns></returns>
+        public static ThMEPOriginTransformer GetTransformer(List<Polyline> selectFrames, bool debugMode = false)
+        {
+            var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+
+            if (debugMode == false)
+            {
+                foreach (var frame in selectFrames)
+                {
+                    for (int i = 0; i < frame.NumberOfVertices; i++)
+                    {
+                        var p0 = frame.GetPoint3dAt((i + frame.NumberOfVertices - 1) % frame.NumberOfVertices);
+                        var p1 = frame.GetPoint3dAt(i % frame.NumberOfVertices);
+                        var p2 = frame.GetPoint3dAt((i + 1) % frame.NumberOfVertices);
+
+                        var dir = (p1 - p0).GetNormal();
+                        var dir2 = (p2 - p1).GetNormal();
+
+                        var angle = dir.GetAngleTo(dir2);
+
+                        if (Math.Abs(Math.Cos(angle)) < Math.Cos(Math.PI * 89 / 180))
+                        {
+                            transformer = new ThMEPOriginTransformer(p1);
+                            break;
+                        }
+                    }
+                    if (transformer.Displacement != Matrix3d.Identity)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return transformer;
+        }
+        public static ThFloorHeatingDataProcessService GetData(AcadDatabase acadDatabase, List<Polyline> selectFrames, ThMEPOriginTransformer transformer, bool withUI)
         {
             var dataFactory = new ThFloorHeatingDataFactory()
             {
@@ -40,14 +78,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 
             var dataQuery = new ThFloorHeatingDataProcessService()
             {
-                WithUI = ThFloorHeatingCoilSetting.Instance.WithUI,
+                WithUI = withUI,
                 Transformer = transformer,
                 InputExtractors = dataFactory.Extractors,
-                FurnitureObstacleData = dataFactory.SanitaryTerminal,
                 RoomSeparateLine = dataFactory.RoomSeparateLine,
                 WaterSeparatorData = dataFactory.WaterSeparator,
                 BathRadiatorData = dataFactory.BathRadiator,
-                FurnitureObstacleDataTemp = dataFactory.SenitaryTerminalOBBTemp,
+                FurnitureObstacle = dataFactory.ObstacleObb,
 
             };
             dataQuery.ProcessDataWithRoom(selectFrames);
@@ -83,11 +120,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             Parameter.AuxiliaryRoomConstraint = Convert.ToBoolean(vm.AuxiliaryRoomConstraint);
             Parameter.PrivatePublicMode = vm.PrivatePublicMode;
             Parameter.TotalLength = vm.TotalLenthConstraint * 1000;
+            Parameter.SuggestDistanceWall = vm.SuggestDistWall;
 
-            //  Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
-
-
-
+            ////---sub setting
+            //Parameter.KeyRoomShortSide = vm.MainRoomEdgeTol;
+            //Parameter.??? = vm.ConvexEdgeTol;
+            //
+            //Parameter.???= vm.FilletRadius;
         }
 
         public static void PairRoomWithRoomSuggest(ref List<ThRoomSetModel> roomSet, Dictionary<Polyline, BlockReference> roomPlSuggestDict, double suggestDistDefualt)
@@ -111,63 +150,29 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="roomList">近原点</param>
-        /// <param name="roomSuggest">远端，需要先trans，做完reset方便之后update和插入</param>
-        /// <returns></returns>
-        //public static Dictionary<Polyline, BlockReference> PairRoomPlWithRoomSuggest(List<ThFloorHeatingRoom> roomList, List<BlockReference> roomSuggest, ThMEPOriginTransformer transformer)
-        //{
-        //    var roomSuggestDict = new Dictionary<Polyline, BlockReference>();
-        //    foreach (var room in roomList)
-        //    {
-        //        roomSuggestDict.Add(room.RoomBoundary, null);
-        //        var roomCenter = room.RoomBoundary.GetCenter();
-        //        var suggestInRoom = roomSuggest.Where(x => room.RoomBoundary.Contains(x.Position)).ToList();
-        //        if (suggestInRoom.Any())
-        //        {
-        //            var suggest = suggestInRoom.OrderBy(x => x.Position.DistanceTo(roomCenter)).First();
-        //            roomSuggestDict[room.RoomBoundary] = suggest;
-        //        }
-        //        else
-        //        {
-        //            var suggestInOriRoom = roomSuggest.Where(x => room.OriginalBoundary.Contains(x.Position)).ToList();
-        //            if (suggestInOriRoom.Any())
-        //            {
-        //                var minDist = 2000.0;
-        //                foreach (var suggest in suggestInOriRoom)
-        //                {
-        //                    var dist = suggest.Position.DistanceTo(roomCenter);
-        //                    if (dist <= minDist)
-        //                    {
-        //                        minDist = dist;
-        //                        roomSuggestDict[room.RoomBoundary] = suggest;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    return roomSuggestDict;
-
-        //}
-
-
-        public static Dictionary<Polyline, BlockReference> PairRoomPlWithRoomSuggest(List<ThFloorHeatingRoom> roomList, List<BlockReference> roomSuggest, ThMEPOriginTransformer transformer)
+        /// <param name="roomList"></param>
+        /// <param name="roomSuggest"></param>
+        /// <param name="roomSuggestDict">kay: room boundary, value: ori blk</param>
+        public static void PairRoomPlWithRoomSuggest(List<ThFloorHeatingRoom> roomList, Dictionary<BlockReference, BlockReference> roomSuggest, ref Dictionary<Polyline, BlockReference> roomSuggestDict)
         {
-            var roomSuggestDict = new Dictionary<Polyline, BlockReference>();
-            var suggestListClone = new List<BlockReference>();
+            roomSuggestDict = new Dictionary<Polyline, BlockReference>();
             var roomSearchOriginal = new List<ThFloorHeatingRoom>();
 
-            suggestListClone.AddRange(roomSuggest);
+            var suggestList = roomSuggest.Select(x => x.Key).ToList();
 
             foreach (var room in roomList)
             {
                 roomSuggestDict.Add(room.RoomBoundary, null);
-                var roomCenter = room.RoomBoundary.GetCenter();
-                var suggestInRoom = suggestListClone.Where(x => room.RoomBoundary.Contains(x.Position)).ToList();
+                var roomCenter = room.RoomBoundary.GetCenterInPolyline();
+                var suggestInRoom = suggestList.Where(x => room.RoomBoundary.Contains(x.Position)).ToList();
                 if (suggestInRoom.Any())
                 {
                     var suggest = suggestInRoom.OrderBy(x => x.Position.DistanceTo(roomCenter)).First();
-                    roomSuggestDict[room.RoomBoundary] = suggest;
-
+                    var oriSuggest = roomSuggest[suggest];
+                    if (oriSuggest != null)
+                    {
+                        roomSuggestDict[room.RoomBoundary] = oriSuggest;
+                    }
                 }
                 else
                 {
@@ -176,12 +181,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 
             }
 
-            suggestListClone = suggestListClone.Except(roomSuggestDict.Select(x => x.Value)).ToList();
+            suggestList = suggestList.Except(roomSuggestDict.Select(x => x.Value)).ToList();
 
             foreach (var room in roomSearchOriginal)
             {
-                var suggestInOriRoom = suggestListClone.Where(x => room.OriginalBoundary.Contains(x.Position)).ToList();
-                var roomCenter = room.RoomBoundary.GetCenter();
+                var suggestInOriRoom = suggestList.Where(x => room.OriginalBoundary.Contains(x.Position)).ToList();
+                var roomCenter = room.RoomBoundary.GetCenterInPolyline();
                 if (suggestInOriRoom.Any())
                 {
                     var minDist = 2000.0;
@@ -191,29 +196,57 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                         if (dist <= minDist)
                         {
                             minDist = dist;
-                            roomSuggestDict[room.RoomBoundary] = suggest;
+                            var oriSuggest = roomSuggest[suggest];
+                            if (oriSuggest != null)
+                            {
+                                roomSuggestDict[room.RoomBoundary] = oriSuggest;
+                            }
                         }
                     }
                 }
             }
-            return roomSuggestDict;
-
         }
 
 
-
-        public static List<BlockReference> GetRoomSuggestData(Database database)
+        /// <summary>
+        /// key: transformed blk clone, value: original blk (for update)
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="transformer"></param>
+        /// <returns></trans></returns>
+        public static Dictionary<BlockReference, BlockReference> GetRoomSuggestData(Database database, ThMEPOriginTransformer transformer)
         {
-            //var extractService = new ThBlockReferenceExtractor()
+            var blkDict = new Dictionary<BlockReference, BlockReference>();
+
             var extractService = new ThExtractBlockReferenceService()
             {
                 BlockName = ThFloorHeatingCommon.BlkName_RoomSuggest,
             };
             extractService.Extract(database, new Point3dCollection());
-            var RoomRouteSuggestBlk = extractService.Blocks.ToList();
+            var roomRouteSuggestBlk = extractService.Blocks.ToList();
 
-            return RoomRouteSuggestBlk;
+            foreach (var blk in roomRouteSuggestBlk)
+            {
+                var transblk = blk.Clone() as BlockReference;
+                transformer.Transform(transblk);
+                blkDict.Add(transblk, blk);
+            }
+
+            return blkDict;
         }
+
+        public static Point3d GetCenterInPolyline(this Polyline shell)
+        {
+            var pt = shell.GetCenter();
+            if (shell.Contains(pt) == false)
+            {
+                pt = shell.GetMaximumInscribedCircleCenter();
+            }
+
+            return pt;
+
+        }
+
 
     }
 }

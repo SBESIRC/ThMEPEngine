@@ -5,10 +5,9 @@ using AcHelper;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Service;
 
-namespace ThMEPWSS.Command
+namespace ThMEPEngineCore.Command
 {
     public class ThPickRoomCmd : ThMEPBaseCommand, IDisposable
     {

@@ -71,7 +71,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 FloorListDatas = SystemDiagramUtils.GetStoreyInfoList(acadDatabase, objIds);
 
                 var FloorNum = storeysRecEngine.Elements
-                    .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey"))
+                    .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey") || (e as ThStoreys).StoreyTypeString.Equals("楼层"))
                     .Select(floor => (floor as ThStoreys).StoreyNumber).ToList()
                     .Where(e => !e.Trim().StartsWith("-") && !e.Trim().StartsWith("B")).ToList();
 

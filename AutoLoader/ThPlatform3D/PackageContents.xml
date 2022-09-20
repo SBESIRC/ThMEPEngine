@@ -25,7 +25,6 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THJGHM" Global="THJGHM" />
                 <Command Local="THDB2IFC" Global="THDB2IFC" />
-                <Command Local="THDB2Push" Global="THDB2Push" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -36,7 +35,6 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THJGHM" Global="THJGHM" />
                 <Command Local="THDB2IFC" Global="THDB2IFC" />
-                <Command Local="THDB2Push" Global="THDB2Push" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -45,6 +43,13 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThPlatform3D.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform" AppName="ThPlatform3D" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+				<Command Local="THBPI" Global="THBPI" />
+				<Command Local="THJBHZ" Global="THJBHZ" />
+				<Command Local="THLBHZ" Global="THLBHZ" />
+				<Command Local="THLGHZ" Global="THLGHZ" />
+				<Command Local="THQDHZ" Global="THQDHZ" />
+				<Command Local="THCAD2SUPUSH" Global="THCAD2SUPUSH" />
+				<Command Local="THCAD2P3DPUSH" Global="THCAD2P3DPUSH" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -53,6 +58,13 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThPlatform3D.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform" AppName="ThPlatform3D" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+				<Command Local="THBPI" Global="THBPI" />
+				<Command Local="THJBHZ" Global="THJBHZ" />
+				<Command Local="THLBHZ" Global="THLBHZ" />
+				<Command Local="THLGHZ" Global="THLGHZ" />
+				<Command Local="THQDHZ" Global="THQDHZ" />
+				<Command Local="THCAD2SUPUSH" Global="THCAD2SUPUSH" />
+				<Command Local="THCAD2P3DPUSH" Global="THCAD2P3DPUSH" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -63,6 +75,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="TH3D" Global="TH3D" />
                 <Command Local="THSMBTUI" Global="THSMBTUI" />
+                <Command Local="THAMBTUI" Global="THAMBTUI" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -71,7 +84,9 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/Tianhua.Platform3D.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for platform UI" AppName="ThPlatform3DUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="TH3D" Global="TH3D" />
                 <Command Local="THSMBTUI" Global="THSMBTUI" />
+                <Command Local="THAMBTUI" Global="THAMBTUI" />
             </Commands>
         </ComponentEntry>
     </Components>

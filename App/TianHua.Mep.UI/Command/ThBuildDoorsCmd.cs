@@ -46,8 +46,9 @@ namespace TianHua.Mep.UI.Command
         /// 至少有一侧为非剪力墙的可能出现门的宽度选择
         /// </summary>
         private HashSet<int> _OtherwallSpacing { get; set; }
+        private List<string> _doorBlkNames;
 
-        public ThBuildDoorsCmd(string wallLayer, string shearwallLayer, string doorLayer, string columnLayer)
+        public ThBuildDoorsCmd(string wallLayer, string shearwallLayer, string doorLayer, string columnLayer,List<string> doorBlkNames)
         {
             ActionName = "根据AI-墙线找门";
             CommandName = "XXXX";
@@ -55,6 +56,7 @@ namespace TianHua.Mep.UI.Command
             _shearwallLayer = shearwallLayer;
             _doorLayer = doorLayer;
             _columnLayer = columnLayer;
+            _doorBlkNames = doorBlkNames;
             _wallThickness = new HashSet<int> { 250, 300, 350, 400, 500, 600 };
             _columnThickness = new HashSet<int> { 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000 };
             _shearwallSpacing = new HashSet<int> { 5500, 5600, 6000, 7000 };

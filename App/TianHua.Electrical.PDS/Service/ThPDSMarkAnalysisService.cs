@@ -51,7 +51,7 @@ namespace TianHua.Electrical.PDS.Service
                 if (thPDSDistBox.LoadTypeCat_2.Equals(ThPDSLoadTypeCat_2.ResidentialDistributionPanel)
                     && str.Contains("AR"))
                 {
-                    var idRegex = new Regex(@"AR-[0-9]+");
+                    var idRegex = new Regex(@"AR-[0-9.]+");
                     var idMatch = idRegex.Match(str);
                     if (idMatch.Success)
                     {
@@ -819,13 +819,13 @@ namespace TianHua.Electrical.PDS.Service
         private double AnalyseResidentialPower(List<string> infos)
         {
             var highPower = 0.0;
-            var regex = new Regex(@"AR-[0-9]+");
+            var regex = new Regex(@"AR-[0-9.]+");
             foreach (var info in infos)
             {
                 var match = regex.Match(info);
                 if (match.Success)
                 {
-                    var numberRegex = new Regex(@"[0-9]+");
+                    var numberRegex = new Regex(@"[0-9.]+");
                     var numberMatch = numberRegex.Match(match.Value);
                     if (numberMatch.Success)
                     {

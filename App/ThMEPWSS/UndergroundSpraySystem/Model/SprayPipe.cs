@@ -1,6 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System.Collections.Generic;
@@ -16,29 +15,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     public class SprayPipe
     {
         public DBObjectCollection DBObjs { get; set; }
-        public List<Line> PipeLines { get; set; }
         public SprayPipe()
         {
-            PipeLines = new List<Line>();
             DBObjs = new DBObjectCollection();
-        }
-        public void Extract(Database database, SprayIn sprayIn)
-        {
-            using (var acadDatabase = AcadDatabase.Use(database))
-            {
-                var lines = ThDrainageSystemServiceGeoCollector.GetLines(
-                        acadDatabase.ModelSpace.OfType<Entity>().ToList(),
-                        layer => IsTargetLayer(layer));
-                foreach (var pline in sprayIn.FloorRectDic.Values)
-                {
-                    var dbObjs = GeoFac
-                    .CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())(pline.ToNTSPolygon())
-                    .SelectMany(x => x.ToDbCollection().OfType<DBObject>())
-                    .ToCollection();
-                    dbObjs.Cast<Entity>()
-                        .ForEach(e => DBObjs.Add(e));
-                }
-            }
         }
 
         public void Extract(Database database, Point3dCollection polygon)
@@ -86,7 +65,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 }
             }
             
-            return ThMEPWSS.UndergroundFireHydrantSystem.Service.PipeLineList.CleanLaneLines3(pipeLines);
+            return pipeLines;
         }
     }
 }

@@ -32,6 +32,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         static DrainageSystemAGViewmodel setViewModel = null;
         bool _createFrame = false;
         bool _readFloor = false;
+        bool _generate_TCHElements = false;
         uiPipeDrawControl uiPipeDraw;
         public uiDrainageSysAboveGround()
         {
@@ -118,14 +119,18 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 var config = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
                 FormUtil.DisableForm(gridForm);
                 ThDrainSystemAboveGroundCmd thDrainSystem = new ThDrainSystemAboveGroundCmd(viewModel.FloorFrameds.ToList(), setViewModel, config);
+                thDrainSystem.OutputTCHElements = _generate_TCHElements;
                 thDrainSystem.Execute();
                 //ThDrainSysADUIService.Instance.selectFloors = viewModel.FloorFrameds.ToList();
                 //ThDrainSysADUIService.Instance.viewmodel = setViewModel;
                 //ThDrainSysADUIService.Instance.layerNames = config;
                 //执行完成后窗口焦点不在CAD上，CAD界面不会及时更新，触发焦点到CAD
                 ThMEPWSS.Common.Utils.FocusToCAD();
-                //CommandHandlerBase.ExecuteFromCommandLine(false, "THTCHPIPIMP");
-                //ThMEPWSS.Common.Utils.FocusToCAD();
+                if (thDrainSystem.OutputTCHElements)
+                {
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THTCHPIPIMP");
+                    ThMEPWSS.Common.Utils.FocusToCAD();
+                }
             }
             catch (Exception ex)
             {
@@ -195,6 +200,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 MessageBox.Show("抱歉，出现未知错误\r\n" + ex.Message);
             }
+        }
+
+        private void GenerateCAD_Checked(object sender, RoutedEventArgs e)
+        {
+            _generate_TCHElements = false;
+        }
+
+        private void GenerateTCH_Checked(object sender, RoutedEventArgs e)
+        {
+            _generate_TCHElements = true;
         }
     }
     class ShowListViewModel : NotifyPropertyChangedBase

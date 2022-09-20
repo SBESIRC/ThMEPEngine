@@ -180,9 +180,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 Type = 3;
                 return;
             }
-            foreach(var vpt in sprayIn.Verticals)
+            foreach(var vpt in sprayIn.Verticals.Keys)
             {
-                if(vpt._pt.DistanceTo(PtEx._pt)<100)
+                if(vpt._pt.DistanceTo(PtEx._pt)< sprayIn.Verticals[vpt])
                 {
                     Type = 4;
                     break;

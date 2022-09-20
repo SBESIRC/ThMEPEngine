@@ -1,9 +1,11 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using HandyControl.Controls;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows.Input;
 using ThControlLibraryWPF.ControlUtils;
-using Tianhua.Platform3D.UI.PropertyServices;
+using ThMEPTCH.PropertyServices;
+using ThMEPTCH.PropertyServices.PropertyVMoldels;
 
 namespace Tianhua.Platform3D.UI.ViewModels
 {
@@ -12,13 +14,52 @@ namespace Tianhua.Platform3D.UI.ViewModels
         private PropertyService propertyService;
         public static readonly PropertiesViewModel Instacne = new PropertiesViewModel();
         private List<EntityProperties> EntityProperties;
+        private PropertyGrid propertyGrid;
+        private PropertyVMBase propertyVM { get; set; }
+        public PropertyVMBase PropertyVM 
+        {
+            get { return propertyVM; }
+            set 
+            {
+                if (null != propertyVM)
+                    propertyVM.PropertyChanged -= PropertyVM_PropertyChanged;
+                propertyVM = value;
+                this.RaisePropertyChanged();
+                if(null != propertyVM)
+                    propertyVM.PropertyChanged += PropertyVM_PropertyChanged;
+                PropertyGridUpdata();
+            }
+        }
+
+        private void PropertyVM_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (selectIds.Count < 1)
+                return;
+            var newModel = sender as PropertyVMBase;
+            if (null == newModel)
+                return;
+            string fieldName = e.PropertyName;
+            var type = newModel.GetType();
+            object value = type.GetProperty(fieldName).GetValue(newModel, null);
+            foreach (var id in selectIds) 
+            {
+                var entityOldProperty = EntityProperties.Find(c => c.EntityId == id).Properties;
+                var oldType = entityOldProperty.GetType();
+                oldType.GetProperty(fieldName).SetValue(entityOldProperty, value);
+                propertyService.LastSvrCache.SetProperty(id, entityOldProperty.Property,false);
+            }
+        }
+
         PropertiesViewModel() 
         {
             selectIds = new List<ObjectId>();
             propertyService = new PropertyService();
-            Properties = new ObservableCollection<THProperties>();
             EntityProperties = new List<EntityProperties>();
             ClearHisData();
+        }
+        public void InitPropertyGrid(PropertyGrid property)
+        {
+            propertyGrid = property;
         }
         public void SelectIds(List<ObjectId> selectIds) 
         {
@@ -66,90 +107,96 @@ namespace Tianhua.Platform3D.UI.ViewModels
                 RaisePropertyChanged("ShowTypeName");
             }
         }
-
-        private ObservableCollection<THProperties> properties { get; set; }
-        public ObservableCollection<THProperties> Properties 
-        {
-            get { return properties; }
-            set 
-            {
-                properties = value;
-                this.RaisePropertyChanged();
-            }
-        }
         private void SelectChanged(List<ObjectId> objIds) 
         {
             ClearHisData();
-            if (null == objIds || objIds.Count < 1)
-                return;
-            List<string> allTypes = new List<string>();
-            foreach (var item in objIds) 
+            if (null != objIds) 
             {
-                var typeName = propertyService.GetShowTypeProperties(item, out Dictionary<string, object> properties);
-                if (string.IsNullOrEmpty(typeName))
-                    continue;
-                var tempProp = new EntityProperties(item, typeName);
-                foreach (var keyValue in properties) 
+                foreach (var item in objIds)
                 {
-                    var prop = new THProperties(keyValue.Key, keyValue.Value, false, false);
-                    tempProp.Properties.Add(prop);
-                }
-                EntityProperties.Add(tempProp);
-            }
-            if (EntityProperties.Count < 1)
-                return;
-            var types = EntityProperties.Select(c => c.TypeName).Distinct().ToList();
-            Count = EntityProperties.Count;
-            IsMultipleType = types.Count > 1;
-            TypeName = IsMultipleType? "多类别": types.First();
-            Properties.Add(GetFirstRowData());
-            if (!isMultipleType) 
-            {
-                foreach (var item in EntityProperties.First().Properties)
-                {
-                    Properties.Add(item);
+                    var isVaild = propertyService.GetShowProperties(item, out PropertyVMBase properties);
+                    if (!isVaild)
+                        continue;
+                    selectIds.Add(item);
+                    var tempProp = new EntityProperties(item,properties.TypeName, properties);
+                    EntityProperties.Add(tempProp);
                 }
             }
+            PropertyVM = GetShowViewModel();
         }
         private void ClearHisData() 
         {
+            PropertyVM = null;
             selectIds.Clear();
             EntityProperties.Clear();
             IsMultipleType = false;
             TypeName = "未选择";
-            Properties.Clear();
             Count = 0;
         }
-        private THProperties GetFirstRowData() 
+        private PropertyVMBase GetShowViewModel() 
         {
-            var prop = new THProperties("构件类型", string.Format("{0}({1})", TypeName, Count),true,false);
-            return prop;
+            PropertyVMBase propertyVM = null;
+            if (EntityProperties.Count < 1)
+            {
+                propertyVM = propertyService.GetNoSelectVMProperty();
+            }
+            else 
+            {
+                var types = EntityProperties.Select(c => c.TypeName).Distinct().ToList();
+                Count = EntityProperties.Count;
+                IsMultipleType = types.Count > 1;
+                if (IsMultipleType)
+                {
+                    propertyVM = propertyService.GetMultiSelectVMProperty();
+                }
+                else 
+                {
+                    propertyVM = propertyService.LastSvrCache.MergePropertyVM(EntityProperties.Select(c => c.Properties).ToList());
+                    propertyVM.A01_ShowTypeName = string.Format("{0}({1})", types.First(), Count);
+                }
+            }
+            return propertyVM;
+        }
+        private void PropertyGridUpdata() 
+        {
+            //测试代码，设置排序问题,目前没有调试通。
+            if (null == propertyGrid)
+                return;
+            foreach (CommandBinding item in propertyGrid.CommandBindings) 
+            {
+                var commandName = ((System.Windows.Input.RoutedCommand)(item.Command)).Name;
+                if (string.IsNullOrEmpty(commandName))
+                    continue;
+                if (item.Command.CanExecute(null))
+                {
+
+                }
+                else if (item.Command.CanExecute(propertyGrid))
+                {
+
+                }
+                else if (item.Command.CanExecute(propertyGrid.DataContext))
+                {
+
+                }
+                else if (item.Command.CanExecute(propertyGrid.SelectedObject)) 
+                {
+                
+                }
+                item.Command.Execute(null);
+            }
         }
     }
     class EntityProperties 
     {
         public ObjectId EntityId { get; }
         public string TypeName { get; set; }
-        public List<THProperties> Properties { get; }
-        public EntityProperties(ObjectId objectId, string type) 
+        public PropertyVMBase Properties { get; }
+        public EntityProperties(ObjectId objectId,string type, PropertyVMBase propertyVM) 
         {
-            EntityId = objectId;
             TypeName = type;
-            Properties = new List<THProperties>();
-        }
-    }
-    class THProperties 
-    {
-        public string Name { get; }
-        public object Value { get; set; }
-        public bool? IsReadOnly { get; set; }
-        public bool IsMultipleValue { get; set; }
-        public THProperties(string name,object value,bool? isReadOnly,bool isMultiValue) 
-        {
-            Name = name;
-            Value = value;
-            IsReadOnly = isReadOnly;
-            IsMultipleValue = isMultiValue;
+            Properties = propertyVM;
+            EntityId = objectId;
         }
     }
 }

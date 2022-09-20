@@ -529,7 +529,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 if (haveBeam) 
                 {
                     //在横管穿越阳台和设备平台的位置设置穿墙套管。 图层：W-BUSH  图块：套管-AI    可见性：普通套管
-                    var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other);
+                    var addBlock = new CreateBlockInfo(_floorId, ThWSSCommon.Layout_PipeCasingBlockName, ThWSSCommon.Layout_PipeCasingLayerName, crossPoint, EnumEquipmentType.other, nearPipe.uid);
                     var angle = (-Vector3d.YAxis).GetAngleTo(outDir, Vector3d.ZAxis);
                     addBlock.rotateAngle = angle % (Math.PI * 2);
                     addBlock.dymBlockAttr.Add("可见性", "普通套管");
@@ -553,18 +553,18 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     var maxWidth = Math.Max(upWidth, btWidth);
                     var leftDir = Vector3d.XAxis;
 
-                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeCasingTextLayerName, "", ""));
-                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineEp, lineEp + leftDir.MultiplyBy(maxWidth + 100)), ThWSSCommon.Layout_PipeCasingTextLayerName, "", ""));
+                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineSp, lineEp), ThWSSCommon.Layout_PipeCasingTextLayerName, nearPipe.uid, ""));
+                    createBasicElements.Add(new CreateBasicElement(_floorId, new Line(lineEp, lineEp + leftDir.MultiplyBy(maxWidth + 100)), ThWSSCommon.Layout_PipeCasingTextLayerName, nearPipe.uid, ""));
                     var upTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(10);
                     upText.Position = upTextPt;
                     var btTextPt = lineEp + Vector3d.XAxis.MultiplyBy(10) + lineDri.MultiplyBy(btHeight + 30);
                     btText.Position = btTextPt;
-                    createDBTextElements.Add(new CreateDBTextElement(_floorId, upTextPt, upText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
-                    createDBTextElements.Add(new CreateDBTextElement(_floorId, btTextPt, btText, "", ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+                    createDBTextElements.Add(new CreateDBTextElement(_floorId, upTextPt, upText, nearPipe.uid, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
+                    createDBTextElements.Add(new CreateDBTextElement(_floorId, btTextPt, btText, nearPipe.uid, ThWSSCommon.Layout_PipeCasingTextLayerName, ThWSSCommon.Layout_TextStyle));
                 }
                 tempPoints = tempPoints.Where(c => !points.Any(x => x.DistanceTo(c) < 5)).ToList();
             }
-            
+
             return true;
         }
         Line NearRoomLine(Polyline roomPLine,Point3d pipeCenterPoint) 
@@ -664,6 +664,13 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     if (null == moveLine)
                         continue;
                     createBasicElements.Add(new CreateBasicElement(_floorId, moveLine, layerName,item.pipeBlockUid,"DLLG_LJX"));
+                }
+                foreach (var id in item.connectBlockIds)
+                {
+                    var drain = _balconyDrains.Find(c => c.belongBlockId.Equals(id));
+                    if (null == drain)
+                        continue;
+                    drain.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                 }
             }
         }

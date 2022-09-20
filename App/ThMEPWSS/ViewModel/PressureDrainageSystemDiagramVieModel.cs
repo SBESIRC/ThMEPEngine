@@ -93,7 +93,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                 }
                 UndpdsFloorListDatas = SystemDiagramUtils.GetStoreyInfoList(acadDatabase, storeysRecEngine.Elements.Select(e => (e as ThStoreys).ObjectId).ToArray());
                 var FloorNum = storeysRecEngine.Elements
-                    .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey"))
+                    .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey") || (e as ThStoreys).StoreyTypeString.Equals("楼层"))
                     .Select(floor => (floor as ThStoreys).StoreyNumber).ToList();
                 if (FloorNum.Count == 0)
                 {
@@ -183,9 +183,10 @@ namespace ThMEPWSS.Diagram.ViewModel
                     {
                         if (floornums[i].ToString().Contains(".5"))
                         {
+                            var value = floornums[i];
                             for (int j = 0; j < floornums.Count; j++)
                             {
-                                if (floornums[j] > floornums[i])
+                                if (floornums[j] > value)
                                     floornums[j] += 1;
                                 else if (i == j)
                                 {

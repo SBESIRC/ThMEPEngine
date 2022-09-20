@@ -23,14 +23,15 @@ public static partial class ThSUComponentDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChdUaFNVQ29tcG9uZW50RGF0YS5wcm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90",
-          "bxocVGhTVUNvbXBEZWZpbml0aW9uRGF0YS5wcm90byJpChFUaFNVQ29tcG9u",
-          "ZW50RGF0YRIrCgpkZWZpbml0aW9uGAEgASgLMhcuVGhTVUNvbXBEZWZpbml0",
-          "aW9uRGF0YRInCg90cmFuc2Zvcm1hdGlvbnMYAiABKAsyDi5UaFRDSE1hdHJp",
-          "eDNkYgZwcm90bzM="));
+          "bxoWVGhTVU1hdGVyaWFsRGF0YS5wcm90bxocVGhTVUNvbXBEZWZpbml0aW9u",
+          "RGF0YS5wcm90byKOAQoRVGhTVUNvbXBvbmVudERhdGESKwoKZGVmaW5pdGlv",
+          "bhgBIAEoCzIXLlRoU1VDb21wRGVmaW5pdGlvbkRhdGESJwoPdHJhbnNmb3Jt",
+          "YXRpb25zGAIgASgLMg4uVGhUQ0hNYXRyaXgzZBIjCghtYXRlcmlhbBgDIAEo",
+          "CzIRLlRoU1VNYXRlcmlhbERhdGFiBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, global::ThSUCompDefinitionDataReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, global::ThSUCompDefinitionDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUComponentData), global::ThSUComponentData.Parser, new[]{ "Definition", "Transformations" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUComponentData), global::ThSUComponentData.Parser, new[]{ "Definition", "Transformations", "Material" }, null, null, null, null)
         }));
   }
   #endregion
@@ -73,6 +74,7 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
   public ThSUComponentData(ThSUComponentData other) : this() {
     definition_ = other.definition_ != null ? other.definition_.Clone() : null;
     transformations_ = other.transformations_ != null ? other.transformations_.Clone() : null;
+    material_ = other.material_ != null ? other.material_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -106,6 +108,18 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     }
   }
 
+  /// <summary>Field number for the "material" field.</summary>
+  public const int MaterialFieldNumber = 3;
+  private global::ThSUMaterialData material_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThSUMaterialData Material {
+    get { return material_; }
+    set {
+      material_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -123,6 +137,7 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     }
     if (!object.Equals(Definition, other.Definition)) return false;
     if (!object.Equals(Transformations, other.Transformations)) return false;
+    if (!object.Equals(Material, other.Material)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -132,6 +147,7 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     int hash = 1;
     if (definition_ != null) hash ^= Definition.GetHashCode();
     if (transformations_ != null) hash ^= Transformations.GetHashCode();
+    if (material_ != null) hash ^= Material.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -158,6 +174,10 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
       output.WriteRawTag(18);
       output.WriteMessage(Transformations);
     }
+    if (material_ != null) {
+      output.WriteRawTag(26);
+      output.WriteMessage(Material);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -176,6 +196,10 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
       output.WriteRawTag(18);
       output.WriteMessage(Transformations);
     }
+    if (material_ != null) {
+      output.WriteRawTag(26);
+      output.WriteMessage(Material);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -191,6 +215,9 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     }
     if (transformations_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Transformations);
+    }
+    if (material_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Material);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -215,6 +242,12 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
         Transformations = new global::ThTCHMatrix3d();
       }
       Transformations.MergeFrom(other.Transformations);
+    }
+    if (other.material_ != null) {
+      if (material_ == null) {
+        Material = new global::ThSUMaterialData();
+      }
+      Material.MergeFrom(other.Material);
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -245,6 +278,13 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
           input.ReadMessage(Transformations);
           break;
         }
+        case 26: {
+          if (material_ == null) {
+            Material = new global::ThSUMaterialData();
+          }
+          input.ReadMessage(Material);
+          break;
+        }
       }
     }
   #endif
@@ -272,6 +312,13 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
             Transformations = new global::ThTCHMatrix3d();
           }
           input.ReadMessage(Transformations);
+          break;
+        }
+        case 26: {
+          if (material_ == null) {
+            Material = new global::ThSUMaterialData();
+          }
+          input.ReadMessage(Material);
           break;
         }
       }

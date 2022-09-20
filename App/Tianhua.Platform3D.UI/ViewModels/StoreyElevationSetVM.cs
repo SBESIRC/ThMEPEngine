@@ -3,15 +3,17 @@ using System.Linq;
 using System.Windows;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThMEPTCH.Services;
+using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Platform3D.UI.ViewModels
 {
     public class StoreyElevationSetVM
     {
-        private static bool isAlwaysPopupSaveTip = true;
-        //private static bool isAlwaysPopupSaveSuccessTip = true;
+        private string _activeTabName = "";
+        private string _copySourceTabName = "";
+        private bool isAlwaysPopupSaveTip = true;
+        //private  bool isAlwaysPopupSaveSuccessTip = true;
         private string _jsonExtensionName = ".StoreyInfo.json";
         private Dictionary<string, ObservableCollection<ThEditStoreyInfo>> _buildStoreys;
         public StoreyElevationSetVM() 
@@ -29,6 +31,23 @@ namespace TianHua.Platform3D.UI.ViewModels
             {
                 return _buildStoreys.Keys.ToList();
             }
+        }
+        /// <summary>
+        /// 记录复制选项卡的源Tab
+        /// </summary>
+        public string CopySourceTabName
+        {
+            get => _copySourceTabName;
+            set => _copySourceTabName = value;
+        }
+
+        /// <summary>
+        /// 记录StoreyTabControl活跃的TabName
+        /// </summary>
+        public string ActiveTabName
+        {
+            get => _activeTabName;
+            set => _activeTabName = value;
         }
 
         public void DeleteBuilding(string buildingName)
@@ -73,11 +92,11 @@ namespace TianHua.Platform3D.UI.ViewModels
             return _buildStoreys.ContainsKey(buildingName);
         }
 
-        public void CopyBuildingStoreys(string sourceBuildingName,string targetBuildName)
+        public void CopyBuildingStoreys(string targetBuildName)
         {
-            if(sourceBuildingName!= targetBuildName && IsExisted(sourceBuildingName) && IsExisted(targetBuildName))
+            if(this._copySourceTabName!= targetBuildName && IsExisted(this._copySourceTabName) && IsExisted(targetBuildName))
             {
-                var souceBuildStoreys = GetBuildingStoreys(sourceBuildingName);
+                var souceBuildStoreys = GetBuildingStoreys(this._copySourceTabName);
                 UpdateBuildingStoryes(targetBuildName, souceBuildStoreys);
             }
         }
@@ -105,7 +124,7 @@ namespace TianHua.Platform3D.UI.ViewModels
                 {
                     //if(isAlwaysPopupSaveSuccessTip)
                     //{
-                    //    var saveTipRes = MessageBox.Show("保存成功！是否基础弹出此提示？", "保存提示", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                    //    var saveTipRes = MessageBox.Show("保存成功！是否继续弹出此提示？", "保存提示", MessageBoxButton.YesNo, MessageBoxImage.Information);
                     //    if (saveTipRes == MessageBoxResult.No)
                     //    {
                     //        isAlwaysPopupSaveSuccessTip = false;
@@ -195,7 +214,7 @@ namespace TianHua.Platform3D.UI.ViewModels
 
         private string GetActiveDocName()
         {
-            if(acadApp.DocumentManager.Count>0)
+            if(acadApp.DocumentManager.MdiActiveDocument!=null)
             {
                 return acadApp.DocumentManager.MdiActiveDocument.Name;
             }

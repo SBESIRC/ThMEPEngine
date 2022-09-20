@@ -90,7 +90,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Parameter.PublicRegionConstraint = true;
 
             Parameter.SuggestDistanceWall = 100;
-            Parameter.SuggestDistanceRoom = 200;
+            Parameter.SuggestDistanceRoom = 300;
         }
 
         class DataPass

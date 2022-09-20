@@ -141,6 +141,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" Guid="{3A4804C4-979C-4633-9E0E-CF2FD79D86C2}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" Source="$(var.AutoloaderContentsPath)\Support\加气混凝土.pat" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_SuperBoundaryConfig" Guid="{0FCFE576-2968-4A42-8EAD-4DD44B9F948B}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_SuperBoundaryConfig" Source="$(var.AutoloaderContentsPath)\Support\SuperBoundaryConfig.ini" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -312,6 +315,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Parking_Stall_Table_Path" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Reinforced_Concrete" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_SuperBoundaryConfig" />
         </ComponentGroup>
     </Fragment>
 </Wix>

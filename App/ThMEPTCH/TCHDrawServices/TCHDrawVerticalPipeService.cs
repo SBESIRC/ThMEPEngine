@@ -90,6 +90,7 @@ namespace ThMEPTCH.TCHDrawServices
                 DocScale = verticalPipe.DocScale,
                 Spacing = verticalPipe.Spacing,
                 Radius = verticalPipe.DimRadius,
+                LayoutRotation=verticalPipe.LayoutRotation,
             };
             return pipeDim;
         }

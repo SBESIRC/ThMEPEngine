@@ -12,10 +12,14 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" Guid="{6C454254-2EA7-4EF8-B836-0BEBE5F7ECCA}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" Source="$(var.AutoloaderContentsPath)\Support\建筑门窗填充样式文件.dwg" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_CAD_Template" Guid="{A66DD263-E728-4100-982A-A1D91C9756FF}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_CAD_Template" Source="$(var.AutoloaderContentsPath)\Support\图层图例.dwg" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
     </Fragment>
     <Fragment>
         <ComponentGroup Id="ProductComponentsSupport">
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_CAD_Template" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Structure_Plan_Path" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Architecture_Template_Path" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Architecture_DoorWindow_Template_Path" />

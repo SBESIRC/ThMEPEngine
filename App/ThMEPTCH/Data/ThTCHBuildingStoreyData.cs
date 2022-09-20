@@ -22,20 +22,24 @@ public static partial class ThTCHBuildingStoreyDataReflection {
   static ThTCHBuildingStoreyDataReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "Ch1UaFRDSEJ1aWxkaW5nU3RvcmV5RGF0YS5wcm90bxoTVGhUQ0hSb290RGF0",
-          "YS5wcm90bxoTVGhUQ0hXYWxsRGF0YS5wcm90bxoTVGhUQ0hEb29yRGF0YS5w",
-          "cm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90bxoVVGhUQ0hXaW5kb3dEYXRhLnBy",
-          "b3RvGhZUaFRDSE9wZW5pbmdEYXRhLnByb3RvIvkBChdUaFRDSEJ1aWxkaW5n",
-          "U3RvcmV5RGF0YRIcCgRyb290GAEgASgLMg4uVGhUQ0hSb290RGF0YRIOCgZu",
-          "dW1iZXIYAiABKAkSDgoGaGVpZ2h0GAMgASgBEhEKCWVsZXZhdGlvbhgEIAEo",
-          "ARINCgV1c2FnZRgFIAEoCRIdCgZvcmlnaW4YBiABKAsyDS5UaFRDSFBvaW50",
-          "M2QSHQoFd2FsbHMYByADKAsyDi5UaFRDSFdhbGxEYXRhEh0KBWRvb3JzGAgg",
-          "AygLMg4uVGhUQ0hEb29yRGF0YRIhCgd3aW5kb3dzGAkgAygLMhAuVGhUQ0hX",
-          "aW5kb3dEYXRhYgZwcm90bzM="));
+          "Ch1UaFRDSEJ1aWxkaW5nU3RvcmV5RGF0YS5wcm90bxobVGhUQ0hCdWlsdEVs",
+          "ZW1lbnREYXRhLnByb3RvGhNUaFRDSFdhbGxEYXRhLnByb3RvGhNUaFRDSERv",
+          "b3JEYXRhLnByb3RvGhNUaFRDSEdlb21ldHJ5LnByb3RvGhVUaFRDSFdpbmRv",
+          "d0RhdGEucHJvdG8aE1RoVENIU2xhYkRhdGEucHJvdG8aFlRoVENIUmFpbGlu",
+          "Z0RhdGEucHJvdG8aFlRoVENIT3BlbmluZ0RhdGEucHJvdG8ikQMKF1RoVENI",
+          "QnVpbGRpbmdTdG9yZXlEYXRhEi0KDWJ1aWxkX2VsZW1lbnQYASABKAsyFi5U",
+          "aFRDSEJ1aWx0RWxlbWVudERhdGESDgoGbnVtYmVyGAIgASgJEg4KBmhlaWdo",
+          "dBgDIAEoARIRCgllbGV2YXRpb24YBCABKAESDQoFdXNhZ2UYBSABKAkSHQoG",
+          "b3JpZ2luGAYgASgLMg0uVGhUQ0hQb2ludDNkEhgKEG1lbW9yeV9zdG9yZXlf",
+          "aWQYByABKAkSJwoPbWVtb3J5X21hdHJpeDNkGAggASgLMg4uVGhUQ0hNYXRy",
+          "aXgzZBIdCgV3YWxscxgJIAMoCzIOLlRoVENIV2FsbERhdGESHQoFZG9vcnMY",
+          "CiADKAsyDi5UaFRDSERvb3JEYXRhEiEKB3dpbmRvd3MYCyADKAsyEC5UaFRD",
+          "SFdpbmRvd0RhdGESHQoFc2xhYnMYDCADKAsyDi5UaFRDSFNsYWJEYXRhEiMK",
+          "CHJhaWxpbmdzGA0gAygLMhEuVGhUQ0hSYWlsaW5nRGF0YWIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHWallDataReflection.Descriptor, global::ThTCHDoorDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, global::ThTCHWindowDataReflection.Descriptor, global::ThTCHOpeningDataReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThTCHBuiltElementDataReflection.Descriptor, global::ThTCHWallDataReflection.Descriptor, global::ThTCHDoorDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, global::ThTCHWindowDataReflection.Descriptor, global::ThTCHSlabDataReflection.Descriptor, global::ThTCHRailingDataReflection.Descriptor, global::ThTCHOpeningDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHBuildingStoreyData), global::ThTCHBuildingStoreyData.Parser, new[]{ "Root", "Number", "Height", "Elevation", "Usage", "Origin", "Walls", "Doors", "Windows" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHBuildingStoreyData), global::ThTCHBuildingStoreyData.Parser, new[]{ "BuildElement", "Number", "Height", "Elevation", "Usage", "Origin", "MemoryStoreyId", "MemoryMatrix3D", "Walls", "Doors", "Windows", "Slabs", "Railings" }, null, null, null, null)
         }));
   }
   #endregion
@@ -76,15 +80,19 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThTCHBuildingStoreyData(ThTCHBuildingStoreyData other) : this() {
-    root_ = other.root_ != null ? other.root_.Clone() : null;
+    buildElement_ = other.buildElement_ != null ? other.buildElement_.Clone() : null;
     number_ = other.number_;
     height_ = other.height_;
     elevation_ = other.elevation_;
     usage_ = other.usage_;
     origin_ = other.origin_ != null ? other.origin_.Clone() : null;
+    memoryStoreyId_ = other.memoryStoreyId_;
+    memoryMatrix3D_ = other.memoryMatrix3D_ != null ? other.memoryMatrix3D_.Clone() : null;
     walls_ = other.walls_.Clone();
     doors_ = other.doors_.Clone();
     windows_ = other.windows_.Clone();
+    slabs_ = other.slabs_.Clone();
+    railings_ = other.railings_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -94,15 +102,15 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     return new ThTCHBuildingStoreyData(this);
   }
 
-  /// <summary>Field number for the "root" field.</summary>
-  public const int RootFieldNumber = 1;
-  private global::ThTCHRootData root_;
+  /// <summary>Field number for the "build_element" field.</summary>
+  public const int BuildElementFieldNumber = 1;
+  private global::ThTCHBuiltElementData buildElement_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThTCHRootData Root {
-    get { return root_; }
+  public global::ThTCHBuiltElementData BuildElement {
+    get { return buildElement_; }
     set {
-      root_ = value;
+      buildElement_ = value;
     }
   }
 
@@ -181,10 +189,34 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     }
   }
 
+  /// <summary>Field number for the "memory_storey_id" field.</summary>
+  public const int MemoryStoreyIdFieldNumber = 7;
+  private string memoryStoreyId_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string MemoryStoreyId {
+    get { return memoryStoreyId_; }
+    set {
+      memoryStoreyId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "memory_matrix3d" field.</summary>
+  public const int MemoryMatrix3DFieldNumber = 8;
+  private global::ThTCHMatrix3d memoryMatrix3D_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThTCHMatrix3d MemoryMatrix3D {
+    get { return memoryMatrix3D_; }
+    set {
+      memoryMatrix3D_ = value;
+    }
+  }
+
   /// <summary>Field number for the "walls" field.</summary>
-  public const int WallsFieldNumber = 7;
+  public const int WallsFieldNumber = 9;
   private static readonly pb::FieldCodec<global::ThTCHWallData> _repeated_walls_codec
-      = pb::FieldCodec.ForMessage(58, global::ThTCHWallData.Parser);
+      = pb::FieldCodec.ForMessage(74, global::ThTCHWallData.Parser);
   private readonly pbc::RepeatedField<global::ThTCHWallData> walls_ = new pbc::RepeatedField<global::ThTCHWallData>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -193,9 +225,9 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   }
 
   /// <summary>Field number for the "doors" field.</summary>
-  public const int DoorsFieldNumber = 8;
+  public const int DoorsFieldNumber = 10;
   private static readonly pb::FieldCodec<global::ThTCHDoorData> _repeated_doors_codec
-      = pb::FieldCodec.ForMessage(66, global::ThTCHDoorData.Parser);
+      = pb::FieldCodec.ForMessage(82, global::ThTCHDoorData.Parser);
   private readonly pbc::RepeatedField<global::ThTCHDoorData> doors_ = new pbc::RepeatedField<global::ThTCHDoorData>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -204,14 +236,36 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   }
 
   /// <summary>Field number for the "windows" field.</summary>
-  public const int WindowsFieldNumber = 9;
+  public const int WindowsFieldNumber = 11;
   private static readonly pb::FieldCodec<global::ThTCHWindowData> _repeated_windows_codec
-      = pb::FieldCodec.ForMessage(74, global::ThTCHWindowData.Parser);
+      = pb::FieldCodec.ForMessage(90, global::ThTCHWindowData.Parser);
   private readonly pbc::RepeatedField<global::ThTCHWindowData> windows_ = new pbc::RepeatedField<global::ThTCHWindowData>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public pbc::RepeatedField<global::ThTCHWindowData> Windows {
     get { return windows_; }
+  }
+
+  /// <summary>Field number for the "slabs" field.</summary>
+  public const int SlabsFieldNumber = 12;
+  private static readonly pb::FieldCodec<global::ThTCHSlabData> _repeated_slabs_codec
+      = pb::FieldCodec.ForMessage(98, global::ThTCHSlabData.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHSlabData> slabs_ = new pbc::RepeatedField<global::ThTCHSlabData>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThTCHSlabData> Slabs {
+    get { return slabs_; }
+  }
+
+  /// <summary>Field number for the "railings" field.</summary>
+  public const int RailingsFieldNumber = 13;
+  private static readonly pb::FieldCodec<global::ThTCHRailingData> _repeated_railings_codec
+      = pb::FieldCodec.ForMessage(106, global::ThTCHRailingData.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHRailingData> railings_ = new pbc::RepeatedField<global::ThTCHRailingData>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThTCHRailingData> Railings {
+    get { return railings_; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -229,15 +283,19 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     if (ReferenceEquals(other, this)) {
       return true;
     }
-    if (!object.Equals(Root, other.Root)) return false;
+    if (!object.Equals(BuildElement, other.BuildElement)) return false;
     if (Number != other.Number) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Height, other.Height)) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Elevation, other.Elevation)) return false;
     if (Usage != other.Usage) return false;
     if (!object.Equals(Origin, other.Origin)) return false;
+    if (MemoryStoreyId != other.MemoryStoreyId) return false;
+    if (!object.Equals(MemoryMatrix3D, other.MemoryMatrix3D)) return false;
     if(!walls_.Equals(other.walls_)) return false;
     if(!doors_.Equals(other.doors_)) return false;
     if(!windows_.Equals(other.windows_)) return false;
+    if(!slabs_.Equals(other.slabs_)) return false;
+    if(!railings_.Equals(other.railings_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -245,15 +303,19 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override int GetHashCode() {
     int hash = 1;
-    if (root_ != null) hash ^= Root.GetHashCode();
+    if (buildElement_ != null) hash ^= BuildElement.GetHashCode();
     if (Number.Length != 0) hash ^= Number.GetHashCode();
     if (Height != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Height);
     if (Elevation != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Elevation);
     if (Usage.Length != 0) hash ^= Usage.GetHashCode();
     if (origin_ != null) hash ^= Origin.GetHashCode();
+    if (MemoryStoreyId.Length != 0) hash ^= MemoryStoreyId.GetHashCode();
+    if (memoryMatrix3D_ != null) hash ^= MemoryMatrix3D.GetHashCode();
     hash ^= walls_.GetHashCode();
     hash ^= doors_.GetHashCode();
     hash ^= windows_.GetHashCode();
+    hash ^= slabs_.GetHashCode();
+    hash ^= railings_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -272,9 +334,9 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     output.WriteRawMessage(this);
   #else
-    if (root_ != null) {
+    if (buildElement_ != null) {
       output.WriteRawTag(10);
-      output.WriteMessage(Root);
+      output.WriteMessage(BuildElement);
     }
     if (Number.Length != 0) {
       output.WriteRawTag(18);
@@ -296,9 +358,19 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
       output.WriteRawTag(50);
       output.WriteMessage(Origin);
     }
+    if (MemoryStoreyId.Length != 0) {
+      output.WriteRawTag(58);
+      output.WriteString(MemoryStoreyId);
+    }
+    if (memoryMatrix3D_ != null) {
+      output.WriteRawTag(66);
+      output.WriteMessage(MemoryMatrix3D);
+    }
     walls_.WriteTo(output, _repeated_walls_codec);
     doors_.WriteTo(output, _repeated_doors_codec);
     windows_.WriteTo(output, _repeated_windows_codec);
+    slabs_.WriteTo(output, _repeated_slabs_codec);
+    railings_.WriteTo(output, _repeated_railings_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -309,9 +381,9 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-    if (root_ != null) {
+    if (buildElement_ != null) {
       output.WriteRawTag(10);
-      output.WriteMessage(Root);
+      output.WriteMessage(BuildElement);
     }
     if (Number.Length != 0) {
       output.WriteRawTag(18);
@@ -333,9 +405,19 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
       output.WriteRawTag(50);
       output.WriteMessage(Origin);
     }
+    if (MemoryStoreyId.Length != 0) {
+      output.WriteRawTag(58);
+      output.WriteString(MemoryStoreyId);
+    }
+    if (memoryMatrix3D_ != null) {
+      output.WriteRawTag(66);
+      output.WriteMessage(MemoryMatrix3D);
+    }
     walls_.WriteTo(ref output, _repeated_walls_codec);
     doors_.WriteTo(ref output, _repeated_doors_codec);
     windows_.WriteTo(ref output, _repeated_windows_codec);
+    slabs_.WriteTo(ref output, _repeated_slabs_codec);
+    railings_.WriteTo(ref output, _repeated_railings_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -346,8 +428,8 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public int CalculateSize() {
     int size = 0;
-    if (root_ != null) {
-      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Root);
+    if (buildElement_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(BuildElement);
     }
     if (Number.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(Number);
@@ -364,9 +446,17 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     if (origin_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Origin);
     }
+    if (MemoryStoreyId.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(MemoryStoreyId);
+    }
+    if (memoryMatrix3D_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(MemoryMatrix3D);
+    }
     size += walls_.CalculateSize(_repeated_walls_codec);
     size += doors_.CalculateSize(_repeated_doors_codec);
     size += windows_.CalculateSize(_repeated_windows_codec);
+    size += slabs_.CalculateSize(_repeated_slabs_codec);
+    size += railings_.CalculateSize(_repeated_railings_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -379,11 +469,11 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
     if (other == null) {
       return;
     }
-    if (other.root_ != null) {
-      if (root_ == null) {
-        Root = new global::ThTCHRootData();
+    if (other.buildElement_ != null) {
+      if (buildElement_ == null) {
+        BuildElement = new global::ThTCHBuiltElementData();
       }
-      Root.MergeFrom(other.Root);
+      BuildElement.MergeFrom(other.BuildElement);
     }
     if (other.Number.Length != 0) {
       Number = other.Number;
@@ -403,9 +493,20 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
       }
       Origin.MergeFrom(other.Origin);
     }
+    if (other.MemoryStoreyId.Length != 0) {
+      MemoryStoreyId = other.MemoryStoreyId;
+    }
+    if (other.memoryMatrix3D_ != null) {
+      if (memoryMatrix3D_ == null) {
+        MemoryMatrix3D = new global::ThTCHMatrix3d();
+      }
+      MemoryMatrix3D.MergeFrom(other.MemoryMatrix3D);
+    }
     walls_.Add(other.walls_);
     doors_.Add(other.doors_);
     windows_.Add(other.windows_);
+    slabs_.Add(other.slabs_);
+    railings_.Add(other.railings_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -422,10 +523,10 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 10: {
-          if (root_ == null) {
-            Root = new global::ThTCHRootData();
+          if (buildElement_ == null) {
+            BuildElement = new global::ThTCHBuiltElementData();
           }
-          input.ReadMessage(Root);
+          input.ReadMessage(BuildElement);
           break;
         }
         case 18: {
@@ -452,15 +553,34 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
           break;
         }
         case 58: {
-          walls_.AddEntriesFrom(input, _repeated_walls_codec);
+          MemoryStoreyId = input.ReadString();
           break;
         }
         case 66: {
-          doors_.AddEntriesFrom(input, _repeated_doors_codec);
+          if (memoryMatrix3D_ == null) {
+            MemoryMatrix3D = new global::ThTCHMatrix3d();
+          }
+          input.ReadMessage(MemoryMatrix3D);
           break;
         }
         case 74: {
+          walls_.AddEntriesFrom(input, _repeated_walls_codec);
+          break;
+        }
+        case 82: {
+          doors_.AddEntriesFrom(input, _repeated_doors_codec);
+          break;
+        }
+        case 90: {
           windows_.AddEntriesFrom(input, _repeated_windows_codec);
+          break;
+        }
+        case 98: {
+          slabs_.AddEntriesFrom(input, _repeated_slabs_codec);
+          break;
+        }
+        case 106: {
+          railings_.AddEntriesFrom(input, _repeated_railings_codec);
           break;
         }
       }
@@ -479,10 +599,10 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
         case 10: {
-          if (root_ == null) {
-            Root = new global::ThTCHRootData();
+          if (buildElement_ == null) {
+            BuildElement = new global::ThTCHBuiltElementData();
           }
-          input.ReadMessage(Root);
+          input.ReadMessage(BuildElement);
           break;
         }
         case 18: {
@@ -509,15 +629,34 @@ public sealed partial class ThTCHBuildingStoreyData : pb::IMessage<ThTCHBuilding
           break;
         }
         case 58: {
-          walls_.AddEntriesFrom(ref input, _repeated_walls_codec);
+          MemoryStoreyId = input.ReadString();
           break;
         }
         case 66: {
-          doors_.AddEntriesFrom(ref input, _repeated_doors_codec);
+          if (memoryMatrix3D_ == null) {
+            MemoryMatrix3D = new global::ThTCHMatrix3d();
+          }
+          input.ReadMessage(MemoryMatrix3D);
           break;
         }
         case 74: {
+          walls_.AddEntriesFrom(ref input, _repeated_walls_codec);
+          break;
+        }
+        case 82: {
+          doors_.AddEntriesFrom(ref input, _repeated_doors_codec);
+          break;
+        }
+        case 90: {
           windows_.AddEntriesFrom(ref input, _repeated_windows_codec);
+          break;
+        }
+        case 98: {
+          slabs_.AddEntriesFrom(ref input, _repeated_slabs_codec);
+          break;
+        }
+        case 106: {
+          railings_.AddEntriesFrom(ref input, _repeated_railings_codec);
           break;
         }
       }

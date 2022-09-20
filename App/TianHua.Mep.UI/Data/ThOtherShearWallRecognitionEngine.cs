@@ -1,15 +1,15 @@
 ﻿using System.Linq;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using NFox.Cad;
+using ThCADCore.NTS;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using ThCADCore.NTS;
-using NFox.Cad;
-using ThCADExtension;
-using ThMEPEngineCore.CAD;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
 
 namespace TianHua.Mep.UI.Data
 {
@@ -27,8 +27,7 @@ namespace TianHua.Mep.UI.Data
                 BlackVisitors = CreateBlacks(database),
                 LayerFilter = ThDbLayerManager.Layers(database),
             };
-            var extractor = new ThBuildingElementExtractor();
-            extractor.Accept(visitor);
+            var extractor = new ThBlockInnerElementExtractor(visitor);
             extractor.Extract(database);
             Results = visitor.Results;
         }

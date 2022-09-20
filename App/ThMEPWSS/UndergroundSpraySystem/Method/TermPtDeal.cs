@@ -25,6 +25,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
             foreach (var pt in sprayIn.PtDic.Keys)
             {
+                if (pt._pt.DistanceTo(new Point3d(339464.9, 655739.4,0)) < 10)
+                    ;
                 bool flag = false;
                 if (sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                 {
@@ -43,7 +45,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
                 if (sprayIn.PtDic[pt].Count == 1)
                 {
-                    foreach (var v in sprayIn.Verticals)
+                    foreach (var v in sprayIn.Verticals.Keys)
                     {
                         if (v._pt.DistanceTo(pt._pt) < 100)
                         {
@@ -116,7 +118,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
                 if (sprayIn.PtDic[pt].Count == 1)
                 {
-                    foreach (var v in sprayIn.Verticals)
+                    foreach (var v in sprayIn.Verticals.Keys)
                     {
                         if (v._pt.DistanceTo(pt._pt) < 100)
                         {
@@ -273,7 +275,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             //var dbPts = new List<DBPoint>();
             //sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
             //var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
-            foreach (var vpt in sprayIn.Verticals)
+            foreach (var vpt in sprayIn.Verticals.Keys)
             {
                 GetCollectiveLabelDic(vpt, null, ref sprayIn, textSpatialIndex, pipeDNSpatialIndex, true);
             }
@@ -290,7 +292,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             var dbPts = new List<DBPoint>();
             sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
             var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
-            foreach (var pt in sprayIn.Verticals)
+            foreach (var pt in sprayIn.Verticals.Keys)
             {
                 if (sprayIn.PtDic.ContainsKey(pt))
                 {
@@ -383,7 +385,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             ThCADCoreNTSSpatialIndex textIndex, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
             var verPipeCenters = sprayIn.Verticals;
-            var verPipeBounds = verPipeCenters.Select(c =>
+            var verPipeBounds = verPipeCenters.Keys.Select(c =>
             {
                 Polyline pl = CreatePolyline(c);
                 return pl;

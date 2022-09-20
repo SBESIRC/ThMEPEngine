@@ -17,12 +17,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 {
     internal class ThMEPHVACCommonUtils
     {
-        public static ThMEPOriginTransformer GetTransformer(Point3dCollection pts)
-        {
-            var center = pts.Envelope().CenterPoint();
-            var transformer = new ThMEPOriginTransformer(center);
-            return transformer;
-        }
+        //public static ThMEPOriginTransformer GetTransformer(Point3dCollection pts)
+        //{
+        //    var center = pts.Envelope().CenterPoint();
+        //    var transformer = new ThMEPOriginTransformer(center);
+        //    return transformer;
+        //}
 
         /////-------for no UI mode setting
         public static bool SettingBoolean(string hintString, int defaultValue)

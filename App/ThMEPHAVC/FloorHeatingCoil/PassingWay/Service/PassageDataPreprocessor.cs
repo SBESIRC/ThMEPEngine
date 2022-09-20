@@ -85,8 +85,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if (pre != -1)
                 {
                     next = (pre + 1) % points.Count;
-                    if (Math.Abs(pipe_inputs[i].pout.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].out_buffer) < 1 ||
-                        Math.Abs(pipe_inputs[i].pout.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].out_buffer) < 1)
+                    if (Math.Abs(pipe_inputs[i].pout.DistanceTo(points[pre]) - room_buffer - pipe_inputs[i].out_buffer) <= 2 ||
+                        Math.Abs(pipe_inputs[i].pout.DistanceTo(points[next]) - room_buffer - pipe_inputs[i].out_buffer) <= 2)
                         pipe_inputs[i].out_near_wall = true;
                     dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
                     pipe_inputs[i].end_dir = (dir + 1) % 4;
@@ -108,8 +108,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     var next = (pre + 1) % points.Count;
                     var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[pre], points[next]);
                     main_pipe_input.start_dir = (dir + 3) % 4;
-                    if (Math.Abs(main_pipe_input.pin.DistanceTo(points[pre]) - room_buffer - main_pipe_input.in_buffer) < 1 ||
-                        Math.Abs(main_pipe_input.pin.DistanceTo(points[next]) - room_buffer - main_pipe_input.in_buffer) < 1)
+                    if (Math.Abs(main_pipe_input.pin.DistanceTo(points[pre]) - room_buffer - main_pipe_input.in_buffer) <= 2 ||
+                        Math.Abs(main_pipe_input.pin.DistanceTo(points[next]) - room_buffer - main_pipe_input.in_buffer) <= 2)
                         main_pipe_input.in_near_wall = true;
                 }
                 PassageShowUtils.PrintMassage("main:" + main_pipe_input.start_dir.ToString() + "-" + (main_pipe_input.in_near_wall ? "T" : "F"));
@@ -132,7 +132,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (pipe_inputs[0].end_offset != pipe_inputs.Last().end_offset) 
                 return mode;
 
-            // 判断最后一条边是否是均匀布置
+            // 判断最后一条边是否是均匀布置（不用动）
             var pre = pipe_inputs.First().end_offset;
             var next = (pre + 1) % points.Count;
             var dis = points[pre].DistanceTo(points[next]);

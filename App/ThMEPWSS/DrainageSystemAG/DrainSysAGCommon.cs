@@ -227,6 +227,11 @@ namespace ThMEPWSS.DrainageSystemAG
             var copyText = new CreateDBTextElement(floorId, newPoint, text, cText.belongBlockId, cText.layerName,cText.textStyle, cText.uid);
             return copyText;
         }
+        static bool IsPerpVector(Vector3d a, Vector3d b, double degreetol = 1)
+        {
+            double angle = a.GetAngleTo(b);
+            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
+        }
         public static List<EquipmentBlcokModel> GetFloorBlocks(List<EquipmentBlcokModel> tempBlocks, List<Entity> axisEntitys)
         {
             var resList = new List<EquipmentBlcokModel>();
@@ -234,8 +239,7 @@ namespace ThMEPWSS.DrainageSystemAG
             //var tempBlocks = equipmentData.GetPolylineEquipmentBlocks(floor.outPolyline);
             if (null == tempBlocks || tempBlocks.Count < 1 || null == axisEntitys || axisEntitys.Count < 2)
                 return tempBlocks;
-            //var axisEntitys = basicElementEngine.GetExtractorEntity(floor.outPolyline, new List<EnumElementType> { EnumElementType.ExternalLineAxis });
-            
+            //var axisEntitys = basicElementEngine.GetExtractorEntity(floor.outPolyline, new List<EnumElementType> { EnumElementType.ExternalLineAxis });          
             var xAxisPoints = new List<Point3d>();
             var yAxisPoints = new List<Point3d>();
             foreach (var axis in axisEntitys)
@@ -245,22 +249,15 @@ namespace ThMEPWSS.DrainageSystemAG
                     if (line.Length < 5000)
                         continue;
                     var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                    var angle = lineDir.GetAngleTo(Vector3d.XAxis, Vector3d.ZAxis);
-                    var angle0 = angle % Math.PI;
-                    var angle90 = angle % (Math.PI / 2);
-                    var minAngle = Math.PI * 5 / 180;
-                    var maxAngle = Math.PI - minAngle;
-                    if (Math.Abs(angle) > minAngle && Math.Abs(angle) < maxAngle)
-                        continue;
-                    if (Math.Abs(angle0) < minAngle || Math.Abs(angle0) > maxAngle)
-                    {
-                        xAxisPoints.Add(line.StartPoint);
-                        xAxisPoints.Add(line.EndPoint);
-                    }
-                    else if (Math.Abs(angle90) < minAngle)
+                    if (IsPerpVector(lineDir, Vector3d.XAxis))
                     {
                         yAxisPoints.Add(line.StartPoint);
                         yAxisPoints.Add(line.EndPoint);
+                    }
+                    else
+                    {
+                        xAxisPoints.Add(line.StartPoint);
+                        xAxisPoints.Add(line.EndPoint);
                     }
                 }
             }

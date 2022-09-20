@@ -174,7 +174,6 @@
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="Config\ThExtractShearWallConfig.cs" />
     <Compile Include="Config\ThExtractBeamConfig.cs" />
-    <Compile Include="Config\ThExtratRoomOutlineConfig.cs" />
     <Compile Include="Config\ThRegularMatchingService.cs" />
     <Compile Include="ConnectWiring\ConnectWiringService.cs" />
     <Compile Include="ConnectWiring\Data\ThBlockPointsExtractor.cs" />
@@ -211,6 +210,10 @@
     <Compile Include="Engine\ThCircleVPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThCircleVPipeExtractionVisitor.cs" />
     <Compile Include="Engine\ThCircleVPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThFlowFittingExtractionEngine.cs" />
+    <Compile Include="Engine\ThFlowFittingExtractionVisitor.cs" />
+    <Compile Include="Engine\ThFlowFittingExtractor.cs" />
+    <Compile Include="Engine\ThFlowFittingRecognitionEngine.cs" />
     <Compile Include="Engine\ThWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThDrainageVPipeExtractionEngine.cs" />
     <Compile Include="Engine\ThDrainageVPipeExtractionVisitor.cs" />
@@ -252,6 +255,7 @@
     <Compile Include="IO\SVG\ThComponentInfo.cs" />
     <Compile Include="IO\SVG\ThFloorInfo.cs" />
     <Compile Include="IO\SVG\ThArchitectureSVGReader.cs" />
+    <Compile Include="IO\SVG\ThSvgParseInfo.cs" />
     <Compile Include="IO\ThTextureMaterialManager.cs" />
     <Compile Include="IO\ThIfcCategoryManager.cs" />
     <Compile Include="IO\SVG\ThSvgPropertyNameManager.cs" />
@@ -259,6 +263,7 @@
     <Compile Include="IO\SVG\ThSvgUtils.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="IO\WKT\ThGeometryWKTWriter.cs" />
+    <Compile Include="Model\Common\ThBlockInfo.cs" />
     <Compile Include="Model\Common\ThLayerInfo.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSprinkler.cs" />
@@ -270,6 +275,7 @@
     <Compile Include="Service\ThBlockReferenceObbService.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
+    <Compile Include="Service\ThIniTool.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />

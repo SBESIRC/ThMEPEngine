@@ -9,7 +9,6 @@ namespace Tianhua.Platform3D.UI
 {
     public class Platform3DUIApp : IExtensionApplication
     {
-        PaletteSet mainPaletteSet = null;
         public void Initialize()
         {
             //add code to run when the ExtApp initializes. Here are a few examples:
@@ -30,20 +29,12 @@ namespace Tianhua.Platform3D.UI
             //  Unloading those dependents;
             //  Un-subscribing to those events;
             //  Etc.
+            PlatformRemoveEvents();
         }
         [CommandMethod("TIANHUACAD", "TH3D", CommandFlags.Modal)]
         public void ThTH3D()
         {
-            if (mainPaletteSet == null)
-            {
-                mainPaletteSet = new PaletteSet("天华三维设计面板");
-                var mainUControl = new PlatformMainUI();
-                mainPaletteSet.AddVisual("", mainUControl);
-            }
-            mainPaletteSet.KeepFocus = true;
-            mainPaletteSet.Visible = true;
-            mainPaletteSet.DockEnabled = DockSides.Left;
-            mainPaletteSet.Dock = DockSides.Left;
+            Platform3DMainService.Instace.ShowUI();
         }
 
         [CommandMethod("TIANHUACAD", "THSMBTUI", CommandFlags.Modal)]
@@ -55,14 +46,29 @@ namespace Tianhua.Platform3D.UI
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THAMBTUI", CommandFlags.Modal)]
+        public void THAUTSC()
+        {
+            using (var cmd = new ThArchitecturePlaneCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
         #region 平台CAD相关事件
         private void PlatformAddEvents() 
         {
-            AcadApp.DocumentManager.DocumentActivated += ObjectSelectEvent.DocumentManager_DocumentActivated;
+            AcadApp.DocumentManager.DocumentActivated += Platform3DMainEvent.DocumentManager_DocumentActivated;
+            AcadApp.DocumentManager.DocumentToBeDestroyed += Platform3DMainEvent.DocumentManager_DocumentToBeDestroyed;
+            AcadApp.DocumentManager.DocumentDestroyed += Platform3DMainEvent.DocumentManager_DocumentDestroyed;
+            AcadApp.DocumentManager.DocumentToBeActivated += Platform3DMainEvent.DocumentManager_DocumentToBeActivated;
         }
         private void PlatformRemoveEvents()
         {
-
+            AcadApp.DocumentManager.DocumentActivated -= Platform3DMainEvent.DocumentManager_DocumentActivated;
+            AcadApp.DocumentManager.DocumentToBeDestroyed -= Platform3DMainEvent.DocumentManager_DocumentToBeDestroyed;
+            AcadApp.DocumentManager.DocumentDestroyed -= Platform3DMainEvent.DocumentManager_DocumentDestroyed;
+            AcadApp.DocumentManager.DocumentToBeActivated -= Platform3DMainEvent.DocumentManager_DocumentToBeActivated;
         }
         #endregion
     }

@@ -16,7 +16,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
     {
         public static List<Point3d> PolylineIntersectionPolyline(Polyline a,Polyline b)
         {
-            var inter = a.Intersect(b, Intersect.OnBothOperands).ToHashSet();
+            var inter = new HashSet<Point3d>(new Point3dComparer());
+            inter.UnionWith(a.Intersect(b, Intersect.OnBothOperands));
             var points = PassageWayUtils.GetPolyPoints(a);
             var s = PassageWayUtils.GetPointIndex(b.StartPoint, points, 1e-3);
             if (s == -1) s = PassageWayUtils.GetSegIndexOnPolyline(b.StartPoint, points, 1e-3);
@@ -108,6 +109,17 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     points.Insert(j + 1, p);
                     return;
                 }
+        }
+    }
+    public class Point3dComparer:IEqualityComparer<Point3d>
+    {
+        public bool Equals(Point3d a,Point3d b)
+        {
+            return Math.Abs(a.X - b.X) + Math.Abs(a.Y - b.Y) < 1e-3;
+        }
+        public int GetHashCode(Point3d obj)
+        {
+            return 1;
         }
     }
 }

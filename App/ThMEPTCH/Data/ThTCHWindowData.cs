@@ -23,28 +23,18 @@ public static partial class ThTCHWindowDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChVUaFRDSFdpbmRvd0RhdGEucHJvdG8aG1RoVENIQnVpbHRFbGVtZW50RGF0",
-          "YS5wcm90byJbCg9UaFRDSFdpbmRvd0RhdGESLQoNYnVpbGRfZWxlbWVudBgB",
-          "IAEoCzIWLlRoVENIQnVpbHRFbGVtZW50RGF0YRIZCgR0eXBlGAIgASgOMgsu",
-          "V2luZG93VHlwZSo0CgpXaW5kb3dUeXBlEgoKBldpbmRvdxAAEgsKB1NodXR0",
-          "ZXIQARINCglFY2NlbnRyaWMQAmIGcHJvdG8z"));
+          "YS5wcm90byJOCg9UaFRDSFdpbmRvd0RhdGESLQoNYnVpbGRfZWxlbWVudBgB",
+          "IAEoCzIWLlRoVENIQnVpbHRFbGVtZW50RGF0YRIMCgR0eXBlGAIgASgNYgZw",
+          "cm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHBuiltElementDataReflection.Descriptor, },
-        new pbr::GeneratedClrTypeInfo(new[] {typeof(global::WindowType), }, null, new pbr::GeneratedClrTypeInfo[] {
+        new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHWindowData), global::ThTCHWindowData.Parser, new[]{ "BuildElement", "Type" }, null, null, null, null)
         }));
   }
   #endregion
 
 }
-#region Enums
-public enum WindowType {
-  [pbr::OriginalName("Window")] Window = 0,
-  [pbr::OriginalName("Shutter")] Shutter = 1,
-  [pbr::OriginalName("Eccentric")] Eccentric = 2,
-}
-
-#endregion
-
 #region Messages
 public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
 #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -105,10 +95,10 @@ public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
 
   /// <summary>Field number for the "type" field.</summary>
   public const int TypeFieldNumber = 2;
-  private global::WindowType type_ = global::WindowType.Window;
+  private uint type_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::WindowType Type {
+  public uint Type {
     get { return type_; }
     set {
       type_ = value;
@@ -140,7 +130,7 @@ public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
   public override int GetHashCode() {
     int hash = 1;
     if (buildElement_ != null) hash ^= BuildElement.GetHashCode();
-    if (Type != global::WindowType.Window) hash ^= Type.GetHashCode();
+    if (Type != 0) hash ^= Type.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -163,9 +153,9 @@ public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
       output.WriteRawTag(10);
       output.WriteMessage(BuildElement);
     }
-    if (Type != global::WindowType.Window) {
+    if (Type != 0) {
       output.WriteRawTag(16);
-      output.WriteEnum((int) Type);
+      output.WriteUInt32(Type);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -181,9 +171,9 @@ public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
       output.WriteRawTag(10);
       output.WriteMessage(BuildElement);
     }
-    if (Type != global::WindowType.Window) {
+    if (Type != 0) {
       output.WriteRawTag(16);
-      output.WriteEnum((int) Type);
+      output.WriteUInt32(Type);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -198,8 +188,8 @@ public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
     if (buildElement_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(BuildElement);
     }
-    if (Type != global::WindowType.Window) {
-      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
+    if (Type != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Type);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -219,7 +209,7 @@ public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
       }
       BuildElement.MergeFrom(other.BuildElement);
     }
-    if (other.Type != global::WindowType.Window) {
+    if (other.Type != 0) {
       Type = other.Type;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
@@ -245,7 +235,7 @@ public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
           break;
         }
         case 16: {
-          Type = (global::WindowType) input.ReadEnum();
+          Type = input.ReadUInt32();
           break;
         }
       }
@@ -271,7 +261,7 @@ public sealed partial class ThTCHWindowData : pb::IMessage<ThTCHWindowData>
           break;
         }
         case 16: {
-          Type = (global::WindowType) input.ReadEnum();
+          Type = input.ReadUInt32();
           break;
         }
       }

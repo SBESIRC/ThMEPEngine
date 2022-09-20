@@ -165,7 +165,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             {
                 if (!Tool.CheckValid(pt, spraySystem))
                 {
-                    return;
+                    continue;
                 }
                 BranchPtDraw(pt, ref textRecord, ref lastFirePt, ref branchWithFireNums, ref throughIndex, ref index, sprayOut, spraySystem, sprayIn);
 

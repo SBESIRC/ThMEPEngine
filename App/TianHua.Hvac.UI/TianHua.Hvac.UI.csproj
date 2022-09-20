@@ -87,6 +87,9 @@
     <Compile Include="FloorHeatingCoil\uiFloorHeatingCoil.xaml.cs">
       <DependentUpon>uiFloorHeatingCoil.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FloorHeatingCoil\uiFloorHeatingCoilObstacle.xaml.cs">
+      <DependentUpon>uiFloorHeatingCoilObstacle.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FloorHeatingCoil\uiFloorHeatingCoilSubSetting.xaml.cs">
       <DependentUpon>uiFloorHeatingCoilSubSetting.xaml</DependentUpon>
     </Compile>
@@ -353,6 +356,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="FloorHeatingCoil\uiFloorHeatingCoilObstacle.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="FloorHeatingCoil\uiFloorHeatingCoilSubSetting.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -523,6 +530,10 @@
     <PackageReference Include="CommunityToolkit.Mvvm">
       <Version>8.0.0</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\住宅模式.png" />
+    <Resource Include="Images\公建模式.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

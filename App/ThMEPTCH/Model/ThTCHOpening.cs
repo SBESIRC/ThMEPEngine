@@ -8,8 +8,48 @@ namespace ThMEPTCH.Model
     [ProtoContract]
     public class ThTCHOpening : ThTCHElement, ICloneable
     {
-        private ThTCHOpening() { }
+        /// <summary>
+        /// 是否忽略尺寸标注
+        /// </summary>
+        [ProtoMember(21)]
+        public bool ShowDimension { get; set; }
+
+        /// <summary>
+        /// 是否遮挡元素
+        /// </summary>
+        [ProtoMember(22)]
+        public bool Hidden { get; set; }
+
+        /// <summary>
+        /// 底高
+        /// </summary>
+        [ProtoMember(23)]
+        public double BottomElevation { get; set; }
+
+        /// <summary>
+        /// 编号前缀
+        /// </summary>
+        [ProtoMember(24)]
+        public string NumberPrefix { get; set; }
+
+        /// <summary>
+        /// 编号后缀
+        /// </summary>
+        [ProtoMember(25)]
+        public string NumberPostfix { get; set; }
+
+        /// <summary>
+        /// 立面显示
+        /// </summary>
+        [ProtoMember(26)]
+        public bool ElevationDisplay { get; set; }
+
         private double Angle { get; }
+
+        public ThTCHOpening()
+        {
+        }
+
         /// <summary>
         /// 洞口的信息
         /// </summary>
@@ -28,6 +68,7 @@ namespace ThMEPTCH.Model
             Length = length;
             Angle = angle;
         }
+
         public object Clone()
         {
             if (this == null)

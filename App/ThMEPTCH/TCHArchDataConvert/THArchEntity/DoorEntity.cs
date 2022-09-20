@@ -10,6 +10,9 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
         public double Thickness { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+        public SwingEnum Swing { get; set; }
+        public DoorTypeOperationEnum OperationType { get; set; }
+
         public DoorEntity(TArchEntity dbDoor) : base(dbDoor)
         {
         }

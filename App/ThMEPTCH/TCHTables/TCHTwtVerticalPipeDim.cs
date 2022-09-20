@@ -40,5 +40,6 @@
         public double Spacing;
         public double TextHeight;
         public double DocScale;
+        public double LayoutRotation;
     }
 }

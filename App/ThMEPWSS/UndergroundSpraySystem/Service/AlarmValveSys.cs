@@ -7,6 +7,7 @@ using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundSpraySystem.Method;
+using NFox.Cad;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
 {
@@ -17,7 +18,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var database = acadDatabase.Database;
 
             var pipe = new SprayPipe();
-            pipe.Extract(database, sprayIn);//提取管道
+            pipe.Extract(database, selectArea);//提取管道
             var pipeLines = pipe.CreateSprayLines();//生成管道线
             pipeLines = LineMerge.CleanLaneLines(pipeLines);
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
@@ -55,7 +56,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var flowPts = flowIndicator.CreatePts( sprayIn);
             var objs = flowIndicator.CreatBlocks();
             pipeLines.PipeLineSplit(flowPts);
-            var flowSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var flowSpatialIndex = new ThCADCoreNTSSpatialIndex(objs.ToCollection());
             pipeLines.CreatePtDic(sprayIn);
 
             DicTools.CreatePtTypeDic(flowPts, "Flow", sprayIn);

@@ -15,6 +15,7 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -23,6 +24,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -69,23 +71,76 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="CAD\THDBHoleExtractionVisitor.cs" />
     <Compile Include="CAD\ThDBVisitorExtension.cs" />
+    <Compile Include="CAD\ThTArchWallExtension.cs" />
+    <Compile Include="CAD\ThTCHEDbExtension.cs" />
+    <Compile Include="Data\ThSUBuildingElementData.cs" />
     <Compile Include="Data\ThSUCompDefinitionData.cs" />
     <Compile Include="Data\ThSUComponentData.cs" />
     <Compile Include="Data\ThSUFaceData.cs" />
     <Compile Include="Data\ThSUGeometry.cs" />
+    <Compile Include="Data\ThSUMaterialData.cs" />
+    <Compile Include="Data\ThSUProjectData.cs" />
     <Compile Include="Data\ThTCHBuildingData.cs" />
     <Compile Include="Data\ThTCHBuildingStoreyData.cs" />
     <Compile Include="Data\ThTCHBuiltElementData.cs" />
+    <Compile Include="Data\ThTCHDescendingData.cs" />
     <Compile Include="Data\ThTCHDoorData.cs" />
     <Compile Include="Data\ThTCHGeometry.cs" />
     <Compile Include="Data\ThTCHOpeningData.cs" />
     <Compile Include="Data\ThTCHProjectData.cs" />
+    <Compile Include="Data\ThTCHProperty.cs" />
+    <Compile Include="Data\ThTCHRailingData.cs" />
     <Compile Include="Data\ThTCHRootData.cs" />
     <Compile Include="Data\ThTCHSiteData.cs" />
+    <Compile Include="Data\ThTCHSlabData.cs" />
     <Compile Include="Data\ThTCHWallData.cs" />
     <Compile Include="Data\ThTCHWindowData.cs" />
-    <Compile Include="Services\THDBFFLBuilder.cs" />
+    <Compile Include="Engine\ThTCHCableCarrierFittingExtractionEngine.cs" />
+    <Compile Include="Engine\ThTCHCableCarrierFittingExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHCableCarrierSegmentExtractionEngine.cs" />
+    <Compile Include="Engine\ThTCHCableCarrierSegmentExtractionVisitor.cs" />
+    <Compile Include="Model\ThTCHCableCarrierFitting.cs" />
+    <Compile Include="Model\ThTCHCableCarrierSegment.cs" />
+    <Compile Include="PropertyServices\EntityProperties\DescendingPropertyService.cs" />
+    <Compile Include="PropertyServices\EntityProperties\HolePropertyService.cs" />
+    <Compile Include="PropertyServices\EntityProperties\RailingPropertyService.cs" />
+    <Compile Include="PropertyServices\EntityProperties\SlabPropertyService.cs" />
+    <Compile Include="PropertyServices\EntityProperties\TCHDoorPropertyService.cs" />
+    <Compile Include="PropertyServices\EntityProperties\TCHWallPropertyService.cs" />
+    <Compile Include="PropertyServices\EntityProperties\TCHWindowPropertyService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\DescendingPropertyUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\HolePropertyUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\RailingPropertyUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\SlabPropertyUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\TCHDoorPropertyUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\TCHWallPropertyUIService.cs" />
+    <Compile Include="PropertyServices\EntityUIProperties\TCHWindowPropertyUIService.cs" />
+    <Compile Include="PropertyServices\EnumPropertyEditor.cs" />
+    <Compile Include="PropertyServices\ITHProperty.cs" />
+    <Compile Include="PropertyServices\PropertyAttribute.cs" />
+    <Compile Include="PropertyServices\PropertyEnums\EnumSlabMaterial.cs" />
+    <Compile Include="PropertyServices\PropertyModels\DescendingProperty.cs" />
+    <Compile Include="PropertyServices\PropertyModels\PropertyBase.cs" />
+    <Compile Include="PropertyServices\PropertyModels\RailingProperty.cs" />
+    <Compile Include="PropertyServices\PropertyModels\HoleProperty.cs" />
+    <Compile Include="PropertyServices\PropertyModels\SlabProperty.cs" />
+    <Compile Include="PropertyServices\PropertyModels\TCHDoorProperty.cs" />
+    <Compile Include="PropertyServices\PropertyModels\TCHWallProperty.cs" />
+    <Compile Include="PropertyServices\PropertyModels\TCHWindowProperty.cs" />
+    <Compile Include="PropertyServices\PropertyService.cs" />
+    <Compile Include="PropertyServices\PropertyServiceBase.cs" />
+    <Compile Include="PropertyServices\PropertyUIServiceBase.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\DescendingPropertyVM.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\NoPropertyVM.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\PropertyVMBase.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\RailingPropertyVM.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\HolePropertyVM.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\SlabPropertyVM.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\TCHDoorPropertyVM.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\TCHWallPropertyVM.cs" />
+    <Compile Include="PropertyServices\PropertyVMoldels\TCHWindowPropertyVM.cs" />
     <Compile Include="CAD\THDBFFLExtractionVisitor.cs" />
     <Compile Include="CAD\THDBFFLMarkExtractionVisitor.cs" />
     <Compile Include="CAD\THDBRailingExtractionVisitor.cs" />
@@ -105,10 +160,8 @@
     <Compile Include="CAD\ThTCHDbCommon.cs" />
     <Compile Include="CAD\ThTCHDbExtension.cs" />
     <Compile Include="CAD\ThTCHDoorExtractionVisitor.cs" />
-    <Compile Include="CAD\ThTCHEntityExtension.cs" />
     <Compile Include="CAD\ThTCHPolylineExtension.cs" />
     <Compile Include="CAD\ThTCHWindowExtractionVisitor.cs" />
-    <Compile Include="Data\IO\XmlSerializerFactory.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
     <Compile Include="Model\SurrogateModel\Matrix3DSurrogate.cs" />
     <Compile Include="Model\SurrogateModel\Point3DCollectionSurrogate.cs" />
@@ -125,7 +178,7 @@
     <Compile Include="Model\ThTCHTwtBlock.cs" />
     <Compile Include="Model\ThTCHTwtPipe.cs" />
     <Compile Include="Model\ThTCHSymbMultiLeader.cs" />
-    <Compile Include="Model\ThTCHSlabDescendingData.cs" />
+    <Compile Include="Model\ThTCHDescending.cs" />
     <Compile Include="Model\ThTCHDoor.cs" />
     <Compile Include="Model\ThTCHBuildingStorey.cs" />
     <Compile Include="Model\ThTCHRailing.cs" />
@@ -146,13 +199,15 @@
     <Compile Include="Model\ThTCHWall.cs" />
     <Compile Include="Model\ThTCHWindow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PropertyServices\THNumPropertyEditor.cs" />
+    <Compile Include="PropertyServices\THTextPropertyEditor.cs" />
+    <Compile Include="Services\ThArchitectureDescendingService.cs" />
+    <Compile Include="Services\ThDescendingBuffer.cs" />
     <Compile Include="Services\ThDWGToIFCModels.cs" />
     <Compile Include="Services\ThDWGToIFCService.cs" />
     <Compile Include="Services\ThEditStoreyInfo.cs" />
     <Compile Include="Services\ThIfcStoreyParseTool.cs" />
-    <Compile Include="Services\ThMEPTCHTool.cs" />
-    <Compile Include="Services\ThTCHArchDBService.cs" />
-    <Compile Include="Services\ThTGLXMLService.cs" />
+    <Compile Include="Services\ThPolylineFixer.cs" />
     <Compile Include="TCHArchDataConvert\DBToTHEntityCommon.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchDBData.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchSQL.cs" />
@@ -200,41 +255,10 @@
     <Compile Include="TCHTables\TCHTwtVector.cs" />
     <Compile Include="TCHTables\TCHTwtVerticalPipe.cs" />
     <Compile Include="TCHTables\TCHTwtVerticalPipeDim.cs" />
-    <Compile Include="TCHXmlDataConvert\ITCHXmlConvert.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHConvertAttribute.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHConvertBase.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlOpeningToThIfcDoorWindow.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlSLabToThIfcFloor.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHEntityToThIfc\TCHXmlWallToThIfcWall.cs" />
-    <Compile Include="TCHXmlDataConvert\TCHXmlDataConvertService.cs" />
-    <Compile Include="TCHXmlDataConvert\XmConvertCommon.cs" />
-    <Compile Include="TCHXmlModels\Content.cs" />
-    <Compile Include="TCHXmlModels\Entity_Collection.cs" />
-    <Compile Include="TCHXmlModels\Tangent_obj_data.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlAngle.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlDouble.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlInt.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlPoint.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlString.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\XmlMatrix3d.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCHFloor.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_SLab.cs" />
-    <Compile Include="TCHXmlModels\TCHOpeningAttributes\Lib_Block.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\Baseline.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\DrawPara.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\Height.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\Link_WinDoor.cs" />
-    <Compile Include="TCHXmlModels\TCHBaseModels\TCHXmlBaseModel.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCHXmlEntity.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_OPENING.cs" />
-    <Compile Include="TCHXmlModels\TCHEntityModels\TCH_WALL.cs" />
-    <Compile Include="TCHXmlModels\TCHWallAttributes\Width.cs" />
     <Compile Include="ThMEPTCHApp.cs" />
     <Compile Include="ThMEPTCHCommon.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="TCHXmlModels\TCHAttributes\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
       <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
@@ -252,6 +276,10 @@
       <Project>{2ABCDB6E-F0C9-44C1-960F-31D494EF9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17F707AF-855C-416C-A55E-DFF6FF92FC30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
@@ -263,18 +291,33 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Google.Protobuf">
-      <Version>3.21.5</Version>
+      <Version>3.21.6</Version>
+    </PackageReference>
+    <PackageReference Include="HandyControl">
+      <Version>3.3.0</Version>
     </PackageReference>
     <PackageReference Include="protobuf-net">
       <Version>3.1.17</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="proto\ThSUBuildingElementData.proto" />
+    <None Include="proto\ThSUCompDefinitionData.proto" />
+    <None Include="proto\ThSUComponentData.proto" />
+    <None Include="proto\ThSUFaceData.proto" />
+    <None Include="proto\ThSUGeometry.proto" />
+    <None Include="proto\ThSUMaterialData.proto" />
+    <None Include="proto\ThSUProjectData.proto" />
     <None Include="proto\ThTCHBuildingData.proto" />
     <None Include="proto\ThTCHBuildingStoreyData.proto" />
     <None Include="proto\ThTCHBuiltElementData.proto" />
+    <None Include="proto\ThTCHDescendingData.proto" />
     <None Include="proto\ThTCHDoorData.proto" />
     <None Include="proto\ThTCHOpeningData.proto" />
+    <None Include="proto\ThTCHProjectData.proto" />
+    <None Include="proto\ThTCHRailingData.proto" />
+    <None Include="proto\ThTCHSiteData.proto" />
+    <None Include="proto\ThTCHSlabData.proto" />
     <None Include="proto\ThTCHWallData.proto" />
     <None Include="proto\ThTCHGeometry.proto" />
     <None Include="proto\ThTCHRootData.proto" />

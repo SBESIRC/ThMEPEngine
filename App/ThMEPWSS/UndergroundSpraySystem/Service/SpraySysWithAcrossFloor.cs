@@ -18,13 +18,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 {
     internal class SpraySysWithAcrossFloor
     {
-        public static bool GetInput2(AcadDatabase acadDatabase, SprayIn sprayIn, Point3dCollection selectArea, Point3d startPt)
+        public static bool GetInput(AcadDatabase acadDatabase, SprayIn sprayIn, Point3dCollection selectArea, Point3d startPt)
         {
             var database = acadDatabase.Database;
 
             var pipe = new SprayPipe();
-            pipe.Extract(database, sprayIn);//提取管道
+            pipe.Extract(database, selectArea);//提取管道
             var pipeLines = pipe.CreateSprayLines();//生成管道线
+          
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
             var vertical = new VerticalPipeNew();
             vertical.Extract(database, selectArea, sprayIn);//提取竖管
@@ -35,9 +36,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var alarmValve = new AlarmValveTCH();
             var alarmPts = alarmValve.Extract(database, selectArea);
 
-
             pipeLines = LineTools.DealPipeLines(pipeLines, alarmPts, sprayIn);
-
 
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
             DicTools.CreatePtTypeDic(sprayIn.PtDic.Keys.ToList(), "MainLoop", sprayIn);
@@ -63,7 +62,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var flowIndicator = new FlowIndicator();
             flowIndicator.Extract(database, selectArea);
             var flowPts = flowIndicator.CreatePts(sprayIn);
+            foreach(var pt in flowPts)
+            {
+                Draw.Circle(new Circle(pt._pt,new Vector3d(0,0,1),200), "水流指示器");
+            }
             var objs = flowIndicator.CreatBlocks();
+            Draw.Rects(objs,"水流指示器");
             pipeLines.PipeLineSplit(flowPts);
 
             pipeLines.CreatePtDic(sprayIn);
@@ -104,9 +108,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             alarmText.CreateAlarmTextDic(sprayIn, alarmPts, textSpatialIndex);//生成报警阀文字字典对
 
             var loopMarkPt = new LoopMarkPt();//环管标记点
-            loopMarkPt.Extract(database, sprayIn);
+            loopMarkPt.Extract(database, selectArea);
             loopMarkPt.CreateStartPts(pipeLines, sprayIn, startPt);//获取环管的起始终止点
-            if (sprayIn.LoopStartPt.Equals(new Point3d()))
+            if (sprayIn.LoopStartPt.Equals(new Point3dEx()))
             {
                 return false;
             }

@@ -82,7 +82,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // 计算最短方向路径
             pipe_segments = new List<List<PipeSegment>>();
             for (int i = 0; i < pipe_inputs.Count; ++i)
-                pipe_segments.Add(directionWayCalculator.Calculate(pipe_inputs[i]));
+                pipe_segments.Add(directionWayCalculator.Calculate(pipe_inputs[i])); //pipe_inputs[i] 包含一大堆信息
         }
         void CalculateShortestWay()
         {
@@ -103,10 +103,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
             equispacedWayCalculator.ShowDirWay();
 
             // 调整推荐间距
-            equispacedWayCalculator.AdjustCommandBuffer();
-            buffer = equispacedWayCalculator.buffer;
-            room_buffer = equispacedWayCalculator.room_buffer;
-
+            if (PublicValue.ChangeSDis == 1)
+            {
+                equispacedWayCalculator.AdjustCommandBuffer();
+                buffer = equispacedWayCalculator.buffer;
+                room_buffer = equispacedWayCalculator.room_buffer;
+            }
             // 计算均匀分布路径
             equispaced_segments = new List<List<Polyline>>();
             equispaced_lines = new List<List<Line>>();
@@ -210,9 +212,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         void CalculateMainWay()
         {
-
             PipeOutput main_output = null;
-            if (main_has_output)
+            if (main_has_output && !ProcessedData.HaveVirtualPipe)
             {
                 MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
                 mainPipeGet.Pipeline2();
@@ -229,19 +230,32 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 MainPipeGet2 mainPipeGet = new MainPipeGet2(region, shortest_way, main_index, buffer, room_buffer, main_has_output);
                 mainPipeGet.Pipeline3();
                 main_output = new PipeOutput();
+                if (main_pipe_input == null)
+                    main_pipe_input = pipe_inputs[main_index];
+
                 main_output.pipe_id = main_pipe_input.pipe_id;
                 main_output.skeleton = new List<Polyline>();
 
                 DBObjectCollection shape = new DBObjectCollection();
                 foreach (var rest_shape in mainPipeGet.BufferedPipeList)
                     shape.Add(rest_shape);
-                main_output.shape = shape.UnionPolygons().Cast<Polyline>().FindByMax(x=>x.Area);
+
+                var shape_list = shape.UnionPolygons().Cast<Polyline>().ToList();
+                if (shape_list.Count > 0)
+                {
+                    main_output.shape = shape.UnionPolygons().Cast<Polyline>().FindByMax(x => x.Area);
+                }
             }
             // 添加至输出列表
-            if (main_index == outputs.Count)
-                outputs.Add(main_output);
-            else
-                outputs.Insert(main_index, main_output);
+
+            if (main_output.shape == null) main_output.shape = new Polyline();
+            if(true)
+            {
+                if (main_index == outputs.Count)
+                    outputs.Add(main_output);
+                else
+                    outputs.Insert(main_index, main_output);
+            }
         }
         public void Dispose()
         {

@@ -6,7 +6,6 @@ using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO.SVG;
-using Autodesk.AutoCAD.Geometry;
 using System.Text.RegularExpressions;
 
 namespace ThPlatform3D.Common
@@ -149,6 +148,25 @@ namespace ThPlatform3D.Common
             }
             return 0.0;
         }
+
+        public static double GetFloorBottomElevation(this Dictionary<string, string> properties,List<ThFloorInfo> floorInfos)
+        {
+            if (properties.ContainsKey(ThSvgPropertyNameManager.FloorNamePropertyName))
+            {
+                var flrName = properties[ThSvgPropertyNameManager.FloorNamePropertyName];
+                var res = floorInfos.Where(o => o.FloorName == flrName);
+                if(res.Count()==1)
+                {
+                    double dValue = 0.0;
+                    if (double.TryParse(res.First().Bottom_elevation, out dValue))
+                    {
+                        return dValue;
+                    }
+                }                
+            }
+            return 0.0;
+        }
+
         public static Extents2d ToExtents2d(this DBObjectCollection objs)
         {
             var extents = new Extents2d();
@@ -234,26 +252,33 @@ namespace ThPlatform3D.Common
                 });
             }
         }
-        public static void Layout(this List<ObjectIdCollection> floorObjIds,double floorSpacing)
+
+        public static void MoveToBottom(this ObjectIdCollection objIds)
+        {
+            if (objIds.Count == 0)
+            {
+                return;
+            }
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId);
+                var btrModelSpace = acadDb.Element<BlockTableRecord>(bt[BlockTableRecord.ModelSpace]);
+                var dot = acadDb.Element<DrawOrderTable>(btrModelSpace.DrawOrderTableId, true);
+                dot.MoveToBottom(objIds);
+            }
+        }
+
+        public static void MoveToTop(this ObjectIdCollection objIds)
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                for (int i = 0; i < floorObjIds.Count; i++)
-                {
-                    if (i == 0)
-                    {
-                        continue;
-                    }
-                    var dir = new Vector3d(0, i * floorSpacing, 0);
-                    var mt = Matrix3d.Displacement(dir);
-                    floorObjIds[i].OfType<ObjectId>().ForEach(o =>
-                    {
-                        var entity = acadDb.Element<Entity>(o, true);
-                        entity.TransformBy(mt);
-                    });
-                }
+                var bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId);
+                var btrModelSpace = acadDb.Element<BlockTableRecord>(bt[BlockTableRecord.ModelSpace]);
+                var dot = acadDb.Element<DrawOrderTable>(btrModelSpace.DrawOrderTableId, true);
+                dot.MoveToTop(objIds);
             }
         }
+
         public static bool IsIncludeHatch(this List<ObjectIdCollection> floorObjIds)
         {
             using (var acadDb = AcadDatabase.Active())

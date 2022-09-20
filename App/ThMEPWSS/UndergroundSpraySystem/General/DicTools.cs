@@ -138,7 +138,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
             var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
 
-            foreach(var pt in sprayIn.Verticals)
+            foreach(var pt in sprayIn.Verticals.Keys)
             {
                 var rstGetPt = GetPipePt(pt, dbPtSpatialIndex);
                 if(!rstGetPt)
@@ -217,11 +217,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-        public static void CreatFlowBlocks(DBObjectCollection flowblocks, SprayIn sprayIn)
+        public static void CreatFlowBlocks(List<Polyline> flowblocks, SprayIn sprayIn)
         {
             foreach (var objs in flowblocks)
             {
-                sprayIn.FlowBlocks.Add((DBObject)objs);
+                sprayIn.FlowBlocks.Add(objs);
             }
         }
 

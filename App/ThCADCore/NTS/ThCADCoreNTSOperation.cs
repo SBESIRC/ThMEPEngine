@@ -19,7 +19,14 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSGeometryClipper.Clip(polyline, curve, inverted);
         }
 
-        public static DBObjectCollection Buffer(this Polyline polyline, double distance,bool keepHole = false)
+        /// <summary>
+        /// 只支持闭合Polyline的Buffer
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="distance"></param>
+        /// <param name="keepHole"></param>
+        /// <returns></returns>
+        public static DBObjectCollection Buffer(this Polyline polyline, double distance, bool keepHole = false)
         {
             var buffer = new BufferOp(polyline.ToNTSPolygon(), new BufferParameters()
             {
@@ -28,6 +35,12 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection(keepHole);
         }
 
+        /// <summary>
+        /// 支持Polyline的Square类型Buffer
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
         public static DBObjectCollection BufferPL(this Polyline polyline, double distance)
         {
             var buffer = new BufferOp(polyline.ToNTSLineString(), new BufferParameters()
@@ -38,6 +51,12 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
+        /// <summary>
+        /// 支持Polyline的Flat类型Buffer
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
         public static DBObjectCollection BufferFlatPL(this Polyline polyline, double distance)
         {
             var buffer = new BufferOp(polyline.ToNTSLineString(), new BufferParameters()
@@ -91,7 +110,7 @@ namespace ThCADCore.NTS
             var filters = new DBObjectCollection();
             objs.OfType<Polyline>().ForEach(o =>
             {
-                foreach(Entity e in o.Fix())
+                foreach (Entity e in o.Fix())
                 {
                     filters.Add(e);
                 }

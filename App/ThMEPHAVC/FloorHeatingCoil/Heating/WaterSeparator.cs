@@ -28,8 +28,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             var points = PassageWayUtils.GetPolyPoints(originPl);
             points = SmoothUtils.SmoothPoints(points);
-            var si = PassageWayUtils.GetPointIndex(fixList[0], points);
-            var ei = PassageWayUtils.GetPointIndex(fixList[1], points);
+            var si = PassageWayUtils.GetPointIndex(fixList[0], points,1.1);
+            var ei = PassageWayUtils.GetPointIndex(fixList[1], points,1.1);
             Point3d start = fixList[0];
             Point3d end = fixList[1];
 

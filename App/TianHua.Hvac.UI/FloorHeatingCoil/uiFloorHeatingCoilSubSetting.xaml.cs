@@ -27,20 +27,19 @@ namespace TianHua.Hvac.UI.FloorHeatingCoil
     /// <summary>
     /// uiFloorHeatingCoilSubSetting.xaml 的交互逻辑
     /// </summary>
-    public partial class UiFloorHeatingCoilSubSetting : ThCustomWindow
+    public partial class uiFloorHeatingCoilSubSetting : ThCustomWindow
     {
         ThFloorHeatingCoilViewModel CoilViewModel;
-        public UiFloorHeatingCoilSubSetting(ThFloorHeatingCoilViewModel vm)
+        public uiFloorHeatingCoilSubSetting(ThFloorHeatingCoilViewModel vm)
         {
             InitializeComponent();
-            this.MutexName = "THDNPG";
             CoilViewModel = vm;
             DataContext = CoilViewModel;
         }
         private void window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
-            this.Close();
+            this.Hide();
         }
 
     }

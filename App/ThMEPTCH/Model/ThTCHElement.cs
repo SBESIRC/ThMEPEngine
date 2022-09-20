@@ -60,6 +60,12 @@ namespace ThMEPTCH.Model
         /// </summary>
         [ProtoMember(10)]
         public double ZOffSet { get; set; }
+        /// <summary>
+        /// 材质
+        /// </summary>
+        [ProtoMember(11)]
+        public string EnumMaterial { get; set; }
+
         #endregion
         #region 传object数据有问题，后面需要处理
         [ProtoMember(19)]

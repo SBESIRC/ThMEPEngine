@@ -18,6 +18,7 @@ namespace ThMEPWSS.Pipe.Service
         public string RoofName { get; set; }
         public List<Tuple<string,string>> StandardSpaceNames { get; set; }
         public List<Tuple<string, string>> NonStandardSpaceNames { get; set; }
+        public List<Tuple<string, string>> GeneralSpaceNames { get; set; }//楼层-新楼层框线定义
         public List<Tuple<string, string>> StoreyNames { get; set; }
         public ThReadStoreyInformationService()
         {
@@ -26,6 +27,7 @@ namespace ThMEPWSS.Pipe.Service
             StoreyNames = new List<Tuple<string, string>>();
             StandardSpaceNames = new List<Tuple<string,string>>();
             NonStandardSpaceNames = new List<Tuple<string, string>>();
+            GeneralSpaceNames = new List<Tuple<string, string>>();
         }
         public void Read(ObjectIdCollection objIds)
         {
@@ -39,9 +41,11 @@ namespace ThMEPWSS.Pipe.Service
             RoofName = GetRoofName(objIds);
             StandardSpaceNames = GetSortList(DivideCharacter(GetStandardSpaceName(objIds), "标准层"));
             NonStandardSpaceNames = GetSortList(DivideCharacter(GetNonStandardSpaceName(objIds), "非标层"));
+            GeneralSpaceNames = GetSortList(DivideCharacter(GetGeneralSpaceName(objIds), "楼层"));
             var CompositeSpaceNames = new List<Tuple<string, string>>();
             DivideCharacter(GetStandardSpaceName(objIds), "标准层").ForEach(o => CompositeSpaceNames.Add(o));
             DivideCharacter(GetNonStandardSpaceName(objIds), "非标层").ForEach(o => CompositeSpaceNames.Add(o));
+            DivideCharacter(GetGeneralSpaceName(objIds), "楼层").ForEach(o => CompositeSpaceNames.Add(o));
             if (DeviceName != "")
             {
                 StoreyNames.Add(Tuple.Create(DeviceName, "小屋面"));
@@ -150,6 +154,18 @@ namespace ThMEPWSS.Pipe.Service
                 {
                     blockString.Add(BlockTools.GetAttributeInBlockReference(objId, "楼层编号"));
                 }              
+            }
+            return blockString;
+        }
+        public static List<string> GetGeneralSpaceName(ObjectIdCollection blocks)
+        {
+            var blockString = new List<string>();
+            foreach (ObjectId objId in blocks)
+            {
+                if (BlockTools.GetDynBlockValue(objId, "楼层类型").Equals("楼层"))
+                {
+                    blockString.Add(BlockTools.GetAttributeInBlockReference(objId, "楼层编号"));
+                }
             }
             return blockString;
         }

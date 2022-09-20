@@ -59,15 +59,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         public List<PipeSegment> Calculate(PipeInput pipe)
         {
-            var box_path = FindShortestBoxWay(pipe);
-            return ConvertToDirectionWay(pipe, box_path);
+            var box_path = FindShortestBoxWay(pipe);       //以矩形为节点的路线
+            return ConvertToDirectionWay(pipe, box_path);  //上面那个结构抽出来的信息
         }
         int FindBoxPointIn(Point3d p)
         {
             int index = -1;
             for (int i = 0; i < boxes.Count; ++i)
             {
-                if (p.X >= boxes[i].xmin - 1 && 
+                if (p.X >= boxes[i].xmin - 1 &&  //+-1 eps
                     p.X <= boxes[i].xmax + 1 &&
                     p.Y >= boxes[i].ymin - 1 && 
                     p.Y <= boxes[i].ymax + 1)
@@ -95,10 +95,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
             int t = FindBoxPointIn(pipe.pout);
             int n = boxes.Count;
             // init arrays
-            double[] dist = new double[n];
-            int[] path = new int[n];
-            bool[] used = new bool[n];
-            int[] dirs = new int[n];
+            double[] dist = new double[n];    //全局信息       框线间的真实距离 double
+            int[] path = new int[n];          //整条管线       最短路径上的每一个框的index
+            bool[] used = new bool[n];      
+            int[] dirs = new int[n];          // count = dist.count  累计最短路径上的转弯数量
             for (int i = 0; i < n; ++i)
             {
                 dist[i] = 120000;
@@ -128,6 +128,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         // update dist
                         dist[y] = dist[x] + distmap[x, y];
                         // calculate <path[x]-x-y>'s dirs
+                        // 起点所在框的前一个框是这个框自己
                         var pre_dir = path[x] == x ? pipe.start_dir : GetDirBetweenTwoBox(boxes[path[x]], boxes[x]);
                         var cur_dir = GetDirBetweenTwoBox(boxes[x], boxes[y]);
                         int new_dirs = dirs[x] + (Math.Abs(cur_dir - pre_dir) % 2 != 0 ? 1 : 0);
@@ -159,6 +160,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             List<PipeSegment> ret = new List<PipeSegment>();
             List<KeyValuePair<int, List<int>>> dir_groups = new List<KeyValuePair<int, List<int>>>();
             int i = 1;
+            //给同方向的box分到一组里
             while (i < box_path.Count)
             {
                 var dir = GetDirBetweenTwoBox(boxes[box_path[i - 1]], boxes[box_path[i]]);

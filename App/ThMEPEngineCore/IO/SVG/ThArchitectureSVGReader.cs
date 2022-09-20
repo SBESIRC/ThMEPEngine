@@ -10,16 +10,10 @@ namespace ThMEPEngineCore.IO.SVG
 {
     public class ThArchitectureSVGReader 
     {
-        public List<ThGeometry> Geos { get; set; }
-        public List<ThFloorInfo> FloorInfos { get; set; }
-        public List<ThComponentInfo> ComponentInfos { get; set; }
-        public Dictionary<string, string> DocProperties { get; set; }
+        public ThSvgParseInfo ParseInfo { get; private set; }
         public ThArchitectureSVGReader()
         {
-            Geos = new List<ThGeometry>();
-            FloorInfos = new List<ThFloorInfo>();
-            ComponentInfos = new List<ThComponentInfo>();
-            DocProperties = new Dictionary<string, string>();
+            ParseInfo= new ThSvgParseInfo();
         }
         public void ReadFromContent(string content)
         {
@@ -178,10 +172,10 @@ namespace ThMEPEngineCore.IO.SVG
                 }
             }
             // 收集结果
-            Geos = results;
-            FloorInfos = floorInfos.OrderBy(o => o.BottomElevation).ToList();
-            DocProperties = docProperties;
-            ComponentInfos = componentInfos;
+            ParseInfo.Geos = results;
+            ParseInfo.FloorInfos = floorInfos.OrderBy(o => o.BottomElevation).ToList();
+            ParseInfo.DocProperties = docProperties;
+            ParseInfo.ComponentInfos = componentInfos;
         }
 
         private bool IsMaterial(string material)

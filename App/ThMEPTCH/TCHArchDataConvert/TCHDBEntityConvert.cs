@@ -34,8 +34,10 @@ namespace ThMEPTCH.TCHArchDataConvert
             {
                 var entity = DBToTHEntityCommon.TArchWallToEntityWall(item, 0, 0, 0, 0, moveOffSet);
                 wallEntityDic.Add(entity.Outline, entity);
-                if (entity.WallCenterCurve != null && (entity.WallCenterCurve is Line || entity.WallCenterCurve is Arc))
-                    wallCurveDic.Add(entity.WallCenterCurve, entity);
+                if (entity.CenterCurve != null && (entity.CenterCurve is Line || entity.CenterCurve is Arc))
+                {
+                    wallCurveDic.Add(entity.CenterCurve, entity);
+                }
                 addDBColl.Add(entity.Outline);
             }
             var wallCurves = wallCurveDic.Select(c => c.Key).ToList();
@@ -46,11 +48,11 @@ namespace ThMEPTCH.TCHArchDataConvert
                 double epLeftOffSet = 0.0;
                 double spRightOffSet = 0.0;
                 double epRightOffSet = 0.0;
-                if (null != entity.WallCenterCurve)
+                if (null != entity.CenterCurve)
                 {
-                    if (entity.WallCenterCurve is Line line)
+                    if (entity.CenterCurve is Line line)
                         spLeftOffSet = GetWallPointOffSet(line, wallCurves, out epLeftOffSet, out spRightOffSet, out epRightOffSet);
-                    else if (entity.WallCenterCurve is Arc arc)
+                    else if (entity.CenterCurve is Arc arc)
                         spLeftOffSet = GetWallPointOffSet(arc, wallCurves, out epLeftOffSet, out spRightOffSet, out epRightOffSet);
                 }
                 if (Math.Abs(spLeftOffSet) > 0.001 || Math.Abs(epLeftOffSet) > 0.001 || Math.Abs(spRightOffSet) > 0.001 || Math.Abs(epRightOffSet) > 0.001)
@@ -139,8 +141,8 @@ namespace ThMEPTCH.TCHArchDataConvert
             {
                 var entity = DBToTHEntityCommon.TArchWallToEntityWall(item, 0, 0, 0, 0, moveOffSet);
                 wallEntityDic.Add(entity.Outline, entity);
-                if (entity.WallCenterCurve != null && (entity.WallCenterCurve is Line || entity.WallCenterCurve is Arc))
-                    wallCurveDic.Add(entity.WallCenterCurve, entity);
+                if (entity.CenterCurve != null && (entity.CenterCurve is Line || entity.CenterCurve is Arc))
+                    wallCurveDic.Add(entity.CenterCurve, entity);
                 addDBColl.Add(entity.Outline);
             }
             var wallCurves = wallCurveDic.Select(c => c.Key).ToList();
@@ -151,11 +153,11 @@ namespace ThMEPTCH.TCHArchDataConvert
                 double epLeftOffSet = 0.0;
                 double spRightOffSet = 0.0;
                 double epRightOffSet = 0.0;
-                if (null != entity.WallCenterCurve)
+                if (null != entity.CenterCurve)
                 {
-                    if (entity.WallCenterCurve is Line line)
+                    if (entity.CenterCurve is Line line)
                         spLeftOffSet = GetWallPointOffSet(line, wallCurves, out epLeftOffSet, out spRightOffSet, out epRightOffSet);
-                    else if (entity.WallCenterCurve is Arc arc)
+                    else if (entity.CenterCurve is Arc arc)
                         spLeftOffSet = GetWallPointOffSet(arc, wallCurves, out epLeftOffSet, out spRightOffSet, out epRightOffSet);
                 }
                 if (Math.Abs(spLeftOffSet) > 0.001 || Math.Abs(epLeftOffSet) > 0.001 || Math.Abs(spRightOffSet) > 0.001 || Math.Abs(epRightOffSet) > 0.001)
@@ -335,7 +337,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             var rightPt = isSp ? thisRightCurve.StartPoint : thisRightCurve.EndPoint;
             if (thisCurve is Line)
             {
-                if (thisLeftCurve == thisEntity.WallLeftCurve)
+                if (thisLeftCurve == thisEntity.LeftCurve)
                 {
                     leftOffSet = dir.Negate().DotProduct(leftInsPoint - leftPt);
                     rightOffSet = dir.Negate().DotProduct(rightInsPoint - rightPt);
@@ -371,12 +373,12 @@ namespace ThMEPTCH.TCHArchDataConvert
         }
         Curve GetLeftOrRightCurve(Point3d point, WallEntity entity, Vector3d dir)
         {
-            var leftSp = entity.WallLeftCurve.StartPoint;
-            var leftEp = entity.WallLeftCurve.EndPoint;
+            var leftSp = entity.LeftCurve.StartPoint;
+            var leftEp = entity.LeftCurve.EndPoint;
             var nearPt = point.DistanceTo(leftSp) < point.DistanceTo(leftEp) ? leftSp : leftEp;
             if ((nearPt - point).DotProduct(dir) < -0.0001)
-                return entity.WallRightCurve;
-            return entity.WallLeftCurve;
+                return entity.RightCurve;
+            return entity.LeftCurve;
         }
         Dictionary<Curve, Point3d> PointGetCurves(Point3d point, List<Curve> otherCurves, double tolerance = 1)
         {
@@ -399,9 +401,10 @@ namespace ThMEPTCH.TCHArchDataConvert
             var pl = entity.Outline.Shell();
             pl.Closed = false;
             pl.Elevation = entity.Outline.Elevation;
-            var newWall = new ThTCHWall(pl, entity.WallHeight);
+            var newWall = new ThTCHWall(pl, entity.Height);
             newWall.Uuid = projectId + entity.DBId;
             newWall.Width = entity.LeftWidth + entity.RightWidth;
+            newWall.EnumMaterial = entity.EnumMaterial.GetDescription();
             //var newWall = new ThTCHWall(entity.StartPoint,entity.EndPoint,entity.RightWidth+entity.LeftWidth, entity.WallHeight);
             return newWall;
         }
@@ -414,7 +417,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             var newWall = new ThTCHWallData();
             newWall.BuildElement = new ThTCHBuiltElementData();
             newWall.BuildElement.Outline = pl.ToTCHPolyline();
-            newWall.BuildElement.Height = entity.WallHeight;
+            newWall.BuildElement.Height = entity.Height;
             newWall.BuildElement.Width = entity.LeftWidth + entity.RightWidth;
             newWall.BuildElement.Root = new ThTCHRootData();
             newWall.BuildElement.Root.GlobalId = projectId + entity.DBId;
@@ -425,7 +428,8 @@ namespace ThMEPTCH.TCHArchDataConvert
 
         ThTCHDoor DoorEntityToTCHDoor(DoorEntity entity)
         {
-            var newDoor = new ThTCHDoor(entity.BasePoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation);
+            var newDoor = new ThTCHDoor(entity.BasePoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation,
+                (uint)entity.Swing, (uint)entity.OperationType);
             newDoor.Uuid = projectId + entity.DBId.ToString();
             return newDoor;
         }
@@ -434,8 +438,10 @@ namespace ThMEPTCH.TCHArchDataConvert
         {
             var newDoor = new ThTCHDoorData();
             newDoor.BuildElement = new ThTCHBuiltElementData();
-            newDoor.BuildElement.Width = entity.Width;
+            newDoor.BuildElement.Length = entity.Width;
+            newDoor.BuildElement.Width = entity.Thickness;
             newDoor.BuildElement.Origin = entity.BasePoint.ToTCHPoint();
+            newDoor.BuildElement.XVector = Vector3d.XAxis.RotateBy(entity.Rotation, Vector3d.ZAxis).ToTCHVector();
             newDoor.BuildElement.Height = entity.Height;
             newDoor.BuildElement.Root = new ThTCHRootData();
             newDoor.BuildElement.Root.GlobalId = projectId + entity.DBId.ToString();
@@ -444,7 +450,7 @@ namespace ThMEPTCH.TCHArchDataConvert
 
         ThTCHWindow WindowEntityToTCHWindow(WindowEntity entity)
         {
-            var newWindow = new ThTCHWindow(entity.BasePoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation);
+            var newWindow = new ThTCHWindow(entity.BasePoint, entity.Width, entity.Height, entity.Thickness, entity.Rotation, (uint)entity.WindowType);
             newWindow.Uuid = projectId + entity.DBId;
             return newWindow;
         }
@@ -453,8 +459,10 @@ namespace ThMEPTCH.TCHArchDataConvert
         {
             var newWindow = new ThTCHWindowData();
             newWindow.BuildElement = new ThTCHBuiltElementData();
-            newWindow.BuildElement.Width = entity.Width;
+            newWindow.BuildElement.Length = entity.Width;
+            newWindow.BuildElement.Width = entity.Thickness;
             newWindow.BuildElement.Origin = entity.BasePoint.ToTCHPoint();
+            newWindow.BuildElement.XVector = Vector3d.XAxis.RotateBy(entity.Rotation, Vector3d.ZAxis).ToTCHVector();
             newWindow.BuildElement.Height = entity.Height;
             newWindow.BuildElement.Root = new ThTCHRootData();
             newWindow.BuildElement.Root.GlobalId = projectId + entity.DBId.ToString();

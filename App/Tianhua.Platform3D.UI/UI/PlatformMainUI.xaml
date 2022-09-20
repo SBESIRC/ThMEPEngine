@@ -103,6 +103,7 @@
                       AutoGenerateColumns ="False"
                       HeadersVisibility="None"
                       RowHeight="22"
+                      Visibility="Collapsed"
                       ItemsSource="{Binding Properties}"
                       >
                 <DataGrid.Columns>
@@ -119,6 +120,15 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
+            <Grid Grid.Row="1" ClipToBounds="True">
+                <hc:PropertyGrid  Grid.Row="1" Background="Transparent" ShowSortButton="True"  Margin="0,0,0,0"
+                                  Padding="5,0,5,5"
+                                  x:Name="propertyGrid"
+                             SelectedObject="{Binding PropertyVM,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" SelectedObjectChanged="propertyGrid_SelectedObjectChanged">
+                </hc:PropertyGrid>
+                
+            </Grid>
+            
         </Grid>
     </Grid>
 </UserControl>

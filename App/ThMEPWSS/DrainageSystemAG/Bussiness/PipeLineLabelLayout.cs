@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageSystemAG.Models;
@@ -41,7 +42,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         double _createFloorSpliteY;
         List<Polyline> _roomTypeSplitLines = new List<Polyline>();//楼层框定户型分隔线
         Polyline _floorFramedBound { get; set; }
-        public PipeLineLabelLayout(FloorFramed spliterfloor, double spliterY, List<Polyline> roomTypeSplitLines)
+        List<FloorFramed> _floorFrameds { get; set; }
+        public PipeLineLabelLayout(FloorFramed spliterfloor, double spliterY, List<Polyline> roomTypeSplitLines, List<FloorFramed> floorFrameds)
         {
             _thisFloorPipes = new List<CreateBlockInfo>();
             _orderLabelPipes = new List<CreateBlockInfo>();
@@ -52,6 +54,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             _cretateFloorRooms = new List<RoomModel>();
             _roomTypeSplitLines = new List<Polyline>(roomTypeSplitLines);
             _floorFramedBound = spliterfloor.outPolyline;
+            _floorFrameds= floorFrameds;
         }
         public void AddObstacleEntitys(List<Entity> entitys)
         {
@@ -103,6 +106,10 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             if (null != thisFloorRoofDrain && thisFloorRoofDrain.Count > 0)
                 _labelRoofDrains.AddRange(thisFloorRoofDrain);
         }
+        public static Vector3d CreateVector(Point3d ps, Point3d pe)
+        {
+            return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
+        }
         public List<CreateDBTextElement> SpliteFloorSpace(out List<CreateBasicElement> createBasics)
         {
             _pipeLabelText.InitFloorData(_createFloor, _cretateFloorRooms);
@@ -124,18 +131,36 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
             var allPipeLabels = GetThisFloorAllLables();
-
+            //获取顶层到该楼层的偏移矩阵
+            var crossMat = new Matrix3d();
+            if (allPipeLabels.Any())
+            {
+                var thisFloorFramed = _floorFrameds.Where(e => e.outPolyline.Contains(allPipeLabels[0].BasePoint)).ToList();
+                var topFloorFramed = _floorFrameds.Where(e => e.outPolyline.Contains(_floorFramedBound.GetCentroidPoint())).ToList();
+                if (thisFloorFramed.Any() && topFloorFramed.Any())
+                    crossMat = Matrix3d.Displacement(CreateVector(topFloorFramed.First().datumPoint, thisFloorFramed.First().datumPoint));
+            }
             //提取到属于该楼层框的户型分割线
+            double refY = _floorFramedBound.GetCentroidPoint().Y;
+            var eldSpaceX = new List<double>(floorSpaceX);
+            if (eldSpaceX.Count > 2)
+            {
+                eldSpaceX.RemoveAt(0);
+                eldSpaceX.RemoveAt(eldSpaceX.Count - 1);
+            }
+            eldSpaceX.ForEach(d => _roomTypeSplitLines.Add(FloorFramedSpliter.PolyFromLine(new Line(new Point3d(d, refY - 1, 0), new Point3d(d, refY + 1, 0)))));
             _roomTypeSplitLines = _roomTypeSplitLines.Where(e => _floorFramedBound.Contains(ThCADExtension.ThCurveExtension.GetMidpoint(e)) || _floorFramedBound.IntersectWithEx(e).Count > 0).ToList();
             if (_roomTypeSplitLines.Count >= 1)
             {
                 var floorSpceRegions = FloorFramedSpliter.ConvertToCorrectSpliteLines(_roomTypeSplitLines, _floorFramedBound);
                 for (int i = 0; i < floorSpceRegions.Count; i++)
                 {
-                    double minX = floorSpaceX[i];
-                    double maxX = floorSpaceX[i + 1];
+                    double minX = floorSpceRegions[i].EntityVertices().Cast<Point3d>().Select(p => p.X).OrderBy(d=>d).First();
+                    double maxX = floorSpceRegions[i].EntityVertices().Cast<Point3d>().Select(p => p.X).OrderBy(d => d).Last();
+                    var offset_region = floorSpceRegions[i].Clone() as Polyline;
+                    offset_region.TransformBy(crossMat);
                     //获取该区域内的立管
-                    var spacePipes = allPipeLabels.Where(c => floorSpceRegions[i].Contains(c.BasePoint)).ToList();
+                    var spacePipes = allPipeLabels.Where(c => offset_region.Contains(c.BasePoint)).ToList();
                     if (spacePipes == null || spacePipes.Count < 1)
                         continue;
                     var tmpBaseElements = createBasicElements;
@@ -317,6 +342,17 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     var textLineEp = layoutDir.outDirection.X < 0 ? textStartPoint : textStartPoint + Vector3d.XAxis.MultiplyBy(textWidth);
                     var s = new CreateBasicElement(_createFloor.floorUid, new Line(lineStartPoint, textLineEp), txtLineLayer, pipe.BelongId, "LG_BSLJX");
                     createBasicElements.Add(s);
+                    var _mainLine = new Line(pipe.BasePoint, lineStartPoint);
+                    if (matched_pipeName)
+                    {
+                        var addLine1 = new CreateBasicElement(_createFloor.floorUid, _mainLine, ThWSSCommon.Layout_PipeWastDrainTextLayerName, pipe.BelongId, "LG_BSLJX");
+                        createBasicElements.Add(addLine1);
+                    }
+                    else
+                    {
+                        var addLine = new CreateBasicElement(_createFloor.floorUid, _mainLine, ThWSSCommon.Layout_PipeRainTextLayerName, pipe.BelongId, "LG_BSLJX");
+                        createBasicElements.Add(addLine);
+                    }
                     if (i != thisLinePipes.Count - 1)
                     {
                         var maxPoint = text.GeometricExtents.MaxPoint;
@@ -331,23 +367,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     {
                         retText.Add(new CreateDBTextElement(_createFloor.floorUid, btText.Position, btText, pipe.BelongId, txtLineLayer, ThWSSCommon.Layout_TextStyle));
                     }
-                }
+                }                          
                 var startPipe = layoutDir.direction.Y < 0 ? thisLinePipes.Last() : thisLinePipes.First();
                 var lineSp = new Point3d(centerPoint.X, startPipe.BasePoint.Y, 0);
                 var lineEp = layoutDir.direction.Y < 0 ? createPoint : lineStartPoint;
                 var mainLine = new Line(lineSp, lineEp);
-                if (plCount > 0) 
-                {
-                    //有废水立管,则添加一根废水对应线
-                    var addLine1 = new CreateBasicElement(_createFloor.floorUid, (Line)mainLine.Clone(), ThWSSCommon.Layout_PipeWastDrainTextLayerName, connectPipeIds, "LG_BSLJX");
-                    createBasicElements.Add(addLine1);
-                }
-                if(plCount != thisLinePipes.Count)
-                {
-                    //还有雨水、阳台等立管，则加入一根雨水对应线
-                    var addLine = new CreateBasicElement(_createFloor.floorUid, (Line)mainLine.Clone(), ThWSSCommon.Layout_PipeRainTextLayerName, connectPipeIds, "LG_BSLJX");
-                    createBasicElements.Add(addLine);
-                }
                 //将主线加入到后续的避让线中
                 _obstacleEntities.AddMainLine(mainLine);
             }

@@ -22,28 +22,37 @@ using ThMEPHVAC.FloorHeatingCoil.Heating;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Heating
 {
-    class ClearSingleBuffer
+    class ClearSinglePolyline
     {
         public Polyline OriginalPoly = new Polyline();
-        public double ClearDis = 0;
         public Polyline Boundary = new Polyline();
         public Polyline ClearedPl = new Polyline();
-        public ClearSingleBuffer(Polyline pl, Polyline boundary, double clearDis)
+        public double ClearDis = 0;
+
+        public ClearSinglePolyline(Polyline pl, Polyline boundary, double clearDis = 300)
         {
             OriginalPoly = pl;
             ClearDis = clearDis;
             Boundary = boundary;
         }
 
-        public void Pipeline() 
+        public void PipelineClosed() 
         {
             ClearedPl = ClearBendsLongFirstClosed(OriginalPoly, Boundary, ClearDis);
         }
 
-        public Polyline ClearBendsLongFirstClosed(Polyline originalPl, Polyline boundary, double dis)
+        static public Point3d FindDiagonalPoint(Point3d pt0, Point3d pt1, Point3d pt2)
+        {
+            Vector3d dir = pt1 - pt0;
+            Point3d newPt = pt2 - dir;
+            return newPt;
+        }
+
+        static public Polyline ClearBendsLongFirstClosed(Polyline originalPl, Polyline boundary, double dis)
         {
             Polyline newPl = originalPl.Clone() as Polyline;
             var coords = PassageWayUtils.GetPolyPoints(newPl);
+            coords = SmoothUtils.SmoothPoints(coords);
             //coords.RemoveAt(coords.Count - 1);
 
             List<Point3d> newPointList = new List<Point3d>(); 
@@ -58,7 +67,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Point3d pt2 = coords[(i + 2) % num];
                 Point3d pt3 = coords[(i + 3) % num];
 
-                if ((pt2 - pt1).Length < dis)
+                Vector3d vec0 = pt1 - pt0;
+                Vector3d vec1 = pt2 - pt1;
+                Vector3d vec2 = pt3 - pt2;
+
+                //只修正阶梯状情况
+                if ((pt2 - pt1).Length < dis && vec0.GetNormal().DotProduct(vec2.GetNormal()) > 0.95)
                 {
                     Point3d newPt1 = FindDiagonalPoint(pt0, pt1, pt2);
                     Point3d newPt2 = FindDiagonalPoint(pt1, pt2, pt3);
@@ -72,8 +86,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     //if (i + 3 == newPl.NumberOfVertices) ok2 = false;
                     //if (i == 0) ok1 = false;
 
-                    Vector3d vec0 = pt1 - pt0;
-                    Vector3d vec2 = pt3 - pt2;
+                    
                     if ((ok1 && ok2 && vec0.Length > vec2.Length) || (ok2 && !ok1))
                     {
                         newPointList.Add(pt0);
@@ -98,30 +111,26 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                                     newPointList.RemoveAt(0);
                                 }
                             }
-                            
                         }
                         
+                        //if (vec2.Length > Parameter.IsLongSide / 2 && vec0.GetNormal().DotProduct(vec2.GetNormal()) < -0.95)
+                        //{
+                        //    //Polyline excessPl = new Polyline();
+                        //    //excessPl.AddVertexAt(0, newPt2.ToPoint2D(), 0, 0, 0);
+                        //    //excessPl.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
+                        //    //ExcessPoly.Add(excessPl);
+                        //    newPointList.Add(newPt2);
+                        //    newPointList.Add(pt1);
 
-                        
-
-                        if (vec2.Length > Parameter.IsLongSide / 2 && vec0.GetNormal().DotProduct(vec2.GetNormal()) < -0.95)
-                        {
-                            //Polyline excessPl = new Polyline();
-                            //excessPl.AddVertexAt(0, newPt2.ToPoint2D(), 0, 0, 0);
-                            //excessPl.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
-                            //ExcessPoly.Add(excessPl);
-                            newPointList.Add(newPt2);
-                            newPointList.Add(pt1);
-
-                            if (i == num - 1) newPointList.Add(newPt2);
-                            //newPointList.Add(newPt2);
-                        }
+                        //    if (i == num - 1) newPointList.Add(newPt2);
+                        //    //newPointList.Add(newPt2);
+                        //}
                         i = i + 3;
                         continue;
                     }
                     else if ((ok1 && ok2 && vec0.Length < vec2.Length) || (!ok2 && ok1))
                     {
-                        newPointList.Add(pt0);
+                        newPointList.Add(newPt1);
                         newPointList.Add(newPt1);
                         coords[(i + 1) % num] = newPt2;
                         coords[(i + 2) % num] = newPt2;
@@ -142,19 +151,16 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                             }
                         }
 
-
-                        
-
-                        if (vec0.Length > Parameter.IsLongSide / 2 && vec0.GetNormal().DotProduct(vec2.GetNormal()) < -0.95)
-                        {
-                            //Polyline excessPl = new Polyline();
-                            //excessPl.AddVertexAt(0, newPt1.ToPoint2D(), 0, 0, 0);
-                            //excessPl.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
-                            //ExcessPoly.Add(excessPl);
-                            newPointList.Add(newPt1);
-                            newPointList.Add(pt2);
-                            if (i == num - 1) newPointList.Add(newPt1);
-                        }
+                        //if (vec0.Length > Parameter.IsLongSide / 2 && vec0.GetNormal().DotProduct(vec2.GetNormal()) < -0.95)
+                        //{
+                        //    //Polyline excessPl = new Polyline();
+                        //    //excessPl.AddVertexAt(0, newPt1.ToPoint2D(), 0, 0, 0);
+                        //    //excessPl.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
+                        //    //ExcessPoly.Add(excessPl);
+                        //    newPointList.Add(newPt1);
+                        //    newPointList.Add(pt2);
+                        //    if (i == num - 1) newPointList.Add(newPt1);
+                        //}
 
                         i = i + 3;
                         continue;
@@ -164,22 +170,119 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 //如果没有continue;
                 newPointList.Add(pt0);
                 i++;
-                
             }
 
             if (newPointList.Last() != newPointList.First()) 
             {
                 newPointList.Add(newPointList.First());
             }
+            newPointList = SmoothUtils.SmoothPoints(newPointList);
             newPl = PassageWayUtils.BuildPolyline(newPointList);
             return newPl;
         }
 
-        public Point3d FindDiagonalPoint(Point3d pt0, Point3d pt1, Point3d pt2)
+
+        static public Polyline ClearBendsLongFirstUnClosed(Polyline originalPl, Polyline boundary, List<Point3d> fixList,double dis) 
         {
-            Vector3d dir = pt1 - pt0;
-            Point3d newPt = pt2 - dir;
-            return newPt;
+            Polyline newPl = originalPl;
+            var coords = PassageWayUtils.GetPolyPoints(newPl);
+            coords = SmoothUtils.SmoothPoints(coords);
+
+            List<Point3d> newPointList = new List<Point3d>();
+
+            double bufferDis = 5;
+            Polyline newBoundary = boundary.Buffer(bufferDis).OfType<Polyline>().ToList().OrderByDescending(x => x.Area).First();
+            
+            int num = coords.Count;
+            for (int i = 0; i + 3 < coords.Count;)
+            {
+                Point3d pt0 = coords[i];
+                Point3d pt1 = coords[(i + 1) % num];
+                Point3d pt2 = coords[(i + 2) % num];
+                Point3d pt3 = coords[(i + 3) % num];
+
+                Vector3d vec0 = pt1 - pt0;
+                Vector3d vec1 = pt2 - pt1;
+                Vector3d vec2 = pt3 - pt2;
+
+                if (i == 2)
+                {
+                    int stop = 0;
+                }
+
+                if ((pt2 - pt1).Length < 31 && (pt2 - pt1).Length > 29)
+                {
+                    int stop = 0;
+                }
+
+
+                if ((pt2 - pt1).Length < dis && vec0.GetNormal().DotProduct(vec2.GetNormal()) > 0.95)
+                {
+                    Point3d newPt1 = FindDiagonalPoint(pt0, pt1, pt2);
+                    Point3d newPt2 = FindDiagonalPoint(pt1, pt2, pt3);
+
+                    bool ok1 = newBoundary.Contains(new Line(newPt1, pt2)) && newBoundary.Contains(new Line(newPt1, pt0));
+                    bool ok2 = newBoundary.Contains(new Line(newPt2, pt1)) && newBoundary.Contains(new Line(newPt2, pt3));
+
+
+                    if (i + 3 == num - 1) ok2 = false;
+                    if (i == 0) ok1 = false;
+
+                    if ((ok1 && ok2 && vec0.Length > vec2.Length) || (ok2 && !ok1))
+                    {
+                        newPointList.Add(pt0);
+                        //newPointList.Add(newPt2);
+                        newPointList.Add(newPt2);
+                        coords[(i + 1) % num] = newPt2;
+                        coords[(i + 2) % num] = newPt2;
+                        coords[(i + 3) % num] = newPt2;
+
+                        i = i + 3;
+                        continue;
+                    }
+                    else if ((ok1 && ok2 && vec0.Length < vec2.Length) || (!ok2 && ok1))
+                    {
+                        newPointList.Add(newPt1);
+                        newPointList.Add(newPt1);
+                        coords[(i + 1) % num] = newPt2;
+                        coords[(i + 2) % num] = newPt2;
+
+
+                        if (i >= coords.Count - 2)
+                        {
+                            List<Point3d> deleteList = new List<Point3d>();
+                            deleteList.Add(pt1);
+                            deleteList.Add(pt2);
+                            for (int a = 0; a < 2; a++)
+                            {
+                                if (deleteList.Contains(newPointList.First()))
+                                {
+                                    deleteList.Remove(newPointList.First());
+                                    newPointList.RemoveAt(0);
+                                }
+                            }
+                        }
+
+                        i = i + 3;
+                        continue;
+                    }
+                }
+                //如果没有continue;
+                newPointList.Add(pt0);
+                i++;
+
+            }
+
+
+            newPointList = SmoothUtils.SmoothPoints(newPointList);
+            newPl = PassageWayUtils.BuildPolyline(newPointList);
+            return newPl;
+        }
+
+        static public Polyline UnClosedHelper(Polyline originalPl, Polyline boundary, List<bool> fixList)  
+        {
+
+            return new Polyline();
         }
     }
 }

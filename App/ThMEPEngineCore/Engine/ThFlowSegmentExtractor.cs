@@ -3,6 +3,11 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using AcHelper;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
+using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -55,21 +60,6 @@ namespace ThMEPEngineCore.Engine
                             v.Results.AddRange(DoExtract(e, v));
                         });
                     });
-            }
-        }
-
-        public void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                foreach (ObjectId objId in dbObjs)
-                {
-                    var e = acadDatabase.Element<Entity>(objId);
-                    Visitors.ForEach(v =>
-                    {
-                        v.Results.AddRange(DoExtract(e, v));
-                    });
-                }
             }
         }
 

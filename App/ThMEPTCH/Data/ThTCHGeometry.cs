@@ -31,9 +31,10 @@ public static partial class ThTCHGeometryReflection {
           "ZGF0YTMxGAkgASgBEg4KBmRhdGEzMhgKIAEoARIOCgZkYXRhMzMYCyABKAES",
           "DgoGZGF0YTM0GAwgASgBEg4KBmRhdGE0MRgNIAEoARIOCgZkYXRhNDIYDiAB",
           "KAESDgoGZGF0YTQzGA8gASgBEg4KBmRhdGE0NBgQIAEoASIdCgxUaFRDSFNl",
-          "Z21lbnQSDQoFaW5kZXgYASADKA0iTwoNVGhUQ0hQb2x5bGluZRIdCgZwb2lu",
+          "Z21lbnQSDQoFaW5kZXgYASADKA0ieAoNVGhUQ0hQb2x5bGluZRIdCgZwb2lu",
           "dHMYASADKAsyDS5UaFRDSFBvaW50M2QSHwoIc2VnbWVudHMYAiADKAsyDS5U",
-          "aFRDSFNlZ21lbnRiBnByb3RvMw=="));
+          "aFRDSFNlZ21lbnQSJwoPaW5uZXJfcG9seWxpbmVzGAMgAygLMg4uVGhUQ0hQ",
+          "b2x5bGluZWIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -41,7 +42,7 @@ public static partial class ThTCHGeometryReflection {
           new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHVector3d), global::ThTCHVector3d.Parser, new[]{ "X", "Y", "Z" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHMatrix3d), global::ThTCHMatrix3d.Parser, new[]{ "Data11", "Data12", "Data13", "Data14", "Data21", "Data22", "Data23", "Data24", "Data31", "Data32", "Data33", "Data34", "Data41", "Data42", "Data43", "Data44" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHSegment), global::ThTCHSegment.Parser, new[]{ "Index" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHPolyline), global::ThTCHPolyline.Parser, new[]{ "Points", "Segments" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHPolyline), global::ThTCHPolyline.Parser, new[]{ "Points", "Segments", "InnerPolylines" }, null, null, null, null)
         }));
   }
   #endregion
@@ -1600,6 +1601,7 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   public ThTCHPolyline(ThTCHPolyline other) : this() {
     points_ = other.points_.Clone();
     segments_ = other.segments_.Clone();
+    innerPolylines_ = other.innerPolylines_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -1631,6 +1633,17 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
     get { return segments_; }
   }
 
+  /// <summary>Field number for the "inner_polylines" field.</summary>
+  public const int InnerPolylinesFieldNumber = 3;
+  private static readonly pb::FieldCodec<global::ThTCHPolyline> _repeated_innerPolylines_codec
+      = pb::FieldCodec.ForMessage(26, global::ThTCHPolyline.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHPolyline> innerPolylines_ = new pbc::RepeatedField<global::ThTCHPolyline>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThTCHPolyline> InnerPolylines {
+    get { return innerPolylines_; }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -1648,6 +1661,7 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
     }
     if(!points_.Equals(other.points_)) return false;
     if(!segments_.Equals(other.segments_)) return false;
+    if(!innerPolylines_.Equals(other.innerPolylines_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -1657,6 +1671,7 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
     int hash = 1;
     hash ^= points_.GetHashCode();
     hash ^= segments_.GetHashCode();
+    hash ^= innerPolylines_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -1677,6 +1692,7 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   #else
     points_.WriteTo(output, _repeated_points_codec);
     segments_.WriteTo(output, _repeated_segments_codec);
+    innerPolylines_.WriteTo(output, _repeated_innerPolylines_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -1689,6 +1705,7 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
     points_.WriteTo(ref output, _repeated_points_codec);
     segments_.WriteTo(ref output, _repeated_segments_codec);
+    innerPolylines_.WriteTo(ref output, _repeated_innerPolylines_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -1701,6 +1718,7 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
     int size = 0;
     size += points_.CalculateSize(_repeated_points_codec);
     size += segments_.CalculateSize(_repeated_segments_codec);
+    size += innerPolylines_.CalculateSize(_repeated_innerPolylines_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -1715,6 +1733,7 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
     }
     points_.Add(other.points_);
     segments_.Add(other.segments_);
+    innerPolylines_.Add(other.innerPolylines_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -1738,6 +1757,10 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
           segments_.AddEntriesFrom(input, _repeated_segments_codec);
           break;
         }
+        case 26: {
+          innerPolylines_.AddEntriesFrom(input, _repeated_innerPolylines_codec);
+          break;
+        }
       }
     }
   #endif
@@ -1759,6 +1782,10 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
         }
         case 18: {
           segments_.AddEntriesFrom(ref input, _repeated_segments_codec);
+          break;
+        }
+        case 26: {
+          innerPolylines_.AddEntriesFrom(ref input, _repeated_innerPolylines_codec);
           break;
         }
       }

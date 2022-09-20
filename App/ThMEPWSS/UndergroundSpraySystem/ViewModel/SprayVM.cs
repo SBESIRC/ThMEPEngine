@@ -69,7 +69,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                         return;
                     }
                     FloorListDatas = storeysRecEngine.Elements
-                        .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey"))
+                        .Where(e => (e as ThStoreys).StoreyType.ToString().Contains("Storey") || (e as ThStoreys).StoreyTypeString.Equals("楼层"))
                         .Select(floor => (floor as ThStoreys).StoreyNumber).ToList()
                         .Where(e => e.Trim().StartsWith("B")).ToList();
 

@@ -9,8 +9,10 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
@@ -205,11 +207,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 打印天正桥架(因为天正桥架获取不到它的ObjectId)
             if (ArrangeParameter.IsTCHCableTray)
             {
-                var lines = new List<Line>();
-                var crossLinks = new List<Line>();
-                var wires = CutTerminal(crossLinks);
-                lines.AddRange(wires);
-                lines.AddRange(crossLinks);
+                var lines = CutLightingLines(FdxLines);
+                lines.AddRange(FdxLines);
                 ResetObjIds(ObjIds);
                 PrintTCHCableTray(lines, Transformer);
                 Transformer.Reset(lines.ToCollection());
@@ -218,6 +217,88 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 ResetObjIds(ObjIds);
             }
+        }
+
+        private List<Line> CutLightingLines(List<Line> nonLightinglines, double tolerance = 10.0)
+        {
+            var results = new List<Line>();
+            var wireDict = CreateWireDict(Graphs.SelectMany(o => o.GraphEdges).ToList());
+            var unLinkWires = CutPortUnLinkWires(wireDict, ArrangeParameter.LampLength, FdxLines).OfType<Line>().ToList();
+            var firstLines = new List<Line>();
+            var secondLines = new List<Line>();
+            var grapgEdges = Graphs.SelectMany(o => o.GraphEdges);
+            var firstEdges = grapgEdges.Where(o => o.EdgePattern.Equals(EdgePattern.First)).Select(o => o.Edge).ToList();
+            unLinkWires.ForEach(o =>
+            {
+                var center = o.GetCenter();
+                var direction = o.LineDirection();
+                var tag = false;
+                foreach (var edge in firstEdges)
+                {
+                    if (edge.DistanceTo(center, false) < 10.0
+                        && Math.Abs(edge.LineDirection().DotProduct(direction)) > Math.Cos(1.0 / 180 * Math.PI))
+                    {
+                        firstLines.Add(o);
+                        tag = true;
+                        break;
+                    }
+                }
+                if (!tag)
+                {
+                    secondLines.Add(o);
+                }
+            });
+
+            var nonLightingLineIndex = new ThCADCoreNTSSpatialIndex(nonLightinglines.ToCollection());
+            var firstEdgesIndex = new ThCADCoreNTSSpatialIndex(firstLines.ToCollection());
+            var secondEdgesIndex = new ThCADCoreNTSSpatialIndex(secondLines.ToCollection());
+
+            CutLightingLines(results, firstLines, nonLightingLineIndex, secondEdgesIndex, tolerance);
+            CutLightingLines(results, secondLines, nonLightingLineIndex, firstEdgesIndex, tolerance);
+            results.RemoveAll(o => o.Length < 10.0);
+            return results;
+        }
+
+        private void CutLightingLines(List<Line> results, List<Line> edges, ThCADCoreNTSSpatialIndex nonLightingLineIndex,
+            ThCADCoreNTSSpatialIndex otherEdgesIndex, double tolerance)
+        {
+            edges.ForEach(o =>
+            {
+                var direction = o.LineDirection();
+                var reduceLine = new Line(o.StartPoint + tolerance * direction, o.EndPoint - tolerance * direction);
+                var buffer = reduceLine.Buffer(tolerance);
+                var nonLightingLineFilter = nonLightingLineIndex.SelectCrossingPolygon(buffer).OfType<Line>().ToList();
+                var edgeFilter = otherEdgesIndex.SelectCrossingPolygon(buffer).OfType<Line>().ToList();
+
+                var points = new List<Point3d>();
+                GetIntersectPts(nonLightingLineFilter, o, points);
+                GetIntersectPts(edgeFilter, o, points);
+
+                points.Add(o.StartPoint);
+                points.Add(o.EndPoint);
+                points = points.OrderBy(pt => pt.DistanceTo(o.StartPoint)).ToList();
+                for (var i = 0; i < points.Count - 1; i++)
+                {
+                    results.Add(new Line(points[i], points[i + 1]));
+                }
+            });
+        }
+
+        private void GetIntersectPts(List<Line> filter, Line line, List<Point3d> points)
+        {
+            filter.ForEach(l =>
+            {
+                var intersection = GetIntersectPts(l, line);
+                if (intersection.Count == 1)
+                {
+                    points.Add(intersection[0]);
+                }
+            });
+        }
+
+        private Point3dCollection GetIntersectPts(Line first, Line second)
+        {
+            return first.IntersectWithEx(second, Intersect.ExtendBoth);
         }
     }
 }

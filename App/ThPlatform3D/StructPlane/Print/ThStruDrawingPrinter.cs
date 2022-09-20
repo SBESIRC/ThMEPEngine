@@ -33,7 +33,7 @@ namespace ThPlatform3D.StructPlane.Print
         /// </summary>
         protected double _flrHeight { get; set; }
         protected ThPlanePrintParameter _printParameter { get; set; }
-        public ThStruDrawingPrinter(ThSvgInput input, ThPlanePrintParameter printParameter)
+        public ThStruDrawingPrinter(ThSvgParseInfo input, ThPlanePrintParameter printParameter)
         {
             _geos = input.Geos;
             _floorInfos = input.FloorInfos;
@@ -42,7 +42,14 @@ namespace ThPlatform3D.StructPlane.Print
             ObjIds = new ObjectIdCollection();
             _printParameter = printParameter;            
             _flrHeight = _docProperties.GetFloorHeight();
-            _flrBottomEle = _docProperties.GetFloorBottomElevation();
+            if(_docProperties.ContainsKey(ThSvgPropertyNameManager.FloorBottomElevationPropertyName))
+            {
+                _flrBottomEle = _docProperties.GetFloorBottomElevation();
+            }
+            else
+            {
+                _flrBottomEle = _docProperties.GetFloorBottomElevation(_floorInfos);
+            }            
         }
         public abstract void Print(Database database);
         public void ClearObjIds()

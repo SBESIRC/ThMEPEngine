@@ -26,19 +26,19 @@ namespace ThMEPTCH.TCHArchDataConvert
         public static WallEntity TArchWallToEntityWall(TArchWall arch, double leftSpOffSet, double leftEpOffSet, double rightSpOffSet, double rightEpOffSet,Vector3d moveOffSet)
         {
             WallEntity wallEntity = new WallEntity(arch);
-            var z = arch.StartPointZ;
-            var spX = Math.Floor(arch.StartPointX);
-            var spY = Math.Floor(arch.StartPointY);
-            var epX = Math.Floor(arch.EndPointX);
-            var epY = Math.Floor(arch.EndPointY);
+            var z = arch.StartPoint.Z;
+            var spX = Math.Floor(arch.StartPoint.X);
+            var spY = Math.Floor(arch.StartPoint.Y);
+            var epX = Math.Floor(arch.EndPoint.X);
+            var epY = Math.Floor(arch.EndPoint.Y);
             if (Math.Abs(z) < 5)
                 z = 0;
             wallEntity.StartPoint = new Point3d(spX, spY, z) + moveOffSet;
             wallEntity.EndPoint = new Point3d(epX, epY, z) + moveOffSet;
             wallEntity.LeftWidth = arch.LeftWidth;
             wallEntity.RightWidth = arch.RightWidth;
-            wallEntity.WallHeight = arch.Height;
-            wallEntity.Elevtion = arch.Elevtion;
+            wallEntity.Height = arch.Height;
+            wallEntity.EnumMaterial = arch.EnumMaterial;
             if (arch.IsArc)
             {
                 var sp = wallEntity.StartPoint;
@@ -69,9 +69,9 @@ namespace ThMEPTCH.TCHArchDataConvert
                 var eAngle = sAngle + angle;
                 var innerArc = new Arc(arcCenter, Vector3d.ZAxis, innerRadius, sAngle - innerSpOffSet, eAngle + innerEpOffSet);
                 var outArc = new Arc(arcCenter, Vector3d.ZAxis, outRadius, sAngle - outSpOffSet, eAngle + outEpOffSet);
-                wallEntity.WallCenterCurve = new Arc(arcCenter, Vector3d.ZAxis, radius, sAngle, eAngle);
-                wallEntity.WallLeftCurve = innerArc;
-                wallEntity.WallRightCurve = outArc;
+                wallEntity.CenterCurve = new Arc(arcCenter, Vector3d.ZAxis, radius, sAngle, eAngle);
+                wallEntity.LeftCurve = innerArc;
+                wallEntity.RightCurve = outArc;
                 innerArcSp = innerArc.StartPoint;
                 innerArcEp = innerArc.EndPoint;
                 outArcSp = outArc.StartPoint;
@@ -105,7 +105,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             {
                 var sp = wallEntity.StartPoint;
                 var ep = wallEntity.EndPoint;
-                wallEntity.WallCenterCurve = new Line(sp, ep);
+                wallEntity.CenterCurve = new Line(sp, ep);
                 var wallDir = (ep - sp).GetNormal();
                 var normal = Vector3d.ZAxis;
                 var leftDir = normal.CrossProduct(wallDir).GetNormal();
@@ -113,8 +113,8 @@ namespace ThMEPTCH.TCHArchDataConvert
                 var spRight = sp - leftDir.MultiplyBy(arch.RightWidth) - wallDir.MultiplyBy(rightSpOffSet);
                 var epLeft = ep + leftDir.MultiplyBy(arch.LeftWidth) + wallDir.MultiplyBy(leftEpOffSet);
                 var epRight = ep - leftDir.MultiplyBy(arch.RightWidth) + wallDir.MultiplyBy(rightEpOffSet);
-                wallEntity.WallLeftCurve = new Line(spLeft, epLeft);
-                wallEntity.WallRightCurve = new Line(spRight, epRight);
+                wallEntity.LeftCurve = new Line(spLeft, epLeft);
+                wallEntity.RightCurve = new Line(spRight, epRight);
                 var segments = new PolylineSegmentCollection();
                 segments.Add(new PolylineSegment(spLeft.ToPoint2D(), spRight.ToPoint2D()));
                 segments.Add(new PolylineSegment(spRight.ToPoint2D(), epRight.ToPoint2D()));
@@ -140,6 +140,8 @@ namespace ThMEPTCH.TCHArchDataConvert
                 Thickness = arch.Thickness,
                 BasePoint = arch.BasePoint,
                 Outline = GetDoorOutline(arch),
+                Swing = arch.Swing,
+                OperationType = arch.OperationType,
             };
             return entity;
         }
@@ -159,6 +161,7 @@ namespace ThMEPTCH.TCHArchDataConvert
                 Thickness = arch.Thickness,
                 BasePoint = arch.BasePoint,
                 Outline = GetWindowOutline(arch),
+                WindowType = arch.WindowType,
             };
             return entity;
         }

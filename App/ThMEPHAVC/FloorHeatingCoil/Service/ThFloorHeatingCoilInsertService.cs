@@ -61,7 +61,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             }
         }
 
-        public static void InsertCoil(List<Polyline> pipes,string layer, bool withColor = false)
+        public static void InsertPolyline(List<Polyline> pipes, string layer, bool withColor = false)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -71,7 +71,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     {
                         var poly = pipes[i];
                         poly.Linetype = "ByLayer";
-                        poly.Layer =layer;
+                        poly.Layer = layer;
                         if (withColor == true)
                         {
                             poly.ColorIndex = i % 6;
@@ -96,7 +96,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             return attNameValues;
         }
 
-        public static void ShowConnectivity(List<Polyline> roomgraph, string layer,int colorIndex)
+        public static void ShowConnectivity(List<Polyline> roomgraph, string layer, int colorIndex)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -107,26 +107,30 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     poly.ColorIndex = colorIndex;
                     var objid = acadDatabase.ModelSpace.Add(poly);
 
-
                     var ids = new ObjectIdCollection();
                     ids.Add(objid);
                     var hatch = new Hatch();
                     hatch.PatternScale = 1;
                     hatch.ColorIndex = colorIndex;
+                    hatch.Layer = layer;
                     hatch.CreateHatch(HatchPatternType.PreDefined, "SOLID", true);
                     hatch.AppendLoop(HatchLoopTypes.Outermost, ids);
+                    hatch.Transparency = new Autodesk.AutoCAD.Colors.Transparency((byte)51); //80%
                     hatch.EvaluateHatch(true);
 
+                    poly.Erase();
                 }
 
             }
         }
 
-        public static void InsertBlk(Point3d insertPt, string insertBlkName, Dictionary<string, object> dynValue)
+        public static void InsertBlk(Point3d insertPt, string insertBlkName, Dictionary<string, object> dynValue, Vector3d dir)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                //var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                //var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+                var vec = dir.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
                 var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
                 var blkName = insertBlkName;
                 var pt = insertPt;
@@ -184,6 +188,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                         continue;
                     currentDb.Blocks.Import(block, true);
                 }
+
                 foreach (var item in layerNames)
                 {
                     if (string.IsNullOrEmpty(item))
@@ -192,6 +197,22 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     if (null == layer)
                         continue;
                     currentDb.Layers.Import(layer, true);
+
+                    LayerTools.UnLockLayer(database, item);
+                    LayerTools.UnFrozenLayer(database, item);
+                    LayerTools.UnOffLayer(database, item);
+
+                    ThFloorHeatingCommon.LayerLineType.TryGetValue(item, out var lineType);
+                    if (lineType==null || lineType=="")
+                    {
+                        continue;
+                    }
+                    var lineTypesTemplate = blockDb.Linetypes.ElementOrDefault(lineType);
+                    if (null == lineTypesTemplate)
+                        continue;
+                    currentDb.Linetypes.Import(lineTypesTemplate, true);
+
+                  
                 }
             }
         }

@@ -148,6 +148,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                     isClose = true;
                     ol.Closed = true;
                 }
+                if (ol.Area < 10)
+                {
+                    continue;
+                }
                 spatialIndex.SelectWindowPolygon(ol.Buffer(50).OfType<Polyline>().Max()).OfType<DBPoint>().Select(d => d.Position).ForEach(pt => containPoints.Add(pt));
                 if (isClose == true)
                 {

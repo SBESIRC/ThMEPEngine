@@ -23,16 +23,18 @@ public static partial class ThTCHBuiltElementDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChtUaFRDSEJ1aWx0RWxlbWVudERhdGEucHJvdG8aE1RoVENIUm9vdERhdGEu",
-          "cHJvdG8aE1RoVENIR2VvbWV0cnkucHJvdG8i1wEKFVRoVENIQnVpbHRFbGVt",
-          "ZW50RGF0YRIcCgRyb290GAEgASgLMg4uVGhUQ0hSb290RGF0YRIOCgZsZW5n",
-          "dGgYAiABKAESDQoFd2lkdGgYAyABKAESDgoGaGVpZ2h0GAQgASgBEh0KBm9y",
-          "aWdpbhgFIAEoCzINLlRoVENIUG9pbnQzZBIgCgh4X3ZlY3RvchgGIAEoCzIO",
-          "LlRoVENIVmVjdG9yM2QSJAoHb3V0bGluZRgHIAEoCzIOLlRoVENIUG9seWxp",
-          "bmVIAIgBAUIKCghfb3V0bGluZWIGcHJvdG8z"));
+          "cHJvdG8aE1RoVENIR2VvbWV0cnkucHJvdG8aE1RoVENIUHJvcGVydHkucHJv",
+          "dG8imAIKFVRoVENIQnVpbHRFbGVtZW50RGF0YRIcCgRyb290GAEgASgLMg4u",
+          "VGhUQ0hSb290RGF0YRIOCgZsZW5ndGgYAiABKAESDQoFd2lkdGgYAyABKAES",
+          "DgoGaGVpZ2h0GAQgASgBEh0KBm9yaWdpbhgFIAEoCzINLlRoVENIUG9pbnQz",
+          "ZBIgCgh4X3ZlY3RvchgGIAEoCzIOLlRoVENIVmVjdG9yM2QSHwoHb3V0bGlu",
+          "ZRgHIAEoCzIOLlRoVENIUG9seWxpbmUSGgoNZW51bV9tYXRlcmlhbBgIIAEo",
+          "CUgAiAEBEiIKClByb3BlcnRpZXMYCSADKAsyDi5UaFRDSFByb3BlcnR5QhAK",
+          "Dl9lbnVtX21hdGVyaWFsYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, global::ThTCHPropertyReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHBuiltElementData), global::ThTCHBuiltElementData.Parser, new[]{ "Root", "Length", "Width", "Height", "Origin", "XVector", "Outline" }, new[]{ "Outline" }, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHBuiltElementData), global::ThTCHBuiltElementData.Parser, new[]{ "Root", "Length", "Width", "Height", "Origin", "XVector", "Outline", "EnumMaterial", "Properties" }, new[]{ "EnumMaterial" }, null, null, null)
         }));
   }
   #endregion
@@ -80,6 +82,8 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
     origin_ = other.origin_ != null ? other.origin_.Clone() : null;
     xVector_ = other.xVector_ != null ? other.xVector_.Clone() : null;
     outline_ = other.outline_ != null ? other.outline_.Clone() : null;
+    enumMaterial_ = other.enumMaterial_;
+    properties_ = other.properties_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -182,6 +186,47 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
     }
   }
 
+  /// <summary>Field number for the "enum_material" field.</summary>
+  public const int EnumMaterialFieldNumber = 8;
+  private string enumMaterial_;
+  /// <summary>
+  ///Material
+  /// </summary>
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string EnumMaterial {
+    get { return enumMaterial_ ?? ""; }
+    set {
+      enumMaterial_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+  /// <summary>Gets whether the "enum_material" field is set</summary>
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool HasEnumMaterial {
+    get { return enumMaterial_ != null; }
+  }
+  /// <summary>Clears the value of the "enum_material" field</summary>
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void ClearEnumMaterial() {
+    enumMaterial_ = null;
+  }
+
+  /// <summary>Field number for the "Properties" field.</summary>
+  public const int PropertiesFieldNumber = 9;
+  private static readonly pb::FieldCodec<global::ThTCHProperty> _repeated_properties_codec
+      = pb::FieldCodec.ForMessage(74, global::ThTCHProperty.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHProperty> properties_ = new pbc::RepeatedField<global::ThTCHProperty>();
+  /// <summary>
+  ///Property
+  /// </summary>
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThTCHProperty> Properties {
+    get { return properties_; }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -204,6 +249,8 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
     if (!object.Equals(Origin, other.Origin)) return false;
     if (!object.Equals(XVector, other.XVector)) return false;
     if (!object.Equals(Outline, other.Outline)) return false;
+    if (EnumMaterial != other.EnumMaterial) return false;
+    if(!properties_.Equals(other.properties_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -218,6 +265,8 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
     if (origin_ != null) hash ^= Origin.GetHashCode();
     if (xVector_ != null) hash ^= XVector.GetHashCode();
     if (outline_ != null) hash ^= Outline.GetHashCode();
+    if (HasEnumMaterial) hash ^= EnumMaterial.GetHashCode();
+    hash ^= properties_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -264,6 +313,11 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
       output.WriteRawTag(58);
       output.WriteMessage(Outline);
     }
+    if (HasEnumMaterial) {
+      output.WriteRawTag(66);
+      output.WriteString(EnumMaterial);
+    }
+    properties_.WriteTo(output, _repeated_properties_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -302,6 +356,11 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
       output.WriteRawTag(58);
       output.WriteMessage(Outline);
     }
+    if (HasEnumMaterial) {
+      output.WriteRawTag(66);
+      output.WriteString(EnumMaterial);
+    }
+    properties_.WriteTo(ref output, _repeated_properties_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -333,6 +392,10 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
     if (outline_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Outline);
     }
+    if (HasEnumMaterial) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(EnumMaterial);
+    }
+    size += properties_.CalculateSize(_repeated_properties_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -378,6 +441,10 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
       }
       Outline.MergeFrom(other.Outline);
     }
+    if (other.HasEnumMaterial) {
+      EnumMaterial = other.EnumMaterial;
+    }
+    properties_.Add(other.properties_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -433,6 +500,14 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
           input.ReadMessage(Outline);
           break;
         }
+        case 66: {
+          EnumMaterial = input.ReadString();
+          break;
+        }
+        case 74: {
+          properties_.AddEntriesFrom(input, _repeated_properties_codec);
+          break;
+        }
       }
     }
   #endif
@@ -486,6 +561,14 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
             Outline = new global::ThTCHPolyline();
           }
           input.ReadMessage(Outline);
+          break;
+        }
+        case 66: {
+          EnumMaterial = input.ReadString();
+          break;
+        }
+        case 74: {
+          properties_.AddEntriesFrom(ref input, _repeated_properties_codec);
           break;
         }
       }

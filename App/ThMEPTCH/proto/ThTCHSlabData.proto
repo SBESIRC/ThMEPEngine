@@ -1,0 +1,8 @@
+syntax = "proto3";
+import "ThTCHDescendingData.proto";
+import "ThTCHBuiltElementData.proto";
+
+message ThTCHSlabData{
+    ThTCHBuiltElementData build_element = 1;
+    repeated ThTCHDescendingData descendings = 2;
+}

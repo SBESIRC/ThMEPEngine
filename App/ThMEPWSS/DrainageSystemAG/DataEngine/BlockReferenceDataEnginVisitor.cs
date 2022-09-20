@@ -95,11 +95,27 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngineVisitor
         {
             if (CheckLayerValid(blkref) && IsDistributionElement(blkref))
             {
-                var copy = blkref.GetTransformedCopy(matrix);
-                elements.Add(new ThRawIfcDistributionElementData()
+                try
+                {             
+                    var copy = blkref.GetTransformedCopy(matrix);
+                    elements.Add(new ThRawIfcDistributionElementData()
+                    {
+                        Geometry = copy,
+                    });
+                }
+                catch (Exception ex)
                 {
-                    Geometry = copy,
-                });
+                    // 在读取块时，读取外参出现了该错误，矩阵的scale相关参数非比例，将该矩阵的scale参数（新矩阵）清零规避该问题。
+                    if (ex.Message.Equals("eCannotScaleNonUniformly"))
+                    {
+                        var sc_matrix = Matrix3d.Scaling(0, Point3d.Origin);
+                        var copy = blkref.GetTransformedCopy(matrix.PostMultiplyBy(sc_matrix));
+                        elements.Add(new ThRawIfcDistributionElementData()
+                        {
+                            Geometry = copy,
+                        });
+                    }
+                }
             }
         }
 

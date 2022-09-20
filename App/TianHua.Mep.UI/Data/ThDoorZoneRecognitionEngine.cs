@@ -40,7 +40,10 @@ namespace TianHua.Mep.UI.Data
 
         public override void ExtractFromMS(Database database)
         {
-            var doorZoneVisitor = new ThDoorZoneExtractionVisitor();
+            var doorZoneVisitor = new ThDoorZoneExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
             if (CheckQualifiedLayer != null)
             {
                 doorZoneVisitor.CheckQualifiedLayer = this.CheckQualifiedLayer;
@@ -76,7 +79,7 @@ namespace TianHua.Mep.UI.Data
         }
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThParkingStallExtractionEngine()
+            var engine = new ThDoorZoneExtractionEngine()
             {
                 CheckQualifiedLayer = this.CheckQualifiedLayer,
                 CheckQualifiedBlockName = this.CheckQualifiedBlockName,
@@ -104,13 +107,9 @@ namespace TianHua.Mep.UI.Data
                 objs = spatialIndex.SelectCrossingPolygon(newPts);
             }
             transformer.Reset(objs);
-            objs.Cast<Entity>().ForEach(o =>
-            {
-                if (o is Polyline polyline && polyline.Area > 0.0)
-                {
-                    Elements.Add(new ThIfcSpace { Boundary = polyline });
-                }
-            });
+            objs.OfType<Polyline>()
+                .Where(o=>o.Area>1e-6)
+                .ForEach(o => Elements.Add(new ThIfcSpace { Boundary = o }));
         }
     }
 }

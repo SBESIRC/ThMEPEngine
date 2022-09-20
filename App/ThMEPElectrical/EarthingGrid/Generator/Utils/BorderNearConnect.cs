@@ -120,6 +120,10 @@ namespace ThMEPElectrical.EarthingGrid.Generator.Utils
                 Line reducedLine = LineDealer.ReduceLine(wallPt, nearPt, 1000);
                 foreach (var outline in allOutlines)
                 {
+                    if (outline.Area < 10)
+                    {
+                        continue;
+                    }
                     bool closed = false;
                     if(outline.Closed == false)
                     {
