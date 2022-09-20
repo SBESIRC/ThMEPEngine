@@ -20,8 +20,11 @@ namespace ThMEPTCH.Services
             var dictionary = new Dictionary<Polyline, ThTCHDescendingData>();
             architectureSlab.Descendings.ForEach(o =>
             {
-                var outlineGeometry = GetPolyline(o.OutlineBuffer.ToPolyline().Buffer(10.0));
-                dictionary.Add(outlineGeometry, o);
+                if (o.IsDescending)
+                {
+                    var outlineGeometry = GetPolyline(o.OutlineBuffer.ToPolyline().Buffer(10.0));
+                    dictionary.Add(outlineGeometry, o);
+                }
             });
 
             var geometries = dictionary.Select(o => o.Key).ToCollection();

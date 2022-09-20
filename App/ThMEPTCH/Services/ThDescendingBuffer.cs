@@ -215,9 +215,9 @@ namespace ThMEPTCH.Services
             return coll.OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
         }
 
-        private Polyline GetPolyline(List<DBObject> DBObjects)
+        private Polyline GetPolyline(List<DBObject> objects)
         {
-            return DBObjects.OfType<MPolygon>().Select(o => o.Shell()).OrderByDescending(p => p.Area).FirstOrDefault();
+            return objects.OfType<MPolygon>().Select(o => o.Shell()).OrderByDescending(p => p.Area).FirstOrDefault();
         }
 
         private Polyline Simplify(Polyline outline)

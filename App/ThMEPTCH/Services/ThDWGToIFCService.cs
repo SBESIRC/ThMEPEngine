@@ -12,6 +12,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
 using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
@@ -1146,7 +1147,22 @@ namespace ThMEPTCH.Services
                 innerPLine = innerPLine.DPSimplify(10);
                 // 裁剪外围部分
                 innerPLine = innerPLine.Intersection(outPLineColl).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
-                if (innerPLine.IsNull())
+                var vertices = innerPLine.Vertices();
+                var newVertices = new Point3dCollection();
+                vertices.OfType<Point3d>().ForEach(pt =>
+                {
+                    if (outPLine.Distance(pt) < 1.0)
+                    {
+                        newVertices.Add(outPLine.GetClosePoint(pt));
+                    }
+                    else
+                    {
+                        newVertices.Add(pt);
+                    }
+                });
+                innerPLine = newVertices.CreatePolyline();
+
+                if (innerPLine.IsNull() || innerPLine.Area < 10.0)
                 {
                     continue;
                 }
@@ -1154,7 +1170,7 @@ namespace ThMEPTCH.Services
                 if (!item.IsOpening)
                 {
                     var service = new ThDescendingBuffer(outPLine, innerPLine);
-
+                    //var innerPLineClone = ThPolylineFixer.Fix(outPLine, innerPLine);
                     // 结构降板
                     // 降板外轮廓
                     var outlineBuffer = service.OnStructure(item.StructureWrapThickness);
@@ -1178,6 +1194,7 @@ namespace ThMEPTCH.Services
                     // 建筑降板
                     // 降板内轮廓
                     var outlineInner = service.OnArchitecture(item.WrapSurfaceThickness);
+                    //outlineInner = ThPolylineFixer.Fix(outPLine, outlineInner);
                     if (outlineInner.IsNull() || outlineInner.Area < 10.0)
                     {
                         continue;

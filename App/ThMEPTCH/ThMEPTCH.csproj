@@ -207,6 +207,7 @@
     <Compile Include="Services\ThDWGToIFCService.cs" />
     <Compile Include="Services\ThEditStoreyInfo.cs" />
     <Compile Include="Services\ThIfcStoreyParseTool.cs" />
+    <Compile Include="Services\ThPolylineFixer.cs" />
     <Compile Include="TCHArchDataConvert\DBToTHEntityCommon.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchDBData.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchSQL.cs" />
