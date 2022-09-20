@@ -122,6 +122,8 @@ namespace TianHua.Mep.UI.ViewModel
                 //借助于SuperBoundary的SBND_PICK命令
                 using (var docLock = Active.Document.LockDocument())
                 {
+                    SetFocusToDwgView();
+
                     // 0、创建图层（把显示的区域打印到此图层上）
                     Active.Database.CreateAIRoomOutlineLayer();
 
@@ -137,8 +139,7 @@ namespace TianHua.Mep.UI.ViewModel
 
                     // 3、构建房间区域
                     using (var cmd = new ThSuperBoundaryCmd(roomDatas))
-                    {
-                        SetFocusToDwgView();
+                    {                        
                         cmd.Execute();
                     }
 
@@ -154,10 +155,12 @@ namespace TianHua.Mep.UI.ViewModel
                 //借助于SuperBoundary的SBND_ALL命令
                 using (var docLock = Active.Document.LockDocument())
                 {
-                    // 选取范围
+                    SetFocusToDwgView();
+
+                    // 0、选取范围
                     var pts = ThAuxiliaryUtils.GetRange();
 
-                    // 0、获取房间名称
+                    // 1、获取房间名称
                     var roomNameTexts = GetRoomNames(Active.Database, pts);
                     if (roomNameTexts.Count == 0)
                     {
@@ -166,10 +169,10 @@ namespace TianHua.Mep.UI.ViewModel
                         return;
                     }
 
-                    // 1、创建图层（把显示的区域打印到此图层上）
+                    // 2、创建图层（把显示的区域打印到此图层上）
                     Active.Database.CreateAIRoomOutlineLayer();
 
-                    // 2、把房间数据获取到
+                    // 3、把房间数据获取到
                     var roomDatas = GetRoomDataFromMS(pts);
                     if (roomDatas.Count == 0)
                     {
@@ -178,20 +181,13 @@ namespace TianHua.Mep.UI.ViewModel
                         return;
                     }
 
-                    //// 3、再显示已存在的房间区域
-                    //var roomAreaIds = ShowExistedRoomAreas(Active.Database);
-
                     // 4、构建房间区域
                     using (var cmd = new ThSuperBoundaryCmd(roomDatas, roomNameTexts))
                     {
-                        SetFocusToDwgView();
                         cmd.Execute();
                     }
 
-                    //// 5、删除显示的房间区域
-                    //Erase(Active.Database,roomAreaIds);
-
-                    // 6、释放房间名称
+                    // 5、释放房间名称
                     roomNameTexts.OfType<Entity>()
                         .Where(o => o.ObjectId != ObjectId.Null)
                         .ToCollection().MDispose();
@@ -773,70 +769,86 @@ namespace TianHua.Mep.UI.ViewModel
         }
 
         #region ---------- 获取房间名称 ------------
+        // 获取文字
         private DBObjectCollection GetRoomNames(Database database, Point3dCollection pts)
         {
             var results = new DBObjectCollection();
-            // 获取门标注->设计师按图层定义的规则
-            var tianHuaMarks = RecognizeTianHuaDoorMarks(database, pts);
-            results = results.Union(tianHuaMarks);
-
             // 获取DB门标注
-            var dbDoorMarks = RecognizeDBDoorMarks(database, pts);
+            var dbDoorMarks = RecognizeDBRoomMarks(database, pts);
             results = results.Union(dbDoorMarks);
 
             // 获取AI门标注
-            var aiDoorMarks = RecognizeAIDoorMarks(database, pts);
+            var aiDoorMarks = RecognizeAIRoomMarks(database, pts);
             results = results.Union(aiDoorMarks);
 
             return results;
         }
 
-        private DBObjectCollection RecognizeAIDoorMarks(Database database, Point3dCollection pts)
+        private DBObjectCollection RecognizeAIRoomMarks(Database database, Point3dCollection pts)
         {
-            var aiRoomEngine = new ThAIRoomMarkRecognitionEngine();
-            aiRoomEngine.Recognize(database, pts);
-            aiRoomEngine.RecognizeMS(database, pts);
-            return aiRoomEngine.Elements
-                .OfType<ThIfcTextNote>()
+            var extractionEngine = new ThAIRoomMarkExtractionEngine();
+            extractionEngine.Extract(database);
+            extractionEngine.ExtractFromMS(database);
+            var newResults = extractionEngine.Results;
+
+            var objs = newResults
                 .Select(o => o.Geometry)
+                .OfType<Polyline>()
+                .Where(o => o.Area >= 1e-6)
                 .ToCollection();
-        }
-
-        private DBObjectCollection RecognizeTianHuaDoorMarks(Database database, Point3dCollection pts)
-        {
-            var engine = new ThDB3RoomMarkRecognitionEngine();
-            engine.Recognize(database, pts);
-            //engine.RecognizeMS(database, pts);
-            return engine.Elements
-                .OfType<ThIfcTextNote>()
-                .Select(o => o.Geometry)
-                .ToCollection();
-        }
-
-        private DBObjectCollection RecognizeDBDoorMarks(Database database, Point3dCollection pts)
-        {
-            var doorMarkVisitor = new ThDB3DoorMarkExtractionVisitor()
-            {
-                LayerFilter = ThDoorMarkLayerManager.XrefLayers(database),
-            };
-            var extractor = new ThBuildingElementExtractor();
-            extractor.Accept(doorMarkVisitor);
-            extractor.Extract(database);
-            extractor.ExtractFromMS(database);
-
-            var allDbDoorMarks = doorMarkVisitor.Results.Select(o => o.Geometry).ToCollection();
             if (pts.Count > 2)
             {
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(allDbDoorMarks);
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 var filterObjs = spatialIndex.SelectCrossingPolygon(pts);
-                allDbDoorMarks.Difference(filterObjs);
-                allDbDoorMarks.MDispose();
-                return filterObjs;
+                newResults = newResults.Where(o => filterObjs.Contains(o.Geometry)).ToList();
             }
-            else
+
+            var results = new DBObjectCollection();
+            newResults.ForEach(o =>
             {
-                return allDbDoorMarks;
+                if (o.Data is DBText dbText)
+                {
+                    results.Add(dbText);
+                }
+                else if (o.Data is MText mText)
+                {
+                    results.Add(mText);
+                }
+            });
+            return results;
+        }
+
+        private DBObjectCollection RecognizeDBRoomMarks(Database database, Point3dCollection pts)
+        {
+            // 只获取文字
+            var extractionEngine = new ThDB3RoomMarkExtractionEngine();
+            extractionEngine.Extract(database);
+            var newResults = extractionEngine.Results;
+            var objs = newResults
+                .Select(o => o.Geometry)
+                .OfType<Polyline>()
+                .Where(o=>o.Area>=1e-6)
+                .ToCollection();            
+            if (pts.Count > 2)
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var filterObjs = spatialIndex.SelectCrossingPolygon(pts);
+                newResults = newResults.Where(o => filterObjs.Contains(o.Geometry)).ToList();
             }
+
+            var results = new DBObjectCollection();
+            newResults.ForEach(o =>
+            {
+                if (o.Data is DBText dbText)
+                {
+                    results.Add(dbText);
+                }
+                else if (o.Data is MText mText)
+                {
+                    results.Add(mText);
+                }
+            });
+            return results;
         }
         #endregion
     }
