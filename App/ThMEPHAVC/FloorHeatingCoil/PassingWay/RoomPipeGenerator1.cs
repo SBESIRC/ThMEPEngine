@@ -34,8 +34,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         Polyline input_seg = null;                                  // 入口轮廓
 
         double buffer_coefficent = 0.8;                             // 向内做buffer的系数，需要大于0.5
-
-        //double buffer_eps = 20;                                     // 向内做buffer的容差
+        double buffer_threshold = 150;                                     // 最小间距
 
         RoomPipeGenerator1() { }
 
@@ -65,7 +64,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
             if (PublicValue.Clear0 == 1) 
             {
-                poly = ClearSinglePolyline.ClearBendsLongFirstClosed(poly, poly, Parameter.SuggestDistanceRoom * 2);
+                poly = ClearSinglePolyline.ClearBendsLongFirstClosed(poly, poly, Parameter.ClearSingleBufferDis);
             }
 
             BufferTreeNode node = new BufferTreeNode(poly, depth, parent);
@@ -206,7 +205,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     // 删除：1、与多个real_poly中相交的rest_poly   2、不足推荐宽度的rest_poly
                     for (int i = rest_polys.Count - 1; i >= 0; --i)
                     {
-                        var smaller_rest = PassageWayUtils.Buffer(rest_polys[i], -buffer / 4 * buffer_coefficent + 1, 1e-3);
+                        var smaller_rest = PassageWayUtils.Buffer(rest_polys[i], -buffer_threshold / 2 + 1, 1e-3);
                         if (smaller_rest.Count == 0)
                         {
                             rest_polys[i].Dispose();
@@ -619,7 +618,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             }
         }
         /// <summary>
-        /// 找到外轮廓的连接点：1、距离当前轮廓小于buffer/2  2、靠近外轮廓终点  3、距离外轮廓的上一个点大于buffer/2  4、当前轮廓上的点距离上一个点大于buffer/2*buffer_coefficent
+        /// 找到外轮廓的连接点：1、距离当前轮廓小于buffer/2  2、靠近外轮廓终点  3、距离外轮廓的上一个点大于buffer/2  4、当前轮廓上的点距离上一个点大于buffer_threshold
         /// </summary>
         /// <param name="a_coords">多段线点集形式的外轮廓</param>
         /// <param name="b">内轮廓</param>
@@ -652,7 +651,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                         continue;
                     var child_dis = close_point.DistanceTo(b_coords[pre_index]);
                     // 条件4
-                    if (child_dis < buffer / 2 * buffer_coefficent - 2) 
+                    if (child_dis < buffer_threshold - 2) 
                         continue;
                     // 条件3
                     var parent_dis = a_coords[i].DistanceTo(a_coords[i - 1]);
@@ -676,8 +675,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     {
                         var b_pre = b_coords[(j - 1+b_coords.Count) % b_coords.Count];
                         if (!PassageWayUtils.IsParallel(point - a_coords[i], b_coords[j] - b_pre)   // 外轮廓与内轮廓断线同向
-                            || point.DistanceTo(a_coords[i]) < buffer / 2 -2                          // 条件3
-                            || b_coords[j].DistanceTo(b_pre) < buffer / 2 * buffer_coefficent-2)      // 条件4
+                            || point.DistanceTo(a_coords[i]) < buffer / 2 - 2                          // 条件3
+                            || b_coords[j].DistanceTo(b_pre) < buffer_threshold - 2)       // 条件4
                             continue;
                         var dis = GetDistancePtoS(a_coords, point);
                         if (dis > last_point_dis)

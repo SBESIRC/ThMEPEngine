@@ -105,7 +105,7 @@ namespace ThMEPHVAC
                 }
 
                 double buffer = 600;
-                double room_buffer = 200;
+                double room_buffer = 100;
                 // core process
                 PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(room, pipe_in_list, pipe_out_list, main_index, buffer, room_buffer, 0);
                 passagePipeGenerator.CalculatePipeline();

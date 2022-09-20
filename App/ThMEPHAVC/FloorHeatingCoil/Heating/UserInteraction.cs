@@ -552,10 +552,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void ParameterSetting() 
         {
+
             PublicValue.ChangeSDis = 0;
             PublicValue.Clear0 = 1;
             PublicValue.Clear1 = 1;
-        
+            Parameter.ClearSingleBufferDis = Parameter.SuggestDistanceRoom + 10;    //清理耳朵时的延长长度
+            Parameter.ClearWholePipeDis = 50;
+
         }
     }
 }

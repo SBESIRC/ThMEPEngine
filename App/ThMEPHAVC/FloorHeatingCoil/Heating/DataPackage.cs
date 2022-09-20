@@ -151,7 +151,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         //清理框线
         static public double ClearThreshold = 280;
         static public double ClearExtendLength = 40000;    //清理耳朵时的延长长度
-        
+        static public double ClearSingleBufferDis = 110;    //清理耳朵时的延长长度
+        static public double ClearWholePipeDis = 50;
+
+
         //寻找门
         static public double DoorBufferValue = 500;       //门找区域时的单方向Buffer长度
 

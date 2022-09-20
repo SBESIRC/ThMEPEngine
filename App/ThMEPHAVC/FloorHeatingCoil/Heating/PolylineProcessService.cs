@@ -1013,11 +1013,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 ei = tmp;
             }
             PassageWayUtils.RearrangePoints(ref points, si);
-            // 多段线倒圆角
             var ret = PassageWayUtils.BuildPolyline(points);
 
             //清理Polyline 
             Polyline newPl = ClearPolylineUnclosed(ret);
+            DrawUtils.ShowGeometry(newPl, "l8c1", 2, 30);
 
             double bufferDis = 0;
             bufferDis = 75;
@@ -1026,9 +1026,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Polyline newBoundary = originPl.Buffer(bufferDis).OfType<Polyline>().ToList().OrderByDescending(x => x.Area).First();
 
             newPl = ClearSmallHelper1(newPl, newBoundary, fixList, value, 0);
+            DrawUtils.ShowGeometry(newPl, "l8c2", 2, 30);
             newPl = ClearSmallHelper1(newPl, newBoundary, fixList, value, 1);
+            DrawUtils.ShowGeometry(newPl, "l8c3", 2, 30);
             newPl = ClearSmallHelper1(newPl, newBoundary, fixList, value, 2);
-
+            DrawUtils.ShowGeometry(newPl, "l8c4", 2, 30);
             var pointsNew = PassageWayUtils.GetPolyPoints(newPl);
             pointsNew = SmoothUtils.SmoothPoints(pointsNew);
             newPl = PassageWayUtils.BuildPolyline(pointsNew);
@@ -1063,6 +1065,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Vector3d vec0 = pt1 - pt0;
                 Vector3d vec1 = pt2 - pt1;
                 Vector3d vec2 = pt3 - pt2;
+
+                if ((Math.Abs(vec0.X) > 2 && Math.Abs(vec0.Y) > 2) ||
+                    (Math.Abs(vec1.X) > 2 && Math.Abs(vec1.Y) > 2) ||
+                    (Math.Abs(vec2.X) > 2 && Math.Abs(vec2.Y) > 2)) continue;
 
 
                 bool isTurnBack = false;

@@ -95,7 +95,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     Parameter.PublicRegionConstraint = true;
                     Parameter.IndependentRoomConstraint = true;
                     Parameter.AuxiliaryRoomConstraint = true;
-                    Parameter.PrivatePublicMode = 1;
+                    Parameter.PrivatePublicMode = 0;
                     Parameter.TotalLength = 120 * 1000;
 
                     Parameter.SuggestDistanceWall = 200;

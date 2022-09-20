@@ -579,8 +579,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     DBObjectCollection a = new DBObjectCollection();
                     a.Add(upPl as DBObject);
                     List<Polyline> overlap = pl.Intersection(a).OfType<Polyline>().ToList();
-                    if (overlap.Count == 0)
+                    if (overlap.Count == 0 && PipeCenterLineListMap[i][upRegionId].Count > 0)
                     {
+
                         Polyline center = PipeCenterLineListMap[i][upRegionId][0];
                         Polyline otherConnector = GetOtherConnector(ppList[0], ppList[1], center, upRegionId);
                         List<Polyline> listToUnion = new List<Polyline>();
@@ -736,7 +737,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 fixList.AddRange(PipeFixPointList[i]);
                 
                 //修线
-                WholePipeList[i] = PolylineProcessService.PlClearSmall(WholePipeList[i], fixList, 101);
+                WholePipeList[i] = PolylineProcessService.PlClearSmall(WholePipeList[i], fixList, 50);
                 DrawUtils.ShowGeometry(WholePipeList[i], "l5ClearSmall", 20 , 30);
 
                 //修正入口偏移
