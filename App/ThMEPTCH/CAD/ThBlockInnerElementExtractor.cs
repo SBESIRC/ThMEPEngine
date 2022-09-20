@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 
-namespace TianHua.Mep.UI.Data
+namespace ThMEPTCH.CAD
 {
     public class ThBlockInnerElementExtractor
     {

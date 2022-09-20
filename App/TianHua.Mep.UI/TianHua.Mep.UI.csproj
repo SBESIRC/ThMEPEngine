@@ -31,14 +31,10 @@
   <ItemGroup>
     <Compile Include="Command\ThBuildDoorsCmd.cs" />
     <Compile Include="Command\ThExtractRoomConfigCmd.cs" />
-    <Compile Include="Command\ThExtractRoomDataCmd.cs" />
     <Compile Include="Converter\BeamEngineOpsBooleanConverter.cs" />
-    <Compile Include="Data\ThBlockInnerElementExtractor.cs" />
     <Compile Include="Data\ThConfigDataTool.cs" />
     <Compile Include="Data\ThDoorZoneRecognitionEngine.cs" />
     <Compile Include="Data\ThDoorZoneExtractionVisitor.cs" />
-    <Compile Include="Data\ThOtherShearWallExtractionVisitor.cs" />
-    <Compile Include="Data\ThOtherShearWallRecognitionEngine.cs" />
     <Compile Include="FrameCompare\FrameCompareUI.xaml.cs">
       <DependentUpon>FrameCompareUI.xaml</DependentUpon>
     </Compile>

@@ -11,7 +11,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 
-namespace TianHua.Mep.UI.Data
+namespace ThMEPTCH.CAD
 {
     /// <summary>
     /// 1、提取DB3Column,Column,Shearwall,DB3Shearwall规则之外的Hatch，

@@ -15,9 +15,8 @@ using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using ThMEPTCH.CAD;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
-using TianHua.Mep.UI.Data;
 
-namespace TianHua.Mep.UI.Command
+namespace ThMEPTCH.Services
 {
     public class ThExtractRoomDataCmd : ThMEPBaseCommand, IDisposable
     {
