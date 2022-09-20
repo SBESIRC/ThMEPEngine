@@ -45,7 +45,7 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
 
-        private bool ynExtractShearWall;
+        private bool ynExtractShearWall =true;
         public bool YnExtractShearWall
         {
             get => ynExtractShearWall;
