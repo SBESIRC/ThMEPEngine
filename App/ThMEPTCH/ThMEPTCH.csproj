@@ -71,11 +71,8 @@
     </When>
   </Choose>
   <ItemGroup>
-    <Compile Include="CAD\ThBlockInnerElementExtractor.cs" />
     <Compile Include="CAD\THDBHoleExtractionVisitor.cs" />
     <Compile Include="CAD\ThDBVisitorExtension.cs" />
-    <Compile Include="CAD\ThOtherShearWallExtractionVisitor.cs" />
-    <Compile Include="CAD\ThOtherShearWallRecognitionEngine.cs" />
     <Compile Include="CAD\ThTArchWallExtension.cs" />
     <Compile Include="CAD\ThTCHEDbExtension.cs" />
     <Compile Include="Data\ThSUBuildingElementData.cs" />
@@ -209,7 +206,6 @@
     <Compile Include="Services\ThDWGToIFCModels.cs" />
     <Compile Include="Services\ThDWGToIFCService.cs" />
     <Compile Include="Services\ThEditStoreyInfo.cs" />
-    <Compile Include="Services\ThExtractRoomDataCmd.cs" />
     <Compile Include="Services\ThIfcStoreyParseTool.cs" />
     <Compile Include="TCHArchDataConvert\DBToTHEntityCommon.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchDBData.cs" />
