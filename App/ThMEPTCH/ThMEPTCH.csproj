@@ -201,6 +201,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyServices\THNumPropertyEditor.cs" />
     <Compile Include="PropertyServices\THTextPropertyEditor.cs" />
+    <Compile Include="Services\ThArchitectureDescendingService.cs" />
+    <Compile Include="Services\ThDescendingBuffer.cs" />
     <Compile Include="Services\ThDWGToIFCModels.cs" />
     <Compile Include="Services\ThDWGToIFCService.cs" />
     <Compile Include="Services\ThEditStoreyInfo.cs" />

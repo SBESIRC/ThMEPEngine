@@ -526,7 +526,7 @@ namespace ThMEPTCH.Services
                     var crossRailings = railingSpatialIndex.SelectCrossingPolygon(wall.BuildElement.Outline.ToPolyline()).OfType<Polyline>().ToList();
                     foreach (var polyline in crossRailings)
                     {
-                        if (hisPLines.Any(c => c == polyline)) 
+                        if (hisPLines.Any(c => c == polyline))
                             continue;
                         hisPLines.Add(polyline);
                         var railing = thisRailingEntitys[polyline];
@@ -580,9 +580,9 @@ namespace ThMEPTCH.Services
                 buildingStorey.Elevation = floor.Elevation;
                 buildingStorey.Usage = floor.FloorName;
                 buildingStorey.Origin = new ThTCHPoint3d() { X = 0, Y = 0, Z = floor.Elevation };
-                buildingStorey.BuildElement.Properties.Add(new ThTCHProperty { Key =  "FloorNo", Value = floor.Num.ToString()});
-                buildingStorey.BuildElement.Properties.Add(new ThTCHProperty { Key =  "Height", Value = floor.LevelHeight.ToString()});
-                buildingStorey.BuildElement.Properties.Add(new ThTCHProperty { Key =  "StdFlrNo", Value = floor.Num.ToString()});
+                buildingStorey.BuildElement.Properties.Add(new ThTCHProperty { Key = "FloorNo", Value = floor.Num.ToString() });
+                buildingStorey.BuildElement.Properties.Add(new ThTCHProperty { Key = "Height", Value = floor.LevelHeight.ToString() });
+                buildingStorey.BuildElement.Properties.Add(new ThTCHProperty { Key = "StdFlrNo", Value = floor.Num.ToString() });
                 ThTCHBuildingStoreyData memoryStory = null;
                 if (isMemoryStory)
                 {
@@ -1044,16 +1044,12 @@ namespace ThMEPTCH.Services
                 // 结构降板
                 if (!item.IsOpening)
                 {
+                    var service = new ThDescendingBuffer(outPLine, innerPLine);
+
+                    // 结构降板
                     // 降板外轮廓
-                    var outlineBuffer = innerPLine.Buffer(item.StructureWrapThickness).OfType<Polyline>()
-                        .OrderByDescending(p => p.Area).FirstOrDefault();
-                    if (outlineBuffer.IsNull())
-                    {
-                        continue;
-                    }
-                    outlineBuffer = outlineBuffer.Intersection(outPLineColl).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
-                    outlineBuffer = ThMEPFrameService.Normalize(outlineBuffer);
-                    if (outlineBuffer.IsNull())
+                    var outlineBuffer = service.OnStructure(item.StructureWrapThickness);
+                    if (outlineBuffer.IsNull() || outlineBuffer.Area < 10.0)
                     {
                         continue;
                     }
@@ -1122,6 +1118,7 @@ namespace ThMEPTCH.Services
         {
             var slabs = new List<ThTCHSlabData>();
             var outPLine = slabPolyline.OutPolyline.GetTransformedCopy(matrix) as Polyline;
+
             outPLine = ThMEPFrameService.Normalize(outPLine);
             outPLine = outPLine.DPSimplify(10);
             var structureSlab = new ThTCHSlabData();
@@ -1144,6 +1141,7 @@ namespace ThMEPTCH.Services
             {
                 // 降板
                 var innerPLine = item.OutPolyline.GetTransformedCopy(matrix) as Polyline;
+                // Normalize()会多产生一个末端点
                 innerPLine = ThMEPFrameService.Normalize(innerPLine);
                 innerPLine = innerPLine.DPSimplify(10);
                 // 裁剪外围部分
@@ -1153,19 +1151,14 @@ namespace ThMEPTCH.Services
                     continue;
                 }
 
-                // 结构降板
                 if (!item.IsOpening)
                 {
+                    var service = new ThDescendingBuffer(outPLine, innerPLine);
+
+                    // 结构降板
                     // 降板外轮廓
-                    var outlineBuffer = innerPLine.Buffer(item.StructureWrapThickness).OfType<Polyline>()
-                        .OrderByDescending(p => p.Area).FirstOrDefault();
-                    if (outlineBuffer.IsNull())
-                    {
-                        continue;
-                    }
-                    outlineBuffer = outlineBuffer.Intersection(outPLineColl).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
-                    outlineBuffer = ThMEPFrameService.Normalize(outlineBuffer);
-                    if (outlineBuffer.IsNull())
+                    var outlineBuffer = service.OnStructure(item.StructureWrapThickness);
+                    if (outlineBuffer.IsNull() || outlineBuffer.Area < 10.0)
                     {
                         continue;
                     }
@@ -1181,38 +1174,17 @@ namespace ThMEPTCH.Services
                     descending.Outline.ZOffSet(-slabPolyline.SurfaceThickness);
                     descending.OutlineBuffer.ZOffSet(-slabPolyline.SurfaceThickness);
                     structureSlab.Descendings.Add(descending);
-                }
-                else
-                {
-                    var descending = new ThTCHDescendingData()
-                    {
-                        Outline = innerPLine.ToTCHPolyline(),
-                        IsDescending = false,
-                        DescendingHeight = Math.Abs(item.LowerPlateHeight),
-                    };
-                    descending.Outline.ZOffSet(-slabPolyline.SurfaceThickness);
-                    structureSlab.Descendings.Add(descending);
-                }
 
-                // 建筑降板
-                if (!item.IsOpening)
-                {
+                    // 建筑降板
                     // 降板内轮廓
-                    var outlineBuffer = innerPLine.Buffer(-item.WrapSurfaceThickness).OfType<Polyline>()
-                        .OrderByDescending(p => p.Area).FirstOrDefault();
-                    if (outlineBuffer.IsNull())
-                    {
-                        continue;
-                    }
-                    outlineBuffer = outlineBuffer.Intersection(outPLineColl).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
-                    outlineBuffer = ThMEPFrameService.Normalize(outlineBuffer);
-                    if (outlineBuffer.IsNull())
+                    var outlineInner = service.OnArchitecture(item.WrapSurfaceThickness);
+                    if (outlineInner.IsNull() || outlineInner.Area < 10.0)
                     {
                         continue;
                     }
                     architectureSlab.Descendings.Add(new ThTCHDescendingData()
                     {
-                        Outline = outlineBuffer.ToTCHPolyline(),
+                        Outline = outlineInner.ToTCHPolyline(),
                         OutlineBuffer = innerPLine.ToTCHPolyline(),
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
@@ -1222,6 +1194,17 @@ namespace ThMEPTCH.Services
                 }
                 else
                 {
+                    // 结构楼洞
+                    var descending = new ThTCHDescendingData()
+                    {
+                        Outline = innerPLine.ToTCHPolyline(),
+                        IsDescending = false,
+                        DescendingHeight = Math.Abs(item.LowerPlateHeight),
+                    };
+                    descending.Outline.ZOffSet(-slabPolyline.SurfaceThickness);
+                    structureSlab.Descendings.Add(descending);
+
+                    // 建筑楼洞
                     architectureSlab.Descendings.Add(new ThTCHDescendingData()
                     {
                         Outline = innerPLine.ToTCHPolyline(),
@@ -1230,6 +1213,10 @@ namespace ThMEPTCH.Services
                     });
                 }
             }
+
+            // 处理相邻的建筑降板
+            ThArchitectureDescendingService.Handle(architectureSlab);
+
             slabs.Add(structureSlab);
             slabs.Add(architectureSlab);
             return slabs;
