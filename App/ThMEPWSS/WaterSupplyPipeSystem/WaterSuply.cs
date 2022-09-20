@@ -691,7 +691,6 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                             var rectList = CreateRectList(sobj, segSpatialIndex);
                             FloorAreaList.Add(rectList);//分区的多段线添加
                         }
-
                     }
                 }
             }
@@ -714,13 +713,13 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                     {
                         if (sobj.StoreyType.ToString().Contains("StandardStorey"))
                         {
-                            {
-                                FloorArea = CreateFloorRect(sobj);
-                            }
-
+                            FloorArea = CreateFloorRect(sobj);
+                        }
+                        else if(sobj.StoreyTypeString.Contains("楼层"))
+                        {
+                            FloorArea = CreateFloorRect(sobj);
                         }
                     }
-                    
                 }
             }
 

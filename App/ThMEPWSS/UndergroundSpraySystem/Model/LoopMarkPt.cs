@@ -20,21 +20,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         {
             DBObjs = new DBObjectCollection();
         }
-        public void Extract(Database database, SprayIn sprayIn)
+        public void Extract(Database database, Point3dCollection selectArea)
         {
             var objs = new DBObjectCollection();
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var Results = acadDatabase.ModelSpace.OfType<BlockReference>()
-                    .Where(o => IsTraget(o)).ToList();
-
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                foreach(var polygon in sprayIn.FloorRectDic.Values)
-                {
-                    var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                    dbObjs.Cast<Entity>()
-                        .ForEach(e => DBObjs.Add(e));
-                }
+                DBObjs = acadDatabase.ModelSpace.OfType<BlockReference>()
+                    .Where(o => IsTraget(o)).ToCollection();
             }
         }
 

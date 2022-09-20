@@ -108,9 +108,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             alarmText.CreateAlarmTextDic(sprayIn, alarmPts, textSpatialIndex);//生成报警阀文字字典对
 
             var loopMarkPt = new LoopMarkPt();//环管标记点
-            loopMarkPt.Extract(database, sprayIn);
+            loopMarkPt.Extract(database, selectArea);
             loopMarkPt.CreateStartPts(pipeLines, sprayIn, startPt);//获取环管的起始终止点
-            if (sprayIn.LoopStartPt.Equals(new Point3d()))
+            if (sprayIn.LoopStartPt.Equals(new Point3dEx()))
             {
                 return false;
             }
