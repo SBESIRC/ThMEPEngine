@@ -117,8 +117,10 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SParkingPartition\SLane.cs" />
+    <Compile Include="SParkingPartition\SLaneGenerationService.cs" />
     <Compile Include="SParkingPartition\SModel.cs" />
     <Compile Include="SParkingPartition\Sparam.cs" />
+    <Compile Include="SParkingPartition\SParkingService.cs" />
     <Compile Include="SParkingPartition\SPartition.cs" />
     <Compile Include="Tools\ListEx.cs" />
     <Compile Include="Tools\PolygonEx.cs" />

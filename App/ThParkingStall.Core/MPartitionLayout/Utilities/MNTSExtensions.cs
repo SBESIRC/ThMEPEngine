@@ -72,8 +72,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             return p;
         }
+        public static LineSegment New(this LineSegment line)
+        {
+            return new LineSegment(line.P0, line.P1);
+        }
         public static Coordinate ClosestPoint(this LineSegment line, Coordinate point, bool extented = false)
-        {        
+        {
             if (extented)
             {
                 var pt = line.MidPoint;
