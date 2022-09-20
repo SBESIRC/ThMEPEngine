@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.ObliqueMPartitionLayout;
+using ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration;
 using ThParkingStall.Core.OTools;
 using static ThParkingStall.Core.IO.ReadWriteEx;
 namespace ThParkingStall.Core.OInterProcess
@@ -56,27 +57,49 @@ namespace ThParkingStall.Core.OInterProcess
             {
                 try
                 {
-                    obliqueMPartition = new ObliqueMPartition(Walls, VaildLanes, Buildings, Region);
+                    //obliqueMPartition = new ObliqueMPartition();
+                    //obliqueMPartition.Cars = new List<InfoCar>();
+                    //obliqueMPartition.Pillars = new List<Polygon>();
+                    //obliqueMPartition.IniLanes = new List<Lane>();
+                    //obliqueMPartition.OutputLanes = new List<LineSegment>();
+
+                    var boundstr = MDebugTools.AnalysisPolygon(Region);
+                    string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                    FileStream fs = new FileStream(dir + "\\GAMonitor.txt", FileMode.Append);
+                    StreamWriter sw = new StreamWriter(fs);
+                    sw.WriteLine(System.DateTime.Now);
+                    sw.WriteLine("区域" + boundstr);
+                    sw.Close();
+                    fs.Close();
+
+                    GA gA = new GA(Walls, VaildLanes, Buildings.Select(e =>e.Clone()).ToList(), BuildingBounds.Select(e => e.Clone()).ToList(), Region);
+                    gA.Process();
+                    var newBuildings=gA.Buildings;
+                    var newbuildingBoxes=gA.BuildingBoxes;
+
+                    obliqueMPartition = new ObliqueMPartition(Walls, VaildLanes, newBuildings, Region);
                     obliqueMPartition.OutputLanes = new List<LineSegment>();
                     obliqueMPartition.OutBoundary = Region;
-                    obliqueMPartition.BuildingBoxes = BuildingBounds;
-                    obliqueMPartition.ObstaclesSpatialIndex = new MNTSSpatialIndex(Buildings);
+                    obliqueMPartition.BuildingBoxes = newbuildingBoxes;
+                    obliqueMPartition.ObstaclesSpatialIndex = new MNTSSpatialIndex(newBuildings);
                     obliqueMPartition.QuickCalculate = !IgnoreCache && VMStock.SpeedUpMode;
                     ObliqueMPartition.LoopThroughEnd = VMStock.AllowLoopThroughEnd;
 #if DEBUG
-                    var s = MDebugTools.AnalysisPolygon(obliqueMPartition.Boundary);
-                    string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-                    FileStream fs = new FileStream(dir + "\\bound.txt", FileMode.Create, FileAccess.Write);
-                    StreamWriter sw = new StreamWriter(fs);
-                    sw.WriteLine(s);
-                    sw.Close();
-                    fs.Close();
+                    //var s = MDebugTools.AnalysisPolygon(obliqueMPartition.Boundary);
+                    //string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                    //FileStream fs = new FileStream(dir + "\\bound.txt", FileMode.Create, FileAccess.Write);
+                    //StreamWriter sw = new StreamWriter(fs);
+                    //sw.WriteLine(s);
+                    //sw.Close();
+                    //fs.Close();
 #endif
+
+
                     obliqueMPartition.Process(true);
                     //有bug，暂时不接
                     Area = obliqueMPartition.CaledBound.Area;
-                    var lane_segs=obliqueMPartition.IniLanes.Select(e => e.Line).ToList();
-                    var car_plys=obliqueMPartition.Cars.Select(e =>e.Polyline).ToList();
+                    var lane_segs = obliqueMPartition.IniLanes.Select(e => e.Line).ToList();
+                    var car_plys = obliqueMPartition.Cars.Select(e => e.Polyline).ToList();
                     var column_plys = obliqueMPartition.Pillars;
                     //MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartitionPro.ConvertToMParkingPartitionPro());
                     //mParkingPartitionPro.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();

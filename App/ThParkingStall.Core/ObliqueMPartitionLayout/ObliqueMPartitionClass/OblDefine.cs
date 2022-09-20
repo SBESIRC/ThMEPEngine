@@ -317,5 +317,6 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             mParkingPartitionPro.OutputLanes = OutputLanes;
             return mParkingPartitionPro;
         }
+
     }
 }
