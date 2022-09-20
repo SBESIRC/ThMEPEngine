@@ -17,6 +17,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using System;
 using ThMEPEngineCore.Engine;
+using System.IO;
 
 namespace ThMEPWSS.ViewModel
 {
@@ -156,7 +157,26 @@ namespace ThMEPWSS.ViewModel
             BlockNameConfigList.Add("空调内机--柜机", new List<List<string>>() { new List<string>(), new List<string>() });
 
             Blocks.Add("门块");
+            //什么鬼XD，写作List实际上是Dict
             BlockNameConfigList.Add("门块", new List<List<string>>() { new List<string>(), new List<string>() });
+
+            UpdateBlockList();
+        }
+        static readonly Dictionary<int, string> dict = new Dictionary<int, string>() { { 3, "洗脸盆" }, { 4, "洗涤槽" }, { 5, "拖把池" }, { 6, "洗衣机" }, { 8, "淋浴房" }, { 9, "转角淋浴房" }, { 10, "浴缸" }, { 11, "喷头" }, { 0, "坐便器" }, { 1, "小便器" }, { 2, "蹲便器" }, { 12, "地漏" } };
+        public void UpdateBlockList()
+        {
+            var file = @"E:\feng\企业微信文件\WXWork\1688850279863586\Cache\File\2022-09\1 - 副本.csv";
+            foreach (var line in File.ReadAllLines(file).Where(x => !string.IsNullOrWhiteSpace(x)))
+            {
+                var arr = line.Split(',');
+                if (!int.TryParse(arr[1], out var typeId)) continue;
+                var blkName = arr[0].Replace(".jpg", "");
+                try
+                {
+                    (BlockNameConfigList[dict[typeId]] ??= new List<List<string>>() { new List<string>(), new List<string>() })[1].Add(blkName);
+                }
+                catch { }
+            }
         }
         public void AddToTransient(string blkConfigName)
         {
@@ -190,7 +210,7 @@ namespace ThMEPWSS.ViewModel
         }
         public void Show(string blockName, Database db)
         {
-            if(BlockNestedEntityFrames.ContainsKey(blockName))
+            if (BlockNestedEntityFrames.ContainsKey(blockName))
             {
                 BlockNestedEntityFrames[blockName].Clear();
                 BlockNestedEntityFrames.Remove(blockName);
