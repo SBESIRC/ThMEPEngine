@@ -160,7 +160,7 @@
     <Compile Include="CAD\ThTCHDbCommon.cs" />
     <Compile Include="CAD\ThTCHDbExtension.cs" />
     <Compile Include="CAD\ThTCHDoorExtractionVisitor.cs" />
-    <Compile Include="CAD\ThTCHPolylineExtension.cs" />
+    <Compile Include="CAD\ThProtoBufExtension.cs" />
     <Compile Include="CAD\ThTCHWindowExtractionVisitor.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
     <Compile Include="Model\SurrogateModel\Matrix3DSurrogate.cs" />

@@ -14,6 +14,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.Services;
 using ThMEPTCH.Model.SurrogateModel;
 using System.Security.Principal;
+using ThMEPTCH.CAD;
 
 namespace ThPlatform3D
 {
@@ -44,9 +45,32 @@ namespace ThPlatform3D
                 {
                     try
                     {
+                        var bytes = project.ToThBimData(ProtoBufDataType.PushType, PlatformType.CADPlatform);
                         pipeClient.Connect(5000);
-                        project.WriteTo(pipeClient);
+                        pipeClient.Write(bytes, 0, bytes.Length);
                         Active.Editor.WriteLine($"传输数据完成，耗时{sw.ElapsedMilliseconds}毫秒。");
+                        using (AcadDatabase acdb = AcadDatabase.Active())
+                        {
+                            if (Active.Document.IsNamedDrawing)
+                            {
+                                var dwgFullName = Active.Document.Name;
+                                var path = Path.GetDirectoryName(dwgFullName);
+                                var fileName = Path.GetFileNameWithoutExtension(dwgFullName);
+                                var thbimPath = Path.Combine(path, fileName + ".thbim");
+                                //var thbimBytes = project.ToThBimData(ProtoBufDataType.ExternalLink, PlatformType.CADPlatform);
+                                var thbimBytes = bytes;
+                                thbimBytes[2] = 3;
+                                using (var stream = new FileStream(thbimPath, FileMode.Create))
+                                {
+                                    stream.Write(thbimBytes, 0, thbimBytes.Length);
+                                }
+                                Active.Editor.WriteLine($"外链文件生成，路径：[{thbimPath}]");
+                            }
+                            else
+                            {
+                                Active.Editor.WriteLine($"未检测到当前打开的DWG文件目录，生成外链文件失败!");
+                            }
+                        }
                     }
                     catch (System.Exception ex)
                     {
@@ -77,12 +101,8 @@ namespace ThPlatform3D
                     try
                     {
                         pipeServer.WaitForConnection();
-                        //project.WriteTo(pipeServer);
-                        var bytes = project.ToByteArray();
-                        var newBytes = new byte[bytes.Length + 10];
-                        newBytes[0] = 1;
-                        bytes.CopyTo(newBytes, 10);
-                        pipeServer.Write(newBytes, 0, newBytes.Length);
+                        var bytes = project.ToThBimData(ProtoBufDataType.PushType, PlatformType.CADPlatform);
+                        pipeServer.Write(bytes, 0, bytes.Length);
 
                         pipeServer.Close();
                         pipeServer.Dispose();

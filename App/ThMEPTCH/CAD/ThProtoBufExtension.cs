@@ -1,14 +1,30 @@
 ﻿using System;
 using System.Linq;
 using ThCADExtension;
-using GeometryExtensions;
+using Google.Protobuf;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPTCH.CAD
 {
-    public static class ThTCHPolylineExtension
+    public enum ProtoBufDataType
+    {
+        None = 0,
+        PushType = 1,
+        ZoomType = 2,
+        ExternalLink = 3,
+    }
+
+    public enum PlatformType
+    {
+        None = 0,
+        CADPlatform = 1,
+        SUPlatform = 2,
+    }
+
+    public static class ThProtoBufExtension
     {
         public static ThTCHPolyline ToTCHPolyline(this Polyline polyline)
         {
@@ -85,7 +101,7 @@ namespace ThMEPTCH.CAD
             return p;
         }
 
-        public static void ZOffSet(this ThTCHPolyline tchPolyline,double offset)
+        public static void ZOffSet(this ThTCHPolyline tchPolyline, double offset)
         {
             if (tchPolyline.IsNull())
             {
@@ -118,7 +134,7 @@ namespace ThMEPTCH.CAD
         {
             return new ThTCHVector3d() { X = vector.X, Y = vector.Y, Z = vector.Z };
         }
-        
+
         public static ThTCHMatrix3d ToTCHMatrix3d(this Matrix3d matrix)
         {
             return new ThTCHMatrix3d()
@@ -140,6 +156,53 @@ namespace ThMEPTCH.CAD
                 Data43 = matrix[3, 2],
                 Data44 = matrix[3, 3],
             };
+        }
+
+        public static byte[] ToThBimData(this ThTCHProjectData project, ProtoBufDataType protoBufType, PlatformType platformType)
+        {
+            if (protoBufType == ProtoBufDataType.None || platformType == PlatformType.None)
+            {
+                throw new NotSupportedException();
+            }
+            var projectBytes = project.ToByteArray();
+            var ThBimData = new byte[projectBytes.Length + 10];
+            ThBimData[0] = 84;
+            ThBimData[1] = 72;
+            switch (protoBufType)
+            {
+                case ProtoBufDataType.PushType:
+                    {
+                        ThBimData[2] = 1;
+                        break;
+                    }
+                case ProtoBufDataType.ZoomType:
+                    {
+                        ThBimData[2] = 2;
+                        break;
+                    }
+                case ProtoBufDataType.ExternalLink:
+                    {
+                        ThBimData[2] = 3;
+                        break;
+                    }
+                    default: throw new NotSupportedException();
+            }
+            switch (platformType)
+            {
+                case PlatformType.CADPlatform:
+                    {
+                        ThBimData[3] = 1;
+                        break;
+                    }
+                case PlatformType.SUPlatform:
+                    {
+                        ThBimData[3] = 2;
+                        break;
+                    }
+                default: throw new NotSupportedException();
+            }
+            projectBytes.CopyTo(ThBimData, 10);
+            return ThBimData;
         }
     }
 }
