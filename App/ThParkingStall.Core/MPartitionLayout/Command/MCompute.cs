@@ -34,7 +34,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             MParkingPartitionPro.LayoutScareFactor_SingleVert = VMStock.LayoutScareFactor_SingleVert;
             MParkingPartitionPro.SingleVertModulePlacementFactor = VMStock.SingleVertModulePlacementFactor;
             MParkingPartitionPro.ScareEnabledForBackBackModule = VMStock.DoubleRowModularDecrease200;
-            MParkingPartitionPro.LoopThroughEnd = VMStock.AllowLoopThroughEnd;
+            MParkingPartitionPro.LoopThroughEnd = false; ;
 
             var Walls = new BlockingCollection<LineString>();
             var Cars = new BlockingCollection<InfoCar>();

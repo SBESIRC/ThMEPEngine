@@ -208,8 +208,8 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //尽端环通
-        private bool _AllowLoopThroughEnd = false;
-        public bool AllowLoopThroughEnd
+        private int _AllowLoopThroughEnd = 50000;
+        public int AllowLoopThroughEnd
         {
             get { return _AllowLoopThroughEnd; }
             set

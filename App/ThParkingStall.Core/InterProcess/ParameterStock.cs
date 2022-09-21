@@ -125,8 +125,8 @@ namespace ThParkingStall.Core.InterProcess
             get { return _DoubleRowModularDecrease200; }
         }
         //尽端环通
-        private static bool _AllowLoopThroughEnd = false;
-        public static bool AllowLoopThroughEnd
+        private static int _AllowLoopThroughEnd = 50000;
+        public static int AllowLoopThroughEnd
         {
             get { return _AllowLoopThroughEnd; }
         }

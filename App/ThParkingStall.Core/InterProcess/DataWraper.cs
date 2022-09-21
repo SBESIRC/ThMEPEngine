@@ -41,7 +41,7 @@ namespace ThParkingStall.Core.InterProcess
         //背靠背模块：缩进200
         public bool DoubleRowModularDecrease200 = true;
         //尽端环通
-        public bool AllowLoopThroughEnd = false;
+        public int AllowLoopThroughEnd = 50000;
         //背靠背长度限制
         public int DisAllowMaxLaneLength = 50000;
         //背靠背模块：柱子沿车道法向偏移距离
