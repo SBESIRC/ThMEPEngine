@@ -45,7 +45,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
         private Polygon Region { get; set; }
 
         public static int PopulationSize = 30;
-        public int IterationCount = 10;
+        public int IterationCount = 20;
         public int SelectionSize = Math.Max(2, (int)(0.382 * PopulationSize));
         public int Max_SelectionSize = Math.Max(2, (int)(0.618 * PopulationSize));//最大保留数量0.618
         public double Max = 1000;
@@ -78,7 +78,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
 
             var obstacles = new List<Polygon>();
             if (BuildingBoxes.Count == 1)
-                obstacles = Buildings.Select(e => e.Clone()).ToList();
+                obstacles = Buildings.Select(e => e.Clone().Translation(Vecs[0])).ToList();
             else
             {
                 var obspacialIndex = new MNTSSpatialIndex(Buildings);
@@ -121,10 +121,16 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
                 var rstLM = temp_list[1];
                 MutationL(ref rstLM);
                 pop.AddRange(rstLM);
-                pop.RemoveAt(pop.Count - 1);
-                pop.RemoveAt(pop.Count - 1);
-                pop.Add(RandomChromosome(Count));
-                pop.Add(RandomChromosome(Count));
+
+                var reRandomCount = ((int)(Math.Floor(PopulationSize * 0.1))) > 2 ? ((int)(Math.Floor(PopulationSize * 0.1))) : 2;
+                for (int i = 0; i < reRandomCount; i++)
+                {
+                    pop.RemoveAt(pop.Count - 1);
+                }
+                for (int i = 0; i < reRandomCount; i++)
+                {
+                    pop.Add(RandomChromosome(Count));
+                }
             }
             return selected;
         }
@@ -345,7 +351,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
             var bound = Region.Clone();
             var obstacles = new List<Polygon>();
             if (BuildingBoxes.Count == 1)
-                obstacles = Buildings.Select(e => e.Clone()).ToList();
+                obstacles = Buildings.Select(e => e.Clone().Translation(Vecs[0])).ToList();
             else
             {
                 var obspacialIndex = new MNTSSpatialIndex(Buildings);
@@ -363,6 +369,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
             obliqueMPartition.ObstaclesSpatialIndex = new MNTSSpatialIndex(obstacles);
             obliqueMPartition.GenerateParkingSpaces();
             return obliqueMPartition.Cars.Count;
+
         }
     }
 }
