@@ -72,10 +72,10 @@ namespace ThParkingStall.Core.OInterProcess
                     sw.Close();
                     fs.Close();
 
-                    GA gA = new GA(Walls, VaildLanes, Buildings.Select(e =>e.Clone()).ToList(), BuildingBounds.Select(e => e.Clone()).ToList(), Region);
+                    GA gA = new GA(Walls, VaildLanes, Buildings.Select(e => e.Clone()).ToList(), BuildingBounds.Select(e => e.Clone()).ToList(), Region);
                     gA.Process();
-                    var newBuildings=gA.Buildings;
-                    var newbuildingBoxes=gA.BuildingBoxes;
+                    var newBuildings = gA.Buildings;
+                    var newbuildingBoxes = gA.BuildingBoxes;
 
                     obliqueMPartition = new ObliqueMPartition(Walls, VaildLanes, newBuildings, Region);
                     obliqueMPartition.OutputLanes = new List<LineSegment>();
