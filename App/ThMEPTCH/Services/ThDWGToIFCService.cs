@@ -257,7 +257,7 @@ namespace ThMEPTCH.Services
                 floor.FloorEntitys.AddRange(thisRailingEntities.Select(c => c.Value).ToList());
             }
 
-            var floorData = GetBlockElevtionValue(floorOrigin, jsonConfig);
+            var floorData = GetBlockElevationValue(floorOrigin, jsonConfig);
             //var floorData = GetBlockElevtionValue(floorOrigin);
             if (floorData.Count < 1)
             {
@@ -563,7 +563,7 @@ namespace ThMEPTCH.Services
                 floor.FloorEntitys.AddRange(thisRailingEntitys.Select(c => c.Value).ToList());
             }
 
-            var floorData = GetBlockElevtionValue(floorOrigin, jsonConfig);
+            var floorData = GetBlockElevationValue(floorOrigin, jsonConfig);
             foreach (var floor in floorData)
             {
                 var levelEntitys = floorOrigin.Find(c => c.FloorName == floor.FloorName);
@@ -602,7 +602,6 @@ namespace ThMEPTCH.Services
                     buildingStorey.MemoryStoreyId = memoryStory.BuildElement.Root.GlobalId;
                     buildingStorey.MemoryMatrix3D = Matrix3d.Displacement(buildingStorey.Origin.ToPoint3d() - memoryStory.Origin.ToPoint3d()).ToTCHMatrix3d();
                 }
-
                 else
                 {
                     var walls = new List<ThTCHWallData>();
@@ -900,7 +899,7 @@ namespace ThMEPTCH.Services
             return floor.GeometricExtents.ToRectangle();
         }
 
-        List<LevelElevation> GetBlockElevtionValue(List<FloorBlock> floorBlocks, Dictionary<string, List<ThEditStoreyInfo>> jsonConfigs)
+        List<LevelElevation> GetBlockElevationValue(List<FloorBlock> floorBlocks, Dictionary<string, List<ThEditStoreyInfo>> jsonConfigs)
         {
             var res = new List<LevelElevation>();
             var storeyConfig = jsonConfigs.First().Value;//经过确认，暂时认为只有一栋楼不考虑多楼情况，支取First

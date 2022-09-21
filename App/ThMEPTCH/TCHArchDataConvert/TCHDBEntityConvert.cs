@@ -423,6 +423,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             newWall.BuildElement.Root.GlobalId = projectId + entity.DBId;
             newWall.BuildElement.Origin = new ThTCHPoint3d() { X = 0, Y = 0, Z = 0 };
             newWall.BuildElement.XVector = new ThTCHVector3d() { X = 0, Y = 0, Z = 0 };
+            newWall.BuildElement.EnumMaterial = entity.EnumMaterial.GetDescription();
             return newWall;
         }
 
