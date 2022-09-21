@@ -445,6 +445,8 @@ namespace ThMEPTCH.TCHArchDataConvert
             newDoor.BuildElement.Height = entity.Height;
             newDoor.BuildElement.Root = new ThTCHRootData();
             newDoor.BuildElement.Root.GlobalId = projectId + entity.DBId.ToString();
+            newDoor.Swing = Convert.ToUInt16(entity.Swing);
+            newDoor.Operation = Convert.ToUInt16(entity.OperationType);
             return newDoor;
         }
 
@@ -466,6 +468,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             newWindow.BuildElement.Height = entity.Height;
             newWindow.BuildElement.Root = new ThTCHRootData();
             newWindow.BuildElement.Root.GlobalId = projectId + entity.DBId.ToString();
+            newWindow.Type = Convert.ToUInt16(entity.WindowType);
             return newWindow;
         }
     }
