@@ -1,5 +1,4 @@
-﻿using ProtoBuf;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
 using DotNetARX;
 using System.IO;
@@ -9,10 +8,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.Services;
-using ThMEPTCH.Model.SurrogateModel;
 using System.Security.Principal;
 using ThMEPTCH.CAD;
 

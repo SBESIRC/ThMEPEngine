@@ -359,15 +359,36 @@ namespace ThMEPLighting.Garage.Service.Arrange
                             nonLightingLines[i].EndPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
                         extends.Add(endNewLine);
                     }
+                    else
+                    {
+                        pointSquare = endNewLine.BufferSquare(10.0);
+                        endExtendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
+                        if (endExtendSearch.Count > 0)
+                        {
+                            nonLightingLines[i] = new Line(nonLightingLines[i].StartPoint,
+                                nonLightingLines[i].EndPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
+                        }
+                    }
                     if (startExtendSearch.Count > 0)
                     {
                         nonLightingLines[i] = new Line(nonLightingLines[i].EndPoint,
                             nonLightingLines[i].StartPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
                         extends.Add(startNewLine);
                     }
+                    else
+                    {
+                        pointSquare = startNewLine.BufferSquare(10.0);
+                        startExtendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
+                        if (startExtendSearch.Count > 0)
+                        {
+                            nonLightingLines[i] = new Line(nonLightingLines[i].EndPoint,
+                                nonLightingLines[i].StartPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
+                        }
+                    }
                 }
             }
 
+            // 过滤重复边
             for (var i = 0; i < extends.Count; i++)
             {
                 if (results.Any(o => o.StartPoint.DistanceTo(extends[i].StartPoint) < 1.0

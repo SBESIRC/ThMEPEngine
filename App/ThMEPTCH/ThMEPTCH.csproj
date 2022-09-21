@@ -301,28 +301,5 @@
       <Version>3.1.17</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="proto\ThSUBuildingElementData.proto" />
-    <None Include="proto\ThSUCompDefinitionData.proto" />
-    <None Include="proto\ThSUComponentData.proto" />
-    <None Include="proto\ThSUFaceData.proto" />
-    <None Include="proto\ThSUGeometry.proto" />
-    <None Include="proto\ThSUMaterialData.proto" />
-    <None Include="proto\ThSUProjectData.proto" />
-    <None Include="proto\ThTCHBuildingData.proto" />
-    <None Include="proto\ThTCHBuildingStoreyData.proto" />
-    <None Include="proto\ThTCHBuiltElementData.proto" />
-    <None Include="proto\ThTCHDescendingData.proto" />
-    <None Include="proto\ThTCHDoorData.proto" />
-    <None Include="proto\ThTCHOpeningData.proto" />
-    <None Include="proto\ThTCHProjectData.proto" />
-    <None Include="proto\ThTCHRailingData.proto" />
-    <None Include="proto\ThTCHSiteData.proto" />
-    <None Include="proto\ThTCHSlabData.proto" />
-    <None Include="proto\ThTCHWallData.proto" />
-    <None Include="proto\ThTCHGeometry.proto" />
-    <None Include="proto\ThTCHRootData.proto" />
-    <None Include="proto\ThTCHWindowData.proto" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
