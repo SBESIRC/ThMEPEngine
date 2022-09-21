@@ -4,6 +4,7 @@ using DotNetARX;
 using ThMEPTCH.Services;
 using System.Windows.Forms;
 using Autodesk.AutoCAD.Runtime;
+using System.IO;
 
 namespace ThMEPIFC
 {
@@ -53,7 +54,10 @@ namespace ThMEPIFC
                 var MergeModel = modelMergeService.ModelMerge(filePath, project);
                 if (!MergeModel.IsNull())
                 {
-                    Ifc2x3.ThTGL2IFC2x3Builder.SaveIfcModel(MergeModel, filePath);
+                    var path = Path.GetDirectoryName(filePath);
+                    var fileName = Path.GetFileNameWithoutExtension(filePath);
+                    var NewFilePath = Path.Combine(path, fileName + "-100%.ifc");
+                    Ifc2x3.ThTGL2IFC2x3Builder.SaveIfcModel(MergeModel, NewFilePath);
                     MergeModel.Dispose();
                     Active.Database.GetEditor().WriteMessage($"合模成功：已更新IFC文件");
                 }
