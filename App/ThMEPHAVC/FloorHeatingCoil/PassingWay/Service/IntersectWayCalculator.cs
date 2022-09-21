@@ -64,7 +64,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             //    if (polygon_points != null)
             //        PassageShowUtils.ShowPoints(polygon_points);
             //    foreach (var poly in equispaced_segments[index])
-            //        PassageShowUtils.ShowEntity(poly);
+            //        PassageShowUtils.ShowEntity(poly, index);
             //}
             ConvertToIntersectWay(index, polygon_points, turn_left);
             GetIntersectWayBuffer(index);
@@ -151,7 +151,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 var last_way_poly = PassageWayUtils.BuildPolyline(last_way.poly);
 
                 intersect_region = MainRegionCalculator.GetMainRegion(last_way_poly, intersect_region, !turn_left);
-                var last_way_buffer = PassageWayUtils.BufferWithHole(last_way.Buffer(1), 0.75 * buffer).First();
+                //var last_way_buffer = PassageWayUtils.BufferWithHole(last_way.Buffer(1), 0.75 * buffer).First();
+                var last_way_buffer = last_way.Buffer(4);
                 var diff = intersect_region.ToNTSPolygon().Difference(last_way_buffer.ToNTSPolygon()).ToDbCollection().Cast<Polyline>();
                 last_way_buffer.Dispose();
                 last_way_poly.Dispose();
@@ -309,6 +310,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     var move_index = (line.StartPoint.DistanceTo(last_point) < line.EndPoint.DistanceTo(last_point)) ? 0 : 1;
                     equispaced_segments[index].Last().SetPointAt(move_index, last_point.ToPoint2D());
                 }
+                if (!region.Contains(last_point))
+                    return null;
                 polygon_points.Add(last_point);
             }
 

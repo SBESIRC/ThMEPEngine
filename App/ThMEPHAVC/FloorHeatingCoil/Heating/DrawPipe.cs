@@ -679,6 +679,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 if (plList2.Count > 0)
                 {
                     pl = plList2.First();
+                    pl = pl.Difference(ProcessedData.DifferArea).OfType<Polyline>().ToList().FindByMax(x => x.Area);
+                    DrawUtils.ShowGeometry(ProcessedData.DifferArea, "l8DifferArea", 5);
                 }
 
                 WholePipeList.Add(pl);
@@ -736,6 +738,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 fixList.Add(pt1);
                 fixList.AddRange(PipeFixPointList[i]);
                 
+                //修正入口点位
+
+
+
                 //修线
                 WholePipeList[i] = PolylineProcessService.PlClearSmall(WholePipeList[i], fixList, 50);
                 DrawUtils.ShowGeometry(WholePipeList[i], "l5ClearSmall", 20 , 30);
@@ -751,6 +757,38 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 
                 DrawUtils.ShowGeometry(fillet_poly, "l4FilletedPipe", 0, 30);
                 FilletedPipeList.Add(fillet_poly);
+            }
+        }
+
+        Polyline CreateStart(Polyline originPl,List<Point3d> fixList) 
+        {
+            var points = PassageWayUtils.GetPolyPoints(originPl);
+            points = SmoothUtils.SmoothPoints(points);
+            var si = PassageWayUtils.GetPointIndex(fixList[0], points, 1.1);
+            var ei = PassageWayUtils.GetPointIndex(fixList[1], points, 1.1);
+
+            if ((si != -1 && ei != -1)||(si == -1 && ei == -1))
+            {
+                return originPl;
+            }
+            else 
+            {
+                int nowIndex = 0;
+                if (si != -1) nowIndex = si;
+                else nowIndex = ei;
+
+                Vector3d dir = (fixList[1] - fixList[0]).GetNormal();
+                int pCount = points.Count;
+                Point3d pre = points[(nowIndex - 1 + pCount) % pCount];
+                Point3d next = points[(nowIndex + 1) % pCount];
+
+                Vector3d vec0 = (pre - points[nowIndex]).GetNormal() ;
+                Vector3d vec1 = (next - points[nowIndex]).GetNormal() ;
+                if (Math.Abs(vec0.DotProduct(dir)) > 0.95) 
+                {
+                    
+                }
+                return originPl;
             }
         }
 

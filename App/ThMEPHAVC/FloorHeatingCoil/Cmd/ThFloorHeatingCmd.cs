@@ -98,7 +98,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     Parameter.PrivatePublicMode = 0;
                     Parameter.TotalLength = 120 * 1000;
 
-                    Parameter.SuggestDistanceWall = 200;
+                    Parameter.SuggestDistanceWall = 100;
 
                     PublicValue.ChangeSDis = 0;
                     //直接修改参数

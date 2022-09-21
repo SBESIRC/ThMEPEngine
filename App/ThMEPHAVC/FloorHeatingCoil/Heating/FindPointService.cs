@@ -80,7 +80,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             double tmpDis = 0;
             double tmpX = 0;
 
-            if (downDoor.Length < pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1))
+            if (downDoor.Length < pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1)-5)
             {
                 tmpDis = downDoor.Length / (nowDoor.PipeIdList.Count * 2 + 1);
                 tmpDis = ((int)tmpDis / 10) * 10;
