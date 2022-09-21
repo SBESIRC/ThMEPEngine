@@ -585,7 +585,7 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("TargetParkingCntMax");
             }
         }
-        private bool _BoundaryShrink = false;
+        private bool _BoundaryShrink = true;
         public bool BoundaryShrink
         {
             get { return _BoundaryShrink; }

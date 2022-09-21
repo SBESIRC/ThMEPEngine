@@ -70,7 +70,7 @@ namespace ThParkingStall.Core.InterProcess
         //加速运算
         public bool SpeedUpMode = false;
         //边界收缩
-        public bool BoundaryShrink = false;
+        public bool BoundaryShrink = true;
         #endregion
         public Chromosome chromosome = null;//正交基因记录
         public Genome genome = null;//斜交基因记录
