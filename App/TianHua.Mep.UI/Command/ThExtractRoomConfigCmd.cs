@@ -11,14 +11,14 @@ namespace TianHua.Mep.UI.Command
     public class ThExtractRoomConfigCmd : ThMEPBaseCommand, IDisposable
     {
         private static ExtractRoomOutlineUI _uiExtractRoomOutline;
-        private static Dictionary<Document, ThExtractRoomOutlineVM> _documentVMDic;
+        private static Dictionary<string, ThExtractRoomOutlineVM> _documentVMDic;
         public ThExtractRoomConfigCmd()
         {
         }
 
         static ThExtractRoomConfigCmd()
         {
-            _documentVMDic = new Dictionary<Document, ThExtractRoomOutlineVM>();
+            _documentVMDic = new Dictionary<string, ThExtractRoomOutlineVM>();
         }
 
         public void Dispose()
@@ -26,16 +26,17 @@ namespace TianHua.Mep.UI.Command
             //
         }
 
+        private Document ActiveDoc => acadApp.Application.DocumentManager.MdiActiveDocument;
+
         public override void SubExecute()
         {
-            if(acadApp.Application.DocumentManager.MdiActiveDocument!=null)
+            if(ActiveDoc != null)
             {
-                var activeDoc = acadApp.Application.DocumentManager.MdiActiveDocument;
-                var vm = GetRoomOutlineVM(activeDoc);
+                var vm = GetRoomOutlineVM(ActiveDoc.Name);
                 if (vm==null)
                 {
                     vm = new ThExtractRoomOutlineVM();
-                    AddToDocumentVMDic(activeDoc, vm);
+                    AddToDocumentVMDic(ActiveDoc.Name, vm);
                 }                
                 ShowUI(vm);
             }
@@ -43,21 +44,24 @@ namespace TianHua.Mep.UI.Command
 
         public void DocumentActivated(object sender, DocumentCollectionEventArgs e)
         {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            if(ActiveDoc !=null)
             {
-                var vm = GetRoomOutlineVM(e.Document);
+                var vm = GetRoomOutlineVM(e.Document.Name);
                 if (vm == null)
                 {
                     vm = new ThExtractRoomOutlineVM();
-                    AddToDocumentVMDic(e.Document, vm);
+                    AddToDocumentVMDic(e.Document.Name, vm);
                 }
                 UpdateUI(vm);
-            }
+            }            
         }
 
         public void DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
         {
-            RemoveFromDocumentVMDic(e.Document);
+            if(e.Document!=null)
+            {
+                RemoveFromDocumentVMDic(e.Document.Name);
+            }            
         }
 
         public void DocumentDestroyed(object sender, DocumentDestroyedEventArgs e)
@@ -68,11 +72,11 @@ namespace TianHua.Mep.UI.Command
             }            
         }
 
-        private ThExtractRoomOutlineVM GetRoomOutlineVM(Document doc)
+        private ThExtractRoomOutlineVM GetRoomOutlineVM(string docName)
         {
-            if(doc!=null && _documentVMDic.ContainsKey(doc))
+            if(!string.IsNullOrEmpty(docName) && _documentVMDic.ContainsKey(docName))
             {
-                return _documentVMDic[doc];
+                return _documentVMDic[docName];
             }
             else
             {
@@ -80,27 +84,27 @@ namespace TianHua.Mep.UI.Command
             }
         }
 
-        private void AddToDocumentVMDic(Document doc, ThExtractRoomOutlineVM vm)
+        private void AddToDocumentVMDic(string docName, ThExtractRoomOutlineVM vm)
         {
-            if(doc ==null || vm == null)
+            if(string.IsNullOrEmpty(docName) || vm == null)
             {
                 return;
             }
-            if(_documentVMDic.ContainsKey(doc))
+            if(_documentVMDic.ContainsKey(docName))
             {
-                _documentVMDic[doc] = vm;
+                _documentVMDic[docName] = vm;
             }
             else
             {
-                _documentVMDic.Add(doc, vm);
+                _documentVMDic.Add(docName, vm);
             }
         }
 
-        private void RemoveFromDocumentVMDic(Document doc)
+        private void RemoveFromDocumentVMDic(string docName)
         {
-            if (doc!=null && _documentVMDic.ContainsKey(doc))
+            if (!string.IsNullOrEmpty(docName) && _documentVMDic.ContainsKey(docName))
             {
-                _documentVMDic.Remove(doc);
+                _documentVMDic.Remove(docName);
             }
         }
 

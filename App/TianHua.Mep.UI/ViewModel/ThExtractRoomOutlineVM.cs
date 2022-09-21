@@ -16,15 +16,12 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model.Common;
 using TianHua.Mep.UI.Data;
 using TianHua.Mep.UI.Command;
-using acadApp = Autodesk.AutoCAD.ApplicationServices;
 using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
 
 namespace TianHua.Mep.UI.ViewModel
@@ -46,7 +43,7 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
 
-        private bool ynExtractShearWall;
+        private bool ynExtractShearWall =true;
         public bool YnExtractShearWall
         {
             get => ynExtractShearWall;
@@ -64,7 +61,6 @@ namespace TianHua.Mep.UI.ViewModel
         public string Id => _id;
         private DBObjectCollection _doorBlkObbs;
         private Point3dCollection _rangePts;
-
         public ThExtractRoomOutlineVM()
         {
             LoadFromActiveDatabase();
@@ -83,293 +79,265 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void ExtractRoomDatas()
         {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            using (var lockDoc = Active.Document.LockDocument())
+            using (ThExtractRoomDataCmd cmd = new ThExtractRoomDataCmd(GetLayers()))
             {
-                using (var lockDoc = Active.Document.LockDocument())
-                using (ThExtractRoomDataCmd cmd = new ThExtractRoomDataCmd(GetLayers()))
+                cmd.YnExtractShearWall = YnExtractShearWall;
+                SetFocusToDwgView();
+                cmd.Execute();
+                _rangePts = cmd.RangePts;
+                if (cmd.RangePts.Count >= 3)
                 {
-                    cmd.YnExtractShearWall = YnExtractShearWall;
-                    SetFocusToDwgView();
-                    cmd.Execute();
-                    _rangePts = cmd.RangePts;
-                    if (cmd.RangePts.Count >= 3)
-                    {
-                        Active.Database.CreateAILayer(AIWallLayer, 7);
-                        EraseEntities(cmd.RangePts, AIWallLayer);
-                        PrintEntities(cmd.Walls, AIWallLayer);
+                    Active.Database.CreateAILayer(AIWallLayer, 7);
+                    EraseEntities(cmd.RangePts, AIWallLayer);
+                    PrintEntities(cmd.Walls, AIWallLayer);
 
-                        Active.Database.CreateAIColumnLayer();
-                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.COLUMN);
-                        PrintEntities(cmd.Columns, ThMEPEngineCoreLayerUtils.COLUMN);
+                    Active.Database.CreateAIColumnLayer();
+                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.COLUMN);
+                    PrintEntities(cmd.Columns, ThMEPEngineCoreLayerUtils.COLUMN);
 
-                        Active.Database.CreateAIDoorLayer();
-                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.DOOR);
-                        PrintEntities(cmd.Doors, ThMEPEngineCoreLayerUtils.DOOR);
+                    Active.Database.CreateAIDoorLayer();
+                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.DOOR);
+                    PrintEntities(cmd.Doors, ThMEPEngineCoreLayerUtils.DOOR);
 
-                        Active.Database.CreateAIShearWallLayer();
-                        EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.SHEARWALL);
-                        PrintEntities(cmd.ShearWalls, ThMEPEngineCoreLayerUtils.SHEARWALL);
+                    Active.Database.CreateAIShearWallLayer();
+                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.SHEARWALL);
+                    PrintEntities(cmd.ShearWalls, ThMEPEngineCoreLayerUtils.SHEARWALL);
 
-                        SetCurrentLayer(AIWallLayer);
-                    }
+                    SetCurrentLayer(AIWallLayer);
                 }
             }
         }
         public void BuildRoomOutline()
         {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            using (var docLock = Active.Document.LockDocument())
             {
-                //借助于SuperBoundary的SBND_PICK命令
-                using (var docLock = Active.Document.LockDocument())
+                SetFocusToDwgView();
+
+                // 0、创建图层（把显示的区域打印到此图层上）
+                Active.Database.CreateAIRoomOutlineLayer();
+
+                // 1、把房间数据获取到
+                var roomDatas = GetRoomDataFromMS();
+                if (roomDatas.Count == 0)
                 {
-                    SetFocusToDwgView();
-
-                    // 0、创建图层（把显示的区域打印到此图层上）
-                    Active.Database.CreateAIRoomOutlineLayer();
-
-                    // 1、把房间数据获取到
-                    var roomDatas = GetRoomDataFromMS();
-                    if (roomDatas.Count == 0)
-                    {
-                        return;
-                    }
-
-                    // 2、再显示已存在的房间区域
-                    var roomAreaIds = ShowExistedRoomAreas(Active.Database);
-
-                    // 3、构建房间区域
-                    using (var cmd = new ThSuperBoundaryCmd(roomDatas))
-                    {                        
-                        cmd.Execute();
-                    }
-
-                    // 4、删除显示的房间区域
-                    Erase(Active.Database, roomAreaIds);
+                    return;
                 }
+
+                // 2、再显示已存在的房间区域
+                var roomAreaIds = ShowExistedRoomAreas(Active.Database);
+
+                // 3、构建房间区域
+                using (var cmd = new ThSuperBoundaryCmd(roomDatas))
+                {
+                    cmd.Execute();
+                }
+
+                // 4、删除显示的房间区域
+                Erase(Active.Database, roomAreaIds);
             }
         }
         public void BuildRoomOutline1()
         {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            //借助于SuperBoundary的SBND_ALL命令
+            using (var docLock = Active.Document.LockDocument())
             {
-                //借助于SuperBoundary的SBND_ALL命令
-                using (var docLock = Active.Document.LockDocument())
+                SetFocusToDwgView();
+
+                // 0、选取范围
+                var pts = ThAuxiliaryUtils.GetRange();
+
+                // 1、获取房间名称
+                var roomNameTexts = GetRoomNames(Active.Database, pts);
+                if (roomNameTexts.Count == 0)
                 {
-                    SetFocusToDwgView();
-
-                    // 0、选取范围
-                    var pts = ThAuxiliaryUtils.GetRange();
-
-                    // 1、获取房间名称
-                    var roomNameTexts = GetRoomNames(Active.Database, pts);
-                    if (roomNameTexts.Count == 0)
-                    {
-                        MessageBox.Show("未找到任何的房间名称，无法生成房间框线!", "信息提示"
-                                , MessageBoxButton.OK, MessageBoxImage.Information);
-                        return;
-                    }
-
-                    // 2、创建图层（把显示的区域打印到此图层上）
-                    Active.Database.CreateAIRoomOutlineLayer();
-
-                    // 3、把房间数据获取到
-                    var roomDatas = GetRoomDataFromMS(pts);
-                    if (roomDatas.Count == 0)
-                    {
-                        MessageBox.Show("未获取到任何的墙线元素，无法生成房间框线！", "信息提示"
+                    MessageBox.Show("未找到任何的房间名称，无法生成房间框线!", "信息提示"
                             , MessageBoxButton.OK, MessageBoxImage.Information);
-                        return;
-                    }
-
-                    // 4、构建房间区域
-                    using (var cmd = new ThSuperBoundaryCmd(roomDatas, roomNameTexts))
-                    {
-                        cmd.Execute();
-                    }
-
-                    // 5、释放房间名称
-                    roomNameTexts.OfType<Entity>()
-                        .Where(o => o.ObjectId != ObjectId.Null)
-                        .ToCollection().MDispose();
+                    return;
                 }
+
+                // 2、创建图层（把显示的区域打印到此图层上）
+                Active.Database.CreateAIRoomOutlineLayer();
+
+                // 3、把房间数据获取到
+                var roomDatas = GetRoomDataFromMS(pts);
+                if (roomDatas.Count == 0)
+                {
+                    MessageBox.Show("未获取到任何的墙线元素，无法生成房间框线！", "信息提示"
+                        , MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 4、构建房间区域
+                using (var cmd = new ThSuperBoundaryCmd(roomDatas, roomNameTexts))
+                {
+                    cmd.Execute();
+                }
+
+                // 5、释放房间名称
+                roomNameTexts.OfType<Entity>()
+                    .Where(o => o.ObjectId != ObjectId.Null)
+                    .ToCollection().MDispose();
             }
         }
         public void BuildDoors()
         {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            var doorBlkNames = DoorBlkInfos.Select(o => o.Name).ToList();
+            using (var lockDoc = Active.Document.LockDocument())
+            using (var cmd = new ThBuildDoorsCmd(
+                AIWallLayer, AIShearWallLayer,
+                ThMEPEngineCoreLayerUtils.DOOR,
+                ThMEPEngineCoreLayerUtils.COLUMN, doorBlkNames))
             {
-                var doorBlkNames = DoorBlkInfos.Select(o => o.Name).ToList();
-                using (var lockDoc = Active.Document.LockDocument())
-                using (var cmd = new ThBuildDoorsCmd(
-                    AIWallLayer, AIShearWallLayer,
-                    ThMEPEngineCoreLayerUtils.DOOR,
-                    ThMEPEngineCoreLayerUtils.COLUMN, doorBlkNames))
-                {
-                    SetFocusToDwgView();
-                    cmd.Execute();
-                    Active.Database.CreateAIDoorLayer();
-                    PrintEntities(cmd.doors, ThMEPEngineCoreLayerUtils.DOOR);
-                    //Active.Editor.Regen();
-                }
+                SetFocusToDwgView();
+                cmd.Execute();
+                Active.Database.CreateAIDoorLayer();
+                PrintEntities(cmd.doors, ThMEPEngineCoreLayerUtils.DOOR);
+                //Active.Editor.Regen();
             }
         }
         public void SaveToDatabase()
         {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            using (var lockDoc = Active.Document.LockDocument())
+            using (var acadDb = AcadDatabase.Active())
             {
-                using (var lockDoc = Active.Document.LockDocument())
-                using (var acadDb = AcadDatabase.Active())
+                var extractRoomConfigNamedDictId = acadDb.Database.GetNamedDictionary(ThConfigDataTool.ExtractRoomNamedDictKey);
+                if (extractRoomConfigNamedDictId == ObjectId.Null)
                 {
-                    var extractRoomConfigNamedDictId = acadDb.Database.GetNamedDictionary(ThConfigDataTool.ExtractRoomNamedDictKey);
-                    if (extractRoomConfigNamedDictId == ObjectId.Null)
-                    {
-                        extractRoomConfigNamedDictId = acadDb.Database.AddNamedDictionary(ThConfigDataTool.ExtractRoomNamedDictKey);
-                    }
-                    // 保存墙图层
-                    var wallTvs = new TypedValueList();
-                    LayerInfos.ForEach(o => wallTvs.Add(DxfCode.ExtendedDataAsciiString, o.Layer));
-                    extractRoomConfigNamedDictId.UpdateXrecord(ThConfigDataTool.WallLayerSearchKey, wallTvs);
-
-                    // 保存门图块配置
-                    var doorBlkTvs = new TypedValueList();
-                    DoorBlkInfos.ForEach(o => doorBlkTvs.Add(DxfCode.ExtendedDataAsciiString, o.Name));
-                    extractRoomConfigNamedDictId.UpdateXrecord(ThConfigDataTool.DoorBlkNameConfigSearchKey, doorBlkTvs);
-
-                    // 保存是否提取剪力墙
-                    var ynExtractShearWallTvs = new TypedValueList();
-                    ynExtractShearWallTvs.Add(DxfCode.Bool, ynExtractShearWall);
-                    extractRoomConfigNamedDictId.UpdateXrecord(ThConfigDataTool.YnExtractShearWallSearchKey, ynExtractShearWallTvs);
-                    MessageBox.Show("配置已保存到当前图纸中！", "保存提示",MessageBoxButton.OK, MessageBoxImage.Information);
+                    extractRoomConfigNamedDictId = acadDb.Database.AddNamedDictionary(ThConfigDataTool.ExtractRoomNamedDictKey);
                 }
+                // 保存墙图层
+                var wallTvs = new TypedValueList();
+                LayerInfos.ForEach(o => wallTvs.Add(DxfCode.ExtendedDataAsciiString, o.Layer));
+                extractRoomConfigNamedDictId.UpdateXrecord(ThConfigDataTool.WallLayerSearchKey, wallTvs);
+
+                // 保存门图块配置
+                var doorBlkTvs = new TypedValueList();
+                DoorBlkInfos.ForEach(o => doorBlkTvs.Add(DxfCode.ExtendedDataAsciiString, o.Name));
+                extractRoomConfigNamedDictId.UpdateXrecord(ThConfigDataTool.DoorBlkNameConfigSearchKey, doorBlkTvs);
+
+                // 保存是否提取剪力墙
+                var ynExtractShearWallTvs = new TypedValueList();
+                ynExtractShearWallTvs.Add(DxfCode.Bool, ynExtractShearWall);
+                extractRoomConfigNamedDictId.UpdateXrecord(ThConfigDataTool.YnExtractShearWallSearchKey, ynExtractShearWallTvs);
+                MessageBox.Show("配置已保存到当前图纸中！", "保存提示", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
         public void PickWallLayer()
         {
-            if(acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            using (var docLock = Active.Document.LockDocument())
+            using (var acdb = AcadDatabase.Active())
             {
-                using (var docLock = Active.Document.LockDocument())
-                using (var acdb = AcadDatabase.Active())
+                SetFocusToDwgView();
+                while (true)
                 {
-                    SetFocusToDwgView();
-                    while (true)
+                    var pneo = new PromptNestedEntityOptions("\n请选择墙体线:");
+                    var pner = Active.Editor.GetNestedEntity(pneo);
+                    if (pner.Status == PromptStatus.OK)
                     {
-                        var pneo = new PromptNestedEntityOptions("\n请选择墙体线:");
-                        var pner = Active.Editor.GetNestedEntity(pneo);
-                        if (pner.Status == PromptStatus.OK)
+                        if (pner.ObjectId != ObjectId.Null)
                         {
-                            if (pner.ObjectId != ObjectId.Null)
+                            var pickedEntity = acdb.Element<Entity>(pner.ObjectId);
+                            if (pickedEntity is Curve || pickedEntity is Mline)
                             {
-                                var pickedEntity = acdb.Element<Entity>(pner.ObjectId);
-                                if (pickedEntity is Curve || pickedEntity is Mline)
+                                var entityLayerSuffix = ThMEPXRefService.OriginalFromXref(pickedEntity.Layer);
+                                if (entityLayerSuffix != "0")
                                 {
-                                    var entityLayerSuffix = ThMEPXRefService.OriginalFromXref(pickedEntity.Layer);
-                                    if (entityLayerSuffix != "0")
-                                    {
-                                        var sameSuffixLayers = GetSameSuffixLayers(entityLayerSuffix);
-                                        sameSuffixLayers.ForEach(layer => AddLayer(layer));
-                                    }
-                                    else
-                                    {
-                                        var containers = pner.GetContainers();
-                                        if (containers.Length > 0)
-                                        {
-                                            // 如果 pick 到的实体是0图层，就获取其父亲的图层
-                                            var parentEntity = acdb.Element<Entity>(containers.First());
-                                            entityLayerSuffix = ThMEPXRefService.OriginalFromXref(parentEntity.Layer);
-                                            var sameSuffixLayers = GetSameSuffixLayers(entityLayerSuffix);
-                                            sameSuffixLayers.ForEach(layer => AddLayer(layer));
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (pner.Status == PromptStatus.Cancel)
-                        {
-                            break;
-                        }
-                    }
-                }
-            }            
-        }
-        public void PickDoorBlock()
-        {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
-            {
-                using (var docLock = Active.Document.LockDocument())
-                using (var acdbDb = AcadDatabase.Active())
-                {
-                    SetFocusToDwgView();
-                    while (true)
-                    {
-                        var nestedEntOpt = new PromptNestedEntityOptions("\nPick nested entity in block:");
-                        Editor ed = Active.Document.Editor;
-                        var nestedEntRes = ed.GetNestedEntity(nestedEntOpt);
-                        if (nestedEntRes.ObjectId != ObjectId.Null)
-                        {
-                            var pickedEntity = acdbDb.Element<Entity>(nestedEntRes.ObjectId);
-                            if (pickedEntity is BlockReference br)
-                            {
-                                var blockName = ThMEPXRefService.OriginalFromXref(br.GetEffectiveName());
-                                AddDoorBlockInfo(blockName);
-                            }
-                            else
-                            {
-                                if (pickedEntity.IsTCHElement())
-                                {
-                                    System.Windows.MessageBox.Show("当前选择的是天正物体，请重新选择！", "选择提示",
-                                        System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
-                                    continue;
+                                    var sameSuffixLayers = GetSameSuffixLayers(entityLayerSuffix);
+                                    sameSuffixLayers.ForEach(layer => AddLayer(layer));
                                 }
                                 else
                                 {
-                                    if (nestedEntRes.GetContainers().Length > 0)
+                                    var containers = pner.GetContainers();
+                                    if (containers.Length > 0)
                                     {
-                                        var containerId = nestedEntRes.GetContainers().First();
-                                        var dbObj2 = acdbDb.Element<Entity>(containerId);
-                                        if (dbObj2 is BlockReference br2)
-                                        {
-                                            var blockName = ThMEPXRefService.OriginalFromXref(br2.GetEffectiveName());
-                                            AddDoorBlockInfo(blockName);
-                                        }
+                                        // 如果 pick 到的实体是0图层，就获取其父亲的图层
+                                        var parentEntity = acdb.Element<Entity>(containers.First());
+                                        entityLayerSuffix = ThMEPXRefService.OriginalFromXref(parentEntity.Layer);
+                                        var sameSuffixLayers = GetSameSuffixLayers(entityLayerSuffix);
+                                        sameSuffixLayers.ForEach(layer => AddLayer(layer));
                                     }
                                 }
                             }
                         }
-                        else if (nestedEntRes.Status == PromptStatus.Cancel)
-                        {
-                            break;
-                        }
+                    }
+                    else if (pner.Status == PromptStatus.Cancel)
+                    {
+                        break;
                     }
                 }
-            }            
+            }
+        }
+        public void PickDoorBlock()
+        {
+            using (var docLock = Active.Document.LockDocument())
+            using (var acdbDb = AcadDatabase.Active())
+            {
+                SetFocusToDwgView();
+                while (true)
+                {
+                    var nestedEntOpt = new PromptNestedEntityOptions("\nPick nested entity in block:");
+                    Editor ed = Active.Document.Editor;
+                    var nestedEntRes = ed.GetNestedEntity(nestedEntOpt);
+                    if (nestedEntRes.ObjectId != ObjectId.Null)
+                    {
+                        var pickedEntity = acdbDb.Element<Entity>(nestedEntRes.ObjectId);
+                        if (pickedEntity is BlockReference br)
+                        {
+                            var blockName = ThMEPXRefService.OriginalFromXref(br.GetEffectiveName());
+                            AddDoorBlockInfo(blockName);
+                        }
+                        else
+                        {
+                            if (pickedEntity.IsTCHElement())
+                            {
+                                System.Windows.MessageBox.Show("当前选择的是天正物体，请重新选择！", "选择提示",
+                                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+                                continue;
+                            }
+                            else
+                            {
+                                if (nestedEntRes.GetContainers().Length > 0)
+                                {
+                                    var containerId = nestedEntRes.GetContainers().First();
+                                    var dbObj2 = acdbDb.Element<Entity>(containerId);
+                                    if (dbObj2 is BlockReference br2)
+                                    {
+                                        var blockName = ThMEPXRefService.OriginalFromXref(br2.GetEffectiveName());
+                                        AddDoorBlockInfo(blockName);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (nestedEntRes.Status == PromptStatus.Cancel)
+                    {
+                        break;
+                    }
+                }
+            }
         }
         public void ShowDoorOutline()
         {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            using (var docLock = Active.Document.LockDocument())
             {
-                using (var docLock = Active.Document.LockDocument())
+                if (_doorBlkObbs.Count == 0)
                 {
-                    if (_doorBlkObbs.Count == 0)
-                    {
-                        var doorBlkNames = DoorBlkInfos.Select(o => o.Name).ToList();
-                        _doorBlkObbs = ThConfigDataTool.GetDoorZones(Active.Database, _rangePts, doorBlkNames);
-                    }
-                    ClearTransientGraphics(_doorBlkObbs);
-                    AddToTransient(_doorBlkObbs);
-                    SetFocusToDwgView();
+                    var doorBlkNames = DoorBlkInfos.Select(o => o.Name).ToList();
+                    _doorBlkObbs = ThConfigDataTool.GetDoorZones(Active.Database, _rangePts, doorBlkNames);
                 }
-            }            
+                ClearTransientGraphics(_doorBlkObbs);
+                AddToTransient(_doorBlkObbs);
+                SetFocusToDwgView();
+            }
         }
         public void CloseDoorOutline()
         {
-            if (acadApp.Application.DocumentManager.MdiActiveDocument != null)
+            using (var docLock = Active.Document.LockDocument())
             {
-                using (var docLock = Active.Document.LockDocument())
-                {
-                    ClearTransientGraphics(_doorBlkObbs);
-                    SetFocusToDwgView();
-                }
-            }            
+                ClearTransientGraphics(_doorBlkObbs);
+                SetFocusToDwgView();
+            }
         }
         public void RemoveLayers(List<string> layers)
         {
@@ -389,6 +357,13 @@ namespace TianHua.Mep.UI.ViewModel
                 doorBlkInfos.ForEach(o => DoorBlkInfos.Remove(o));
             }
         }
+
+        private void ShowSBNDRunCmdTip()
+        {
+            MessageBox.Show("正在运行房间轮廓线生成命令，无法执行当前操作！", "信息提示",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+
         private DBObjectCollection GetRoomDataFromMS()
         {
             var roomDatas = new DBObjectCollection();
@@ -452,36 +427,22 @@ namespace TianHua.Mep.UI.ViewModel
         }
         private List<string> GetAWallLayers()
         {
-            if (acadApp.Application.DocumentManager.Count > 0)
+            using (var acdb = AcadDatabase.Active())
             {
-                using (var acdb = AcadDatabase.Active())
-                {
-                    return acdb.Layers
-                        .Where(o => IsAWallLayer(o.Name))
-                        .Select(o => o.Name)
-                        .ToList();
-                }
-            }
-            else
-            {
-                return new List<string>();
+                return acdb.Layers
+                    .Where(o => IsAWallLayer(o.Name))
+                    .Select(o => o.Name)
+                    .ToList();
             }
         }
         private List<string> GetAEWallLayers()
         {
-            if(acadApp.Application.DocumentManager.Count > 0)
+            using (var acdb = AcadDatabase.Active())
             {
-                using (var acdb = AcadDatabase.Active())
-                {
-                    return acdb.Layers
-                        .Where(o => IsAEWallLayer(o.Name))
-                        .Select(o => o.Name)
-                        .ToList();
-                }
-            }
-            else
-            {
-                return new List<string>();
+                return acdb.Layers
+                    .Where(o => IsAEWallLayer(o.Name))
+                    .Select(o => o.Name)
+                    .ToList();
             }
         }
         private bool IsAWallLayer(string layer)
@@ -590,37 +551,34 @@ namespace TianHua.Mep.UI.ViewModel
             this.DoorBlkInfos = new ObservableCollection<ThBlockInfo>();
             this.LayerInfos = new ObservableCollection<ThLayerInfo>();
             // 从当前database获取图层
-            if (acadApp.Application.DocumentManager.MdiActiveDocument!=null)
+            using (var acadDb = AcadDatabase.Active())
             {
-                using (var acadDb = AcadDatabase.Active())
+                var extractRoomConfigNamedDictId = acadDb.Database.GetNamedDictionary(ThConfigDataTool.ExtractRoomNamedDictKey);
+                if (extractRoomConfigNamedDictId != ObjectId.Null)
                 {
-                    var extractRoomConfigNamedDictId = acadDb.Database.GetNamedDictionary(ThConfigDataTool.ExtractRoomNamedDictKey);
-                    if (extractRoomConfigNamedDictId != ObjectId.Null)
+                    var wallTvs = extractRoomConfigNamedDictId.GetXrecord(ThConfigDataTool.WallLayerSearchKey);
+                    if (wallTvs != null)
                     {
-                        var wallTvs = extractRoomConfigNamedDictId.GetXrecord(ThConfigDataTool.WallLayerSearchKey);
-                        if(wallTvs!=null)
+                        foreach (TypedValue tv in wallTvs)
                         {
-                            foreach (TypedValue tv in wallTvs)
-                            {
-                                this.LayerInfos.Add(new ThLayerInfo { Layer = tv.Value.ToString() });
-                            }
+                            this.LayerInfos.Add(new ThLayerInfo { Layer = tv.Value.ToString() });
                         }
-                       
-                        var doorBlkTvs = extractRoomConfigNamedDictId.GetXrecord(ThConfigDataTool.DoorBlkNameConfigSearchKey);
-                        if(doorBlkTvs!=null)
-                        {
-                            foreach (TypedValue tv in doorBlkTvs)
-                            {
-                                this.DoorBlkInfos.Add(new ThBlockInfo { Name = tv.Value.ToString()});
-                            }
-                        }                        
+                    }
 
-                        var ynExtractShearWallTvs = extractRoomConfigNamedDictId.GetXrecord(ThConfigDataTool.YnExtractShearWallSearchKey);
-                        if(ynExtractShearWallTvs!=null && ynExtractShearWallTvs.Count == 1)
+                    var doorBlkTvs = extractRoomConfigNamedDictId.GetXrecord(ThConfigDataTool.DoorBlkNameConfigSearchKey);
+                    if (doorBlkTvs != null)
+                    {
+                        foreach (TypedValue tv in doorBlkTvs)
                         {
-                            this.ynExtractShearWall = (short)ynExtractShearWallTvs[0].Value==1;
-                        }                        
-                    }                   
+                            this.DoorBlkInfos.Add(new ThBlockInfo { Name = tv.Value.ToString() });
+                        }
+                    }
+
+                    var ynExtractShearWallTvs = extractRoomConfigNamedDictId.GetXrecord(ThConfigDataTool.YnExtractShearWallSearchKey);
+                    if (ynExtractShearWallTvs != null && ynExtractShearWallTvs.Count == 1)
+                    {
+                        this.ynExtractShearWall = (short)ynExtractShearWallTvs[0].Value == 1;
+                    }
                 }
             }
         }
