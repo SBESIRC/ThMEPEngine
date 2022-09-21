@@ -44,8 +44,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
         public List<Polygon> BuildingBoxes { get; set; }
         private Polygon Region { get; set; }
 
-        public static int PopulationSize = 30;
-        public int IterationCount = 20;
+        public static int PopulationSize = 10;
+        public int IterationCount = 5;
         public int SelectionSize = Math.Max(2, (int)(0.382 * PopulationSize));
         public int Max_SelectionSize = Math.Max(2, (int)(0.618 * PopulationSize));//最大保留数量0.618
         public double Max = 1000;
