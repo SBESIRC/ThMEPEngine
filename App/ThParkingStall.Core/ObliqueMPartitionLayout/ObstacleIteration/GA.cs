@@ -325,7 +325,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
                 var steps = new List<double>();
                 for (int i = 0; i < stepCount; i++)
                 {
-                    var value = Min + stepCount * i;
+                    var value = Min + (Max-Min)/stepCount * i;
                     steps.Add(value);
                 }
                 for (int i = 0; i < steps.Count; i++)
@@ -395,6 +395,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
             }
             return new Gene(res.ToArray());
         }
+
         List<double> GenerateRandom(double max, double min, int count)
         {
             var res = new List<double>();
