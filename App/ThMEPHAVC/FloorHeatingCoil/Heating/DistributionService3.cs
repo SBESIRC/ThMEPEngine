@@ -266,6 +266,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 //修正公区
                 if (pipe1.IsPublicPipe == 1) tmpNewPipe.IsPublicPipe = 1;
 
+                //修正死亡
+                if (pipe1.Dead == 1 || pipe2.Dead == 1) tmpNewPipe.Dead = 1;
+
                 newPipe = tmpNewPipe;
             }
 
@@ -287,10 +290,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //}
             if (Parameter.AuxiliaryRoomConstraint)
             {
-                if (nowRegion.RegionId != 0)
-                {
-                    if (pipe1.Dead == 1 || pipe2.Dead == 1) return false;
-                }
+                if ((pipe1.DomainIdList.Count == 1 && pipe1.DomainIdList.First() == nowRegion.RegionId && RegionUsedLength[nowRegion.RegionId] < 10000)
+                    || (pipe2.DomainIdList.Count == 1 && pipe2.DomainIdList.First() == nowRegion.RegionId && RegionUsedLength[nowRegion.RegionId] < 10000)) { }
+                else if (pipe1.Dead == 1 || pipe2.Dead == 1) return false;
+                
             }
             //附属房间其他判别
             //if (pipe1.HaveAuxiliaryRoom == 1 && pipe2.HaveAuxiliaryRoom == 1)
