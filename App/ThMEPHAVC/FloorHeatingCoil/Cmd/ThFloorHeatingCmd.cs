@@ -95,7 +95,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     Parameter.PublicRegionConstraint = true;
                     Parameter.IndependentRoomConstraint = true;
                     Parameter.AuxiliaryRoomConstraint = true;
-                    Parameter.PrivatePublicMode = 0;
+                    Parameter.PrivatePublicMode = 1;
                     Parameter.TotalLength = 120 * 1000;
 
                     Parameter.SuggestDistanceWall = 100;
@@ -105,10 +105,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     //------
 
                     var createSR = new UserInteraction();
+                    PublicValue.Turning = 0;
                     createSR.PipelineB(dataQuery.RoomSet[0]);
                 }
 
+
                 var needUpdateSR = false;
+
                 if (ProcessedData.RegionList != null && ProcessedData.RegionList.Count > 0)
                 {
                     //检测sr和回路图块是否匹配,这里200是匹配不到房间的默认间距，可以修改
@@ -117,6 +120,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 if (needUpdateSR == true)
                 {
                     var updateSR = new UserInteraction();
+                    PublicValue.Turning = 1;
                     updateSR.PipelineC();
                 }
 

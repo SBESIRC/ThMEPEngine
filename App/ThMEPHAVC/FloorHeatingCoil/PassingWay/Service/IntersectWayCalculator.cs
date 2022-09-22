@@ -67,6 +67,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
             //        PassageShowUtils.ShowEntity(poly, index);
             //}
             ConvertToIntersectWay(index, polygon_points, turn_left);
+
+            //PassageShowUtils.ShowEntity(PassageWayUtils.BuildPolyline(shortest_way[index].poly));
+
             GetIntersectWayBuffer(index);
             SmoothShortestWay(index, turn_left);
             // 第二阶段相交测试
@@ -152,7 +155,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
                 intersect_region = MainRegionCalculator.GetMainRegion(last_way_poly, intersect_region, !turn_left);
                 //var last_way_buffer = PassageWayUtils.BufferWithHole(last_way.Buffer(1), 0.75 * buffer).First();
-                var last_way_buffer = last_way.Buffer(4);
+                var last_way_buffer = last_way.Buffer4();
                 var diff = intersect_region.ToNTSPolygon().Difference(last_way_buffer.ToNTSPolygon()).ToDbCollection().Cast<Polyline>();
                 last_way_buffer.Dispose();
                 last_way_poly.Dispose();
@@ -312,6 +315,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
                 if (!region.Contains(last_point))
                     return null;
+                line.Dispose();
+                line = new Line(polygon_points.Last(), last_point);
+                var diff = line.ToNTSGeometry().Difference(region.ToNTSPolygon());
+                if (diff.NumPoints != 0)
+                {
+                    line.Dispose();
+                    return null;
+                }
+
                 polygon_points.Add(last_point);
             }
 
@@ -347,7 +359,23 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     }
                 }
             }
-            return SmoothUtils.SmoothPoints(polygon_points, 1e-3);
+            polygon_points = SmoothUtils.SmoothPoints(polygon_points, 1e-3);
+            if (polygon_points.Count >= 3)
+            {
+                var dp0 = polygon_points[polygon_points.Count - 2] - polygon_points[polygon_points.Count - 1];
+                var dir = PassageWayUtils.GetDirBetweenTwoPoint(polygon_points[polygon_points.Count - 2], polygon_points[polygon_points.Count - 3]);
+                if (dir == pipe_inputs[index].end_dir && dp0.Length <= buffer / 4 + pipe_inputs[index].in_buffer)
+                {
+                    var ep = equispaced_segments[index].Last().EndPoint;
+                    var p = equispaced_segments[index].Last().GetClosePoint(polygon_points[polygon_points.Count - 3]);
+                    if (p != ep && p.DistanceTo(ep) < polygon_points.Last().DistanceTo(ep))
+                    {
+                        polygon_points.RemoveRange(polygon_points.Count - 2, 2);
+                        polygon_points[polygon_points.Count-1] = p;
+                    }
+                }
+            }
+            return polygon_points;
         }
         void ConvertToIntersectWay(int index, List<Point3d> polygon_points, bool turn_left)
         {
@@ -536,7 +564,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 var dp = target_points[1] - target_points[2];
                 if (dp.Length + pipe_inputs[index].in_buffer < buffer / 4 || dp.Length < pipe_inputs[index].in_buffer)
                 {
-                    if (pipe_inputs[index].in_buffer > buffer / 4 - 10 && buffs[2] == buffer / 4)
+                    if (pipe_inputs[index].in_buffer > buffer / 4 - 10 && buffs[2] == buffer / 4 || dp.Length < 10) 
                     {
                         target_points[3] += dp;
                         target_points.RemoveAt(1);

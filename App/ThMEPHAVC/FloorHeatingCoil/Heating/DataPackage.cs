@@ -120,6 +120,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public int ChangeSDis = 0; //
         static public int Clear0 = 1; //RoomBuffer修线
         static public int Clear1 = 1; //导向路径修线
+        static public int Turning = 0; //运行轮次
     }
 
     class Parameter

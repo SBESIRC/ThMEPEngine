@@ -260,9 +260,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
                                 if (out_axis < Math.Min(axis, other_axis) || out_axis > Math.Max(axis, other_axis)) 
                                 {
                                     var axis_point = dir % 2 == 0 ? new Point3d(pipe_inputs[index].pout.X, axis, 0) : new Point3d(axis, pipe_inputs[index].pout.Y, 0);
-                                    if (pipe_inputs[index].is_out_free == false ||
-                                        !pipe_inputs[index].check(axis_point, pipe_segments[index][i].pw, room_buffer))
-                                    {
+                                    //if (pipe_inputs[index].is_out_free == false ||
+                                    //    !pipe_inputs[index].check(axis_point, pipe_segments[index][i].pw, room_buffer))
+                                    //{
                                         if (i == 0 || pipe_segments[index][i].pw < pipe_inputs[index].out_buffer)
                                         {
                                             var new_ps = new PipeSegment();
@@ -271,7 +271,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                                             new_ps.end = dir % 2 == 0 ? axis_point.X : axis_point.Y;
                                             pipe_segments[index].Add(new_ps);
                                         }
-                                    }
+                                    //}
                                 }
                             }
                         }

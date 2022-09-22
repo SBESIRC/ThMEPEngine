@@ -176,20 +176,20 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         Point3d circleCenter = nowPipePoint.PointList[2] + vec0 / 2;
                         double radius = vec0.Length / 2;
 
-                        DrawUtils.ShowGeometry(circleCenter, "t0Input1", 170, lineWeightNum: 30, (int)radius, "C");
+                        DrawUtils.ShowGeometry(circleCenter, string.Format("{0}t0Input1", PublicValue.Turning), 170, lineWeightNum: 30, (int)radius, "C");
                         if (nowPipePoint.FreeDegree != 0) 
                         {
-                            DrawUtils.ShowGeometry(circleCenter, "t0Freedom", 20 , lineWeightNum: 30, (int)radius, "C");
+                            DrawUtils.ShowGeometry(circleCenter, string.Format("{0}t0Freedom", PublicValue.Turning), 20 , lineWeightNum: 30, (int)radius, "C");
                         }
                     }
 
                     Line drawLine = new Line(pipeInList[0].DoorLeft, pipeInList[0].DoorRight);
                     DrawUtils.ShowGeometry(drawLine, "t0Input1Line", 200, lineWeightNum: 30);
-                    DrawUtils.ShowGeometry(nowRegion.ClearedPl, "t0Region", 0, lineWeightNum: 30);
+                    DrawUtils.ShowGeometry(nowRegion.ClearedPl, string.Format("{0}t0Region", PublicValue.Turning), 0, lineWeightNum: 30);
 
                     Point3d ptDraw = nowRegion.ClearedPl.GetCenter() + new Vector3d(800, 0, 0);
                     string draw = ((int)nowRegion.SuggestDist).ToString();
-                    DrawUtils.ShowGeometry(ptDraw, draw, "t0SuggestDist", 10, 30, 300);
+                    DrawUtils.ShowGeometry(ptDraw, draw, string.Format("{0}t0SuggestDist", PublicValue.Turning), 10, 30, 300);
 
                     //////if (i == 16)
                     //////{
@@ -377,41 +377,43 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                     //pins.ForEach(x => DrawUtils.ShowGeometry(x, "l1Input", 7, lineWeightNum: 30, 30, "C"));
                     // pouts.ForEach(x => DrawUtils.ShowGeometry(x, "l1Input", 7, lineWeightNum: 30, 30, "C"));
+                    DrawUtils.ShowGeometry(nowRegion.ClearedPl, string.Format("{0}t0Region", PublicValue.Turning), 0, lineWeightNum: 30);
 
                     for (int a = 0; a < pipeInList.Count; a++)
                     {
-                        DrawUtils.ShowGeometry(pipeInList[a].CenterPoint, "t0Input2", 10, lineWeightNum: 30, (int)pipeInList[a].HalfPipeWidth, "C");
+                        DrawUtils.ShowGeometry(pipeInList[a].CenterPoint, string.Format("{0}t0Input2",PublicValue.Turning),  10, lineWeightNum: 30, (int)pipeInList[a].HalfPipeWidth, "C");
                         Line drawLine = new Line(pipeInList[a].DoorLeft, pipeInList[a].DoorRight);
                         //DrawUtils.ShowGeometry(drawLine, "l1Inpu21Line", 200, lineWeightNum: 30);
                         if (pipeInList[a].Freedom != 0)
                         {
-                            DrawUtils.ShowGeometry(pipeInList[a].CenterPoint, "t0Freedom", 0, lineWeightNum: 30, (int)pipeInList[a].HalfPipeWidth, "C");
+                            DrawUtils.ShowGeometry(pipeInList[a].CenterPoint, string.Format("{0}t0Freedom", PublicValue.Turning), 0, lineWeightNum: 30, (int)pipeInList[a].HalfPipeWidth, "C");
                         }
                         if (a == main_index)
                         {
-                            DrawUtils.ShowGeometry(pipeInList[a].CenterPoint, "t0MainPipeCircle", 1, lineWeightNum: 30, (int)pipeInList[a].HalfPipeWidth, "C");
+                            DrawUtils.ShowGeometry(pipeInList[a].CenterPoint, string.Format("{0}t0MainPipeCircle", PublicValue.Turning), 3, lineWeightNum: 30, (int)pipeInList[a].HalfPipeWidth, "C");
                         }
                     }
 
                     for (int a = 0; a < pipeOutList.Count; a++)
                     {
-                        DrawUtils.ShowGeometry(pipeOutList[a].CenterPoint, "t0Out2", 8, lineWeightNum: 30, (int)pipeOutList[a].HalfPipeWidth, "C");
+                        DrawUtils.ShowGeometry(pipeOutList[a].CenterPoint, string.Format("{0}t0Out2", PublicValue.Turning), 8, lineWeightNum: 30, (int)pipeOutList[a].HalfPipeWidth, "C");
                         Line drawLine = new Line(pipeOutList[a].DoorLeft, pipeOutList[a].DoorRight);
                         //DrawUtils.ShowGeometry(drawLine, "l1OutputLine", 200, lineWeightNum: 30);
                         if (pipeOutList[a].Freedom != 0)
                         {
-                            DrawUtils.ShowGeometry(pipeOutList[a].CenterPoint, "t0Freedom", 0, lineWeightNum: 30, (int)pipeOutList[a].HalfPipeWidth, "C");
+                            Line doorLine = new Line(pipeOutList[a].DoorLeft, pipeOutList[a].DoorRight);
+                            DrawUtils.ShowGeometry(pipeOutList[a].CenterPoint, string.Format("{0}t0Freedom", PublicValue.Turning), 0, lineWeightNum: 30, (int)pipeOutList[a].HalfPipeWidth, "C");
+                            DrawUtils.ShowGeometry(doorLine, string.Format("{0}t0DoorLine", PublicValue.Turning), 5, lineWeightNum: 30);
                         }
                         if (pipeOutList.Count == pipeInList.Count && a == main_index) 
                         {
-                            DrawUtils.ShowGeometry(pipeOutList[a].CenterPoint, "t0MainPipeCircle", 1, lineWeightNum: 30, (int)pipeOutList[a].HalfPipeWidth, "C");
+                            DrawUtils.ShowGeometry(pipeOutList[a].CenterPoint, string.Format("{0}t0MainPipeCircle", PublicValue.Turning), 3 ,lineWeightNum: 30, (int)pipeOutList[a].HalfPipeWidth, "C");
                         }
                     }
-                    DrawUtils.ShowGeometry(nowRegion.ClearedPl, "t0Region", 0, lineWeightNum: 30);
-
+                   
                     Point3d ptDraw = nowRegion.ClearedPl.GetCenter() + new Vector3d(800, 0, 0);
                     string draw = ((int)nowRegion.SuggestDist).ToString();
-                    DrawUtils.ShowGeometry(ptDraw, draw, "t0SuggestDist", 10, 30, 300);
+                    DrawUtils.ShowGeometry(ptDraw, draw, string.Format("{0}t0SuggestDist", PublicValue.Turning), 10, 30, 300);
                     
 
                     //备份
@@ -427,8 +429,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index,nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall,mode);
                     passagePipeGenerator.CalculatePipeline();
                     List<PipeOutput> nowOutputList = passagePipeGenerator.outputs;
-                    nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l4PassingPipe", x.pipe_id % 7 + 1, 30));
-                    nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.skeleton, "l4PassingSkeleton", x.pipe_id % 7 + 1, 30));
+                    nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, string.Format("{0}l4PassingPipe", PublicValue.Turning), x.pipe_id % 7 + 1, 30));
+                    nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.skeleton, string.Format("{0}l4PassingSkeleton", PublicValue.Turning), x.pipe_id % 7 + 1, 30));
 
 
 

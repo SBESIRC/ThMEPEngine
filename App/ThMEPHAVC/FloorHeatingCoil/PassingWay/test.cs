@@ -103,8 +103,19 @@ namespace ThMEPHVAC
                     var circle = acadDatabase.Element<Circle>(pout_result.ObjectId);
                     pipe_out_list.Add(new DrawPipeData(circle.Center, circle.Radius, pouts_freedom[i], i));
                 }
+                //// input pipe outs freedom
+                //for (int i = 0; i < out_pipe_num; i++)
+                //{
+                //    string str = "select out[" + i.ToString() + "]";
+                //    var pout_result = Active.Editor.GetEntity(str);
+                //    if (pout_result.Status != PromptStatus.OK)
+                //        return;
+                //    var line = acadDatabase.Element<Line>(pout_result.ObjectId);
+                //    pipe_out_list[i].DoorLeft = line.StartPoint;
+                //    pipe_out_list[i].DoorRight = line.EndPoint;
+                //}
 
-                double buffer = 600;
+                double buffer = 500;
                 double room_buffer = 100;
                 // core process
                 PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(room, pipe_in_list, pipe_out_list, main_index, buffer, room_buffer, 0);
