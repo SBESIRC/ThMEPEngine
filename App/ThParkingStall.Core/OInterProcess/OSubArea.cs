@@ -72,10 +72,58 @@ namespace ThParkingStall.Core.OInterProcess
                     sw.Close();
                     fs.Close();
 
-                    GA gA = new GA(Walls, VaildLanes, Buildings.Select(e => e.Clone()).ToList(), BuildingBounds.Select(e => e.Clone()).ToList(), Region);
-                    gA.Process();
-                    var newBuildings = gA.Buildings;
-                    var newbuildingBoxes = gA.BuildingBoxes;
+
+                    int modeRun = 0;//0原版，1遗传算法，2均质算法
+                    int PopulationSizeAVG = 100;//均值算法次数-推荐大于81
+                    int IterationCount = 10;//遗传算法代数
+                    int PopulationSize = 10;//均值算法种群数
+                    double MIN = -1000;
+                    double MAX = 1000;
+
+                    try
+                    {
+                        var para_path = dir + "\\ObstacleParas.txt";
+                        StreamReader sR = File.OpenText(para_path);
+                        var para = sR.ReadLine();
+                        var paras = para.Split(new char[] { '{', '}' }).ToList();
+                        var _modeRun = paras[1].Trim(' ');
+                        var _PopulationSizeAVG = paras[3].Trim(' ');
+                        var _IterationCount = paras[5].Trim(' ');
+                        var _PopulationSize = paras[7].Trim(' ');
+                        var _MIN = paras[9].Trim(' ');
+                        var _MAX = paras[11].Trim(' ');
+                        modeRun = int.Parse(_modeRun);
+                        PopulationSizeAVG = int.Parse(_PopulationSizeAVG);
+                        IterationCount = int.Parse(_IterationCount);
+                        PopulationSize = int.Parse(_PopulationSize);
+                        MIN = int.Parse(_MIN);
+                        MAX = int.Parse(_MAX);
+                    }
+                    catch { }
+
+                    var newBuildings = Buildings;
+                    var newbuildingBoxes = BuildingBounds;
+                    if (modeRun > 0)
+                    {
+
+                        GA gA = new GA(Walls, VaildLanes, Buildings.Select(e => e.Clone()).ToList(), BuildingBounds.Select(e => e.Clone()).ToList(), Region);
+                        gA.Max = MAX;
+                        gA.Min = MIN;
+                        if (modeRun == 1)
+                        {
+                            gA._RunGA = true;
+                            GA.PopulationSize = PopulationSize;
+                            GA.IterationCount = IterationCount;
+                        }
+                        else
+                        {
+                            GA.PopulationSizeAVG = PopulationSizeAVG;
+                            gA._RunGA = false;
+                        }
+                        gA.Process();
+                        newBuildings = gA.Buildings;
+                        newbuildingBoxes = gA.BuildingBoxes;
+                    }
 
                     obliqueMPartition = new ObliqueMPartition(Walls, VaildLanes, newBuildings, Region);
                     obliqueMPartition.OutputLanes = new List<LineSegment>();

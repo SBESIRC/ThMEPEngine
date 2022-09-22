@@ -15,6 +15,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
 {
     public class Gene
     {
+        public Gene()
+        {
+
+        }
         public Gene(double[]values)
         {
             Values=values;
@@ -38,14 +42,16 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
             Region = region;
             Count = buildingBoxes.Count;
         }
+        public bool _RunGA { get; set; }
         private List<LineString> Walls { get; set; }
         private List<LineSegment> VaildLanes { get; set; }
         public List<Polygon> Buildings { get; set; }
         public List<Polygon> BuildingBoxes { get; set; }
         private Polygon Region { get; set; }
 
-        public static int PopulationSize = 50;
-        public int IterationCount = 1;
+        public static int PopulationSizeAVG = 100;
+        public static int PopulationSize = 10;
+        public static int IterationCount = 10;
         public int SelectionSize = Math.Max(2, (int)(0.382 * PopulationSize));
         public int Max_SelectionSize = Math.Max(2, (int)(0.618 * PopulationSize));//最大保留数量0.618
         public double Max = 1000;
@@ -56,7 +62,14 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
         public int SMsize = Math.Max(1, (int)(0.618 * PopulationSize));//小变异比例
         public void Process()
         {
-            var solution = Run().First();
+            Gene solution = new Gene();
+            if (_RunGA)
+            {
+                solution= RunGA().First();
+            }
+            else
+                solution = RunAvg().First();
+
             UpdateObstacles(GeneToVector(solution));
             //CalParkings calParkings = new CalParkings(solution,Walls,VaildLanes,Buildings,BuildingBoxes,Region);
             //var final = calParkings.Cal();
@@ -91,7 +104,30 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
             }
             Buildings=obstacles;
         }
-        public List<Gene> Run()
+        public List<Gene> RunAvg()
+        {
+            var pop = CreateAvgPopulation(Count);
+            foreach (var solution in pop)
+            {
+                CalParkings calParkings = new CalParkings(solution, Walls, VaildLanes, Buildings.Select(e => e.Clone()).ToList(), BuildingBoxes.Select(e => e.Clone()).ToList(), Region);
+                solution.ParkingCount = calParkings.Cal();
+            }
+            pop = pop.OrderByDescending(e => e.ParkingCount).ToList();
+
+            var valStr = "";
+            var nums = pop.Select(e => e.ParkingCount).OrderByDescending(e => e).ToList();
+            nums.ForEach(e => valStr += e + ",");
+            if (valStr.Length > 0) valStr.Remove(valStr.Length - 1);
+            string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            FileStream fs = new FileStream(dir + "\\GAMonitor.txt", FileMode.Append);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine($"均质排布车位数{valStr}");
+            sw.Close();
+            fs.Close();
+
+            return pop;
+        }
+        public List<Gene> RunGA()
         {
             List<Gene> selected = new List<Gene>();
             var pop = CreateFirstPopulation(Count);
@@ -101,7 +137,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
             while (CurIteration++ < IterationCount)
             {
                 selected = Selection(pop, out int CurNums);
+
                 var st = selected.Select(e => e.ParkingCount).ToList();
+                
                 var valStr = "";
                 var nums = pop.Select(e => e.ParkingCount).OrderByDescending(e => e).ToList();
                 nums.ForEach(e => valStr += e + ",");
@@ -112,6 +150,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
                 sw.WriteLine($"第{CurIteration}代最大值:{CurNums}:{valStr}");
                 sw.Close();
                 fs.Close();
+
                 var temp_list = CreateNextGeneration(selected);
                 // 小变异
                 pop = temp_list[0];
@@ -275,6 +314,64 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.ObstacleIteration
                 rst.RemoveAt(rst.Count - 1);
             }
             return rst;
+        }
+        public List<Gene> CreateAvgPopulation(int count)
+        {
+            List<Gene> solutions = new List<Gene>();
+            int vectorPairCount = count;
+            if (vectorPairCount == 1)
+            {             
+                var stepCount = Math.Sqrt(PopulationSizeAVG);
+                var steps = new List<double>();
+                for (int i = 0; i < stepCount; i++)
+                {
+                    var value = Min + stepCount * i;
+                    steps.Add(value);
+                }
+                for (int i = 0; i < steps.Count; i++)
+                {
+                    for (int j = 0; j < steps.Count; j++)
+                    {
+                        double[] values = new double[] { steps[i],steps[j] };
+                        Gene gene = new Gene(values);
+                        solutions.Add(gene);
+                    }
+                }
+            }
+            else if(vectorPairCount == 2)
+            {
+                var stepCount = Math.Sqrt(PopulationSizeAVG);
+                stepCount=Math.Sqrt(stepCount);
+                var steps = new List<double>();
+                for (int i = 0; i < stepCount; i++)
+                {
+                    var value = Min + stepCount * i;
+                    steps.Add(value);
+                }
+                for (int i = 0; i < steps.Count; i++)
+                {
+                    for (int j = 0; j < steps.Count; j++)
+                    {
+                        for (int k = 0; k < steps.Count; k++)
+                        {
+                            for (int u = 0; u < steps.Count; u++)
+                            {
+                                double[] values = new double[] { steps[i], steps[j], steps[k], steps[u] };
+                                Gene gene = new Gene(values);
+                                solutions.Add(gene);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < PopulationSizeAVG; i++)
+                {
+                    solutions.Add(RandomChromosome(vectorPairCount));
+                }
+            }
+            return solutions;
         }
         public List<Gene> CreateFirstPopulation(int count)
         {
