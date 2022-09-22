@@ -36,15 +36,15 @@ namespace ThMEPTCH.CAD
                 results.Add(new ThRawIfcBuildingElementData()
                 {
                     Geometry = entity.GetTransformedCopy(matrix),
-                    Data = CreatStructureEntity(entity),
+                    Data = CreatStructureEntity(entity, matrix),
                 });
             }
             return results;
         }
 
-        private THStructureColumn CreatStructureEntity(Entity entity)
+        private THStructureColumn CreatStructureEntity(Entity entity, Matrix3d matrix)
         {
-            Polyline polyline = entity as Polyline;
+            Polyline polyline = entity.GetTransformedCopy(matrix) as Polyline;
             return new THStructureColumn()
             {
                 Outline = polyline,

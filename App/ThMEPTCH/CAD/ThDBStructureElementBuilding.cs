@@ -238,12 +238,12 @@ namespace ThMEPTCH.CAD
                 var objs = new DBObjectCollection();
                 if (beamBGInfo.IsNull())
                 {
-                    var pl = beamInfo.Outline.BufferPL(150)[0] as Polyline;
+                    var pl = beamInfo.Outline.BufferPL(100)[0] as Polyline;
                     objs = spatialIndex.SelectCrossingPolygon(pl);
                 }
                 else
                 {
-                    var pl1 = beamInfo.Outline.BufferPL(150)[0] as Polyline;
+                    var pl1 = beamInfo.Outline.BufferPL(100)[0] as Polyline;
                     var pl2 = beamBGInfo.Outline.BufferPL(150)[0] as Polyline;
                     objs = spatialIndex.SelectCrossingPolygon(pl1).Union(spatialIndex.SelectCrossingPolygon(pl2));
                 }
