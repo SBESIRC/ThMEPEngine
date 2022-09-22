@@ -14,6 +14,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.IO;
 using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
 using ThMEPTCH.PropertyServices.PropertyEnums;
@@ -1017,6 +1018,7 @@ namespace ThMEPTCH.Services
             railing.BuildElement.Height = 1200;
             railing.BuildElement.Width = width;
             railing.BuildElement.Outline = outlines.ToTCHPolyline();
+            railing.BuildElement.EnumMaterial = ThTextureMaterialManager.THRailing;
             return railing;
         }
 
