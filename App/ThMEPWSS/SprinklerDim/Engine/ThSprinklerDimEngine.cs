@@ -16,25 +16,31 @@ namespace ThMEPWSS.SprinklerDim.Engine
 {
     public class ThSprinklerDimEngine
     {
-        public static List<ThSprinklerDimension> LayoutDimEngine(ThSprinklerDimDataProcessService dataProcess, string printTag)
+        public static List<ThSprinklerDimension> LayoutDimEngine(ThSprinklerDimDataProcessService dataProcess, string printTag, out List<Point3d> xUnDimedPtsAll, out List<Point3d> yUnDimedPtsAll)
         {
             var dims = new List<ThSprinklerDimension>();
+            xUnDimedPtsAll = new List<Point3d>();
+            yUnDimedPtsAll = new List<Point3d>();
+
             var spIdx = BuildSpatialIdx(dataProcess);
 
-            for (int i = 0; i < dataProcess.Room.Count; i++ )
+            for (int i = 0; i < dataProcess.Room.Count; i++)
             {
                 var room = dataProcess.Room[i];
 
                 //try
                 //{
-                    var data = BuildRoomData(dataProcess, room, spIdx);
-                    if (data.SprinklerPt.Count == 0)
-                    {
-                        continue;
-                    }
-                    var roomDim = LayoutDimForRoom(data, printTag);
+                var data = BuildRoomData(dataProcess, room, spIdx);
+                if (data.SprinklerPt.Count == 0)
+                {
+                    continue;
+                }
+                var roomDim = LayoutDimForRoom(data, printTag, out var xUnDimedPts, out var yUnDimedPts);
 
-                    dims.AddRange(roomDim);
+                dims.AddRange(roomDim);
+                xUnDimedPtsAll.AddRange(xUnDimedPts);
+                yUnDimedPtsAll.AddRange(yUnDimedPts);
+
                 //}
                 //catch (Exception ex)
                 //{
@@ -87,7 +93,7 @@ namespace ThMEPWSS.SprinklerDim.Engine
         }
 
 
-        private static List<ThSprinklerDimension> LayoutDimForRoom(ThSprinklerDimRoomData data, string printTag)
+        private static List<ThSprinklerDimension> LayoutDimForRoom(ThSprinklerDimRoomData data, string printTag, out List<Point3d> xUnDimedPts, out List<Point3d> yUnDimedPts)
         {
             /////////////////////////plan A
             //// 给喷淋点分区
@@ -134,7 +140,7 @@ namespace ThMEPWSS.SprinklerDim.Engine
             ThSprinklerNetGroupListService.CutOffLinesCrossRoomOrWall(transNetList, mixRoomWall, mixRoomWallSI, printTag);
 
 
-            // 区域标注喷淋点
+            // 选出区域标注喷淋点
             ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
             ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mixRoomWallSI);
 
@@ -142,7 +148,7 @@ namespace ThMEPWSS.SprinklerDim.Engine
             // 生成靠参照物的标注点 + 往外拉标注
             List<Polyline> mixColumnWall = data.Column.Concat(data.Wall).ToList<Polyline>();
 
-            List<List<Point3d>> dimPtsList = ThSprinklerDimExtensionService.FindReferencePoint(transNetList, roomOut, mixColumnWall, data.AxisCurves, step, printTag, out var xUnDimedPts, out var yUnDimedPts);
+            List<List<Point3d>> dimPtsList = ThSprinklerDimExtensionService.FindReferencePoint(transNetList, roomOut, mixColumnWall, data.AxisCurves, step, printTag, out xUnDimedPts, out yUnDimedPts);
             List<ThSprinklerDimension> dims = ThSprinklerDimExtensionService.GenerateDimensionDirectionAndDistance(dimPtsList, roomOut, data.TchPipeText, mixColumnWall, ThDataTransformService.Change(data.TchPipe), printTag);
 
             return dims;

@@ -24,5 +24,8 @@
         public const string TCHTableName_TwtPipeDimStyle = "TwtPipeDimStyle"; //水管标注样式
         public const string TCHTableName_TwtPipe = "TwtPipe"; //水管
         public const string TCHTableName_TwtPipeValve = "TwtPipeValve"; //水管
+
+        public const string TCHTableName_TwtDimensionDim = "TwtDimensionDim"; //水系统，喷淋标注信息
+        public const string TCHTableName_TwtPublicList = "TwtPublicList"; //水系统，喷淋标注公共链表
     }
 }

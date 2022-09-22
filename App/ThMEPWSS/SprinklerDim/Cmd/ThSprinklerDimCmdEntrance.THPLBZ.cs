@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Operation.Relate;
 
+using AcHelper.Commands;
+using AcHelper;
 using Linq2Acad;
 
 using ThCADCore.NTS;
@@ -16,7 +19,6 @@ using ThMEPWSS.SprinklerDim.Data;
 using ThMEPWSS.SprinklerDim.Engine;
 using ThMEPWSS.SprinklerDim.Model;
 using ThMEPWSS.SprinklerDim.Service;
-
 
 namespace ThMEPWSS.SprinklerDim.Cmd
 {
@@ -58,6 +60,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                     TchPipeData = dataFactory.TchPipeData,
                     SprinklerPt = dataFactory.SprinklerPtData,
                     AxisCurvesData = dataFactory.AxisCurves,
+                    Transformer = transformer,
                 };
 
                 // dataQuery.Transform(transformer);
@@ -70,15 +73,25 @@ namespace ThMEPWSS.SprinklerDim.Cmd
         [CommandMethod("TIANHUACAD", "-THPLBZ", CommandFlags.Modal)]
         public void ThSprinklerDimNoUI()
         {
-            using (var cmd = new ThSprinklerDimCmd())
+            var vm = new ThSprinklerDimViewModel();
+            vm.UseTCHDim = 1;
+
+            using (var cmd = new ThSprinklerDimCmd(vm))
             {
                 cmd.Execute();
+                ThMEPWSS.Common.Utils.FocusToCAD();
+                if (vm.UseTCHDim == 1)
+                {
+                    Active.Document.SendCommand("THTCHPIPIMP" + "\n");
+                    ThMEPWSS.Common.Utils.FocusToCAD();
+                    //vm.DeleteDBFile();
+                }
             }
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThSprinklerDimTestDim", CommandFlags.Modal)]
-        public void ThSprinklerDimTestDim()
+        [CommandMethod("TIANHUACAD", "ThSprinklerDimTestDimCAD", CommandFlags.Modal)]
+        public void ThSprinklerDimTestDimCAD()
         {
 
             var pts = new List<Point3d>();
@@ -90,8 +103,27 @@ namespace ThMEPWSS.SprinklerDim.Cmd
 
             var dim = new ThSprinklerDimension(pts, dir, dist);
 
-            var caddim = ThInsertDimToDBService.ToCADDim(new List<ThSprinklerDimension>() { dim });
-            ThInsertDimToDBService.InsertDim(caddim);
+            ThSprinklerDimInsertService.ToCADDim(new List<ThSprinklerDimension>() { dim });
+
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "ThSprinklerDimTestDimTCH", CommandFlags.Modal)]
+        public void ThSprinklerDimTestDimTCH()
+        {
+            var vm = new ThSprinklerDimViewModel();
+            vm.UseTCHDim = 1;
+
+            var pts = new List<Point3d>();
+            pts.Add(new Point3d(0, 0, 0));
+            pts.Add(new Point3d(1000, 1000, 0));
+            pts.Add(new Point3d(3000, 3000, 0));
+            var dir = (pts.Last() - pts.First()).GetNormal().RotateBy((-1) * 90 * System.Math.PI / 180, Vector3d.ZAxis);
+            var dist = 800;
+
+            var dim = new ThSprinklerDimension(pts, dir, dist);
+
+            ThSprinklerDimInsertService.ToTCHDim(new List<ThSprinklerDimension>() { dim }, vm.TCHDBPath);
         }
     }
 }

@@ -1,0 +1,57 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiSprinklerDim"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+             mc:Ignorable="d" 
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             Title="喷淋标注布置"
+             WindowStartupLocation="CenterScreen" ResizeMode="NoResize" SizeToContent="Height"
+             Width="200"
+             Closing="Window_Closing"
+             >
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <local:TrueFalseConverter x:Key="TrueFalseConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="5 0 5 10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions >
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
+               Margin="0 10 0 0" Height="24"
+               Content="使用标注："/>
+        <RadioButton Grid.Row="1" Grid.Column="0" 
+                     Margin="5 0 0 0" Height="24"
+            GroupName="rbUseTCHDim" Content="天正标注"
+            IsChecked="{Binding UseTCHDim,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"
+        />
+        <RadioButton Grid.Row="1" Grid.Column="1"
+                        Height="24"
+            GroupName="rbUseTCHDim" Content="CAD标注"
+            IsChecked="{Binding UseTCHDim,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"
+        />
+
+        <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center"    
+                Margin="10 10 5 0"
+                  Height="24" Width="60"
+            Content="视频教程" Command="{Binding SprinklerDimHelpCmd}"/>
+
+        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center"   
+                Margin="10 10 5 0"
+                  Height="24" Width="60"
+            Content="确定" Command="{Binding SprinklerDimLayoutCmd}"/>
+
+
+    </Grid>
+
+</cus:ThCustomWindow>

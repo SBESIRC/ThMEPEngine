@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
 
 using ThCADCore.NTS;
 using AcHelper;
@@ -30,20 +31,16 @@ namespace ThMEPWSS.SprinklerDim.Cmd
 {
     public class ThSprinklerDimCmd : ThMEPBaseCommand, IDisposable
     {
-        public ThSprinklerDimCmd()
+        ThSprinklerDimViewModel ViewModel;
+        public ThSprinklerDimCmd(ThSprinklerDimViewModel vm)
         {
             InitialCmdInfo();
-            InitialSetting();
-
+            ViewModel = vm;
         }
         private void InitialCmdInfo()
         {
             ActionName = "标注";
             CommandName = "THPLBZ";
-        }
-        private void InitialSetting()
-        {
-
         }
 
         public override void SubExecute()
@@ -59,19 +56,38 @@ namespace ThMEPWSS.SprinklerDim.Cmd
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
 
-                var frames = ThSelectFrameUtil.GetRoomFrame();
+                var frames = new Point3dCollection();
+                if (debugSwitch)
+                {
+                    frames = ThSelectFrameUtil.GetRoomFrame();
+                }
+                else
+                {
+                    frames = ThSelectFrameUtil.GetFrame();
+                }
+
                 if (frames.Count == 0)
                 {
                     return;
                 }
 
-                var printTag = ThMEPWSSUtils.SettingString("");
+                var printTag = "";
+
+                if (debugSwitch)
+                {
+                    printTag = ThMEPWSSUtils.SettingString("");
+                }
+
+                var layer = new List<string>() { ThSprinklerDimCommon.Layer_Dim, ThSprinklerDimCommon.Layer_UnTagX, ThSprinklerDimCommon.Layer_UnTagY };
+                var dimST = new List<string>() { ThSprinklerDimCommon.Style_DimCAD };
+                ThSprinklerDimInsertService.LoadBlockLayerToDocument(acadDatabase.Database, new List<string>(), layer, dimST);
+                ThSprinklerDimInsertService.SetCurrentLayer(ThSprinklerDimCommon.Layer_Dim);
 
                 //转换器
-                //var transformer = ThMEPWSSUtils.GetTransformer(frames);
-                var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
-
+                var transformer = ThMEPWSSUtils.GetTransformer(frames);
+                //var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
                 //提取数据
                 var dataFactory = new ThSprinklerDimDataFactory()
@@ -88,44 +104,34 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                     TchPipeData = dataFactory.TchPipeData,
                     SprinklerPt = dataFactory.SprinklerPtData,
                     AxisCurvesData = dataFactory.AxisCurves,
+                    Transformer = transformer,
                 };
 
-                // dataQuery.Transform(transformer);
-                //dataProcess.ProcessArchitechData();
-                //dataProcess.RemoveDuplicateSprinklerPt();
-                //dataProcess.CreateTchPipe();
-                //dataProcess.ProjectOntoXYPlane();
                 dataProcess.ProcessData();
                 dataProcess.Print();
 
-                //// 给喷淋点分区
-                //var netList = ThSprinklerDimEngine.GetSprinklerPtNetwork(dataProcess.SprinklerPt,dataProcess.TchPipe, printTag, out var step);
-                //netList = ThSprinklerNetGroupListService.ReGroupByRoom(netList, dataProcess.Room, out var roomsOut, printTag);
-                //var transNetList = ThOptimizeGroupService.GetSprinklerPtOptimizedNet(netList, step, printTag);
+                var dims = ThSprinklerDimEngine.LayoutDimEngine(dataProcess, printTag, out var xUnDimedPtsAll, out var yUnDimedPtsAll);
 
-                //List<Polyline> mixRoomWall = new List<Polyline>();
-                //mixRoomWall.AddRange(dataProcess.Room);
-                //mixRoomWall.AddRange(dataProcess.Wall);
+                dims.ForEach(x => x.Reset(transformer));
+                xUnDimedPtsAll = xUnDimedPtsAll.Select(x => transformer.Reset(x)).ToList();
+                yUnDimedPtsAll = yUnDimedPtsAll.Select(x => transformer.Reset(x)).ToList();
 
-                //ThSprinklerNetGroupListService.CutOffLinesCrossWall(transNetList, mixRoomWall, out var mixRoomWallSI, printTag);
-                //ThSprinklerNetGroupListService.GenerateCollineation(ref transNetList, step, printTag);
+                if (debugSwitch)
+                {
+                    ThSprinklerDimInsertService.ToDebugDim(dims, printTag);
+                }
 
-                //// 区域标注喷淋点
-                //ThSprinklerDimensionService.GenerateDimension(transNetList, step, printTag, mixRoomWallSI);
+                if (ViewModel.UseTCHDim == 1)
+                {
+                    ThSprinklerDimInsertService.ToTCHDim(dims, ViewModel.TCHDBPath);
+                }
+                else if (ViewModel.UseTCHDim == 0)
+                {
+                    ThSprinklerDimInsertService.ToCADDim(dims);
+                }
 
-                //List<Polyline> mixColumnWall = new List<Polyline>();
-                //mixColumnWall.AddRange(dataProcess.Column);
-                //mixColumnWall.AddRange(dataProcess.Wall);
-
-
-                //// 生成靠参照物的标注点
-                //List<ThSprinklerDimension> dims = ThSprinklerDimExtensionService.GenerateReferenceDimensionPoint(transNetList, roomsOut, mixColumnWall, ThDataTransformService.Change(dataProcess.AxisCurves), dataProcess.TchPipeText, ThDataTransformService.Change(dataProcess.TchPipe), printTag, step);
-
-                var dims = ThSprinklerDimEngine.LayoutDimEngine(dataProcess, printTag);
-
-                ThInsertDimToDBService.InsertDim(ThInsertDimToDBService.ToCADDim(dims));
-
-
+                ThSprinklerDimInsertService.InsertUnTagPt(xUnDimedPtsAll, true);
+                ThSprinklerDimInsertService.InsertUnTagPt(yUnDimedPtsAll, false);
             }
         }
     }

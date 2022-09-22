@@ -29,6 +29,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             for (int j = 0; j < transNetList.Count; j++)
             {
                 FicPts.Add(new List<int>());
+                //一个图 【 一个线 【一个点【ThSprinklerDimGroup】】
                 List<List<List<ThSprinklerDimGroup>>> XDimension = new List<List<List<ThSprinklerDimGroup>>>();
                 List<List<List<ThSprinklerDimGroup>>> YDimension = new List<List<List<ThSprinklerDimGroup>>>();
                 for (int i = 0; i < transNetList[j].PtsGraph.Count; i++)
@@ -109,8 +110,10 @@ namespace ThMEPWSS.SprinklerDim.Service
             List<int> EdgeDim = new List<int>();
             dims = new List<int>();
             List<int> longestDim = GetLongestLine(collinearation);
+            //最小x的点的组（index）
             List<int> minmarks = new List<int>();
             List<int> maxmarks = new List<int>();
+            //用于存储边缘or最长的标注线
             List<int> minDim = new List<int>();
             List<int> maxDim = new List<int>();
 
@@ -131,6 +134,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 foreach (int i in collinearation[p])
                 {
                     if (minmarks.Contains(i) && !maxmarks.Contains(i)) linecount += 2;
+                    //只有单点才会同时存在min max里，这种情况不计算在内
                     else if (minmarks.Contains(i) && maxmarks.Contains(i)) linecount += 0;
                     else
                         linecount += 1;
@@ -165,6 +169,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                 else longcount += 2;
             }
 
+            //权重优先度
+            //min max优先取
             if (mincount > longcount && mincount > maxcount)
             {
                 dims = minDim;
@@ -177,6 +183,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
             else if (maxcount > longcount && maxcount == mincount)
             {
+                //边缘相等时根据xy取左边上边
                 if (!isXAxis)
                 {
                     dims = minDim;
@@ -206,7 +213,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="group"></param>
         /// <param name="collineation"></param>
         /// <param name="anotherCollineation"></param>
-        /// <param name="dim"></param>
+        /// <param name="dim">边缘或最长线</param>
         /// <param name="step"></param>
         /// <param name="isXAxis"></param>
         /// <param name="walls"></param>
@@ -214,6 +221,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         private static List<List<ThSprinklerDimGroup>> AddDimensions(ThSprinklerNetGroup group, List<List<int>> collineation, List<List<int>> anotherCollineation, List<int> dim, double step, bool isXAxis, ThCADCoreNTSSpatialIndex walls)
         {
             bool[] isDimensioned = Enumerable.Repeat(false, anotherCollineation.Count).ToArray();
+            //一个组里的【一组点的index（dim)】
             List<List<ThSprinklerDimGroup>> resDims = new List<List<ThSprinklerDimGroup>>();
             CheckDimensions(dim, anotherCollineation, ref isDimensioned);
             while (isDimensioned.Contains(false))
@@ -223,6 +231,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 List<ThSprinklerDimGroup> DimedPtNotRemoved = new List<ThSprinklerDimGroup>();
                 List<ThSprinklerDimGroup> DimedPtRemoved = new List<ThSprinklerDimGroup>();
 
+                //找最长
                 for (int i = 0; i < anotherCollineation.Count; i++)
                 {
                     if (!isDimensioned[i])
@@ -243,6 +252,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                     }
                 }
 
+                //判断比例决定，标注是整根还是打断
                 double Prop = (double)DimedPtRemoved.Count / DimedPtNotRemoved.Count;
                 if (Prop <= 0.5)
                 {

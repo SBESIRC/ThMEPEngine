@@ -278,6 +278,16 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
+        /// <summary>
+        /// ptIndex在当前图里的共线的组
+        /// </summary>
+        /// <param name="isContained"></param>
+        /// <param name="ptIndex"></param>
+        /// <param name="pts"></param>
+        /// <param name="graph"></param>
+        /// <param name="isXAxis"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
         private static List<int> GetCollineationGroup(ref bool[] isContained, int ptIndex, List<Point3d> pts, ThSprinklerGraph graph, bool isXAxis, double tolerance = 45.0)
         {
             if (graph.SearchNodeIndex(ptIndex) == -1)
@@ -314,6 +324,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 nodeIndexs = tmp;
             }
 
+            //假设x的情况下，一根共线的组y值从小到大排序
             collineation.Sort((x, y) => ThCoordinateService.GetOriginalValue(pts[x], !isXAxis).CompareTo(ThCoordinateService.GetOriginalValue(pts[y], !isXAxis)));
             return collineation;
         }
@@ -322,6 +333,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         /// <summary>
         /// 生成共线且在误差内的组，共线不相连的两组，若最近距离在误差内，合成一组
+        /// 补回一些 【一个graph】里【因为连接关系不大于1/3】但是 满足 (1.5倍步长）&&（共线<45）
         /// </summary>
         /// <param name="transNetList"></param>
         /// <param name="step"></param>

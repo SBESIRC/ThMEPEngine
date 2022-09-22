@@ -6,109 +6,30 @@ using System.Threading.Tasks;
 using System.IO;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Colors;
+using AcHelper;
 using Linq2Acad;
 using ThCADExtension;
+using ThMEPEngineCore.Diagnostics;
 
+using ThMEPTCH.TCHDrawServices;
+using ThMEPTCH.Model;
 using ThMEPWSS.SprinklerDim.Model;
-using Autodesk.AutoCAD.Colors;
+using Autodesk.AutoCAD.ApplicationServices;
+using Dreambuild.AutoCAD;
+using DotNetARX;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
-    //internal class ThInsertDimToDBTchService
-    //{
-    //    private THMEPSQLiteServices sqlHelper;
-    //    string curDbPath = "";
-    //    public ThInsertDimToDBTchService()
-    //    {
-    //        curDbPath = Path.GetTempPath() + "TG20.db";
-    //        sqlHelper = new THMEPSQLiteServices(curDbPath);
-
-    //    }
-    //    public void InsertDimToDB(List<ThSprinklerDimension> dims)
-    //    {
-    //        foreach (var dimPts in dims)
-    //        {
-    //            var segStartId = InsertDimPtsToDB(dimPts.DimPts);
-    //            InsertDimStartPtToDB(dimPts.DimPts, segStartId, dimPts.Distance, 100);
-    //        }
-    //    }
-
-    //    private int InsertDimPtsToDB(List<Point3d> dim)
-    //    {
-    //        var startId = GetMaxSegId("DimSegments") + 1;
-
-    //        for (int i = 0; i < dim.Count - 1; i++)
-    //        {
-    //            var id = startId + i;
-    //            var nextId = id + 1;
-    //            var dist = dim[i + 1].DistanceTo(dim[i]);
-    //            if (i == dim.Count - 2)
-    //            {
-    //                nextId = -1;
-    //            }
-    //            InsertDimSegmentSQL(id, nextId, dist);
-    //        }
-    //        return startId;
-    //    }
-
-    //    /// <summary>
-    //    /// 找最大id
-    //    /// </summary>
-    //    /// <returns></returns>
-    //    private int GetMaxSegId(string tableName)
-    //    {
-    //        int i = -1;
-    //        var sql = string.Format(@"select IFNULL(max(id),-1) from {0}", tableName);
-
-    //        var dt = sqlHelper.GetTable(sql);
-    //        i = (int)dt.Rows[0][0];
-    //        return i;
-    //    }
-
-    //    /// <summary>
-    //    /// id:本点的id
-    //    /// nextID:下一个点的id 如果是-1，则证明这个标注点是最后一个点
-    //    /// segment:到下一个点的距离
-    //    /// </summary>
-    //    /// <param name="id"></param>
-    //    /// <param name="nextid"></param>
-    //    /// <param name="dist"></param>
-    //    private void InsertDimSegmentSQL(int id, int nextid, double dist)
-    //    {
-    //        var sql = string.Format($"INSERT INTO {0} (id, NextSegmentID, Segment) VALUES (" +
-    //                                                $"{1},{2},{3})", "DimSegments",
-    //                                                id.ToString(), nextid.ToString(), dist.ToString());
-
-
-    //        sqlHelper.ExecuteNonQuery(sql);
-
-    //    }
-
-
-    //    private void InsertDimStartPtToDB(List<Point3d> dim, int SegId, double dist2Line, int scale)
-    //    {
-    //        var startId = GetMaxSegId("DimPt2Pts") + 1;
-    //        var rotationR = Vector3d.XAxis.GetAngleTo(dim.Last() - dim.First(), Vector3d.ZAxis);
-
-    //        InsertDimPt2PtsSQL(dim[0], startId, SegId, rotationR, dist2Line, scale);
-    //    }
-    //    private void InsertDimPt2PtsSQL(Point3d startPt, int startId, int SegId, double rotation, double dist2Line, int scale)
-    //    {
-    //        var sql = string.Format(@"INSERT INTO {0} (id, SegmentID, DimStyle, Location, Rotation, Dist2DimLine, Pscale) VALUES " +
-    //                                    @"({1},{2},'{3}','{""X"":{4},""Y"":{5},""Z"":0.0}',{6},{7},{8})",
-    //                         "DimPt2Pts", startId.ToString(), SegId.ToString(), "_TCH_ARCH",
-    //                         startPt.X.ToString(), startPt.Y.ToString(), rotation.ToString(), dist2Line.ToString(), scale.ToString());
-
-
-    //        sqlHelper.ExecuteNonQuery(sql);
-
-
-    //    }
-    //}
-
-    public static class ThInsertDimToDBService
+    public static class ThSprinklerDimInsertService
     {
-        public static List<RotatedDimension> ToCADDim(List<ThSprinklerDimension> dims)
+        public static void ToCADDim(List<ThSprinklerDimension> dims)
+        {
+            var cadDim = DimModelToCADDim(dims);
+            InsertDim(cadDim);
+        }
+
+        private static List<RotatedDimension> DimModelToCADDim(List<ThSprinklerDimension> dims)
         {
             var cadDim = new List<RotatedDimension>();
             foreach (var dim in dims)
@@ -127,6 +48,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                     newDim.DimLinePoint = dimBasePt;
                     newDim.Rotation = rotation;
                     newDim.Dimtxt = 350;
+                    newDim.Dimscale = 1;
                     cadDim.Add(newDim);
                 }
             }
@@ -134,7 +56,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             return cadDim;
         }
 
-        public static void InsertDim(List<RotatedDimension> dims)
+        private static void InsertDim(List<RotatedDimension> dims)
         {
             if (dims == null || dims.Count() == 0)
             {
@@ -143,10 +65,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                acadDatabase.Database.ImportLayer(ThSprinklerDimCommon.Layer_Dim);
-                acadDatabase.Database.ImportDimtype(ThSprinklerDimCommon.Style_Dim);
-
-                var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(ThSprinklerDimCommon.Style_Dim, acadDatabase.Database);
+                var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(ThSprinklerDimCommon.Style_DimCAD, acadDatabase.Database);
 
                 for (int i = 0; i < dims.Count(); i++)
                 {
@@ -161,77 +80,175 @@ namespace ThMEPWSS.SprinklerDim.Service
             }
         }
 
-        private static void ImportDimtype(this Database database, string name, bool replaceIfDuplicate = false)
+
+        public static void ToTCHDim(List<ThSprinklerDimension> dims,string tchDBPath)
         {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+            var dbDimsModel = DimToDBDimModel(dims);
+
+            var tchDrawSprinklerDimService = new TCHDrawSprinklerDimService(tchDBPath);
+            tchDrawSprinklerDimService.Init(dbDimsModel);
+            tchDrawSprinklerDimService.DrawExecute(false, true);
+
+        }
+
+        private static List<ThTCHSprinklerDim> DimToDBDimModel(List<ThSprinklerDimension> dims)
+        {
+            var tchDimModeList = new List<ThTCHSprinklerDim>();
+
+            foreach (var item in dims)
             {
-                var item = blockDb.DimStyles.ElementOrDefault(name);
-                if (item != null)
+                if (item.DimPts.Count() == 0)
                 {
-                    currentDb.DimStyles.Import(item, replaceIfDuplicate);
+                    continue;
+                }
+
+                var lineDir = (item.DimPts.Last() - item.DimPts.First()).GetNormal();
+                var rotation = Vector3d.XAxis.GetAngleTo(lineDir, Vector3d.ZAxis);
+                var distDir = Math.Round(Math.Sin(lineDir.GetAngleTo(item.Dirrection, Vector3d.ZAxis))); //左 1 右-1
+                double dist = distDir * item.Distance;
+
+                var wct2ucs = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+                var anglew2c = Vector3d.XAxis.GetAngleTo(wct2ucs, Vector3d.ZAxis);
+                var layoutRotation = anglew2c * 180 / Math.PI;
+                var ptDist = new List<double>();
+                for (int i = 0; i < item.DimPts.Count - 1; i++)
+                {
+                    ptDist.Add(item.DimPts[i].DistanceTo(item.DimPts[i + 1]));
+                }
+
+
+                var tchDim = new ThTCHSprinklerDim();
+                tchDim.FirstPoint = item.DimPts.First();
+                tchDim.Rotation = rotation;
+                tchDim.Scale = 100;
+                tchDim.Dist2DimLine = dist / tchDim.Scale;
+                tchDim.LayoutRotation = layoutRotation;
+                tchDim.SegmentValues.AddRange(ptDist);
+                tchDim.System = "喷淋";
+
+                tchDimModeList.Add(tchDim);
+            }
+
+            return tchDimModeList;
+        }
+
+        public static void InsertUnTagPt(List<Point3d> unTagPt, bool isX)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var layer = ThSprinklerDimCommon.Layer_UnTagX;
+                if (isX == false)
+                {
+                    layer = ThSprinklerDimCommon.Layer_UnTagY;
+                }
+
+                foreach (var pt in unTagPt)
+                {
+                    var printItem = new Circle(pt, new Vector3d(0, 0, 1), 500);
+
+                    printItem.Layer = layer;
+                    acadDatabase.ModelSpace.Add(printItem);
                 }
             }
         }
 
-        private static void ImportLayer(this Database database, string layerName, string TemplateName = "", bool replaceIfDuplicate = true)
+        /// <summary>
+        /// debug mode快速看结果
+        /// </summary>
+        /// <param name="dims"></param>
+        /// <param name="printTag"></param>
+        public static void ToDebugDim(List<ThSprinklerDimension> dims, string printTag)
         {
+            foreach (var dim in dims)
+            {
+                var p1 = dim.DimPts.First();
+                var p2 = dim.DimPts.Last();
+
+                p1 = p1 + dim.Dirrection * dim.Distance;
+                p2 = p2 + dim.Dirrection * dim.Distance;
+
+                var line = new Line(p1, p2);
+                DrawUtils.ShowGeometry(line, string.Format("l6finalDim{0}", printTag), 2, 30);
+
+                foreach (var pt in dim.DimPts)
+                {
+                    var ptprint = pt + dim.Dirrection * dim.Distance;
+                    DrawUtils.ShowGeometry(ptprint, string.Format("l6finalDim{0}", printTag), 2, r: 30);
+                }
+            }
+        }
+
+        public static void LoadBlockLayerToDocument(Database database, List<string> blockNames, List<string> layerNames, List<string> DimSytle)
+        {
+            //插入模版图块时调用了WblockCloneObjects方法。需要之后做QueueForGraphicsFlush更新transaction。并且最后commit此transaction
+            //参考
+            //https://adndevblog.typepad.com/autocad/2015/01/using-wblockcloneobjects-copied-modelspace-entities-disappear-in-the-current-drawing.html
+
+            using (Transaction transaction = database.TransactionManager.StartTransaction())
+            {
+                LoadBlockLayerToDocumentWithoutTrans(database, blockNames, layerNames, DimSytle);
+                transaction.TransactionManager.QueueForGraphicsFlush();
+                transaction.Commit();
+            }
+        }
+
+        private static void LoadBlockLayerToDocumentWithoutTrans(Database database, List<string> blockNames, List<string> layerNames, List<string> DimSytle)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            {
+                //解锁0图层，后面块有用0图层的
+                DbHelper.EnsureLayerOn("0");
+                DbHelper.EnsureLayerOn("DEFPOINTS");
+            }
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-
-                if (TemplateName != "")
+                foreach (var item in blockNames)
                 {
-                    var tempLayer = blockDb.Layers.ElementOrDefault(TemplateName);
-                    Color color = Color.FromColorIndex(ColorMethod.ByLayer, (short)3);
-                    if (tempLayer != null)
+                    if (string.IsNullOrEmpty(item))
+                        continue;
+                    var block = blockDb.Blocks.ElementOrDefault(item);
+                    if (null == block)
+                        continue;
+                    currentDb.Blocks.Import(block, true);
+                }
+
+                foreach (var item in layerNames)
+                {
+                    if (string.IsNullOrEmpty(item))
+                        continue;
+                    var layer = blockDb.Layers.ElementOrDefault(item);
+                    if (null == layer)
+                        continue;
+                    currentDb.Layers.Import(layer, true);
+
+                    LayerTools.UnLockLayer(database, item);
+                    LayerTools.UnFrozenLayer(database, item);
+                    LayerTools.UnOffLayer(database, item);
+                }
+
+                foreach (var item in DimSytle)
+                {
+                    if (string.IsNullOrEmpty(item))
+                        continue;
+
+                    var itemTemplate = blockDb.DimStyles.ElementOrDefault(item);
+                    if (item != null)
                     {
-                        color = tempLayer.Color;
+                        currentDb.DimStyles.Import(itemTemplate, true);
                     }
-                    var newLayer = CreateLayer(layerName, color, replaceIfDuplicate);
-                }
-                else
-                {
-                    currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), replaceIfDuplicate);
-                }
-
-                LayerTableRecord layer = currentDb.Layers.Element(layerName, true);
-                if (layer != null)
-                {
-                    layer.UpgradeOpen();
-                    layer.IsOff = false;
-                    layer.IsFrozen = false;
-                    layer.IsLocked = false;
-                    layer.DowngradeOpen();
                 }
             }
         }
-        private static LayerTableRecord CreateLayer(string aimLayer, Color color, bool replaceIfDuplicate)
+
+        public static void SetCurrentLayer(string layer)
         {
-            LayerTableRecord layerRecord = null;
-            using (var db = AcadDatabase.Active())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                layerRecord = db.Layers.ElementOrDefault(aimLayer);
-                // 创建新的图层
-                if (layerRecord == null)
-                {
-                    layerRecord = db.Layers.Create(aimLayer);
-                    layerRecord.Color = color;
-                }
-                layerRecord.UpgradeOpen();
-                if (replaceIfDuplicate == true)
-                {
-                    layerRecord.Color = color;
-                }
-                layerRecord.IsPlottable = false;
-                layerRecord.DowngradeOpen();
+                LayerTools.SetCurrentLayer(acadDatabase.Database, layer);
+                acadDatabase.Database.Cecolor = Color.FromColorIndex(ColorMethod.ByColor, (short)ColorIndex.BYLAYER);
             }
 
-            return layerRecord;
         }
-
-
-
-
     }
 }

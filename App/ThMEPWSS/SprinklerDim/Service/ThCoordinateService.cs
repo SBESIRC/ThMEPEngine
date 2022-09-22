@@ -20,6 +20,13 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
+        /// <summary>
+        /// 之后需要考虑ucs
+        /// </summary>
+        /// <param name="fromOrigin"></param>
+        /// <param name="toOrigin"></param>
+        /// <param name="angle"></param>
+        /// <returns></returns>
         public static Matrix3d GetCoordinateTransformer(Point3d fromOrigin, Point3d toOrigin, Double angle)
         {
             while(angle > Math.Abs(angle - Math.PI / 2))

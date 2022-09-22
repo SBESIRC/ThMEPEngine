@@ -444,5 +444,25 @@ namespace TianHua.Plumbing.WPF.UI.UI
             uiLCKX = new uiStoreyFrame();
             AcadApp.ShowModelessWindow(uiLCKX);
         }
+
+        /// <summary>
+        /// 喷淋标注
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THPLBZ", CommandFlags.Modal)]
+        public void THPLBZ()
+        {
+            if (uiSprinklerDim.Instance != null && uiSprinklerDim.Instance.IsLoaded)
+            {
+                if (!uiSprinklerDim.Instance.IsVisible)
+                {
+                    uiSprinklerDim.Instance.Show();
+                }
+                return;
+            }
+
+            uiSprinklerDim.Instance.WindowStartupLocation =
+                System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(uiSprinklerDim.Instance);
+        }
     }
 }

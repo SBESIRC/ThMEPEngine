@@ -104,6 +104,7 @@
     <Compile Include="Engine\ThTCHCableCarrierSegmentExtractionVisitor.cs" />
     <Compile Include="Model\ThTCHCableCarrierFitting.cs" />
     <Compile Include="Model\ThTCHCableCarrierSegment.cs" />
+    <Compile Include="Model\ThTCHSprinklerDim.cs" />
     <Compile Include="PropertyServices\EntityProperties\DescendingPropertyService.cs" />
     <Compile Include="PropertyServices\EntityProperties\HolePropertyService.cs" />
     <Compile Include="PropertyServices\EntityProperties\RailingPropertyService.cs" />
@@ -231,6 +232,7 @@
     <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureSlabHatch.cs" />
     <Compile Include="TCHArchDataConvert\THStructureEntity\THStructureWall.cs" />
     <Compile Include="TCHDrawServices\TCHDrawCableTrayService.cs" />
+    <Compile Include="TCHDrawServices\TCHDrawSprinklerDimService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawTwtPipeService.cs" />
     <Compile Include="TCHDrawServices\TCHDrawServiceBase.cs" />
     <Compile Include="TCHDrawServices\TCHDrawSprinklerService.cs" />
@@ -247,11 +249,13 @@
     <Compile Include="TCHTables\TCHTgPublicList.cs" />
     <Compile Include="TCHTables\TCHTgSymbMultiLeader.cs" />
     <Compile Include="TCHTables\TCHTwtBlock.cs" />
+    <Compile Include="TCHTables\TCHTwtDimensionDim.cs" />
     <Compile Include="TCHTables\TCHTwtEquipment.cs" />
     <Compile Include="TCHTables\TCHTwtPipe.cs" />
     <Compile Include="TCHTables\TCHTwtPipeDimStyle.cs" />
     <Compile Include="TCHTables\TCHTwtPipeValve.cs" />
     <Compile Include="TCHTables\TCHTwtPoint.cs" />
+    <Compile Include="TCHTables\TCHTwtPublicList.cs" />
     <Compile Include="TCHTables\TCHTwtSprinkler.cs" />
     <Compile Include="TCHTables\TCHTwtVector.cs" />
     <Compile Include="TCHTables\TCHTwtVerticalPipe.cs" />
