@@ -13,8 +13,8 @@
                     Height="500"
                     MinWidth="400"
                     MinHeight="500"
-                    MaxWidth="500"
-                    MaxHeight="600"
+                    MaxWidth="400"
+                    MaxHeight="500"
              mc:Ignorable="d" Closed="ThCustomWindow_Closed">
     <Window.Resources>
         <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
@@ -123,8 +123,8 @@
                     <Button Margin="0,0,0,5" HorizontalAlignment="Right" Height="24" Content="  保存配置  "  Name="btnSaveConfig" Template="{StaticResource ButtonTemplate}"  Click="btnSaveConfig_Click"/>
                 </StackPanel>
                 <StackPanel Grid.Row="0" Grid.Column="2" VerticalAlignment="Bottom" Orientation="Vertical">
-                    <Button Margin="0,0,0,10" HorizontalAlignment="Right" Height="24" Content="提取房间框线（批量）"  Name="btnMultiBuildRoomOutline"  Template="{StaticResource ButtonTemplate}" Click="btnMultiBuildRoomOutline_Click"/>
                     <Button Margin="0,0,0,10" HorizontalAlignment="Right" Height="24" Content="生成房间框线（点选）"  Name="btnSingleBuildRoomOutline" Template="{StaticResource ButtonTemplate}" Click="btnSingleBuildRoomOutline_Click"/>
+                    <Button Margin="0,0,0,10" HorizontalAlignment="Right" Height="24" Content="提取房间框线（批量）"  Name="btnMultiBuildRoomOutline"  Template="{StaticResource ButtonTemplate}" Click="btnMultiBuildRoomOutline_Click"/>
                     <Button Margin="0,0,0,5" HorizontalAlignment="Right" Height="24" Content="  视频教程  "  Name="btnHelp" Template="{StaticResource ButtonTemplate}" Click="btnHelp_Click"/>
                 </StackPanel>                
             </Grid>

@@ -23,6 +23,7 @@ using ThMEPEngineCore.Model.Common;
 using TianHua.Mep.UI.Data;
 using TianHua.Mep.UI.Command;
 using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
+using ThMEPEngineCore.Service;
 
 namespace TianHua.Mep.UI.ViewModel
 {
@@ -124,16 +125,23 @@ namespace TianHua.Mep.UI.ViewModel
                     return;
                 }
 
-                // 2、再显示已存在的房间区域
-                var roomAreaIds = ShowExistedRoomAreas(Active.Database);
+                // 2、再显示已存在的房间区域                
+                var existRooms = GetAIRooms(Active.Database, new Point3dCollection());// 这些房间是不能删的
+                var roomAreaIds = ShowExistedRoomAreas(Active.Database, existRooms); //用Hatch填充，提示用户已存在的区域
 
                 // 3、构建房间区域
+                var newRooms = new DBObjectCollection();
                 using (var cmd = new ThSuperBoundaryCmd(roomDatas))
                 {
                     cmd.Execute();
+                    newRooms = cmd.RoomBoundaries;
                 }
 
-                // 4、删除显示的房间区域
+                // 4、对新成对房间框线和已生成的房间框线去重
+                var repeatedObjs = FilerSimilarObjs(existRooms, newRooms);
+                Erase(Active.Database, repeatedObjs.OfType<DBObject>().Select(o=>o.ObjectId).ToCollection());
+
+                // 5、删除显示的房间区域
                 Erase(Active.Database, roomAreaIds);
             }
         }
@@ -166,15 +174,22 @@ namespace TianHua.Mep.UI.ViewModel
                     MessageBox.Show("未获取到任何的墙线元素，无法生成房间框线！", "信息提示"
                         , MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
-                }
+                }                
 
                 // 4、构建房间区域
+                var newRooms = new DBObjectCollection();
                 using (var cmd = new ThSuperBoundaryCmd(roomDatas, roomNameTexts))
                 {
                     cmd.Execute();
+                    newRooms = cmd.RoomBoundaries;
                 }
 
-                // 5、释放房间名称
+                // 5、对新成对房间框线和已生成的房间框线去重
+                var existRooms = GetAIRooms(Active.Database, pts);// 这些房间是不能删的
+                var repeatedObjs = FilerSimilarObjs(existRooms, newRooms);
+                Erase(Active.Database, repeatedObjs.OfType<DBObject>().Select(o => o.ObjectId).ToCollection());
+
+                // 6、释放房间名称
                 roomNameTexts.OfType<Entity>()
                     .Where(o => o.ObjectId != ObjectId.Null)
                     .ToCollection().MDispose();
@@ -358,6 +373,12 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
 
+        private DBObjectCollection FilerSimilarObjs(DBObjectCollection existedRooms,DBObjectCollection newRooms)
+        {
+            var simpilfer = new ThRoomOutlineSimplifier();
+            return simpilfer.OverKill(existedRooms, newRooms);
+        }
+
         private void ShowSBNDRunCmdTip()
         {
             MessageBox.Show("正在运行房间轮廓线生成命令，无法执行当前操作！", "信息提示",
@@ -385,10 +406,30 @@ namespace TianHua.Mep.UI.ViewModel
         }
         private DBObjectCollection GetAIRooms(Database db, Point3dCollection pts)
         {
-            var builder = new ThRoomBuilderEngine();
-            var rooms = builder.BuildFromMS(db, pts, true);
-            return rooms.Select(r => r.Boundary).ToCollection();
+            // 获取本地的房间框线
+            using (var acadDb =  AcadDatabase.Use(db))
+            {
+                var objs  = acadDb.ModelSpace.OfType<Entity>()
+                    .Where(o => o is Polyline || o is MPolygon)
+                    .Where(o => o.Layer == ThMEPEngineCoreLayerUtils.ROOMOUTLINE)
+                    .ToCollection();
+                if (pts.Count > 2)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    return spatialIndex.SelectCrossingPolygon(pts);
+                }
+                else
+                {
+                    return objs;
+                }                
+            }
         }
+        //private DBObjectCollection GetAIRooms(Database db, Point3dCollection pts)
+        //{
+        //    var builder = new ThRoomBuilderEngine();
+        //    var rooms = builder.BuildFromMS(db, pts, true);
+        //    return rooms.Select(r => r.Boundary).ToCollection();
+        //}
         private List<string> GetSameSuffixLayers(string suffixLayer)
         {
             using (var acdb = AcadDatabase.Active())
@@ -547,7 +588,6 @@ namespace TianHua.Mep.UI.ViewModel
         }
         private void LoadFromActiveDatabase()
         {
-            this.ynExtractShearWall = false;
             this.DoorBlkInfos = new ObservableCollection<ThBlockInfo>();
             this.LayerInfos = new ObservableCollection<ThLayerInfo>();
             // 从当前database获取图层
@@ -617,24 +657,25 @@ namespace TianHua.Mep.UI.ViewModel
                     .ForEach(o => o.Erase());
             }
         }
-        private ObjectIdCollection ShowExistedRoomAreas(Database database)
+        private ObjectIdCollection ShowExistedRoomAreas(Database database,DBObjectCollection rooms)
         {
             // 把已有的房间框线显示出来
             using (var acadDb = AcadDatabase.Use(database))
             {
-                var results = new ObjectIdCollection();
-                var rooms = GetAIRooms(Active.Database, _rangePts);
+                var results = new ObjectIdCollection();                
                 rooms.OfType<Entity>().ForEach(e =>
                 {
                     if (e is Polyline poly)
                     {
-                        var ids = Show(acadDb, poly, ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
+                        var ids = Show(acadDb, poly.Clone() as Polyline, ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
                         ids.OfType<ObjectId>().ForEach(o => results.Add(o));
                     }
                     else if (e is MPolygon polygon)
                     {
-                        var ids = Show(acadDb, polygon, ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
+                        var mClone = polygon.Clone() as MPolygon;
+                        var ids = Show(acadDb, mClone, ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
                         ids.OfType<ObjectId>().ForEach(o => results.Add(o));
+                        mClone.Dispose();
                     }
                 });
                 return results;
