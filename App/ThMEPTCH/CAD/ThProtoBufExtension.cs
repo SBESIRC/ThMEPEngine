@@ -143,6 +143,7 @@ namespace ThMEPTCH.CAD
                     p.AddVertexAt(index++, tchPolyline.Points[int.Parse(list[0].ToString())].ToPoint2d(), arc.GetArcBulge(arc.StartPoint), 0, 0);
                 }
             }
+            p.Closed = tchPolyline.IsClosed;
             return p;
         }
 
