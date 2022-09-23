@@ -560,5 +560,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Parameter.ClearWholePipeDis = 50;
 
         }
+
+        public void check()
+        {
+            if (true)
+            {
+                //throw new NotSupportedException("住宅模式不支持含有多个门的输出。");
+                throw new NotSupportedException(ThFloorHeatingCommon.Error_privateOneDoor);
+            }
+        }
+
     }
 }

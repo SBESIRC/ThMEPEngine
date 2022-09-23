@@ -530,6 +530,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             List<double> buff_list = new List<double>();
             var points = shortest_way[index].poly;
+            if (points.Count >= 3)
+            {
+                if (PassageWayUtils.PointOnSegment(points[2], points[0], points[1], 1e-3))
+                    points.RemoveAt(1);
+            }
             for (int i = 0; i < points.Count - 1; ++i)
             {
                 var dir = PassageWayUtils.GetDirBetweenTwoPoint(points[i], points[i + 1]);
