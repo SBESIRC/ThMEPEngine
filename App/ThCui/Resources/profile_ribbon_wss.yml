@@ -113,6 +113,8 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
+          - text: "碰头定位"
+            attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "喷淋系统"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "喷头校核"
@@ -191,6 +193,15 @@ panels:
       - text: ""
         items:
           - text: "水平面"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlHVACGROUNDHEATING"
+    name: "HVACGROUNDHEATING"
+    title: "地暖平面"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "地暖盘管"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlEMATERIALS"
