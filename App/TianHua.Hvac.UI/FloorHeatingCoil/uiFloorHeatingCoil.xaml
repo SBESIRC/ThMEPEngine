@@ -146,7 +146,7 @@
 				Content="插入" Command="{Binding InsertSuggestBlkCmd}"/>
         </StackPanel>
 
-        <Label Grid.Row="2" Grid.Column ="3" Height="24" HorizontalAlignment="Right" Content="缺省间距："/>
+        <Label Grid.Row="2" Grid.Column ="3" Height="24" HorizontalAlignment="Right" Content="默认间距："/>
         <StackPanel Grid.Row="2" Grid.Column="4" Margin="0 3 0 0" Orientation="Horizontal" >
             <cus:InputTextBox Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDistDefualt,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
             <Label Content="mm"/>
