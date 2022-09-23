@@ -48,5 +48,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public static double DefaultValue_SuggestDist = 200;
 
         public static string Error_privateOneDoor = "住宅模式暂不支持分集水器所在房间有多个门";
+        public static string Error_roomRoute = "未完全指定房间回路编号，请检查";
     }
 }

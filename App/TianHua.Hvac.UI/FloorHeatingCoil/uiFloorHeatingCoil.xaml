@@ -72,19 +72,19 @@
                Height="24"
 			   Content="2.障碍物框线"/>
 
-        <Label Grid.Row="7" Grid.Column="0"  Grid.ColumnSpan="2"
-                   Height="24"
-				   Content="1）图层图块配置"/>
-        <Button Grid.Row="7" Grid.Column="2" 
-              	Margin="0 0 0 4"	Height="24"
-				Content="设置" Click="ObstacleButton_Click"/>
-
-        <Label Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="2"
+        <Label Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="2"
                Height="24"
-			   Content="2）手绘框线"/>
-        <Button Grid.Row="8"  Grid.Column="2"
-			    Height="24"
+			   Content="1）手绘框线"/>
+        <Button Grid.Row="7"  Grid.Column="2"
+			   Margin="0 0 0 4"  Height="24"
 				Content="绘制" Command="{Binding DrawObstacleCmd}"/>
+
+        <Label Grid.Row="8" Grid.Column="0"  Grid.ColumnSpan="2"
+                   Height="24"
+				   Content="2）图层图块配置"/>
+        <Button Grid.Row="8" Grid.Column="2" 
+              		Height="24"
+				Content="设置" Click="ObstacleButton_Click"/>
 
         <Label Grid.Row="9"  Grid.ColumnSpan="3" 
 				   Height="24"
@@ -135,21 +135,21 @@
 				   Margin ="10 0 0 0" Height="24"
 				   Content="4.各区域盘管间距指定（可无）"/>
 
-        <Label Grid.Row="1" Grid.Column ="3"
+        <Label Grid.Row="1" Grid.Column ="3" Height="24" HorizontalAlignment="Right" Content="默认间距："/>
+        <StackPanel Grid.Row="1" Grid.Column="4"  Orientation="Horizontal" >
+            <cus:InputTextBox Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDistDefualt,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
+            <Label Content="mm"/>
+        </StackPanel>
+
+        <Label Grid.Row="2" Grid.Column ="3"
 				   Height="24" HorizontalAlignment="Right"
 				   Content="盘管间距："/>
-        <StackPanel Grid.Row="1" Grid.Column="4" Height="24"  Orientation="Horizontal">
+        <StackPanel Grid.Row="2" Grid.Column="4" Height="24" Margin="0 3 0 0" Orientation="Horizontal">
             <cus:InputTextBox Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDist,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
             <Label  Content="mm"/>
             <Button 
                 Height="24" Width="50"
 				Content="插入" Command="{Binding InsertSuggestBlkCmd}"/>
-        </StackPanel>
-
-        <Label Grid.Row="2" Grid.Column ="3" Height="24" HorizontalAlignment="Right" Content="默认间距："/>
-        <StackPanel Grid.Row="2" Grid.Column="4" Margin="0 3 0 0" Orientation="Horizontal" >
-            <cus:InputTextBox Width="50" TextBoxInputType="InputInteger" NumCanMinus="False" Text="{Binding SuggestDistDefualt,Mode=TwoWay,NotifyOnSourceUpdated=True}" ></cus:InputTextBox>
-            <Label Content="mm"/>
         </StackPanel>
 
         <Label Grid.Column="3" Grid.Row="3" Height="24" Margin="10 0 0 0" Content="5.距墙距离："/>
@@ -182,7 +182,7 @@
             </Grid>
         </RadioButton>
 
-        <RadioButton Grid.Row="6" Grid.Column="4" Grid.RowSpan ="4" GroupName="rbWSConnectMode" 
+        <RadioButton Grid.Row="6" Grid.Column="4" Grid.RowSpan ="3" GroupName="rbWSConnectMode" 
                      IsChecked="{Binding PrivatePublicMode,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"
                      VerticalAlignment="Top" VerticalContentAlignment="Top" HorizontalAlignment="Center"  >
             <Grid VerticalAlignment="Top" >
@@ -194,11 +194,17 @@
                 <Image Grid.Row="1" Width="70" Margin="-10 0 0 0" Source="../Images/公建模式.png" />
             </Grid>
         </RadioButton>
-        <Label Grid.Row="10" Grid.Column="3"  Margin="10 0 0 0" Content="后台参数配置："/>
-        <Button Grid.Row="10" Grid.Column="4" Margin="0 3 0 0"
+        <Label Grid.Row="9" Grid.Column="3"  Margin="10 0 0 0" Content="后台参数配置："/>
+        <Button Grid.Row="9" Grid.Column="4" Margin="0 3 0 0"
                 Click="SubSettingButton_Click"
 				Content="配置" />
-        <Button Grid.Row="12" Grid.Column="3" Grid.ColumnSpan="2" Margin="30 0 20 0"  Height="24" Content="生成地暖平面" Command="{Binding ShowRouteCmd}"/>
+        <Button Grid.Row="11" Grid.Column="3" Grid.ColumnSpan="2"  Height="24" 
+                 Margin="15 0 0 0"
+                Content="生成地暖平面" Command="{Binding ShowRouteCmd}"/>
+
+        <Button IsEnabled="False"  Grid.Row="14" Grid.Column="5" Height="24" 
+                Width="70" HorizontalAlignment="Right" 
+                Content="视频教程" />
 
     </Grid>
 </cus:ThCustomWindow>

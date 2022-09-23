@@ -581,7 +581,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             if (flag)
             {
                 //throw new NotSupportedException("住宅模式不支持含有多个门的输出。");
-                throw new NotSupportedException(ThFloorHeatingCommon.Error_privateOneDoor);
+                throw new NotSupportedException(ThFloorHeatingCommon.Error_roomRoute);
             }
         }
 

@@ -170,6 +170,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
                     var layerList = new List<string> { ThFloorHeatingCommon.BlkLayerDict[ThFloorHeatingCommon.BlkName_ShowRoute],
                                                     ThFloorHeatingCommon.BlkLayerDict[ThFloorHeatingCommon.BlkName_RoomSuggest],
+                                                    ThFloorHeatingCommon .Layer_RoomSeparate,
                                                     ThFloorHeatingCommon.Layer_Coil };
                     ThFloorHeatingCoilInsertService.LoadBlockLayerToDocument(acadDatabase.Database, blkList, layerList);
 
@@ -238,7 +239,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 }
                 catch (System.Exception ex)
                 {
-                    if (ex.Message == ThFloorHeatingCommon.Error_privateOneDoor)
+                    if (ex.Message == ThFloorHeatingCommon.Error_privateOneDoor
+                        || ex.Message == ThFloorHeatingCommon.Error_roomRoute)
                     {
                         Active.Editor.WriteMessage(string.Format("\n{0}\n", ex.Message));
                         VM.CleanData();
@@ -444,10 +446,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                     ptDir2 = door.GetPoint3dAt(3);
                 }
                 var dir = (ptDir2 - ptLong1) / 2;
+                var longDir = (ptLong1 - ptLong0).GetNormal();
 
                 var line = new Polyline();
-                line.AddVertexAt(0, (ptLong0 + dir).ToPoint2D(), 0, 0, 0);
-                line.AddVertexAt(0, (ptLong1 + dir).ToPoint2D(), 0, 0, 0);
+                line.AddVertexAt(0, (ptLong0 + dir + longDir * 15).ToPoint2D(), 0, 0, 0);
+                line.AddVertexAt(1, (ptLong1 + dir - longDir * 15).ToPoint2D(), 0, 0, 0);
 
                 lines.Add(line);
 

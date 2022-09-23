@@ -131,7 +131,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
                 var roomPl = graph.Select(x => roomSet.Room[x].OriginalBoundary.Clone() as Polyline).ToList();
                 RemoveDuplicate(ref roomPl);
                 roomPl.ForEach(x => transformer.Reset(x));
-                ThFloorHeatingCoilInsertService.ShowConnectivity(roomPl, ThFloorHeatingCommon.Layer_RoomSetFrame, (i + 1) % 6);
+                ThFloorHeatingCoilInsertService.ShowConnectivity(roomPl, ThFloorHeatingCommon.Layer_RoomSetFrame, (i + 1) % 254);
             }
         }
 
