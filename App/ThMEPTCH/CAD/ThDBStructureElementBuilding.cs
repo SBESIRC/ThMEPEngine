@@ -143,7 +143,7 @@ namespace ThMEPTCH.CAD
                 }
                 else
                 {
-                    var slabSpace = polyline.TPSimplify(1).Buffer(10)[0] as Polyline;
+                    var slabSpace = polyline.Buffer(10)[0] as Polyline;
                     var slab = new THStructureSlab();
                     slab.Outline = slabSpace;
                     if (slabHatchLines.Any(o => o.Contains(polyline)))
