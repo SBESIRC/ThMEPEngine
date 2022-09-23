@@ -71,6 +71,8 @@ namespace ThParkingStall.Core.InterProcess
         public bool SpeedUpMode = false;
         //边界收缩
         public bool BoundaryShrink = true;
+        //最大建筑位移距离
+        public int BuildingMoveDistance = 500;
         #endregion
         public Chromosome chromosome = null;//正交基因记录
         public Genome genome = null;//斜交基因记录

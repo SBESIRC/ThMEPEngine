@@ -28,8 +28,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var box=buildingBounds[i];
                 if (box.Scale(ScareFactorForCollisionCheck).IntersectPoint(Boundary).Count() > 0)
                 {
-                    var geos=box.Difference(Boundary);
-                    var cut = box.Difference(geos);
+                    var geos = OverlayNGRobust.Overlay(box, Boundary, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+                    //var geos=box.Difference(Boundary);
+                    //var cut = box.Difference(geos);
+                    var cut = OverlayNGRobust.Overlay(box, geos, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
                     if (cut is Polygon)
                         buildingBounds[i] = (Polygon)cut;
                     else if (cut is MultiPolygon)

@@ -186,6 +186,8 @@ namespace ThMEPArchitecture.MultiProcess
             datawraper.SingleVertModulePlacementFactor = ParameterStock.SingleVertModulePlacementFactor;
             datawraper.SpeedUpMode = vm.SpeedUpMode;
             datawraper.BoundaryShrink = vm.BoundaryShrink;
+            //最大建筑位移距离
+            datawraper.BuildingMoveDistance = vm.BuildingMoveDistance;
         }
         public static List<Ramp> GetRamps(this OuterBrder outerBrder)
         {

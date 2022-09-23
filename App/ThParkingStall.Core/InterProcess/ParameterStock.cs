@@ -209,6 +209,9 @@ namespace ThParkingStall.Core.InterProcess
         //边界迭代
         private static bool _BoundaryShrink;
         public static bool BoundaryShrink { get { return _BoundaryShrink; }}
+        //最大建筑位移距离
+        private static int _BuildingMoveDistance;
+        public static int BuildingMoveDistance { get { return _BuildingMoveDistance; }}
         public static void Init(DataWraper datawraper)
         {
             _RunMode = datawraper.RunMode;
@@ -262,6 +265,8 @@ namespace ThParkingStall.Core.InterProcess
             _SpeedUpMode = datawraper.SpeedUpMode;
             //边界迭代
             _BoundaryShrink = datawraper.BoundaryShrink;
+            //最大建筑位移距离
+            _BuildingMoveDistance = datawraper.BuildingMoveDistance;
         }
     }
 }

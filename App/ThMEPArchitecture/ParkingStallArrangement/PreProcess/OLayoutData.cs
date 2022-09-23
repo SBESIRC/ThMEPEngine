@@ -709,25 +709,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 MovingBounds[i] = bound;
                 bound.ToDbMPolygon().AddToCurrentSpace();
             }
-            var MovingBoundSPindex = new MNTSSpatialIndex(MovingBounds);
+            //var MovingBoundSPindex = new MNTSSpatialIndex(MovingBounds);
 
-            var halfRoadWidth = ParameterStock.RoadWidth / 2;
+            //var halfRoadWidth = ParameterStock.RoadWidth / 2;
 
-            foreach (var segLine in SegLines)
-            { 
-                var laneRect = segLine.Splitter.OGetRect(halfRoadWidth);
-                var selected = MovingBoundSPindex.SelectCrossingGeometry(laneRect).Cast<Polygon>();
-                if(selected.Count() == 0) continue;
-                var splitter = segLine.Splitter.ToLineString();
-                var selectedGeo = new MultiPolygon(selected.ToArray());
-                var IntSecCenter = splitter.Intersection(selectedGeo).Centroid;
-                splitter = splitter.Difference(selectedGeo).Get<LineString>().OrderBy(l => l.Length).Last();
-                var coors = splitter.Coordinates.ToList();
-                coors.Add(IntSecCenter.Coordinate);
-                coors = coors.PositiveOrder();
-                segLine.Splitter = new LineSegment(coors.First(), coors.Last());
-            }
-            showVaildLanes();
+            //foreach (var segLine in SegLines)
+            //{ 
+            //    var laneRect = segLine.Splitter.OGetRect(halfRoadWidth);
+            //    var selected = MovingBoundSPindex.SelectCrossingGeometry(laneRect).Cast<Polygon>();
+            //    if(selected.Count() == 0) continue;
+            //    var splitter = segLine.Splitter.ToLineString();
+            //    var selectedGeo = new MultiPolygon(selected.ToArray());
+            //    var IntSecCenter = splitter.Intersection(selectedGeo).Centroid;
+            //    splitter = splitter.Difference(selectedGeo).Get<LineString>().OrderBy(l => l.Length).Last();
+            //    var coors = splitter.Coordinates.ToList();
+            //    if(!IntSecCenter.IsEmpty)coors.Add(IntSecCenter.Coordinate);
+            //    coors = coors.PositiveOrder();
+            //    segLine.Splitter = new LineSegment(coors.First(), coors.Last());
+            //}
+            //showVaildLanes();
             
         }
 

@@ -120,7 +120,7 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("LayoutCount"); 
             }
         }
-
+        //最大建筑位移距离
         private int _BuildingMoveDistance = 500;
         public int BuildingMoveDistance
         {

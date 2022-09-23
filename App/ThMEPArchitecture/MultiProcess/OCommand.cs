@@ -240,24 +240,14 @@ namespace ThMEPArchitecture.MultiProcess
                 //BPA.UpdateParkingCntSP();
                 //BPA.UpdateSolution();
 
-                var BPC = new BuildingPosCalculate(BPA.PotentialMovingVectors);
-                BPC.CalculateBest(true);
+                //var BPC = new BuildingPosCalculate();
+                //BPC.CalculateScore(BPA.PotentialMovingVectors);
+                //BPC.CalculateBest(true);
 
-                foreach (var subArea in OInterParameter.dynamicSubAreas)
-                {
-                    subArea.UpdateParkingCnts(true);
-                    subArea.Display("MPDebug");
-                    MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
-                    //subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
-                }
-                GlobalBusiness globalBusiness = new GlobalBusiness(OInterParameter.dynamicSubAreas);
-                var caledBound = globalBusiness.CalBound();
-                Display(caledBound);
-                
-                var moveDistance = 1 * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
-                                    OInterParameter.TotalArea.Coordinates.Min(c => c.X));
-
-                DisplayParkingStall.MoveAddedEntities(moveDistance);
+                BPA.UpdateBest();
+                OInterParameter.Buildings.ForEach(b => b.ToDbPolylines().ForEach(pl => { pl.AddToCurrentSpace(); DisplayParkingStall.Add(pl); }));
+                ProcessAndDisplay(null,1,stopWatch);
+                OInterParameter.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace());
                 //lanes.Get<LineString>(true).ForEach(l => l.ToDbPolyline().AddToCurrentSpace());
                 //ProcessAndDisplay(null, 0, stopWatch);
             }
