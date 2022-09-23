@@ -105,6 +105,7 @@ namespace ThMEPTCH.Services
                 return null;
             }
             LoadCustomElements();
+
             var allEntities = null != archDBData ? archDBData.AllTArchEntitys() : GetArchEntities();
             var allDBEntities = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities(floorOrigin.Select(o => o.FloorOutLine).ToList());
             InitFloorDBEntity(allEntities, allDBEntities);
@@ -142,6 +143,8 @@ namespace ThMEPTCH.Services
                 var railingColls = new DBObjectCollection();
                 var thisOpeningEntities = new Dictionary<Polyline, ThTCHOpening>();
                 var openingColls = new DBObjectCollection();
+                var rooms =  new List<ThTCHSpace>();
+
                 foreach (var item in curveEntities)
                 {
                     if (item.EntitySystem.Contains("楼板"))
@@ -203,6 +206,19 @@ namespace ThMEPTCH.Services
                             thisOpeningEntities.Add(pLine, opening);
                         }
                     }
+                    else if(item.EntitySystem.Contains("房间"))
+                    {
+                        var outline = item.EntityCurve.GetTransformedCopy(matrix) as Entity;
+                        openingColls.Add(outline);
+                        var room = CreateRoom(outline);
+                        var prop = item.Property as RoomProperty;
+                        room.Height = prop.Height;
+                        room.ExtrudedDirection = Vector3d.ZAxis;
+                        room.Name = prop.Name;
+                        room.ZOffSet = prop.BottomElevation;
+                        room.Uuid = prjId + item.Id;
+                        rooms.Add(room);
+                    }
                 }
                 //用墙的索引找栏杆没有找到
                 var railingSpatialIndex = new ThCADCoreNTSSpatialIndex(railingColls);
@@ -255,6 +271,7 @@ namespace ThMEPTCH.Services
                 }
 
                 floor.FloorEntitys.AddRange(allSlabs);
+                floor.FloorEntitys.AddRange(rooms);
                 floor.FloorEntitys.AddRange(thisRailingEntities.Select(c => c.Value).ToList());
             }
 
@@ -373,6 +390,16 @@ namespace ThMEPTCH.Services
                             (copyItem.Outline as Polyline).Elevation += buildingStorey.Height;
                         buildingStorey.Slabs.Add(copyItem);
                     }
+                    //加房间
+                    var rooms = levelEntitys.FloorEntitys.OfType<ThTCHSpace>().ToList();
+                    foreach (var room in rooms)
+                    {
+                        var copyItem = room.Clone() as ThTCHSpace;
+                        copyItem.Uuid += buildingStorey.Number;
+                        copyItem.Height = buildingStorey.Height;
+                        buildingStorey.Rooms.Add(copyItem);
+                    }
+
                     //buildingStorey.Slabs.AddRange(slabs);
                     var railings = levelEntitys.FloorEntitys.OfType<ThTCHRailing>().ToList();
                     foreach (var railing in railings)
@@ -385,6 +412,7 @@ namespace ThMEPTCH.Services
                     buildingStorey.Walls.AddRange(walls);
                     buildingStorey.Columns.AddRange(columns);
                     buildingStorey.Beams.AddRange(beams);
+                    buildingStorey.Rooms.AddRange(rooms);
                 }
                 thBuilding.Storeys.Add(buildingStorey);
             }
@@ -786,6 +814,10 @@ namespace ThMEPTCH.Services
                     {
                         LayerFilter = new List<string> { "TH-墙洞" },
                     },
+                    new THDBRoomExtractionVisitor()
+                    {
+                        LayerFilter= new List<string> {ThMEPEngineCore.ThMEPEngineCoreLayerUtils.ROOMOUTLINE },
+                    },
                 };
                 var extractor = new ThBuildingElementExtractor();
                 extractor.Accept(visitors);
@@ -814,6 +846,20 @@ namespace ThMEPTCH.Services
                 var slabs = visitors[0].Results.Select(o => o.Data).OfType<FloorCurveEntity>().ToList();
                 var marks = annoVisitors[0].Results.Select(o => o.Geometry).ToCollection();
                 cadCurveEntities.AddRange(BuildFloorSlab(slabs, marks));
+
+                // 给房间设置名称
+                var roomVisitors = visitors.Where(o => o is THDBRoomExtractionVisitor);
+                if(roomVisitors.Count()==1)
+                {
+                    var roomVisitor = roomVisitors.First() as THDBRoomExtractionVisitor;
+                    var roomCurves = roomVisitor.Results
+                        .Where(o=>o.Data!=null && o.Data is FloorCurveEntity)
+                        .Select(o=>o.Data)
+                        .OfType<FloorCurveEntity>()
+                        .ToList();
+                    ThSetRoomNameService.SetFromCurrentDb(roomCurves);
+                    cadCurveEntities.AddRange(roomCurves);
+                }
             }
         }
 
@@ -987,6 +1033,22 @@ namespace ThMEPTCH.Services
                 Outline = pline,
                 ExtrudedDirection = Vector3d.ZAxis,
             };
+        }
+
+        private ThTCHSpace CreateRoom(Entity entity)
+        {
+            if(entity is MPolygon polygon)
+            {
+                return new ThTCHSpace(polygon);
+            }
+            else if (entity is Polyline polyline)
+            {
+                return new ThTCHSpace(polyline);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         private ThTCHOpening CreateOpening(Polyline pline)

@@ -72,6 +72,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="CAD\THDBHoleExtractionVisitor.cs" />
+    <Compile Include="CAD\THDBRoomExtractionVisitor.cs" />
     <Compile Include="CAD\ThDBVisitorExtension.cs" />
     <Compile Include="CAD\ThTArchWallExtension.cs" />
     <Compile Include="CAD\ThTCHEDbExtension.cs" />
@@ -104,6 +105,7 @@
     <Compile Include="Engine\ThTCHCableCarrierSegmentExtractionVisitor.cs" />
     <Compile Include="Model\ThTCHCableCarrierFitting.cs" />
     <Compile Include="Model\ThTCHCableCarrierSegment.cs" />
+    <Compile Include="Model\ThTCHSpace.cs" />
     <Compile Include="Model\ThTCHSprinklerDim.cs" />
     <Compile Include="PropertyServices\EntityProperties\DescendingPropertyService.cs" />
     <Compile Include="PropertyServices\EntityProperties\HolePropertyService.cs" />
@@ -127,6 +129,7 @@
     <Compile Include="PropertyServices\PropertyModels\PropertyBase.cs" />
     <Compile Include="PropertyServices\PropertyModels\RailingProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\HoleProperty.cs" />
+    <Compile Include="PropertyServices\PropertyModels\RoomProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\SlabProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\TCHDoorProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\TCHWallProperty.cs" />
@@ -210,6 +213,7 @@
     <Compile Include="Services\ThEditStoreyInfo.cs" />
     <Compile Include="Services\ThIfcStoreyParseTool.cs" />
     <Compile Include="Services\ThPolylineFixer.cs" />
+    <Compile Include="Services\ThSetRoomNameService.cs" />
     <Compile Include="TCHArchDataConvert\DBToTHEntityCommon.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchDBData.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchSQL.cs" />

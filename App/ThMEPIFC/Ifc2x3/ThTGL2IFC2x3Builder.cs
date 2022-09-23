@@ -26,6 +26,7 @@ namespace ThMEPIFC.Ifc2x3
                     var doors = new List<IfcDoor>();
                     var windows = new List<IfcWindow>();
                     var railings = new List<IfcRailing>();
+                    var rooms = new List<IfcSpace>();
                     var floor_origin = thtchstorey.Origin;
                     var storey = ThTGL2IFC2x3Factory.CreateStorey(Model, building, thtchstorey);
                     foreach (var thtchwall in thtchstorey.Walls)
@@ -66,6 +67,12 @@ namespace ThMEPIFC.Ifc2x3
                         var railing = ThTGL2IFC2x3Factory.CreateRailing(Model, thtchrailing, floor_origin);
                         railings.Add(railing);
                     }
+                    //遍历，造房间
+                    foreach (var thtchRoom in thtchstorey.Rooms)
+                    {
+                        var room = ThTGL2IFC2x3Factory.CreateRoom(Model, thtchRoom, floor_origin);
+                        rooms.Add(room);
+                    }
                     ThTGL2IFC2x3Factory.relContainSlabs2Storey(Model, slabs, storey);
                     ThTGL2IFC2x3Factory.relContainWalls2Storey(Model, walls, storey);
                     ThTGL2IFC2x3Factory.relContainColumns2Storey(Model, columns, storey);
@@ -73,6 +80,7 @@ namespace ThMEPIFC.Ifc2x3
                     ThTGL2IFC2x3Factory.relContainDoors2Storey(Model, doors, storey);
                     ThTGL2IFC2x3Factory.relContainWindows2Storey(Model, windows, storey);
                     ThTGL2IFC2x3Factory.relContainsRailings2Storey(Model, railings, storey);
+                    ThTGL2IFC2x3Factory.relContainsRooms2Storey(Model, rooms, storey);
                 }
             }
         }
