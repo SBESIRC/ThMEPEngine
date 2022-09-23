@@ -34,7 +34,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
                 lanes.AddRange(subArea.obliqueMPartition.IniLanes.Select(e => e.Line));
                 obstacles.AddRange(subArea.BuildingBounds);
             }
-            var newbound = MParkingPartitionPro.CalIntegralBound(pillars, lanes, obstacles, cars);
+            var newbound = MParkingPartitionPro.CalIntegralBound(pillars, lanes, OInterParameter.BuildingBounds, cars);
             return newbound;
         }
         public void ParaWrite()
