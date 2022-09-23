@@ -163,6 +163,7 @@ namespace TianHua.Mep.UI.ViewModel
                             , MessageBoxButton.OK, MessageBoxImage.Information);
                     return;
                 }
+                var existRooms = GetAIRooms(Active.Database, pts);// 这些房间是不能删的
 
                 // 2、创建图层（把显示的区域打印到此图层上）
                 Active.Database.CreateAIRoomOutlineLayer();
@@ -184,8 +185,7 @@ namespace TianHua.Mep.UI.ViewModel
                     newRooms = cmd.RoomBoundaries;
                 }
 
-                // 5、对新成对房间框线和已生成的房间框线去重
-                var existRooms = GetAIRooms(Active.Database, pts);// 这些房间是不能删的
+                // 5、对新成对房间框线和已生成的房间框线去重                
                 var repeatedObjs = FilerSimilarObjs(existRooms, newRooms);
                 Erase(Active.Database, repeatedObjs.OfType<DBObject>().Select(o => o.ObjectId).ToCollection());
 

@@ -172,7 +172,7 @@ namespace TianHua.Mep.UI.Command
                 _walls = ToCurves(_walls, true);
                 _columns = ToCurves(_columns, true);
                 _shearwalls = ToCurves(_shearwalls,true);
-                _otherShearwalls = ToCurves(_shearwalls, true);
+                _otherShearwalls = ToCurves(_otherShearwalls, true);
             }
         }
 
