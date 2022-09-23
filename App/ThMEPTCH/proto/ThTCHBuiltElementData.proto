@@ -16,7 +16,7 @@ message ThTCHBuiltElementData {
     ThTCHVector3d x_vector = 6;
 
     // geometry profile
-    ThTCHPolyline outline = 7;
+    ThTCHMPolygon outline = 7;
 
     //Material
     optional string enum_material = 8;

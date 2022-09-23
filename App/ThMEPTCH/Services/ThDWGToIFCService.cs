@@ -583,7 +583,7 @@ namespace ThMEPTCH.Services
                             var newOutline = opening.BuildElement.Outline.ToPolyline().Buffer(wall.BuildElement.Width / 2 + 100.0).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
                             if (!newOutline.IsNull())
                             {
-                                opening.BuildElement.Outline = newOutline.ToTCHPolyline();
+                                opening.BuildElement.Outline = newOutline.ToTCHMPolygon();
                             }
                         }
                     }
@@ -1065,7 +1065,7 @@ namespace ThMEPTCH.Services
             var opening = new ThTCHOpeningData();
             opening.BuildElement = new ThTCHBuiltElementData();
             opening.BuildElement.Root = new ThTCHRootData();
-            opening.BuildElement.Outline = pline.ToTCHPolyline();
+            opening.BuildElement.Outline = pline.ToTCHMPolygon();
             return opening;
         }
 
@@ -1079,7 +1079,7 @@ namespace ThMEPTCH.Services
             railing.BuildElement.Root = new ThTCHRootData();
             railing.BuildElement.Height = 1200;
             railing.BuildElement.Width = width;
-            railing.BuildElement.Outline = outlines.ToTCHPolyline();
+            railing.BuildElement.Outline = outlines.ToTCHMPolygon();
             railing.BuildElement.EnumMaterial = ThTextureMaterialManager.THRailing;
             return railing;
         }
@@ -1188,7 +1188,7 @@ namespace ThMEPTCH.Services
             var structureSlab = new ThTCHSlabData();
             structureSlab.BuildElement = new ThTCHBuiltElementData();
             structureSlab.BuildElement.Root = new ThTCHRootData();
-            structureSlab.BuildElement.Outline = outPLine.ToTCHPolyline();
+            structureSlab.BuildElement.Outline = outPLine.ToTCHMPolygon();
             structureSlab.BuildElement.Height = slabPolyline.StructureThickness;
             structureSlab.BuildElement.EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
             structureSlab.BuildElement.Outline.ZOffSet(-slabPolyline.SurfaceThickness);
@@ -1196,7 +1196,7 @@ namespace ThMEPTCH.Services
             var architectureSlab = new ThTCHSlabData();
             architectureSlab.BuildElement = new ThTCHBuiltElementData();
             architectureSlab.BuildElement.Root = new ThTCHRootData();
-            architectureSlab.BuildElement.Outline = outPLine.ToTCHPolyline();
+            architectureSlab.BuildElement.Outline = outPLine.ToTCHMPolygon();
             architectureSlab.BuildElement.Height = slabPolyline.SurfaceThickness;
             architectureSlab.BuildElement.EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
 
@@ -1243,8 +1243,8 @@ namespace ThMEPTCH.Services
                     }
                     var descending = new ThTCHDescendingData()
                     {
-                        Outline = innerPLine.ToTCHPolyline(),
-                        OutlineBuffer = outlineBuffer.ToTCHPolyline(),
+                        Outline = innerPLine.ToTCHMPolygon(),
+                        OutlineBuffer = outlineBuffer.ToTCHMPolygon(),
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                         DescendingThickness = item.StructureThickness,
@@ -1264,8 +1264,8 @@ namespace ThMEPTCH.Services
                     }
                     architectureSlab.Descendings.Add(new ThTCHDescendingData()
                     {
-                        Outline = outlineInner.ToTCHPolyline(),
-                        OutlineBuffer = innerPLine.ToTCHPolyline(),
+                        Outline = outlineInner.ToTCHMPolygon(),
+                        OutlineBuffer = innerPLine.ToTCHMPolygon(),
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                         DescendingThickness = item.SurfaceThickness,
@@ -1277,7 +1277,7 @@ namespace ThMEPTCH.Services
                     // 结构楼洞
                     var descending = new ThTCHDescendingData()
                     {
-                        Outline = innerPLine.ToTCHPolyline(),
+                        Outline = innerPLine.ToTCHMPolygon(),
                         IsDescending = false,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                     };
@@ -1287,7 +1287,7 @@ namespace ThMEPTCH.Services
                     // 建筑楼洞
                     architectureSlab.Descendings.Add(new ThTCHDescendingData()
                     {
-                        Outline = innerPLine.ToTCHPolyline(),
+                        Outline = innerPLine.ToTCHMPolygon(),
                         IsDescending = false,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                     });
@@ -1311,7 +1311,7 @@ namespace ThMEPTCH.Services
             var newWall = new ThTCHWallData();
             newWall.BuildElement = new ThTCHBuiltElementData()
             {
-                Outline = pl.ToTCHPolyline(),
+                Outline = pl.ToTCHMPolygon(),
                 Root = new ThTCHRootData() { GlobalId = projectId + wall.Uuid },
             };
             return newWall;

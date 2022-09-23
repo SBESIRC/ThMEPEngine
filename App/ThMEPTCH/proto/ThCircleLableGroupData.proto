@@ -1,0 +1,15 @@
+syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThTCHGeometry.proto";
+
+message CircleLable{
+    ThTCHRootData root = 1;
+    ThTCHCircle circle = 2;
+    string mark = 3;
+    repeated ThTCHLine leaders = 4;
+}
+
+message ThCircleLableGroupData {
+    ThTCHRootData root = 1;
+    repeated CircleLable circle_lables = 2;
+}

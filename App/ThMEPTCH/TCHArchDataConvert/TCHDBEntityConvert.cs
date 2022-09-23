@@ -416,7 +416,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             pl.Elevation = entity.Outline.Elevation;
             var newWall = new ThTCHWallData();
             newWall.BuildElement = new ThTCHBuiltElementData();
-            newWall.BuildElement.Outline = pl.ToTCHPolyline();
+            newWall.BuildElement.Outline = pl.ToTCHMPolygon();
             newWall.BuildElement.Height = entity.Height;
             newWall.BuildElement.Width = entity.LeftWidth + entity.RightWidth;
             newWall.BuildElement.Root = new ThTCHRootData();

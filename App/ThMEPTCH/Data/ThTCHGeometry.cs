@@ -31,10 +31,14 @@ public static partial class ThTCHGeometryReflection {
           "ZGF0YTMxGAkgASgBEg4KBmRhdGEzMhgKIAEoARIOCgZkYXRhMzMYCyABKAES",
           "DgoGZGF0YTM0GAwgASgBEg4KBmRhdGE0MRgNIAEoARIOCgZkYXRhNDIYDiAB",
           "KAESDgoGZGF0YTQzGA8gASgBEg4KBmRhdGE0NBgQIAEoASIdCgxUaFRDSFNl",
-          "Z21lbnQSDQoFaW5kZXgYASADKA0ieAoNVGhUQ0hQb2x5bGluZRIdCgZwb2lu",
-          "dHMYASADKAsyDS5UaFRDSFBvaW50M2QSHwoIc2VnbWVudHMYAiADKAsyDS5U",
-          "aFRDSFNlZ21lbnQSJwoPaW5uZXJfcG9seWxpbmVzGAMgAygLMg4uVGhUQ0hQ",
-          "b2x5bGluZWIGcHJvdG8z"));
+          "Z21lbnQSDQoFaW5kZXgYASADKA0iPAoLVGhUQ0hDaXJjbGUSHQoGY2VudGVy",
+          "GAEgASgLMg0uVGhUQ0hQb2ludDNkEg4KBnJhZGl1cxgCIAEoASJLCglUaFRD",
+          "SExpbmUSHwoIc3RhcnRfcHQYASABKAsyDS5UaFRDSFBvaW50M2QSHQoGZW5k",
+          "X3B0GAIgASgLMg0uVGhUQ0hQb2ludDNkImIKDVRoVENIUG9seWxpbmUSEQoJ",
+          "aXNfY2xvc2VkGAEgASgIEh0KBnBvaW50cxgCIAMoCzINLlRoVENIUG9pbnQz",
+          "ZBIfCghzZWdtZW50cxgDIAMoCzINLlRoVENIU2VnbWVudCJNCg1UaFRDSE1Q",
+          "b2x5Z29uEh0KBXNoZWxsGAEgASgLMg4uVGhUQ0hQb2x5bGluZRIdCgVob2xl",
+          "cxgCIAMoCzIOLlRoVENIUG9seWxpbmViBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -42,7 +46,10 @@ public static partial class ThTCHGeometryReflection {
           new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHVector3d), global::ThTCHVector3d.Parser, new[]{ "X", "Y", "Z" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHMatrix3d), global::ThTCHMatrix3d.Parser, new[]{ "Data11", "Data12", "Data13", "Data14", "Data21", "Data22", "Data23", "Data24", "Data31", "Data32", "Data33", "Data34", "Data41", "Data42", "Data43", "Data44" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHSegment), global::ThTCHSegment.Parser, new[]{ "Index" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHPolyline), global::ThTCHPolyline.Parser, new[]{ "Points", "Segments", "InnerPolylines" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHCircle), global::ThTCHCircle.Parser, new[]{ "Center", "Radius" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHLine), global::ThTCHLine.Parser, new[]{ "StartPt", "EndPt" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHPolyline), global::ThTCHPolyline.Parser, new[]{ "IsClosed", "Points", "Segments" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHMPolygon), global::ThTCHMPolygon.Parser, new[]{ "Shell", "Holes" }, null, null, null, null)
         }));
   }
   #endregion
@@ -1565,6 +1572,485 @@ public sealed partial class ThTCHSegment : pb::IMessage<ThTCHSegment>
 
 }
 
+public sealed partial class ThTCHCircle : pb::IMessage<ThTCHCircle>
+#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    , pb::IBufferMessage
+#endif
+{
+  private static readonly pb::MessageParser<ThTCHCircle> _parser = new pb::MessageParser<ThTCHCircle>(() => new ThTCHCircle());
+  private pb::UnknownFieldSet _unknownFields;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public static pb::MessageParser<ThTCHCircle> Parser { get { return _parser; } }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public static pbr::MessageDescriptor Descriptor {
+    get { return global::ThTCHGeometryReflection.Descriptor.MessageTypes[4]; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  pbr::MessageDescriptor pb::IMessage.Descriptor {
+    get { return Descriptor; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHCircle() {
+    OnConstruction();
+  }
+
+  partial void OnConstruction();
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHCircle(ThTCHCircle other) : this() {
+    center_ = other.center_ != null ? other.center_.Clone() : null;
+    radius_ = other.radius_;
+    _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHCircle Clone() {
+    return new ThTCHCircle(this);
+  }
+
+  /// <summary>Field number for the "center" field.</summary>
+  public const int CenterFieldNumber = 1;
+  private global::ThTCHPoint3d center_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThTCHPoint3d Center {
+    get { return center_; }
+    set {
+      center_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "radius" field.</summary>
+  public const int RadiusFieldNumber = 2;
+  private double radius_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public double Radius {
+    get { return radius_; }
+    set {
+      radius_ = value;
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override bool Equals(object other) {
+    return Equals(other as ThTCHCircle);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool Equals(ThTCHCircle other) {
+    if (ReferenceEquals(other, null)) {
+      return false;
+    }
+    if (ReferenceEquals(other, this)) {
+      return true;
+    }
+    if (!object.Equals(Center, other.Center)) return false;
+    if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Radius, other.Radius)) return false;
+    return Equals(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override int GetHashCode() {
+    int hash = 1;
+    if (center_ != null) hash ^= Center.GetHashCode();
+    if (Radius != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Radius);
+    if (_unknownFields != null) {
+      hash ^= _unknownFields.GetHashCode();
+    }
+    return hash;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override string ToString() {
+    return pb::JsonFormatter.ToDiagnosticString(this);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void WriteTo(pb::CodedOutputStream output) {
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    output.WriteRawMessage(this);
+  #else
+    if (center_ != null) {
+      output.WriteRawTag(10);
+      output.WriteMessage(Center);
+    }
+    if (Radius != 0D) {
+      output.WriteRawTag(17);
+      output.WriteDouble(Radius);
+    }
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(output);
+    }
+  #endif
+  }
+
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+    if (center_ != null) {
+      output.WriteRawTag(10);
+      output.WriteMessage(Center);
+    }
+    if (Radius != 0D) {
+      output.WriteRawTag(17);
+      output.WriteDouble(Radius);
+    }
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(ref output);
+    }
+  }
+  #endif
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public int CalculateSize() {
+    int size = 0;
+    if (center_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Center);
+    }
+    if (Radius != 0D) {
+      size += 1 + 8;
+    }
+    if (_unknownFields != null) {
+      size += _unknownFields.CalculateSize();
+    }
+    return size;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void MergeFrom(ThTCHCircle other) {
+    if (other == null) {
+      return;
+    }
+    if (other.center_ != null) {
+      if (center_ == null) {
+        Center = new global::ThTCHPoint3d();
+      }
+      Center.MergeFrom(other.Center);
+    }
+    if (other.Radius != 0D) {
+      Radius = other.Radius;
+    }
+    _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void MergeFrom(pb::CodedInputStream input) {
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    input.ReadRawMessage(this);
+  #else
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+          break;
+        case 10: {
+          if (center_ == null) {
+            Center = new global::ThTCHPoint3d();
+          }
+          input.ReadMessage(Center);
+          break;
+        }
+        case 17: {
+          Radius = input.ReadDouble();
+          break;
+        }
+      }
+    }
+  #endif
+  }
+
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+          break;
+        case 10: {
+          if (center_ == null) {
+            Center = new global::ThTCHPoint3d();
+          }
+          input.ReadMessage(Center);
+          break;
+        }
+        case 17: {
+          Radius = input.ReadDouble();
+          break;
+        }
+      }
+    }
+  }
+  #endif
+
+}
+
+public sealed partial class ThTCHLine : pb::IMessage<ThTCHLine>
+#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    , pb::IBufferMessage
+#endif
+{
+  private static readonly pb::MessageParser<ThTCHLine> _parser = new pb::MessageParser<ThTCHLine>(() => new ThTCHLine());
+  private pb::UnknownFieldSet _unknownFields;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public static pb::MessageParser<ThTCHLine> Parser { get { return _parser; } }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public static pbr::MessageDescriptor Descriptor {
+    get { return global::ThTCHGeometryReflection.Descriptor.MessageTypes[5]; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  pbr::MessageDescriptor pb::IMessage.Descriptor {
+    get { return Descriptor; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHLine() {
+    OnConstruction();
+  }
+
+  partial void OnConstruction();
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHLine(ThTCHLine other) : this() {
+    startPt_ = other.startPt_ != null ? other.startPt_.Clone() : null;
+    endPt_ = other.endPt_ != null ? other.endPt_.Clone() : null;
+    _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHLine Clone() {
+    return new ThTCHLine(this);
+  }
+
+  /// <summary>Field number for the "start_pt" field.</summary>
+  public const int StartPtFieldNumber = 1;
+  private global::ThTCHPoint3d startPt_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThTCHPoint3d StartPt {
+    get { return startPt_; }
+    set {
+      startPt_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "end_pt" field.</summary>
+  public const int EndPtFieldNumber = 2;
+  private global::ThTCHPoint3d endPt_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThTCHPoint3d EndPt {
+    get { return endPt_; }
+    set {
+      endPt_ = value;
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override bool Equals(object other) {
+    return Equals(other as ThTCHLine);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool Equals(ThTCHLine other) {
+    if (ReferenceEquals(other, null)) {
+      return false;
+    }
+    if (ReferenceEquals(other, this)) {
+      return true;
+    }
+    if (!object.Equals(StartPt, other.StartPt)) return false;
+    if (!object.Equals(EndPt, other.EndPt)) return false;
+    return Equals(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override int GetHashCode() {
+    int hash = 1;
+    if (startPt_ != null) hash ^= StartPt.GetHashCode();
+    if (endPt_ != null) hash ^= EndPt.GetHashCode();
+    if (_unknownFields != null) {
+      hash ^= _unknownFields.GetHashCode();
+    }
+    return hash;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override string ToString() {
+    return pb::JsonFormatter.ToDiagnosticString(this);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void WriteTo(pb::CodedOutputStream output) {
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    output.WriteRawMessage(this);
+  #else
+    if (startPt_ != null) {
+      output.WriteRawTag(10);
+      output.WriteMessage(StartPt);
+    }
+    if (endPt_ != null) {
+      output.WriteRawTag(18);
+      output.WriteMessage(EndPt);
+    }
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(output);
+    }
+  #endif
+  }
+
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+    if (startPt_ != null) {
+      output.WriteRawTag(10);
+      output.WriteMessage(StartPt);
+    }
+    if (endPt_ != null) {
+      output.WriteRawTag(18);
+      output.WriteMessage(EndPt);
+    }
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(ref output);
+    }
+  }
+  #endif
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public int CalculateSize() {
+    int size = 0;
+    if (startPt_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(StartPt);
+    }
+    if (endPt_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(EndPt);
+    }
+    if (_unknownFields != null) {
+      size += _unknownFields.CalculateSize();
+    }
+    return size;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void MergeFrom(ThTCHLine other) {
+    if (other == null) {
+      return;
+    }
+    if (other.startPt_ != null) {
+      if (startPt_ == null) {
+        StartPt = new global::ThTCHPoint3d();
+      }
+      StartPt.MergeFrom(other.StartPt);
+    }
+    if (other.endPt_ != null) {
+      if (endPt_ == null) {
+        EndPt = new global::ThTCHPoint3d();
+      }
+      EndPt.MergeFrom(other.EndPt);
+    }
+    _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void MergeFrom(pb::CodedInputStream input) {
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    input.ReadRawMessage(this);
+  #else
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+          break;
+        case 10: {
+          if (startPt_ == null) {
+            StartPt = new global::ThTCHPoint3d();
+          }
+          input.ReadMessage(StartPt);
+          break;
+        }
+        case 18: {
+          if (endPt_ == null) {
+            EndPt = new global::ThTCHPoint3d();
+          }
+          input.ReadMessage(EndPt);
+          break;
+        }
+      }
+    }
+  #endif
+  }
+
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+          break;
+        case 10: {
+          if (startPt_ == null) {
+            StartPt = new global::ThTCHPoint3d();
+          }
+          input.ReadMessage(StartPt);
+          break;
+        }
+        case 18: {
+          if (endPt_ == null) {
+            EndPt = new global::ThTCHPoint3d();
+          }
+          input.ReadMessage(EndPt);
+          break;
+        }
+      }
+    }
+  }
+  #endif
+
+}
+
 public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
 #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     , pb::IBufferMessage
@@ -1579,7 +2065,7 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ThTCHGeometryReflection.Descriptor.MessageTypes[4]; }
+    get { return global::ThTCHGeometryReflection.Descriptor.MessageTypes[6]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1599,9 +2085,9 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThTCHPolyline(ThTCHPolyline other) : this() {
+    isClosed_ = other.isClosed_;
     points_ = other.points_.Clone();
     segments_ = other.segments_.Clone();
-    innerPolylines_ = other.innerPolylines_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -1611,10 +2097,22 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
     return new ThTCHPolyline(this);
   }
 
+  /// <summary>Field number for the "is_closed" field.</summary>
+  public const int IsClosedFieldNumber = 1;
+  private bool isClosed_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool IsClosed {
+    get { return isClosed_; }
+    set {
+      isClosed_ = value;
+    }
+  }
+
   /// <summary>Field number for the "points" field.</summary>
-  public const int PointsFieldNumber = 1;
+  public const int PointsFieldNumber = 2;
   private static readonly pb::FieldCodec<global::ThTCHPoint3d> _repeated_points_codec
-      = pb::FieldCodec.ForMessage(10, global::ThTCHPoint3d.Parser);
+      = pb::FieldCodec.ForMessage(18, global::ThTCHPoint3d.Parser);
   private readonly pbc::RepeatedField<global::ThTCHPoint3d> points_ = new pbc::RepeatedField<global::ThTCHPoint3d>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -1623,25 +2121,14 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   }
 
   /// <summary>Field number for the "segments" field.</summary>
-  public const int SegmentsFieldNumber = 2;
+  public const int SegmentsFieldNumber = 3;
   private static readonly pb::FieldCodec<global::ThTCHSegment> _repeated_segments_codec
-      = pb::FieldCodec.ForMessage(18, global::ThTCHSegment.Parser);
+      = pb::FieldCodec.ForMessage(26, global::ThTCHSegment.Parser);
   private readonly pbc::RepeatedField<global::ThTCHSegment> segments_ = new pbc::RepeatedField<global::ThTCHSegment>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public pbc::RepeatedField<global::ThTCHSegment> Segments {
     get { return segments_; }
-  }
-
-  /// <summary>Field number for the "inner_polylines" field.</summary>
-  public const int InnerPolylinesFieldNumber = 3;
-  private static readonly pb::FieldCodec<global::ThTCHPolyline> _repeated_innerPolylines_codec
-      = pb::FieldCodec.ForMessage(26, global::ThTCHPolyline.Parser);
-  private readonly pbc::RepeatedField<global::ThTCHPolyline> innerPolylines_ = new pbc::RepeatedField<global::ThTCHPolyline>();
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public pbc::RepeatedField<global::ThTCHPolyline> InnerPolylines {
-    get { return innerPolylines_; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1659,9 +2146,9 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
     if (ReferenceEquals(other, this)) {
       return true;
     }
+    if (IsClosed != other.IsClosed) return false;
     if(!points_.Equals(other.points_)) return false;
     if(!segments_.Equals(other.segments_)) return false;
-    if(!innerPolylines_.Equals(other.innerPolylines_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -1669,9 +2156,9 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override int GetHashCode() {
     int hash = 1;
+    if (IsClosed != false) hash ^= IsClosed.GetHashCode();
     hash ^= points_.GetHashCode();
     hash ^= segments_.GetHashCode();
-    hash ^= innerPolylines_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -1690,9 +2177,12 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     output.WriteRawMessage(this);
   #else
+    if (IsClosed != false) {
+      output.WriteRawTag(8);
+      output.WriteBool(IsClosed);
+    }
     points_.WriteTo(output, _repeated_points_codec);
     segments_.WriteTo(output, _repeated_segments_codec);
-    innerPolylines_.WriteTo(output, _repeated_innerPolylines_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -1703,9 +2193,12 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+    if (IsClosed != false) {
+      output.WriteRawTag(8);
+      output.WriteBool(IsClosed);
+    }
     points_.WriteTo(ref output, _repeated_points_codec);
     segments_.WriteTo(ref output, _repeated_segments_codec);
-    innerPolylines_.WriteTo(ref output, _repeated_innerPolylines_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -1716,9 +2209,11 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public int CalculateSize() {
     int size = 0;
+    if (IsClosed != false) {
+      size += 1 + 1;
+    }
     size += points_.CalculateSize(_repeated_points_codec);
     size += segments_.CalculateSize(_repeated_segments_codec);
-    size += innerPolylines_.CalculateSize(_repeated_innerPolylines_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -1731,9 +2226,237 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
     if (other == null) {
       return;
     }
+    if (other.IsClosed != false) {
+      IsClosed = other.IsClosed;
+    }
     points_.Add(other.points_);
     segments_.Add(other.segments_);
-    innerPolylines_.Add(other.innerPolylines_);
+    _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void MergeFrom(pb::CodedInputStream input) {
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    input.ReadRawMessage(this);
+  #else
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+          break;
+        case 8: {
+          IsClosed = input.ReadBool();
+          break;
+        }
+        case 18: {
+          points_.AddEntriesFrom(input, _repeated_points_codec);
+          break;
+        }
+        case 26: {
+          segments_.AddEntriesFrom(input, _repeated_segments_codec);
+          break;
+        }
+      }
+    }
+  #endif
+  }
+
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  void pb::IBufferMessage.InternalMergeFrom(ref pb::ParseContext input) {
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
+          break;
+        case 8: {
+          IsClosed = input.ReadBool();
+          break;
+        }
+        case 18: {
+          points_.AddEntriesFrom(ref input, _repeated_points_codec);
+          break;
+        }
+        case 26: {
+          segments_.AddEntriesFrom(ref input, _repeated_segments_codec);
+          break;
+        }
+      }
+    }
+  }
+  #endif
+
+}
+
+public sealed partial class ThTCHMPolygon : pb::IMessage<ThTCHMPolygon>
+#if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    , pb::IBufferMessage
+#endif
+{
+  private static readonly pb::MessageParser<ThTCHMPolygon> _parser = new pb::MessageParser<ThTCHMPolygon>(() => new ThTCHMPolygon());
+  private pb::UnknownFieldSet _unknownFields;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public static pb::MessageParser<ThTCHMPolygon> Parser { get { return _parser; } }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public static pbr::MessageDescriptor Descriptor {
+    get { return global::ThTCHGeometryReflection.Descriptor.MessageTypes[7]; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  pbr::MessageDescriptor pb::IMessage.Descriptor {
+    get { return Descriptor; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHMPolygon() {
+    OnConstruction();
+  }
+
+  partial void OnConstruction();
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHMPolygon(ThTCHMPolygon other) : this() {
+    shell_ = other.shell_ != null ? other.shell_.Clone() : null;
+    holes_ = other.holes_.Clone();
+    _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public ThTCHMPolygon Clone() {
+    return new ThTCHMPolygon(this);
+  }
+
+  /// <summary>Field number for the "shell" field.</summary>
+  public const int ShellFieldNumber = 1;
+  private global::ThTCHPolyline shell_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThTCHPolyline Shell {
+    get { return shell_; }
+    set {
+      shell_ = value;
+    }
+  }
+
+  /// <summary>Field number for the "holes" field.</summary>
+  public const int HolesFieldNumber = 2;
+  private static readonly pb::FieldCodec<global::ThTCHPolyline> _repeated_holes_codec
+      = pb::FieldCodec.ForMessage(18, global::ThTCHPolyline.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHPolyline> holes_ = new pbc::RepeatedField<global::ThTCHPolyline>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThTCHPolyline> Holes {
+    get { return holes_; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override bool Equals(object other) {
+    return Equals(other as ThTCHMPolygon);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool Equals(ThTCHMPolygon other) {
+    if (ReferenceEquals(other, null)) {
+      return false;
+    }
+    if (ReferenceEquals(other, this)) {
+      return true;
+    }
+    if (!object.Equals(Shell, other.Shell)) return false;
+    if(!holes_.Equals(other.holes_)) return false;
+    return Equals(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override int GetHashCode() {
+    int hash = 1;
+    if (shell_ != null) hash ^= Shell.GetHashCode();
+    hash ^= holes_.GetHashCode();
+    if (_unknownFields != null) {
+      hash ^= _unknownFields.GetHashCode();
+    }
+    return hash;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public override string ToString() {
+    return pb::JsonFormatter.ToDiagnosticString(this);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void WriteTo(pb::CodedOutputStream output) {
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+    output.WriteRawMessage(this);
+  #else
+    if (shell_ != null) {
+      output.WriteRawTag(10);
+      output.WriteMessage(Shell);
+    }
+    holes_.WriteTo(output, _repeated_holes_codec);
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(output);
+    }
+  #endif
+  }
+
+  #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+    if (shell_ != null) {
+      output.WriteRawTag(10);
+      output.WriteMessage(Shell);
+    }
+    holes_.WriteTo(ref output, _repeated_holes_codec);
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(ref output);
+    }
+  }
+  #endif
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public int CalculateSize() {
+    int size = 0;
+    if (shell_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Shell);
+    }
+    size += holes_.CalculateSize(_repeated_holes_codec);
+    if (_unknownFields != null) {
+      size += _unknownFields.CalculateSize();
+    }
+    return size;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public void MergeFrom(ThTCHMPolygon other) {
+    if (other == null) {
+      return;
+    }
+    if (other.shell_ != null) {
+      if (shell_ == null) {
+        Shell = new global::ThTCHPolyline();
+      }
+      Shell.MergeFrom(other.Shell);
+    }
+    holes_.Add(other.holes_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -1750,15 +2473,14 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 10: {
-          points_.AddEntriesFrom(input, _repeated_points_codec);
+          if (shell_ == null) {
+            Shell = new global::ThTCHPolyline();
+          }
+          input.ReadMessage(Shell);
           break;
         }
         case 18: {
-          segments_.AddEntriesFrom(input, _repeated_segments_codec);
-          break;
-        }
-        case 26: {
-          innerPolylines_.AddEntriesFrom(input, _repeated_innerPolylines_codec);
+          holes_.AddEntriesFrom(input, _repeated_holes_codec);
           break;
         }
       }
@@ -1777,15 +2499,14 @@ public sealed partial class ThTCHPolyline : pb::IMessage<ThTCHPolyline>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
         case 10: {
-          points_.AddEntriesFrom(ref input, _repeated_points_codec);
+          if (shell_ == null) {
+            Shell = new global::ThTCHPolyline();
+          }
+          input.ReadMessage(Shell);
           break;
         }
         case 18: {
-          segments_.AddEntriesFrom(ref input, _repeated_segments_codec);
-          break;
-        }
-        case 26: {
-          innerPolylines_.AddEntriesFrom(ref input, _repeated_innerPolylines_codec);
+          holes_.AddEntriesFrom(ref input, _repeated_holes_codec);
           break;
         }
       }

@@ -61,8 +61,23 @@ message ThTCHSegment {
     repeated uint32 index = 1;
 }
 
+message ThTCHCircle{
+    ThTCHPoint3d center = 1;
+    double radius = 2;
+}
+
+message ThTCHLine{
+    ThTCHPoint3d start_pt = 1;
+    ThTCHPoint3d end_pt = 2;
+}
+
 message ThTCHPolyline {
-    repeated ThTCHPoint3d points = 1;
-    repeated ThTCHSegment segments = 2; 
-    repeated ThTCHPolyline inner_polylines = 3;
+    bool is_closed = 1;
+    repeated ThTCHPoint3d points = 2;
+    repeated ThTCHSegment segments = 3;
+}
+
+message ThTCHMPolygon {
+    ThTCHPolyline shell = 1;
+    repeated ThTCHPolyline holes = 2;
 }

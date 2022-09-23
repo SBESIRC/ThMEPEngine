@@ -26,11 +26,43 @@ namespace ThMEPTCH.CAD
 
     public static class ThProtoBufExtension
     {
+        public static ThTCHPolyline ToTCHPolyline(this Line line)
+        {
+            ThTCHPolyline tchPolyline = new ThTCHPolyline();
+            if (line.IsNull())
+                return tchPolyline;
+            tchPolyline.IsClosed = false;
+            tchPolyline.Points.Add(line.StartPoint.ToTCHPoint());
+            tchPolyline.Points.Add(line.EndPoint.ToTCHPoint());
+            var tchSegment = new ThTCHSegment();
+            tchSegment.Index.Add(0);
+            tchSegment.Index.Add(1);
+            tchPolyline.Segments.Add(tchSegment);
+            return tchPolyline;
+        }
+
+        public static ThTCHMPolygon ToTCHMPolygon(this Polyline polyline)
+        {
+            ThTCHMPolygon MPolygon = new ThTCHMPolygon();
+            MPolygon.Shell = polyline.ToTCHPolyline();
+            return MPolygon;
+        }
+
+        public static ThTCHMPolygon ToTCHMPolygon(this MPolygon mPolygon)
+        {
+            ThTCHMPolygon tchMPolygon = new ThTCHMPolygon();
+            tchMPolygon.Shell = mPolygon.Shell().ToTCHPolyline();
+            mPolygon.Holes().ForEach(o => tchMPolygon.Holes.Add(o.ToTCHPolyline()));
+            return tchMPolygon;
+        }
+
         public static ThTCHPolyline ToTCHPolyline(this Polyline polyline)
         {
             ThTCHPolyline tchPolyline = new ThTCHPolyline();
             if (polyline.IsNull())
                 return tchPolyline;
+            tchPolyline.IsClosed = polyline.Closed;
+
             tchPolyline.Points.Add(polyline.StartPoint.ToTCHPoint());
             var segments = new PolylineSegmentCollection(polyline);
             uint ptIndex = 0;
@@ -72,6 +104,14 @@ namespace ThMEPTCH.CAD
             }
             return tchPolyline;
         }
+        public static Polyline ToPolyline(this ThTCHMPolygon tchMPolygon)
+        {
+            if(!tchMPolygon.IsNull() && (tchMPolygon.Holes.IsNull() || tchMPolygon.Holes.Count == 0))
+            {
+                return tchMPolygon.Shell.ToPolyline();
+            }
+            return null;
+        }
 
         public static Polyline ToPolyline(this ThTCHPolyline tchPolyline)
         {
@@ -82,9 +122,14 @@ namespace ThMEPTCH.CAD
             Polyline p = new Polyline();
             p.AddVertexAt(0, tchPolyline.Points[int.Parse(tchPolyline.Segments.First().Index.First().ToString())].ToPoint2d(), 0, 0, 0);
             int index = 1;
-            foreach (var segment in tchPolyline.Segments)
+            for (int i = 0; i < tchPolyline.Segments.Count; i++)
             {
-                if (segment.Index.Count == 2)
+                var segment = tchPolyline.Segments[i];
+                if (i == tchPolyline.Segments.Count - 1 && tchPolyline.IsClosed)
+                {
+                    //do not
+                }
+                else if (segment.Index.Count == 2)
                 {
                     p.AddVertexAt(index++, tchPolyline.Points[int.Parse(segment.Index.Last().ToString())].ToPoint2d(), 0, 0, 0);
                 }
@@ -99,6 +144,12 @@ namespace ThMEPTCH.CAD
                 }
             }
             return p;
+        }
+
+        public static void ZOffSet(this ThTCHMPolygon tchMPolygon, double offset)
+        {
+            tchMPolygon.Shell.ZOffSet(offset);
+            tchMPolygon.Holes.ForEach(o => o.ZOffSet(offset));
         }
 
         public static void ZOffSet(this ThTCHPolyline tchPolyline, double offset)

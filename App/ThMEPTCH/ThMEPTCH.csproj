@@ -76,6 +76,9 @@
     <Compile Include="CAD\ThDBVisitorExtension.cs" />
     <Compile Include="CAD\ThTArchWallExtension.cs" />
     <Compile Include="CAD\ThTCHEDbExtension.cs" />
+    <Compile Include="Data\ThCircleLableGroupData.cs" />
+    <Compile Include="Data\ThDimensionGroupData.cs" />
+    <Compile Include="Data\ThGridLineSyetemData.cs" />
     <Compile Include="Data\ThSUBuildingElementData.cs" />
     <Compile Include="Data\ThSUCompDefinitionData.cs" />
     <Compile Include="Data\ThSUComponentData.cs" />
