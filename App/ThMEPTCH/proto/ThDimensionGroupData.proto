@@ -2,7 +2,7 @@ syntax = "proto3";
 import "ThTCHRootData.proto";
 import "ThTCHGeometry.proto";
 
-message AlignedDimension{
+message ThAlignedDimension{
     ThTCHRootData root = 1;
     ThTCHPoint3d x_line1_point = 2;
     ThTCHPoint3d x_line2_point = 3;
@@ -12,5 +12,5 @@ message AlignedDimension{
 
 message ThDimensionGroupData {
     ThTCHRootData root = 1;
-    repeated AlignedDimension dimensions = 2;
+    repeated ThAlignedDimension dimensions = 2;
 }

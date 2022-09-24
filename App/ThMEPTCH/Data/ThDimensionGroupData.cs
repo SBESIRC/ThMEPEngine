@@ -23,17 +23,17 @@ public static partial class ThDimensionGroupDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChpUaERpbWVuc2lvbkdyb3VwRGF0YS5wcm90bxoTVGhUQ0hSb290RGF0YS5w",
-          "cm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90byKxAQoQQWxpZ25lZERpbWVuc2lv",
-          "bhIcCgRyb290GAEgASgLMg4uVGhUQ0hSb290RGF0YRIkCg14X2xpbmUxX3Bv",
-          "aW50GAIgASgLMg0uVGhUQ0hQb2ludDNkEiQKDXhfbGluZTJfcG9pbnQYAyAB",
-          "KAsyDS5UaFRDSFBvaW50M2QSJQoOZGltX2xpbmVfcG9pbnQYBCABKAsyDS5U",
-          "aFRDSFBvaW50M2QSDAoEbWFyaxgFIAEoCSJbChRUaERpbWVuc2lvbkdyb3Vw",
-          "RGF0YRIcCgRyb290GAEgASgLMg4uVGhUQ0hSb290RGF0YRIlCgpkaW1lbnNp",
-          "b25zGAIgAygLMhEuQWxpZ25lZERpbWVuc2lvbmIGcHJvdG8z"));
+          "cm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90byKzAQoSVGhBbGlnbmVkRGltZW5z",
+          "aW9uEhwKBHJvb3QYASABKAsyDi5UaFRDSFJvb3REYXRhEiQKDXhfbGluZTFf",
+          "cG9pbnQYAiABKAsyDS5UaFRDSFBvaW50M2QSJAoNeF9saW5lMl9wb2ludBgD",
+          "IAEoCzINLlRoVENIUG9pbnQzZBIlCg5kaW1fbGluZV9wb2ludBgEIAEoCzIN",
+          "LlRoVENIUG9pbnQzZBIMCgRtYXJrGAUgASgJIl0KFFRoRGltZW5zaW9uR3Jv",
+          "dXBEYXRhEhwKBHJvb3QYASABKAsyDi5UaFRDSFJvb3REYXRhEicKCmRpbWVu",
+          "c2lvbnMYAiADKAsyEy5UaEFsaWduZWREaW1lbnNpb25iBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::AlignedDimension), global::AlignedDimension.Parser, new[]{ "Root", "XLine1Point", "XLine2Point", "DimLinePoint", "Mark" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThAlignedDimension), global::ThAlignedDimension.Parser, new[]{ "Root", "XLine1Point", "XLine2Point", "DimLinePoint", "Mark" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ThDimensionGroupData), global::ThDimensionGroupData.Parser, new[]{ "Root", "Dimensions" }, null, null, null, null)
         }));
   }
@@ -41,16 +41,16 @@ public static partial class ThDimensionGroupDataReflection {
 
 }
 #region Messages
-public sealed partial class AlignedDimension : pb::IMessage<AlignedDimension>
+public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension>
 #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     , pb::IBufferMessage
 #endif
 {
-  private static readonly pb::MessageParser<AlignedDimension> _parser = new pb::MessageParser<AlignedDimension>(() => new AlignedDimension());
+  private static readonly pb::MessageParser<ThAlignedDimension> _parser = new pb::MessageParser<ThAlignedDimension>(() => new ThAlignedDimension());
   private pb::UnknownFieldSet _unknownFields;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public static pb::MessageParser<AlignedDimension> Parser { get { return _parser; } }
+  public static pb::MessageParser<ThAlignedDimension> Parser { get { return _parser; } }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -66,7 +66,7 @@ public sealed partial class AlignedDimension : pb::IMessage<AlignedDimension>
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public AlignedDimension() {
+  public ThAlignedDimension() {
     OnConstruction();
   }
 
@@ -74,7 +74,7 @@ public sealed partial class AlignedDimension : pb::IMessage<AlignedDimension>
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public AlignedDimension(AlignedDimension other) : this() {
+  public ThAlignedDimension(ThAlignedDimension other) : this() {
     root_ = other.root_ != null ? other.root_.Clone() : null;
     xLine1Point_ = other.xLine1Point_ != null ? other.xLine1Point_.Clone() : null;
     xLine2Point_ = other.xLine2Point_ != null ? other.xLine2Point_.Clone() : null;
@@ -85,8 +85,8 @@ public sealed partial class AlignedDimension : pb::IMessage<AlignedDimension>
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public AlignedDimension Clone() {
-    return new AlignedDimension(this);
+  public ThAlignedDimension Clone() {
+    return new ThAlignedDimension(this);
   }
 
   /// <summary>Field number for the "root" field.</summary>
@@ -152,12 +152,12 @@ public sealed partial class AlignedDimension : pb::IMessage<AlignedDimension>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
-    return Equals(other as AlignedDimension);
+    return Equals(other as ThAlignedDimension);
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public bool Equals(AlignedDimension other) {
+  public bool Equals(ThAlignedDimension other) {
     if (ReferenceEquals(other, null)) {
       return false;
     }
@@ -282,7 +282,7 @@ public sealed partial class AlignedDimension : pb::IMessage<AlignedDimension>
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public void MergeFrom(AlignedDimension other) {
+  public void MergeFrom(ThAlignedDimension other) {
     if (other == null) {
       return;
     }
@@ -473,12 +473,12 @@ public sealed partial class ThDimensionGroupData : pb::IMessage<ThDimensionGroup
 
   /// <summary>Field number for the "dimensions" field.</summary>
   public const int DimensionsFieldNumber = 2;
-  private static readonly pb::FieldCodec<global::AlignedDimension> _repeated_dimensions_codec
-      = pb::FieldCodec.ForMessage(18, global::AlignedDimension.Parser);
-  private readonly pbc::RepeatedField<global::AlignedDimension> dimensions_ = new pbc::RepeatedField<global::AlignedDimension>();
+  private static readonly pb::FieldCodec<global::ThAlignedDimension> _repeated_dimensions_codec
+      = pb::FieldCodec.ForMessage(18, global::ThAlignedDimension.Parser);
+  private readonly pbc::RepeatedField<global::ThAlignedDimension> dimensions_ = new pbc::RepeatedField<global::ThAlignedDimension>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public pbc::RepeatedField<global::AlignedDimension> Dimensions {
+  public pbc::RepeatedField<global::ThAlignedDimension> Dimensions {
     get { return dimensions_; }
   }
 
