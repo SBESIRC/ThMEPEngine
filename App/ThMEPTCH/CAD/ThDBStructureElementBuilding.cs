@@ -226,7 +226,7 @@ namespace ThMEPTCH.CAD
         {
             List<THStructureBeam> result = new List<THStructureBeam>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
-            var beamInfoQueue = new Queue<THStructureDBText>(beamMarks.Where(o => o.Content.Contains('x')));
+            var beamInfoQueue = new Queue<THStructureDBText>(beamMarks.Where(o => o.Content.Contains('x') || o.Content.Contains('X') || o.Content.Contains('×')));
             var beamBGInfos = beamMarks.Where(o => o.Content.Contains("BG"));
             var beamBGInfoDic = beamBGInfos.ToDictionary(key => key.Point.TransformBy(Matrix3d.Displacement(key.Vector * 250)), value => value);
             var markedBeams = new List<Line>();
@@ -255,7 +255,9 @@ namespace ThMEPTCH.CAD
                     if (markLines.Count() == 1)
                     {
                         var line = markLines.First();
-                        var beamContents = beamInfo.Content.Split('x');
+                        var beamContents = beamInfo.Content.Contains('x') ? beamInfo.Content.Split('x') :
+                            beamInfo.Content.Contains('X') ? beamInfo.Content.Split('X') :
+                            beamInfo.Content.Contains('×') ? beamInfo.Content.Split('×') : new[] { "0", "0" };
                         double.TryParse(beamContents[0],out double beamWidth);
                         double.TryParse(beamContents[1], out double beamHeight);
                         var pl = line.ExtendLine(-100).Buffer(beamWidth + 15);
