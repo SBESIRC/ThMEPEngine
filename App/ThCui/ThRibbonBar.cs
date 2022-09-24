@@ -688,12 +688,12 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 碰头定位
+                // 喷头定位
                 var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("碰头定位",
-                    "天华碰头定位",
+                subRow.AddNewButton("喷头定位",
+                    "天华喷头定位",
                     "THPLBZ",
-                    "天华碰头定位",
+                    "天华喷头定位",
                     "IDI_THCAD_THPLBZ_SMALL",
                     "IDI_THCAD_THPLBZ_LARGE",
                     RibbonButtonStyle.SmallWithText);

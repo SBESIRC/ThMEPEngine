@@ -115,7 +115,7 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
-          - text: "碰头定位"
+          - text: "喷头定位"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "喷淋系统"
             attributes: { "IsVisible": true, "IsEnabled": true }
