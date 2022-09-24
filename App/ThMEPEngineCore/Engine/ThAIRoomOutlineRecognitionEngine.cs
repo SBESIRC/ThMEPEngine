@@ -13,12 +13,10 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThAIRoomOutlineExtractionEngine : ThSpatialElementExtractionEngine
     {
-        public bool IsSupportMPolygon { get; set; } = false;
         public override void ExtractFromMS(Database database)
         {
             var visitor = new ThAIRoomOutlineExtractionVisitor()
             {
-                IsSupportMPolygon = this.IsSupportMPolygon,
                 LayerFilter = ThRoomLayerManager.CurveModelSpaceLayers(database),
             };
             var extractor = new ThSpatialElementExtractor();
@@ -31,7 +29,6 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThAIRoomOutlineExtractionVisitor()
             {
-                IsSupportMPolygon = this.IsSupportMPolygon,
                 LayerFilter = ThRoomLayerManager.CurveModelSpaceLayers(database),
             };
             var extractor = new ThSpatialElementExtractor();
@@ -48,53 +45,49 @@ namespace ThMEPEngineCore.Engine
 
     public class ThAIRoomOutlineRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        public bool IsSupportMPolygon { get; set; } = false;
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThAIRoomOutlineExtractionEngine()
-            { 
-                IsSupportMPolygon =this.IsSupportMPolygon,
-            };
+            var engine = new ThAIRoomOutlineExtractionEngine();
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThAIRoomOutlineExtractionEngine()
-            {
-                IsSupportMPolygon = this.IsSupportMPolygon,
-            };
+            var engine = new ThAIRoomOutlineExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
         {
-            var polygons = new DBObjectCollection();
+            var curves = new DBObjectCollection();
             var objs = datas.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                polygons = spatialIndex.SelectCrossingPolygon(polygon);
+                curves = spatialIndex.SelectCrossingPolygon(polygon);
             }
             else
             {
-                polygons = objs;
+                curves = objs;
             }               
-            if (polygons.Count > 0)
+            if (curves.Count > 0)
             {
-                var transformer = new ThMEPOriginTransformer(polygons);
-                transformer.Transform(polygons);
+                var transformer = new ThMEPOriginTransformer(curves);
+                transformer.Transform(curves);
                 var roomSimplifer = new ThRoomOutlineSimplifier();
-                roomSimplifer.MakeClosed(polygons); // 封闭
-                polygons = roomSimplifer.Normalize(polygons); // 处理狭长线
-                polygons = roomSimplifer.MakeValid(polygons); // 处理自交
-                polygons = roomSimplifer.Simplify(polygons);  // 处理简化线
-                polygons = roomSimplifer.Filter(polygons);    // 过滤面积极小的线
-                polygons = roomSimplifer.OverKill(polygons);  // 去重
-                transformer.Reset(polygons);
-                Elements.AddRange(polygons.OfType<Entity>().Select(o => ThIfcRoom.Create(o)));
+                roomSimplifer.MakeClosed(curves); // 封闭
+                curves = roomSimplifer.Normalize(curves); // 处理狭长线
+                curves = roomSimplifer.MakeValid(curves); // 处理自交
+                curves = roomSimplifer.Simplify(curves);  // 处理简化线
+                curves = roomSimplifer.Filter(curves);    // 过滤面积极小的线
+                curves = roomSimplifer.OverKill(curves);  // 去重
+                transformer.Reset(curves);
+                Elements.AddRange(curves.OfType<Polyline>().Select(o => ThIfcRoom.Create(o)));
+                var ellipseRoom = curves.OfType<Ellipse>().ToList().ToCollection();
+                transformer.Reset(ellipseRoom);
+                Elements.AddRange(ellipseRoom.OfType<Ellipse>().Select(o => ThIfcRoom.Create(o)));
             }
         }
 
@@ -102,5 +95,6 @@ namespace ThMEPEngineCore.Engine
         {
             throw new NotImplementedException();
         }
+
     }
 }

@@ -14,7 +14,6 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRoomBuilderEngine : IDisposable
     {
-        public bool IsSupportMPolygon { get; set; } = false;
         public ThRoomBuilderEngine()
         {
 
@@ -25,10 +24,7 @@ namespace ThMEPEngineCore.Engine
 
         public List<ThIfcRoom> BuildFromMS(Database db,Point3dCollection pts, bool isWithHole = true)
         {
-            var roomEngine = new ThAIRoomOutlineRecognitionEngine()
-            { 
-                IsSupportMPolygon = this.IsSupportMPolygon,
-            };
+            var roomEngine = new ThAIRoomOutlineRecognitionEngine();
             roomEngine.RecognizeMS(db, pts);
             var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
             var markEngine = new ThAIRoomMarkRecognitionEngine();
@@ -40,21 +36,16 @@ namespace ThMEPEngineCore.Engine
 
         public virtual void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks,bool isWithHole=true)
         {
-            var mPolygonRooms = rooms.Where(o => o.Boundary is MPolygon).ToList();
-            var otherRooms = rooms.Except(mPolygonRooms).ToList();
-            if (isWithHole)
+            if(isWithHole)
             {
-                otherRooms = BuildArea(otherRooms);
-            }
-            rooms.Clear();
-            rooms.AddRange(otherRooms);
-            rooms.AddRange(mPolygonRooms);         
+                BuildArea(rooms);
+            }            
             SpaceMatchText(BuildTextContainers(marks, rooms));
         }
 
         protected List<ThIfcRoom> BuildArea(List<ThIfcRoom> rooms)
         {
-            if (rooms.Count>0)
+            if(rooms.Count>0)
             {
                 var objs = rooms.Select(o => o.Boundary).ToCollection();
                 var bufferService = new ThNTSBufferService();
@@ -68,12 +59,10 @@ namespace ThMEPEngineCore.Engine
                 {
                     objs[i] = bufferService.Buffer(objs[i] as Entity, 1);
                 }
-                return objs.OfType<Entity>().Select(o => ThIfcRoom.Create(o)).ToList();
+                rooms.Clear();
+                objs.Cast<Entity>().ForEach(o => rooms.Add(ThIfcRoom.Create(o)));
             }
-            else
-            {
-                return new List<ThIfcRoom>();
-            }
+            return rooms;
         }
 
         protected Dictionary<ThIfcTextNote, List<ThIfcRoom>> BuildTextContainers(
@@ -86,8 +75,7 @@ namespace ThMEPEngineCore.Engine
                      m.Geometry.GetPoint3dAt(0),
                      m.Geometry.GetPoint3dAt(2));
                 var containers = SelectTextIntersectPolygon(rooms.Select(o => o.Boundary).ToList(), m.Geometry);
-                var results = new List<Entity>();
-                results.AddRange(containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)));
+                var results = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
                 results.AddRange(containers.Where(n => n is MPolygon mPolygon && mPolygon.Contains(textCenterPt)));
                 if (results.Count > 0)
                 {

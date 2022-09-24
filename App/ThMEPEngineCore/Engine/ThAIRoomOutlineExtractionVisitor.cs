@@ -8,20 +8,15 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThAIRoomOutlineExtractionVisitor : ThSpatialElementExtractionVisitor
     {
-        public bool IsSupportMPolygon { get; set; } = false;
-
         public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj)
         {
             if (dbObj is Polyline polyline)
             {
                 elements.AddRange(Handle(polyline,Matrix3d.Identity));
             }
-            else if(dbObj is MPolygon mpolygon)
+            else if (dbObj is Ellipse ellipse)
             {
-                if(IsSupportMPolygon)
-                {
-                    elements.AddRange(Handle(mpolygon, Matrix3d.Identity));
-                }
+                elements.AddRange(Handle(ellipse, Matrix3d.Identity));
             }
         }
 
@@ -70,21 +65,7 @@ namespace ThMEPEngineCore.Engine
             return results;
         }
 
-        private List<ThRawIfcSpatialElementData> Handle(MPolygon mPolygon, Matrix3d matrix)
-        {
-            var results = new List<ThRawIfcSpatialElementData>();
-            if (IsSpatialElement(mPolygon) && CheckLayerValid(mPolygon))
-            {
-                var clone = mPolygon.GetTransformedCopy(matrix);
-                if (clone != null)
-                {
-                    results.Add(CreateSpatialElementData(clone, ""));
-                }
-            }
-            return results;
-        }
-
-        private ThRawIfcSpatialElementData CreateSpatialElementData(Entity curve, string description)
+        private ThRawIfcSpatialElementData CreateSpatialElementData(Curve curve, string description)
         {
             return new ThRawIfcSpatialElementData()
             {
