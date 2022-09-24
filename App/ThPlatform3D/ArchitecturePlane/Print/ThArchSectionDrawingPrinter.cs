@@ -229,7 +229,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
             }
             else
             {
-                if (PrintParameter.DrawingScale == "1:100" && materialName != ThTextureMaterialManager.THSteelConcrete )
+                if (PrintParameter.DrawingScale == "1:100" && materialName != ThTextureMaterialManager.THReinforcedConcrete )
                 {
                     // 不要填充
                     configPair = new Tuple<HatchPrintConfig, PrintConfig>(null, configPair.Item2);

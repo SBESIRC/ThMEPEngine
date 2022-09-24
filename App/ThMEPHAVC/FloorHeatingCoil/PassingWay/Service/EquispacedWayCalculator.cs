@@ -54,6 +54,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 for (int i = left; i <= right; ++i)
                 {
                     pipe_segments[i][0].offset = i <= main_index ? (i - left) : (right - i);
+                    pipe_segments[i][0].other_offeset = i <= main_index ? (right - i) : (i - left);
                     pipe_segments[i][0].pw = pipe_inputs[i].in_buffer;
                     pipe_segments[i][0].equispaced = true;
                 }
@@ -126,8 +127,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     // set offset
                     //to do
                     pipe_segments[i][depth].offset = i <= mid_index ? (i - left) : (right - i);//当前均匀分布下第几根管线
-                    
-                    
+                    pipe_segments[i][depth].other_offeset = i <= main_index ? (right - i) : (i - left);//当前均匀分布下另一边第几根管线
+
                     // calculate the same group pipe num
                     var s = pipe_segments[i][depth - 1].start;
                     var e = pipe_segments[i][depth - 1].end;
@@ -237,6 +238,40 @@ namespace ThMEPHVAC.FloorHeatingCoil
                                             pipe_segments[index].Add(new_ps);
                                         }
                                     }
+                                }
+                            }
+                            else
+                            {
+                                // 计算最后一段的分布范围(other_axis,axis)
+                                double other_axis = 0;
+                                var s = pipe_segments[index][i - 1].start;
+                                var e = pipe_segments[index][i - 1].end;
+                                double other_offset = 0;
+                                if (pipe_segments[index][i].equispaced)
+                                    other_offset = pipe_segments[index][i].pw * (pipe_segments[index][i].other_offeset * 4 + 3);
+                                else
+                                    other_offset = pipe_segments[index][i].pw * (pipe_segments[index][i].other_offeset * 4 + 1) + room_buffer;
+                                if (pipe_segments[index][i].close_to)
+                                    other_axis = s + Math.Sign(e - s) * other_offset;
+                                else
+                                    other_axis = e - Math.Sign(e - s) * other_offset;
+                                var out_axis = dir % 2 == 0 ? pipe_inputs[index].pout.Y : pipe_inputs[index].pout.X;
+                                // 判断出口是否超出分布范围
+                                if (out_axis < Math.Min(axis, other_axis) || out_axis > Math.Max(axis, other_axis)) 
+                                {
+                                    var axis_point = dir % 2 == 0 ? new Point3d(pipe_inputs[index].pout.X, axis, 0) : new Point3d(axis, pipe_inputs[index].pout.Y, 0);
+                                    //if (pipe_inputs[index].is_out_free == false ||
+                                    //    !pipe_inputs[index].check(axis_point, pipe_segments[index][i].pw, room_buffer))
+                                    //{
+                                        if (i == 0 || pipe_segments[index][i].pw < pipe_inputs[index].out_buffer)
+                                        {
+                                            var new_ps = new PipeSegment();
+                                            new_ps.dir = PassageWayUtils.GetDirBetweenTwoPoint(axis_point, pipe_inputs[index].pout);
+                                            new_ps.start = dir % 2 == 0 ? poly.Last().X : poly.Last().Y;
+                                            new_ps.end = dir % 2 == 0 ? axis_point.X : axis_point.Y;
+                                            pipe_segments[index].Add(new_ps);
+                                        }
+                                    //}
                                 }
                             }
                         }

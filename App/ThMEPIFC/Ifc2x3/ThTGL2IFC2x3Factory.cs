@@ -270,5 +270,19 @@ namespace ThMEPIFC.Ifc2x3
                 txn.Commit();
             }
         }
+        static public void relContainsRooms2Storey(IfcStore model, List<IfcSpace> rooms, IfcBuildingStorey storey)
+        {
+            using (var txn = model.BeginTransaction("relContainsRooms2Storey"))
+            {
+                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
+                storey.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
+                foreach (var room in rooms)
+                {
+                    relContainedIn.RelatedElements.Add(room);
+                }
+                relContainedIn.RelatingStructure = storey;
+                txn.Commit();
+            }
+        }
     }
 }

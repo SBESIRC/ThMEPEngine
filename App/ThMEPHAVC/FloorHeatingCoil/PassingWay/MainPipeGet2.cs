@@ -106,7 +106,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             {
                 Point3d pin = new Point3d();     //主导管线最短路径上的点
                 Point3d point = new Point3d();   //要连接的剩余区域最外层框线上的点
-                FindPin2(MainReigonList[i], ref pin, ref point);
+                FindPin3(MainReigonList[i], ref pin, ref point);
                 if (point == new Point3d() || (point - pin).Length> Buffer*1.5) continue;
 
                 //此处是为了将最外层框线上的点生造成房间，因此point点要变换
@@ -1007,23 +1007,70 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public void FindPin3(Polyline roomPl, ref Point3d pin, ref Point3d point)
         {
             var coords = PassageWayUtils.GetPolyPoints(roomPl);
-            var mainCoords = PassageWayUtils.GetPolyPoints(MainPipeRoad);
+            coords = SmoothUtils.SmoothPoints(coords);
+            coords.Add(coords.First());
 
-            bool find = false;
-            for (int i = 1;i< mainCoords.Count-1;i++) 
+            double minDis = 100000;
+            double roadDis = 100000;
+            for (int i = 0; i < coords.Count; i++)
             {
-                Point3d nowPt = mainCoords[i];
-                Point3d tmpPoint = roomPl.GetClosestPointTo(nowPt, false);
-                if (nowPt.DistanceTo(tmpPoint) < 0.8 * Buffer) 
+                Point3d nowPt = coords[i];
+                Point3d close = MainPipeRoad.GetClosestPointTo(nowPt, false);
+                Point3d closeContrary = roomPl.GetClosestPointTo(close, false);
+
+                if (close.DistanceTo(MainPipeRoad.StartPoint) < Parameter.SuggestDistanceWall ||
+                    close.DistanceTo(MainPipeRoad.EndPoint) < Parameter.SuggestDistanceWall) continue;
+                double nowDis = close.DistanceTo(nowPt);
+                double nowDisC = closeContrary.DistanceTo(close);
+                bool rec = Math.Abs(close.X - nowPt.X) < 1 || Math.Abs(close.Y - nowPt.Y) < 1;
+                bool recC = Math.Abs(close.X - closeContrary.X) < 1 || Math.Abs(close.Y - closeContrary.Y) < 1;
+
+                double tmpRoadDis = GetDis(MainPipeRoad, close);
+                if (nowDis < minDis - 20 || nowDis < Buffer * 1.5 + 20)
                 {
-                    find = true;
-                    pin = nowPt;
-                    point = tmpPoint;
-                    break;
+                    if (tmpRoadDis < roadDis + 20) {
+                        minDis = nowDis;
+                        pin = close;
+                        point = nowPt;
+                        roadDis = tmpRoadDis;
+                    }
+                }
+                else if (Math.Abs(nowDis - minDis) < 20 && rec)
+                {
+                    bool oldRec = Math.Abs(pin.X - point.X) < 1 || Math.Abs(point.Y - pin.Y) < 1;
+                    if ((tmpRoadDis < roadDis || (!oldRec && rec)) && true)
+                    {
+                        minDis = nowDis;
+                        pin = close;
+                        point = nowPt;
+                        roadDis = tmpRoadDis;
+                    }
+                }
+
+                if (nowDisC < minDis - 20 || nowDisC < Buffer * 1.5 +20)
+                {
+                    if (tmpRoadDis < roadDis + 20)
+                    {
+                        minDis = nowDisC;
+                        pin = close;
+                        point = closeContrary;
+                        roadDis = tmpRoadDis;
+                    }
+                }
+                else if (Math.Abs(nowDisC - minDis) < 20 && recC)
+                {
+                    bool oldRec = Math.Abs(pin.X - point.X) < 1 || Math.Abs(point.Y - pin.Y) < 1;
+                    if ((tmpRoadDis < roadDis || (!oldRec && recC)) && true)
+                    {
+                        minDis = nowDisC;
+                        pin = close;
+                        point = closeContrary;
+                        roadDis = tmpRoadDis;
+                    }
                 }
             }
 
-            if (!find)
+            if (minDis == 100000)
             {
                 pin = new Point3d();
                 point = new Point3d();

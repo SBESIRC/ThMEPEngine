@@ -7,6 +7,8 @@ import "ThTCHWindowData.proto";
 import "ThTCHSlabData.proto";
 import "ThTCHRailingData.proto";
 import "ThTCHOpeningData.proto";
+import "ThTCHRoomData.proto";
+import "ThGridLineSyetemData.proto";
 
 message ThTCHBuildingStoreyData {
     ThTCHBuiltElementData build_element = 1;
@@ -35,4 +37,6 @@ message ThTCHBuildingStoreyData {
     repeated ThTCHWindowData windows = 11;
     repeated ThTCHSlabData slabs = 12;
     repeated ThTCHRailingData railings = 13;
+    repeated ThTCHRoomData rooms = 14;
+    ThGridLineSyetemData grid_line_system = 15;
 }

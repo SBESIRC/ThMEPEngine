@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using ThMEPEngineCore.Algorithm;
+
 namespace ThMEPWSS.SprinklerDim.Model
 {
     public class ThSprinklerDimension
@@ -26,5 +28,9 @@ namespace ThMEPWSS.SprinklerDim.Model
             Distance = distance;
         }
 
+        public void Reset(ThMEPOriginTransformer transformer)
+        {
+            DimPts = DimPts.Select(x => transformer.Reset(x)).ToList();
+        }
     }
 }

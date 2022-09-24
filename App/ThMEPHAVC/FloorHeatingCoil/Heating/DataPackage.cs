@@ -82,7 +82,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public static Vector3d WaterDir = new Vector3d();
         public static int WaterDirIndex = -10;
         static public Vector3d WaterOffset = new Vector3d(0, 0, 0);
-
+        static public Polyline DifferArea = new Polyline();
         //虚拟管道
         public static bool HaveVirtualPipe = false;
         public static Point3d VirtualPOut = new Point3d();
@@ -120,6 +120,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public int ChangeSDis = 0; //
         static public int Clear0 = 1; //RoomBuffer修线
         static public int Clear1 = 1; //导向路径修线
+        static public int Turning = 0; //运行轮次
     }
 
     class Parameter

@@ -60,7 +60,7 @@ namespace ThMEPTCH.Services
                             newVertices.Add(pt);
                         }
                     });
-                    first.Outline = newVertices.CreatePolyline().ToTCHPolyline();
+                    first.Outline = newVertices.CreatePolyline().ToTCHMPolygon();
 
                     spatialIndex.Update(new DBObjectCollection(), filter);
                 }

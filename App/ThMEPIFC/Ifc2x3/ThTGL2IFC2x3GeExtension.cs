@@ -6,6 +6,7 @@ using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.GeometricConstraintResource;
+using ThCADExtension;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -74,10 +75,39 @@ namespace ThMEPIFC.Ifc2x3
                 return model.Instances.New<IfcArbitraryClosedProfileDef>(d =>
                 {
                     d.ProfileType = IfcProfileTypeEnum.AREA;
-                    d.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, mp);
+                    d.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, mp);  
                 });
             }
             throw new NotSupportedException();
+        }
+
+        public static IfcArbitraryProfileDefWithVoids ToIfcArbitraryProfileDefWithVoids(this IfcStore model, Entity e)
+        {
+            if(e is MPolygon polygon)
+            {
+                return model.Instances.New<IfcArbitraryProfileDefWithVoids>(d =>
+                {
+                    d.ProfileType = IfcProfileTypeEnum.AREA;
+                    d.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, polygon.Shell());
+                    foreach (var hole in polygon.Holes())
+                    {
+                        var innerCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, hole);
+                        d.InnerCurves.Add(innerCurve);
+                    }
+                });
+            }
+            else if (e is Polyline polyline)
+            {
+                return model.Instances.New<IfcArbitraryProfileDefWithVoids>(d =>
+                {
+                    d.ProfileType = IfcProfileTypeEnum.AREA;
+                    d.OuterCurve = ThTGL2IFC2x3DbExtension.ToIfcCompositeCurve(model, polyline);
+                });
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public static IfcRectangleProfileDef ToIfcRectangleProfileDef(this IfcStore model, double xDim, double yDim)

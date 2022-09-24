@@ -98,7 +98,9 @@ namespace ThMEPWSS.DrainageSystemAG.Models
         public Point3d createPoint { get; set; }
         public EnumEquipmentType equipmentType { get; }
         public string Layer { get; }
-        public CreateResult(ObjectId id, Point3d point, EnumEquipmentType equipment, string floorUid, string tag, string layer,string _belongBlockId)
+        public string IfBlock_Name { get; }
+        public Dictionary<string, string> IfBlock_atts { get; }
+        public CreateResult(ObjectId id, Point3d point, EnumEquipmentType equipment, string floorUid, string tag, string layer, string _belongBlockId, string ifBlock_Name = "", Dictionary<string, string> ifBlock_atts = null)
         {
             this.objectId = id;
             this.equipmentType = equipment;
@@ -106,7 +108,9 @@ namespace ThMEPWSS.DrainageSystemAG.Models
             this.tag = tag;
             this.createPoint = point;
             Layer = layer;
-            belongBlockId=_belongBlockId;
+            belongBlockId = _belongBlockId;
+            IfBlock_Name = ifBlock_Name;
+            IfBlock_atts = ifBlock_atts;
         }
     }
 

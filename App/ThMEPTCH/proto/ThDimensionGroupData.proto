@@ -1,0 +1,16 @@
+syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThTCHGeometry.proto";
+
+message ThAlignedDimension{
+    ThTCHRootData root = 1;
+    ThTCHPoint3d x_line1_point = 2;
+    ThTCHPoint3d x_line2_point = 3;
+    ThTCHPoint3d dim_line_point = 4;
+    string mark = 5;
+}
+
+message ThDimensionGroupData {
+    ThTCHRootData root = 1;
+    repeated ThAlignedDimension dimensions = 2;
+}

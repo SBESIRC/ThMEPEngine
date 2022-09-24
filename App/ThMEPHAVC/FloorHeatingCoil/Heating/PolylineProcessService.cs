@@ -1003,6 +1003,25 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             points = SmoothUtils.SmoothPoints(points);
             var si = PassageWayUtils.GetPointIndex(fixList[0], points);
             var ei = PassageWayUtils.GetPointIndex(fixList[1], points);
+            int pCount = points.Count;
+
+            if (si == -1 || ei == -1) 
+            {
+
+                var newsi = PassageWayUtils.GetSegIndexOnPolyline(fixList[0], points,5);
+                var newei = PassageWayUtils.GetSegIndexOnPolyline(fixList[1], points,5);
+                if (si == -1 && newsi != -1)
+                {
+                    points.Insert((newsi + 1)% pCount ,fixList[0]);
+                }
+                else if (ei == -1 && newei != -1) 
+                {
+                    points.Insert((newei + 1)% pCount, fixList[1]);
+                }
+            }
+
+            si = PassageWayUtils.GetPointIndex(fixList[0], points);
+            ei = PassageWayUtils.GetPointIndex(fixList[1], points);
 
             if (si == -1 || ei == -1) return originPl;
 
@@ -1013,6 +1032,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 ei = tmp;
             }
             PassageWayUtils.RearrangePoints(ref points, si);
+
             var ret = PassageWayUtils.BuildPolyline(points);
 
             //清理Polyline 

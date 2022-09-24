@@ -242,6 +242,7 @@
     <Compile Include="SprinklerDim\Model\ThSprinklerDimension.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerDimGroup.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerDimRoomData.cs" />
+    <Compile Include="SprinklerDim\Model\ThSprinklerDimViewModel.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerEdgeNode.cs" />
     <Compile Include="SprinklerDim\Model\ThSprinklerNetGroup.cs" />
     <Compile Include="SprinklerDim\Service\ThCoordinateService.cs" />

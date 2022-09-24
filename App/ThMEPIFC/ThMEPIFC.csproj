@@ -38,6 +38,7 @@
     <Compile Include="Ifc2x3\ThTGL2IFC2x3MeshExtension.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3RailingFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3RelationshipFactory.cs" />
+    <Compile Include="Ifc2x3\ThTGL2IFC2x3RoomFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3SlabFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3WallFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3WindowFactory.cs" />

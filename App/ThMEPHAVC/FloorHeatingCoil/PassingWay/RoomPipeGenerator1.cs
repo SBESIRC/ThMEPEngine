@@ -75,7 +75,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 next_buffers = PassageWayUtils.Buffer(poly, flag ? -room_buffer : -buffer / 2);
                 next_buffers = DealWithNextBuffers(next_buffers, node.depth + 1);
                 // 容差处理
-                if (next_buffers.Count == 0)
+                if (next_buffers.Count == 0 && buffer / 2 * buffer_coefficent >= buffer_threshold)
                 {
                     next_buffers = PassageWayUtils.Buffer(poly, flag ? -room_buffer : -buffer / 2 * buffer_coefficent);
                     next_buffers = DealWithNextBuffers(next_buffers, node.depth + 1);
@@ -100,7 +100,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if (depth > 0) 
                       next_buffers = DealWithNextBuffers(next_buffers, node.depth + 1);
                 // 容差处理
-                if (next_buffers.Count == 0)
+                if (next_buffers.Count == 0 && buffer / 2 * buffer_coefficent >= buffer_threshold) 
                 {
                     next_buffers = PassageWayUtils.Buffer(poly, flag ? -room_buffer : -buffer / 2 * buffer_coefficent);
 
@@ -151,6 +151,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             else
             {
                 // 合并主要管线和入口
+                if (output_coords.Last() != output_coords.First())
+                    output_coords.Add(output_coords.First());
                 var main_pipe = PassageWayUtils.BuildPolyline(output_coords);
                 var dis = main_pipe.GetClosePoint(pipe_input.pin).DistanceTo(pipe_input.pin);
                 var le = pipe_input.pin + dir * (dis + pipe_width);
@@ -364,7 +366,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     node.IsCW = -1;
                 }
                 coords = SmoothUtils.SmoothPolygon(coords);
-                // 找到外轮廓的连接点：1、距离当前轮廓小于buffer/2  2、靠近外轮廓终点  3、距离外轮廓的上一个点大于buffer/2  3、当前轮廓上的点距离上一个点大于buffer/2*buffer_coefficent
+                // 找到外轮廓的连接点：1、距离当前轮廓小于buffer/2  2、靠近外轮廓终点  3、距离外轮廓的上一个点大于buffer/2  3、当前轮廓上的点距离上一个点大于buffer_threshold
                 var last_point = GetLastPointAtoB(parent_coords, node.shell, node.IsCW, node.depth);
                 // 找到当前轮廓的连接点
                 var point = node.shell.GetClosePoint(last_point);
@@ -434,6 +436,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 coords = SmoothUtils.SmoothPoints(coords);
                 // 生成轮廓线
                 node.SetShell(PassageWayUtils.BuildPolyline(coords));
+                //PassageShowUtils.ShowEntity(node.shell);
                 // 将当前轮廓加入到整条管道中
                 index = PassageWayUtils.GetPointIndex(last_point, output_coords);
                 if (node.depth % 2 == 0)

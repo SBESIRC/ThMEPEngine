@@ -1058,6 +1058,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             ProcessedData.WaterOffset = waterOffset;
 
             Polyline differArea = PolylineProcessService.CreateRectangle2(doorLine.StartPoint, doorLine.EndPoint, 5000);
+            Polyline differArea2 = PolylineProcessService.CreateRectangle2(doorLine.StartPoint, doorLine.EndPoint, 100);
+            ProcessedData.DifferArea = differArea2;
+
+
             DrawUtils.ShowGeometry(start, "l6starttest", 0);
             regionObb = regionObb.Difference(differArea).OfType<Polyline>().ToList().FindByMax(x => x.Area);
             PolylineProcessService.ClearPolyline(ref regionObb);
@@ -1091,7 +1095,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
             doorLine = new Line(start, end);
             Polyline differArea = PolylineProcessService.CreateRectangle2(doorLine.StartPoint, doorLine.EndPoint, 100000);
+            Polyline differArea2 = PolylineProcessService.CreateRectangle2(doorLine.StartPoint, doorLine.EndPoint, 100);
+            ProcessedData.DifferArea = differArea2;
             regionObb = regionObb.Difference(differArea).OfType<Polyline>().ToList().FindByMax(x => x.Area);
+
+
             PolylineProcessService.ClearPolyline(ref regionObb);
 
             ProcessedData.WaterOffset = new Vector3d(0,0,0);

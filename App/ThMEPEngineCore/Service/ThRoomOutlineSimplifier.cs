@@ -55,7 +55,39 @@ namespace ThMEPEngineCore.Service
 
             return results;
         }
-
+        /// <summary>
+        /// 过滤secondPolygons中某些元素的几何信息和firstPolygons中的某些元素一致
+        /// </summary>
+        /// <param name="firstPolygons"></param>
+        /// <param name="secondPolygons"></param>
+        /// <returns>secondPolygons中重复的对象</returns>
+        public DBObjectCollection OverKill(DBObjectCollection firstPolygons, DBObjectCollection secondPolygons)
+        {
+            // 用NTS的相似度去重
+            // 用firstPolygons中的元素，在secondPolygons查找相似对象
+            var results = new DBObjectCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(secondPolygons);
+            var bufferService = new ThNTSBufferService();
+            firstPolygons
+                .OfType<Entity>()
+                .Where(o => o is Polyline || o is MPolygon)
+                .ForEach(o =>
+                {
+                    var bufferPolygon = bufferService.Buffer(o, 1.0);
+                    if(bufferPolygon!=null)
+                    {
+                        foreach (Entity innerPolygon in spatialIndex.SelectWindowPolygon(bufferPolygon))
+                        {
+                            if (IsSimilar(o, innerPolygon))
+                            {
+                                results.Add(innerPolygon);
+                            }
+                        }
+                        bufferPolygon.Dispose();
+                    }
+                });
+            return results;
+        }
         private bool IsSimilar(Entity first,Entity second)
         {
             if(first is Polyline firstPolyline)

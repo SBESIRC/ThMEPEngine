@@ -121,11 +121,11 @@ namespace ThMEPWSS.SprinklerDim.Service
                 DrawUtils.ShowGeometry(groupList[i].Value, string.Format("l1-{0}-group-{1}-{2}", printTag, i, groupList[i].Value.Count), i % 7);
             }
 
-            //groupList = ThSprinklerNetworkService.FilterGroupByPt(groupList);
-            //for (int i = 0; i < groupList.Count; i++)
-            //{
-            //    DrawUtils.ShowGeometry(groupList.ElementAt(i).Value, string.Format("l2filterShortGroup{0}-{1}-{2}", printTag, i, groupList.ElementAt(i).Value.Count), i % 7);
-            //}
+            groupList = ThSprinklerNetworkService.FilterGroupByPt(groupList);
+            for (int i = 0; i < groupList.Count; i++)
+            {
+                DrawUtils.ShowGeometry(groupList.ElementAt(i).Value, string.Format("l2filterPtInTwoGroup{0}-{1}-{2}", printTag, i, groupList.ElementAt(i).Value.Count), i % 7);
+            }
 
             //// 往组里添加线
             //ThSprinklerNetworkService.AddSingleDTLineToGroup(dtSeg, groupList, DTTol * 1.5);

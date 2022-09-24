@@ -11,14 +11,14 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         static ThSectionMaterialMapConfig() 
         {
             Config = new Dictionary<string, Tuple<HatchPrintConfig, PrintConfig>>();
-            Config.Add(ThTextureMaterialManager.THGasConcrete, CreateThGasConcrete());
-            Config.Add(ThTextureMaterialManager.THSteelConcrete, CreateThSteelConcrete());
-            Config.Add(ThTextureMaterialManager.THQD_COMMONBRICK, CreateThQD_COMMONBRICK());
+            Config.Add(ThTextureMaterialManager.THAeratedconcrete, CreateThGasConcrete());
+            Config.Add(ThTextureMaterialManager.THReinforcedConcrete, CreateThSteelConcrete());
+            Config.Add(ThTextureMaterialManager.THQDCommonBrick, CreateThQD_COMMONBRICK());
             Config.Add(ThTextureMaterialManager.THNoColourFnsh, CreateThNoColourFnsh());
-            Config.Add(ThTextureMaterialManager.THSuConcrete, CreateTHSuConcrete());
-            Config.Add(ThTextureMaterialManager.THShiCai, CreateThShiCai());
-            Config.Add(ThTextureMaterialManager.THBaoWenCeng, CreateThBaoWenCeng());
-            Config.Add(ThTextureMaterialManager.THLanGan, CreateThLanGan());
+            Config.Add(ThTextureMaterialManager.THConcrete, CreateTHSuConcrete());
+            Config.Add(ThTextureMaterialManager.THStone, CreateThShiCai());
+            Config.Add(ThTextureMaterialManager.THInsulationLayer, CreateThBaoWenCeng());
+            Config.Add(ThTextureMaterialManager.THRailing, CreateThLanGan());
             Config.Add(ThTextureMaterialManager.ThMenChuangKaiqiShikuai, CreateMenChuangKaiqiShikuai());
         }
         public static Tuple<HatchPrintConfig,PrintConfig> GetHatchPrintConfig(string materialName)

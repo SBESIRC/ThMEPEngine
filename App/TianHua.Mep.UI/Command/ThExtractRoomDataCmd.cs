@@ -22,6 +22,7 @@ namespace TianHua.Mep.UI.Command
     public class ThExtractRoomDataCmd : ThMEPBaseCommand, IDisposable
     {
         private DBObjectCollection _shearwalls;
+        private DBObjectCollection _otherShearwalls;
         private DBObjectCollection _columns;
         private DBObjectCollection _doors;
         private DBObjectCollection _walls;
@@ -38,7 +39,16 @@ namespace TianHua.Mep.UI.Command
         /// <summary>
         /// 返回提取的剪力墙
         /// </summary>
-        public DBObjectCollection ShearWalls => _shearwalls;
+        public DBObjectCollection ShearWalls
+        {
+            get
+            {
+                var shearWalls = new DBObjectCollection();
+                shearWalls = shearWalls.Union(_shearwalls);
+                shearWalls = shearWalls.Union(_otherShearwalls);
+                return shearWalls;
+            }
+        }
         // <summary>
         /// 返回提取的柱
         /// </summary>
@@ -62,6 +72,7 @@ namespace TianHua.Mep.UI.Command
             _walls = new DBObjectCollection();
             _columns = new DBObjectCollection();
             _shearwalls = new DBObjectCollection();
+            _otherShearwalls = new DBObjectCollection();
             _rangePts = new Point3dCollection();
         }
 
@@ -81,11 +92,10 @@ namespace TianHua.Mep.UI.Command
                 }
                 // 提取数据 + 收集数据
                 var roomData = GetRoomData(acadDb.Database, _rangePts);
-                var wallObjs = GetConfigWalls(acadDb.Database, _rangePts);
-                var otherShearWalls = GetOtherShearwalls(acadDb.Database, _rangePts);
+                var wallObjs = GetConfigWalls(acadDb.Database, _rangePts);               
                 var tchwallElements = GetTCHWalls(acadDb.Database, _rangePts);
                 var tchDoorElements = GetTCHDoors(acadDb.Database, _rangePts);
-                
+                _otherShearwalls = GetOtherShearwalls(acadDb.Database, _rangePts);
                 // 收集建筑墙线  
                 _walls = _walls.Union(wallObjs);               
                 _walls = _walls.Union(roomData.Slabs);
@@ -109,7 +119,7 @@ namespace TianHua.Mep.UI.Command
                 transformer.Transform(_doors);
                 transformer.Transform(_columns);
                 transformer.Transform(_shearwalls);
-                transformer.Transform(otherShearWalls);
+                transformer.Transform(_otherShearwalls);
 
                 var tchDoors = tchDoorElements.Select(o => o.Geometry).ToCollection();
                 var tchwalls = tchwallElements.Select(o => o.Geometry).ToCollection();
@@ -144,46 +154,73 @@ namespace TianHua.Mep.UI.Command
                 // 把天正的墙放入建筑墙中
                 _walls = _walls.Union(tchwalls);
 
-                // 过滤
-                // 过滤柱子内的柱子
-                var innerObjs = FilterInnerColumns(_columns, otherShearWalls); // last指向otherShearwall
-                innerObjs.OfType<DBObject>().ForEach(e => otherShearWalls.Remove(e));
-                innerObjs.MDispose();
+                // 把柱子内部的元素过滤掉
+                FilterColumnInnerObjs();
 
-                // 过滤孤立元素
-                // 孤立元素定义：附近多少距离以内没有东西算孤立元素。
-                var totalObjs = new DBObjectCollection();
-                _walls.OfType<DBObject>().ForEach(o => totalObjs.Add(o));
-                _doors.OfType<DBObject>().ForEach(o => totalObjs.Add(o));
-                _columns.OfType<DBObject>().ForEach(o => totalObjs.Add(o));
-                _shearwalls.OfType<DBObject>().ForEach(o => totalObjs.Add(o));               
-                otherShearWalls.OfType<DBObject>().ForEach(o => totalObjs.Add(o));
-                var objSpatialIndex = new ThCADCoreNTSSpatialIndex(totalObjs);
-
-                // 过滤孤立柱
-                var isolatedColumns = FilterIsolatedElements(_columns, objSpatialIndex, NeibourRangeDistance);
-                // 过滤孤立的“其它剪力墙”
-                var isolatedOtherShearWalls = FilterIsolatedElements(otherShearWalls, objSpatialIndex, NeibourRangeDistance);
-                // 移除孤立元素并释放
-                isolatedColumns.OfType<DBObject>().ForEach(e => _columns.Remove(e));
-                isolatedOtherShearWalls.OfType<DBObject>().ForEach(e => otherShearWalls.Remove(e));
-                isolatedColumns.MDispose();
-                isolatedOtherShearWalls.MDispose();
-
-                // 把“其它剪力墙”添加到剪力墙中
-                _shearwalls = _shearwalls.Union(otherShearWalls);
+                // 过滤孤立元素(附近多少距离以内没有东西算孤立元素。)     
+                FilterIsolatedColumns();
+                FilterIsolatedOtherShearwalls();
 
                 // 把数据还原到原位置
                 transformer.Reset(_walls);
                 transformer.Reset(_doors);
                 transformer.Reset(_columns);
                 transformer.Reset(_shearwalls);
+                transformer.Reset(_otherShearwalls);
 
                 // 把Mpolygon转成Curve
                 _walls = ToCurves(_walls, true);
                 _columns = ToCurves(_columns, true);
                 _shearwalls = ToCurves(_shearwalls,true);
+                _otherShearwalls = ToCurves(_otherShearwalls, true);
             }
+        }
+
+        private void FilterIsolatedColumns()
+        {
+            // 过滤孤立柱
+            var objs = new DBObjectCollection();
+            objs = objs.Union(_doors);
+            objs = objs.Union(_walls);
+            objs = objs.Union(_shearwalls);
+            objs = objs.Union(_otherShearwalls);
+            var objSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var isolatedObjs = FilterIsolatedElements(_columns, objSpatialIndex, NeibourRangeDistance);
+            isolatedObjs.OfType<DBObject>().ForEach(o => _columns.Remove(o));
+            isolatedObjs.MDispose();
+        }
+
+        private void FilterIsolatedOtherShearwalls()
+        {
+            // 过滤其它剪力墙
+            var objs = new DBObjectCollection();
+            objs = objs.Union(_doors);
+            objs = objs.Union(_walls);
+            objs = objs.Union(_columns);
+            objs = objs.Union(_shearwalls);     
+            var objSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var isolatedObjs = FilterIsolatedElements(_otherShearwalls, objSpatialIndex, NeibourRangeDistance);
+            isolatedObjs.OfType<DBObject>().ForEach(o => _otherShearwalls.Remove(o));
+            isolatedObjs.MDispose();
+        }
+
+        private void FilterColumnInnerObjs()
+        {
+            var columnInnerWalls = FilterInnerObjs(_columns, _walls);
+            columnInnerWalls.OfType<DBObject>().ForEach(e => _walls.Remove(e));
+            columnInnerWalls.MDispose();
+
+            var columnInnerDoors = FilterInnerObjs(_columns, _doors);
+            columnInnerDoors.OfType<DBObject>().ForEach(e => _doors.Remove(e));
+            columnInnerDoors.MDispose();
+
+            var columnInnerShearwalls = FilterInnerObjs(_columns, _shearwalls);
+            columnInnerShearwalls.OfType<DBObject>().ForEach(e => _shearwalls.Remove(e));
+            columnInnerShearwalls.MDispose();
+
+            var columnInnerOtherShearwalls = FilterInnerObjs(_columns, _otherShearwalls);
+            columnInnerOtherShearwalls.OfType<DBObject>().ForEach(e => _otherShearwalls.Remove(e));
+            columnInnerOtherShearwalls.MDispose();
         }
 
         private Dictionary<Polyline,Polyline> CreateLinearDoorOpening(
@@ -304,26 +341,13 @@ namespace TianHua.Mep.UI.Command
             {
                 var enlargePolygon = bufferService.Buffer(e, rangeTolerance);
                 var neibourObjs = spatialIndex.SelectCrossingPolygon(enlargePolygon);
-                if(neibourObjs.Count==1 && neibourObjs.Contains(e))
+                if(neibourObjs.Count== 0)
                 {
                     isolatedElements.Add(e);
                 }
                 enlargePolygon.Dispose();
             });
             return isolatedElements;    
-        }
-
-        private DBObjectCollection FilterInnerColumns(DBObjectCollection columns, DBObjectCollection otherShearwalls)
-        {
-            // 由于提取其它剪力墙，导致柱子内部也有物体
-            var sptialIndex = new ThCADCoreNTSSpatialIndex(otherShearwalls);
-            var results = new DBObjectCollection(); // 返回在column内部的元素
-            columns.OfType<Entity>().ForEach(e =>
-            {
-                var innerObjs = sptialIndex.SelectWindowPolygon(e);
-                innerObjs.OfType<DBObject>().ForEach(o => results.Add(o));
-            });
-            return results;
         }
 
         private DBObjectCollection FilterInnerObjs(DBObjectCollection firstPolygons, DBObjectCollection secondPolygons)

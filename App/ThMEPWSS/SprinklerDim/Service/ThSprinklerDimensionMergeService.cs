@@ -38,16 +38,18 @@ namespace ThMEPWSS.SprinklerDim.Service
             //不考虑点与点之间的合并或者空列表
             if (BaseLine.Count <= 1) return false;
 
-            //计算标注线间距
+            //计算标注线方向的垂直间距
             double det = Math.Abs(ThCoordinateService.GetOriginalValue(pts[BaseLine[0].pt], !isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[0].pt], !isXAxis));
             if (DimensionToBeMerged.Count == 1)
             {
+                //DimensionToBeMerged是散点的情况，步长容差到一个步长不是400
                 Line line = new Line(pts[BaseLine[0].pt], pts[BaseLine[0].pt] + xAxis * 100);
                 Point3d droppt = line.GetClosestPointTo(pts[DimensionToBeMerged[0].pt], true);
                 List<int> t = DimensionToBeMerged[0].PtsDimed;
                 if (t.Count == 1) tolerance = 1.0 * step;                                        //仅仅当xy方向都为单点的时候放大tolerance
                 foreach (int j in t)
                 {
+                    //找当前标注点管住的点位里到垂点最近距离
                     if (droppt.DistanceTo(pts[j]) < det)
                     {
                         det = droppt.DistanceTo(pts[j]);
@@ -55,12 +57,13 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
                 double d1 = ThCoordinateService.GetOriginalValue(droppt, !isXAxis) - ThCoordinateService.GetOriginalValue(pts[t[0]], !isXAxis);
                 double d2 = ThCoordinateService.GetOriginalValue(droppt, !isXAxis) - ThCoordinateService.GetOriginalValue(pts[t[t.Count - 1]], !isXAxis);
+                //两条标注线相交
                 if (d1 * d2 < 0) det = 0;
             }
 
             if (det < tolerance)
             {
-                //判断是否碰撞
+                //判断垂直或延长线是否碰撞墙柱
                 foreach (ThSprinklerDimGroup i in DimensionToBeMerged)
                 {
                     Line line = new Line(pts[BaseLine[0].pt], pts[BaseLine[0].pt] + xAxis * 100);
@@ -69,6 +72,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                         return false;
                 }
 
+                //两个标注线两端点的排列组合距离，确定两个标注线的关系
                 double distance1 = ThCoordinateService.GetOriginalValue(pts[BaseLine[0].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[DimensionToBeMerged.Count - 1].pt], isXAxis);
                 double distance2 = ThCoordinateService.GetOriginalValue(pts[BaseLine[BaseLine.Count - 1].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[0].pt], isXAxis);
                 double distance3 = ThCoordinateService.GetOriginalValue(pts[BaseLine[0].pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[DimensionToBeMerged[0].pt], isXAxis);
@@ -82,6 +86,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         /// <summary>
         /// PtsGraph内合并能合并的点
+        /// 图内只考虑散点
         /// </summary>
         /// <param name="pts"></param>
         /// <param name="Dimension"></param>
@@ -103,6 +108,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 if (Dimension[i].Count == 1) continue;
                 for (int j = 0; j < Dimension[i].Count; j++)
                 {
+                    //图内只考虑散点
                     if (Dimension[i][j].Count == 1)
                     {
                         for (int k = 0; k < Dimension[i].Count; k++)
@@ -110,21 +116,25 @@ namespace ThMEPWSS.SprinklerDim.Service
                             if (Dimension[i][k] == null) continue;
                             else
                             {
+                                //不找自己和其他散点
                                 if (k == j || Dimension[i][k].Count == 1) continue;
                                 else
                                 {
                                     List<int> t = new List<int> { Dimension[i][k][0].pt };
                                     double det = GetNeareastDistance(pts, t, Dimension[i][j][0].PtsDimed, IsxAxis);
+                                    //这里可能改成1
                                     if (det < 1.0 * step && 45 < det)
                                     {
                                         List<Point3d> pts1 = pts;
                                         Line line = new Line(pts[Dimension[i][k][0].pt], pts[Dimension[i][k][0].pt] + 100 * xAxis);
                                         Point3d DropPt = line.GetClosestPointTo(pts[Dimension[i][j][0].pt], true);
                                         List<double> distance = new List<double>();
+                                        //找垂点到组内任意一点距离，只要满足 1不小于1.5步长，2 延长线和垂线不撞墙
                                         Dimension[i][k].ForEach(p => distance.Add(pts1[p.pt].DistanceTo(DropPt)));
                                         if (IsConflicted(DropPt, pts[Dimension[i][j][0].pt], matrix, walls) || IsConflicted(DropPt, pts[Dimension[i][k][0].pt], matrix, walls) || distance.Min() > 1.5 * step) continue;
                                         else
                                         {
+                                            //加虚拟点
                                             pts.Add(DropPt);
                                             Dimension[i][k].Add(new ThSprinklerDimGroup(pts.Count - 1, Dimension[i][j][0].PtsDimed));
                                             ficpts.Add(pts.Count - 1);
@@ -202,6 +212,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                         isMerged[DimensionToBeMerged[0].pt] = true;
                         if (DimensionToBeMerged.Count > currentdim.Count)
                         {
+                            //找长的，短的合到长的
                             MergedDims = DimensionToBeMerged;
                             foreach (ThSprinklerDimGroup j in currentdim)
                             {

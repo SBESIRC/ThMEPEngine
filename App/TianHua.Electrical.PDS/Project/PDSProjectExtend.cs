@@ -484,7 +484,7 @@ namespace TianHua.Electrical.PDS.Project
                     Conductor = componentFactory.CreatConductor(),
                 };
             }
-            else if (edge.Source.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.EmergencyLightingDistributionPanel)
+            else if (edge.Source.Load.LoadTypeCat_2 == ThPDSLoadTypeCat_2.FireEmergencyLightingDistributionPanel)
             {
                 //消防应急照明回路
                 edge.Target.Details.LoadCalculationInfo.PhaseSequence = PhaseSequence.L;
@@ -1537,11 +1537,11 @@ namespace TianHua.Electrical.PDS.Project
                     TransferSwitch transferSwitch;
                     if (twoWayInCircuit.transferSwitch is ManualTransferSwitch MTSE)
                     {
-                        transferSwitch = componentFactory.CreatAutomaticTransferSwitch();
+                        transferSwitch = componentFactory.CreatManualTransferSwitch();
                     }
                     else
                     {
-                        transferSwitch = componentFactory.CreatManualTransferSwitch();
+                        transferSwitch = componentFactory.CreatAutomaticTransferSwitch();
                     }
                     twoWayInCircuit.transferSwitch = twoWayInCircuit.transferSwitch.ComponentChange(transferSwitch);
                 }
@@ -1569,22 +1569,22 @@ namespace TianHua.Electrical.PDS.Project
                     TransferSwitch transferSwitch1;
                     if (threeWayInCircuit.transferSwitch1 is ManualTransferSwitch)
                     {
-                        transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch();
+                        transferSwitch1 = componentFactory.CreatManualTransferSwitch();
                     }
                     else
                     {
-                        transferSwitch1 = componentFactory.CreatManualTransferSwitch();
+                        transferSwitch1 = componentFactory.CreatAutomaticTransferSwitch();
                     }
                     threeWayInCircuit.transferSwitch1 = threeWayInCircuit.transferSwitch1.ComponentChange(transferSwitch1);
 
                     TransferSwitch transferSwitch2;
                     if (threeWayInCircuit.transferSwitch2 is ManualTransferSwitch)
                     {
-                        transferSwitch2 = componentFactory.CreatAutomaticTransferSwitch();
+                        transferSwitch2 = componentFactory.CreatManualTransferSwitch();
                     }
                     else
                     {
-                        transferSwitch2 = componentFactory.CreatManualTransferSwitch();
+                        transferSwitch2 = componentFactory.CreatAutomaticTransferSwitch();
                     }
                     threeWayInCircuit.transferSwitch2 = threeWayInCircuit.transferSwitch2.ComponentChange(transferSwitch2);
                 }

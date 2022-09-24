@@ -337,8 +337,8 @@ namespace ThMEPWSS.Command
                         else { }
                     }
                 }
-                var topRainSystemBlock_id = WriteToBlockReference("雨水设备", topRainSystemElements.Select(e => e.objectId.GetEntity()).ToArray());
-                var topWasteSystemBlock_id = WriteToBlockReference("污废水设备", topWasteSystemElements.Select(e => e.objectId.GetEntity()).ToArray());
+                var topRainSystemBlock_id = WriteToBlockReference("雨水设备", topRainSystemElements);
+                var topWasteSystemBlock_id = WriteToBlockReference("污废水设备", topWasteSystemElements);
                 CopyIntegralBlocksToOtherFloor(new ObjectId[] { topRainSystemBlock_id, topWasteSystemBlock_id });
             }
         }
@@ -415,13 +415,29 @@ namespace ThMEPWSS.Command
         {
             return obj.floorUid.Equals(livingHighestFloor.floorUid);
         }
-        ObjectId WriteToBlockReference(string blockName, Entity[] entities)
+        ObjectId WriteToBlockReference(string blockName, List<CreateResult> createResults)
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 //if (!adb.Layers.Contains(LayerName))
                 //    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, LayerName, 0);
                 BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
+                var entities = createResults.Select(e =>
+                 {
+                     var ent = e.objectId.GetEntity();
+                     if (ent is BlockReference br)
+                     {
+                         var br_id = adb.ModelSpace.ObjectId.InsertBlockReference(
+                       br.Layer,
+                       e.IfBlock_Name,
+                       br.Position,
+                       br.ScaleFactors,
+                       br.Rotation,
+                       e.IfBlock_atts);
+                         return br_id.GetEntity();
+                     }
+                     else return ent;
+                 }).ToList();
                 try
                 {
                     BlockTableRecord record = new BlockTableRecord();

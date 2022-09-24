@@ -30,6 +30,7 @@ namespace TianHua.AutoCAD.ThCui
             CreateHVACInstallationPanel(tab);
             CreateHVACVentilationPanel(tab);
             CreateHVACHeatingPanel(tab);
+            CreateHVACGroundHeatingPanel(tab);
         }
 
         private static void CreateHVACCalculationPanel(RibbonTabSource tab)
@@ -176,6 +177,26 @@ namespace TianHua.AutoCAD.ThCui
                     "天华风平面",
                     "IDI_THCAD_THFPM_SMALL",
                     "IDI_THCAD_THFPM_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+        }
+
+        private static void CreateHVACGroundHeatingPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("HVACGROUNDHEATING", "地暖平面");
+            var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 地暖盘管
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("地暖盘管",
+                    "天华地暖盘管",
+                    "THDNPG",
+                    "天华地暖盘管",
+                    "IDI_THCAD_THDNPG_SMALL",
+                    "IDI_THCAD_THDNPG_LARGE",
                     RibbonButtonStyle.LargeWithText);
             }
         }
@@ -667,8 +688,18 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
-                // 喷淋系统
+                // 喷头定位
                 var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("喷头定位",
+                    "天华喷头定位",
+                    "THPLBZ",
+                    "天华喷头定位",
+                    "IDI_THCAD_THPLBZ_SMALL",
+                    "IDI_THCAD_THPLBZ_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 喷淋系统
+                subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("喷淋系统",
                     "天华地下喷淋系统图",
                     "THDXPLXTT",

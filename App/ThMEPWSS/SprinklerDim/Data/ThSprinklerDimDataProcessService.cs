@@ -25,6 +25,7 @@ namespace ThMEPWSS.SprinklerDim.Data
     {
         private double LineTol = 1;
         //----input
+        public ThMEPOriginTransformer Transformer { get; set; } = new ThMEPOriginTransformer();
         public List<ThIfcFlowSegment> TchPipeData { private get; set; } = new List<ThIfcFlowSegment>();
         public List<Point3d> SprinklerPt { get; set; } = new List<Point3d>();
         public List<ThExtractorBase> InputExtractors { get; set; }
@@ -49,6 +50,7 @@ namespace ThMEPWSS.SprinklerDim.Data
             RemoveDuplicateSprinklerPt();
             CreateTchPipe();
             CreateTchPipeText();
+            Transform();
             ProjectOntoXYPlane();
         }
 
@@ -121,7 +123,17 @@ namespace ThMEPWSS.SprinklerDim.Data
             Room.ForEach(x => x.ProjectOntoXYPlane());
             AxisCurves.ForEach(x => x.ProjectOntoXYPlane());
         }
+        public void Transform()
+        {
+            TchPipe.ForEach(x => Transformer.Transform(x));
+            TchPipeText.ForEach(x => Transformer.Transform(x));
+            SprinklerPt = SprinklerPt.Select(x => Transformer.Transform(x)).ToList();
+            Column.ForEach(x => Transformer.Transform(x));
+            Wall.ForEach(x => Transformer.Transform(x));
+            Room.ForEach(x => Transformer.Transform(x));
+            AxisCurves.ForEach(x => Transformer.Transform(x));
 
+        }
         public void Print()
         {
             DrawUtils.ShowGeometry(TchPipe, "l0Pipe", 140);

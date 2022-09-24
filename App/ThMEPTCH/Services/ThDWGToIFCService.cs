@@ -14,6 +14,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.IO;
 using ThMEPTCH.CAD;
 using ThMEPTCH.Model;
 using ThMEPTCH.PropertyServices.PropertyEnums;
@@ -104,6 +105,7 @@ namespace ThMEPTCH.Services
                 return null;
             }
             LoadCustomElements();
+
             var allEntities = null != archDBData ? archDBData.AllTArchEntitys() : GetArchEntities();
             var allDBEntities = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities(floorOrigin.Select(o => o.FloorOutLine).ToList());
             InitFloorDBEntity(allEntities, allDBEntities);
@@ -141,6 +143,8 @@ namespace ThMEPTCH.Services
                 var railingColls = new DBObjectCollection();
                 var thisOpeningEntities = new Dictionary<Polyline, ThTCHOpening>();
                 var openingColls = new DBObjectCollection();
+                var rooms =  new List<ThTCHSpace>();
+
                 foreach (var item in curveEntities)
                 {
                     if (item.EntitySystem.Contains("楼板"))
@@ -202,6 +206,19 @@ namespace ThMEPTCH.Services
                             thisOpeningEntities.Add(pLine, opening);
                         }
                     }
+                    else if(item.EntitySystem.Contains("房间"))
+                    {
+                        var outline = item.EntityCurve.GetTransformedCopy(matrix) as Entity;
+                        openingColls.Add(outline);
+                        var room = CreateRoom(outline);
+                        var prop = item.Property as RoomProperty;
+                        room.Height = prop.Height;
+                        room.ExtrudedDirection = Vector3d.ZAxis;
+                        room.Name = prop.Name;
+                        room.ZOffSet = prop.BottomElevation;
+                        room.Uuid = prjId + item.Id;
+                        rooms.Add(room);
+                    }
                 }
                 //用墙的索引找栏杆没有找到
                 var railingSpatialIndex = new ThCADCoreNTSSpatialIndex(railingColls);
@@ -254,10 +271,11 @@ namespace ThMEPTCH.Services
                 }
 
                 floor.FloorEntitys.AddRange(allSlabs);
+                floor.FloorEntitys.AddRange(rooms);
                 floor.FloorEntitys.AddRange(thisRailingEntities.Select(c => c.Value).ToList());
             }
 
-            var floorData = GetBlockElevtionValue(floorOrigin, jsonConfig);
+            var floorData = GetBlockElevationValue(floorOrigin, jsonConfig);
             //var floorData = GetBlockElevtionValue(floorOrigin);
             if (floorData.Count < 1)
             {
@@ -372,6 +390,16 @@ namespace ThMEPTCH.Services
                             (copyItem.Outline as Polyline).Elevation += buildingStorey.Height;
                         buildingStorey.Slabs.Add(copyItem);
                     }
+                    //加房间
+                    var rooms = levelEntitys.FloorEntitys.OfType<ThTCHSpace>().ToList();
+                    foreach (var room in rooms)
+                    {
+                        var copyItem = room.Clone() as ThTCHSpace;
+                        copyItem.Uuid += buildingStorey.Number;
+                        copyItem.Height = buildingStorey.Height;
+                        buildingStorey.Rooms.Add(copyItem);
+                    }
+
                     //buildingStorey.Slabs.AddRange(slabs);
                     var railings = levelEntitys.FloorEntitys.OfType<ThTCHRailing>().ToList();
                     foreach (var railing in railings)
@@ -384,6 +412,7 @@ namespace ThMEPTCH.Services
                     buildingStorey.Walls.AddRange(walls);
                     buildingStorey.Columns.AddRange(columns);
                     buildingStorey.Beams.AddRange(beams);
+                    buildingStorey.Rooms.AddRange(rooms);
                 }
                 thBuilding.Storeys.Add(buildingStorey);
             }
@@ -554,7 +583,7 @@ namespace ThMEPTCH.Services
                             var newOutline = opening.BuildElement.Outline.ToPolyline().Buffer(wall.BuildElement.Width / 2 + 100.0).OfType<Polyline>().OrderByDescending(p => p.Area).FirstOrDefault();
                             if (!newOutline.IsNull())
                             {
-                                opening.BuildElement.Outline = newOutline.ToTCHPolyline();
+                                opening.BuildElement.Outline = newOutline.ToTCHMPolygon();
                             }
                         }
                     }
@@ -563,7 +592,7 @@ namespace ThMEPTCH.Services
                 floor.FloorEntitys.AddRange(thisRailingEntitys.Select(c => c.Value).ToList());
             }
 
-            var floorData = GetBlockElevtionValue(floorOrigin, jsonConfig);
+            var floorData = GetBlockElevationValue(floorOrigin, jsonConfig);
             foreach (var floor in floorData)
             {
                 var levelEntitys = floorOrigin.Find(c => c.FloorName == floor.FloorName);
@@ -602,7 +631,6 @@ namespace ThMEPTCH.Services
                     buildingStorey.MemoryStoreyId = memoryStory.BuildElement.Root.GlobalId;
                     buildingStorey.MemoryMatrix3D = Matrix3d.Displacement(buildingStorey.Origin.ToPoint3d() - memoryStory.Origin.ToPoint3d()).ToTCHMatrix3d();
                 }
-
                 else
                 {
                     var walls = new List<ThTCHWallData>();
@@ -786,6 +814,10 @@ namespace ThMEPTCH.Services
                     {
                         LayerFilter = new List<string> { "TH-墙洞" },
                     },
+                    new THDBRoomExtractionVisitor()
+                    {
+                        LayerFilter= new List<string> {ThMEPEngineCore.ThMEPEngineCoreLayerUtils.ROOMOUTLINE },
+                    },
                 };
                 var extractor = new ThBuildingElementExtractor();
                 extractor.Accept(visitors);
@@ -814,6 +846,20 @@ namespace ThMEPTCH.Services
                 var slabs = visitors[0].Results.Select(o => o.Data).OfType<FloorCurveEntity>().ToList();
                 var marks = annoVisitors[0].Results.Select(o => o.Geometry).ToCollection();
                 cadCurveEntities.AddRange(BuildFloorSlab(slabs, marks));
+
+                // 给房间设置名称
+                var roomVisitors = visitors.Where(o => o is THDBRoomExtractionVisitor);
+                if(roomVisitors.Count()==1)
+                {
+                    var roomVisitor = roomVisitors.First() as THDBRoomExtractionVisitor;
+                    var roomCurves = roomVisitor.Results
+                        .Where(o=>o.Data!=null && o.Data is FloorCurveEntity)
+                        .Select(o=>o.Data)
+                        .OfType<FloorCurveEntity>()
+                        .ToList();
+                    ThSetRoomNameService.SetFromCurrentDb(roomCurves);
+                    cadCurveEntities.AddRange(roomCurves);
+                }
             }
         }
 
@@ -900,7 +946,7 @@ namespace ThMEPTCH.Services
             return floor.GeometricExtents.ToRectangle();
         }
 
-        List<LevelElevation> GetBlockElevtionValue(List<FloorBlock> floorBlocks, Dictionary<string, List<ThEditStoreyInfo>> jsonConfigs)
+        List<LevelElevation> GetBlockElevationValue(List<FloorBlock> floorBlocks, Dictionary<string, List<ThEditStoreyInfo>> jsonConfigs)
         {
             var res = new List<LevelElevation>();
             var storeyConfig = jsonConfigs.First().Value;//经过确认，暂时认为只有一栋楼不考虑多楼情况，支取First
@@ -989,6 +1035,22 @@ namespace ThMEPTCH.Services
             };
         }
 
+        private ThTCHSpace CreateRoom(Entity entity)
+        {
+            if(entity is MPolygon polygon)
+            {
+                return new ThTCHSpace(polygon);
+            }
+            else if (entity is Polyline polyline)
+            {
+                return new ThTCHSpace(polyline);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         private ThTCHOpening CreateOpening(Polyline pline)
         {
             return new ThTCHOpening()
@@ -1003,7 +1065,7 @@ namespace ThMEPTCH.Services
             var opening = new ThTCHOpeningData();
             opening.BuildElement = new ThTCHBuiltElementData();
             opening.BuildElement.Root = new ThTCHRootData();
-            opening.BuildElement.Outline = pline.ToTCHPolyline();
+            opening.BuildElement.Outline = pline.ToTCHMPolygon();
             return opening;
         }
 
@@ -1017,7 +1079,8 @@ namespace ThMEPTCH.Services
             railing.BuildElement.Root = new ThTCHRootData();
             railing.BuildElement.Height = 1200;
             railing.BuildElement.Width = width;
-            railing.BuildElement.Outline = outlines.ToTCHPolyline();
+            railing.BuildElement.Outline = outlines.ToTCHMPolygon();
+            railing.BuildElement.EnumMaterial = ThTextureMaterialManager.THRailing;
             return railing;
         }
 
@@ -1125,7 +1188,7 @@ namespace ThMEPTCH.Services
             var structureSlab = new ThTCHSlabData();
             structureSlab.BuildElement = new ThTCHBuiltElementData();
             structureSlab.BuildElement.Root = new ThTCHRootData();
-            structureSlab.BuildElement.Outline = outPLine.ToTCHPolyline();
+            structureSlab.BuildElement.Outline = outPLine.ToTCHMPolygon();
             structureSlab.BuildElement.Height = slabPolyline.StructureThickness;
             structureSlab.BuildElement.EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
             structureSlab.BuildElement.Outline.ZOffSet(-slabPolyline.SurfaceThickness);
@@ -1133,7 +1196,7 @@ namespace ThMEPTCH.Services
             var architectureSlab = new ThTCHSlabData();
             architectureSlab.BuildElement = new ThTCHBuiltElementData();
             architectureSlab.BuildElement.Root = new ThTCHRootData();
-            architectureSlab.BuildElement.Outline = outPLine.ToTCHPolyline();
+            architectureSlab.BuildElement.Outline = outPLine.ToTCHMPolygon();
             architectureSlab.BuildElement.Height = slabPolyline.SurfaceThickness;
             architectureSlab.BuildElement.EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
 
@@ -1180,8 +1243,8 @@ namespace ThMEPTCH.Services
                     }
                     var descending = new ThTCHDescendingData()
                     {
-                        Outline = innerPLine.ToTCHPolyline(),
-                        OutlineBuffer = outlineBuffer.ToTCHPolyline(),
+                        Outline = innerPLine.ToTCHMPolygon(),
+                        OutlineBuffer = outlineBuffer.ToTCHMPolygon(),
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                         DescendingThickness = item.StructureThickness,
@@ -1201,8 +1264,8 @@ namespace ThMEPTCH.Services
                     }
                     architectureSlab.Descendings.Add(new ThTCHDescendingData()
                     {
-                        Outline = outlineInner.ToTCHPolyline(),
-                        OutlineBuffer = innerPLine.ToTCHPolyline(),
+                        Outline = outlineInner.ToTCHMPolygon(),
+                        OutlineBuffer = innerPLine.ToTCHMPolygon(),
                         IsDescending = true,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                         DescendingThickness = item.SurfaceThickness,
@@ -1214,7 +1277,7 @@ namespace ThMEPTCH.Services
                     // 结构楼洞
                     var descending = new ThTCHDescendingData()
                     {
-                        Outline = innerPLine.ToTCHPolyline(),
+                        Outline = innerPLine.ToTCHMPolygon(),
                         IsDescending = false,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                     };
@@ -1224,7 +1287,7 @@ namespace ThMEPTCH.Services
                     // 建筑楼洞
                     architectureSlab.Descendings.Add(new ThTCHDescendingData()
                     {
-                        Outline = innerPLine.ToTCHPolyline(),
+                        Outline = innerPLine.ToTCHMPolygon(),
                         IsDescending = false,
                         DescendingHeight = Math.Abs(item.LowerPlateHeight),
                     });
@@ -1248,7 +1311,7 @@ namespace ThMEPTCH.Services
             var newWall = new ThTCHWallData();
             newWall.BuildElement = new ThTCHBuiltElementData()
             {
-                Outline = pl.ToTCHPolyline(),
+                Outline = pl.ToTCHMPolygon(),
                 Root = new ThTCHRootData() { GlobalId = projectId + wall.Uuid },
             };
             return newWall;

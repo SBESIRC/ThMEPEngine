@@ -63,6 +63,20 @@ namespace ThMEPTCH.Data
             };
             return tCHTgPublicList;
         }
+
+        public static TCHTwtPublicList ConvertToTCHTwtPublicList(ulong Id, int pointID, int pipeID, string value, int nextID)
+        {
+            TCHTwtPublicList tCHTgPublicList = new TCHTwtPublicList
+            {
+                ID = ((int)Id),
+                PipeID = pipeID,
+                PointID = pointID,
+                Value = value,
+                NextID = nextID,
+            };
+            return tCHTgPublicList;
+        }
+
         public static TCHTwtVector VectorToTwtVectorModel(ulong Id, Vector3d vector)
         {
             TCHTwtVector tvwVector = new TCHTwtVector

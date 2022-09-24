@@ -15,7 +15,13 @@ namespace ThMEPWSS.SprinklerDim.Service
 {
     public class ThSprinklerDimConflictService
     {
-
+        /// <summary>
+        /// 看是否需要根据与墙柱房间相交长度>200 穿墙线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="wallLinesSI"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
         public static bool NeedToCutOff(Line line, ThCADCoreNTSSpatialIndex wallLinesSI, double tolerance = 200.0)
         {
             //穿图的墙线crossGraphLines

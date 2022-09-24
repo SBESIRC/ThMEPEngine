@@ -95,7 +95,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.PassingWay
             for (int i = 0; i < MainReigonList.Count; i++)
             {
                 Polyline mainReigonListRoom = PassageWayUtils.Buffer(MainReigonList[i].Clone() as Polyline, 0.25 * Buffer + Parameter.SuggestDistanceWall).First();
-                DrawUtils.ShowGeometry(mainReigonListRoom, "l2AdjustedRoom", 4, lineWeightNum: 30);
+                DrawUtils.ShowGeometry(mainReigonListRoom, "l4AdjustedRoom", 4, lineWeightNum: 30);
                 MainRegionListRoom.Add(mainReigonListRoom);
             }
 

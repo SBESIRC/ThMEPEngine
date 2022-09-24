@@ -42,7 +42,7 @@ namespace ThMEPTCH.CAD
             {
                 results.Add(new ThRawIfcBuildingElementData()
                 {
-                    Geometry = entity,
+                    Geometry = entity.GetTransformedCopy(matrix),
                     Data = CreatStructureEntity(entity, matrix),
                 });
             }

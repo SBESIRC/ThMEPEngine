@@ -138,7 +138,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 var ave = list.Average();
                 //if (ave > 2000)
                 //{
-                    length = ave;
+                length = ave;
                 //}
             }
 
@@ -561,45 +561,48 @@ namespace ThMEPWSS.SprinklerDim.Service
         //    return bAdd;
         //}
 
-        ///// <summary>
-        ///// 删掉除了最多线以外组里出现过的线（删斜线）
-        ///// </summary>
-        ///// <param name="dtOrthogonalSeg"></param>
-        ///// <returns></returns>
-        //public static List<KeyValuePair<double, List<Line>>> FilterGroupByPt(List<KeyValuePair<double, List<Line>>> groupList)
-        //{
-        //    var tol = new Tolerance(10, 10);
-        //    var filterGroup = new List<KeyValuePair<double, List<Line>>>();
-        //    var groupPt = new List<Point3d>();
+        /// <summary>
+        /// 删掉除了最多线以外组里出现过的线（删斜线）
+        /// </summary>
+        /// <param name="dtOrthogonalSeg"></param>
+        /// <returns></returns>
+        public static List<KeyValuePair<double, List<Line>>> FilterGroupByPt(List<KeyValuePair<double, List<Line>>> groupList)
+        {
+            var tol = new Tolerance(10, 10);
+            var filterGroup = new List<KeyValuePair<double, List<Line>>>();
+            var groupPt = new List<Point3d>();
 
-        //    groupList = groupList.OrderByDescending(x => x.Value.Count).ToList();
-        //    filterGroup.Add(new KeyValuePair<double, List<Line>>(groupList[0].Key, groupList[0].Value));
-        //    groupPt.AddRange(ThSprinklerLineService.LineListToPtList(groupList[0].Value));
+            if (groupList.Count > 0)
+            {
+                groupList = groupList.OrderByDescending(x => x.Value.Count).ToList();
+                filterGroup.Add(new KeyValuePair<double, List<Line>>(groupList[0].Key, groupList[0].Value));
+                groupPt.AddRange(ThSprinklerLineService.LineListToPtList(groupList[0].Value));
 
-        //    for (int i = 1; i < groupList.Count; i++)
-        //    {
-        //        var lineList = groupList[i].Value;
+                for (int i = 1; i < groupList.Count; i++)
+                {
+                    var lineList = groupList[i].Value;
 
-        //        for (int j = lineList.Count - 1; j >= 0; j--)
-        //        {
-        //            var startInList = groupPt.Where(x => x.IsEqualTo(lineList[j].StartPoint, tol));
-        //            var endInList = groupPt.Where(x => x.IsEqualTo(lineList[j].EndPoint, tol));
+                    for (int j = lineList.Count - 1; j >= 0; j--)
+                    {
+                        var startInList = groupPt.Where(x => x.IsEqualTo(lineList[j].StartPoint, tol));
+                        var endInList = groupPt.Where(x => x.IsEqualTo(lineList[j].EndPoint, tol));
 
-        //            //if (startInList.Count() > 0 || endInList.Count() > 0) 同时在两个组里的点会被删掉
-        //            if (startInList.Count() > 0 && endInList.Count() > 0)
-        //            {
-        //                lineList.RemoveAt(j);
-        //            }
-        //        }
-        //        if (lineList.Count > 0)
-        //        {
-        //            filterGroup.Add(new KeyValuePair<double, List<Line>>(groupList.ElementAt(i).Key, lineList));
-        //            groupPt.AddRange(ThSprinklerLineService.LineListToPtList(lineList));
-        //        }
-        //    }
+                        //if (startInList.Count() > 0 || endInList.Count() > 0) 同时在两个组里的点会被删掉
+                        if (startInList.Count() > 0 && endInList.Count() > 0)
+                        {
+                            lineList.RemoveAt(j);
+                        }
+                    }
+                    if (lineList.Count > 0)
+                    {
+                        filterGroup.Add(new KeyValuePair<double, List<Line>>(groupList.ElementAt(i).Key, lineList));
+                        groupPt.AddRange(ThSprinklerLineService.LineListToPtList(lineList));
+                    }
+                }
+            }
 
-        //    return filterGroup;
-        //}
+            return filterGroup;
+        }
 
         //public static List<Line> FilterDTOrthogonalToPipe(List<Line> dtOrthogonalSeg, Dictionary<Point3d, double> ptAngleDict)
         //{

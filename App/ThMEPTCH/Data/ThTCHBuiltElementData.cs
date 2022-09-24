@@ -28,7 +28,7 @@ public static partial class ThTCHBuiltElementDataReflection {
           "VGhUQ0hSb290RGF0YRIOCgZsZW5ndGgYAiABKAESDQoFd2lkdGgYAyABKAES",
           "DgoGaGVpZ2h0GAQgASgBEh0KBm9yaWdpbhgFIAEoCzINLlRoVENIUG9pbnQz",
           "ZBIgCgh4X3ZlY3RvchgGIAEoCzIOLlRoVENIVmVjdG9yM2QSHwoHb3V0bGlu",
-          "ZRgHIAEoCzIOLlRoVENIUG9seWxpbmUSGgoNZW51bV9tYXRlcmlhbBgIIAEo",
+          "ZRgHIAEoCzIOLlRoVENITVBvbHlnb24SGgoNZW51bV9tYXRlcmlhbBgIIAEo",
           "CUgAiAEBEiIKClByb3BlcnRpZXMYCSADKAsyDi5UaFRDSFByb3BlcnR5QhAK",
           "Dl9lbnVtX21hdGVyaWFsYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
@@ -173,13 +173,13 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
 
   /// <summary>Field number for the "outline" field.</summary>
   public const int OutlineFieldNumber = 7;
-  private global::ThTCHPolyline outline_;
+  private global::ThTCHMPolygon outline_;
   /// <summary>
   /// geometry profile
   /// </summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThTCHPolyline Outline {
+  public global::ThTCHMPolygon Outline {
     get { return outline_; }
     set {
       outline_ = value;
@@ -437,7 +437,7 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
     }
     if (other.outline_ != null) {
       if (outline_ == null) {
-        Outline = new global::ThTCHPolyline();
+        Outline = new global::ThTCHMPolygon();
       }
       Outline.MergeFrom(other.Outline);
     }
@@ -495,7 +495,7 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
         }
         case 58: {
           if (outline_ == null) {
-            Outline = new global::ThTCHPolyline();
+            Outline = new global::ThTCHMPolygon();
           }
           input.ReadMessage(Outline);
           break;
@@ -558,7 +558,7 @@ public sealed partial class ThTCHBuiltElementData : pb::IMessage<ThTCHBuiltEleme
         }
         case 58: {
           if (outline_ == null) {
-            Outline = new global::ThTCHPolyline();
+            Outline = new global::ThTCHMPolygon();
           }
           input.ReadMessage(Outline);
           break;

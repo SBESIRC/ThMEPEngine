@@ -86,5 +86,47 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 polyline.Dispose();
             return ret;
         }
+        public Polyline Buffer4()
+        {
+            var list_buffer = new List<Polyline>();
+            var dirs = new List<int>();
+            for (int i = 0; i < buff.Count; ++i)
+                dirs.Add(PassageWayUtils.GetDirBetweenTwoPoint(poly[i], poly[i + 1]));
+            for (int i = 0; i < buff.Count; ++i)
+            {
+                List<Point3d> cur_buffer = new List<Point3d>();
+                var dir = (poly[i + 1] - poly[i]).GetNormal();
+                if (i == 0)
+                {
+                    cur_buffer.Add(poly[i] + dir.RotateBy(-Math.PI / 2, Vector3d.ZAxis) * buff[i] * 4);
+                    cur_buffer.Add(poly[i] + dir.RotateBy(Math.PI / 2, Vector3d.ZAxis) * buff[i] * 4);
+                }
+                else
+                {
+                    if ((dirs[i - 1] + 1) % 4 == dirs[i]) 
+                    {
+                        cur_buffer.Add(poly[i] + dir.RotateBy(-Math.PI / 2, Vector3d.ZAxis) * buff[i] * 4 - dir * buff[i - 1] * 4);
+                        cur_buffer.Add(poly[i] - dir * buff[i - 1] * 4);
+                        cur_buffer.Add(poly[i]);
+                        cur_buffer.Add(poly[i] + dir.RotateBy(Math.PI / 2, Vector3d.ZAxis) * buff[i] * 4);
+                    }
+                    else
+                    {
+                        cur_buffer.Add(poly[i] + dir.RotateBy(-Math.PI / 2, Vector3d.ZAxis) * buff[i] * 4);
+                        cur_buffer.Add(poly[i]);
+                        cur_buffer.Add(poly[i] - dir * buff[i - 1] * 4);
+                        cur_buffer.Add(poly[i] + dir.RotateBy(Math.PI / 2, Vector3d.ZAxis) * buff[i] * 4 - dir * buff[i - 1] * 4);
+                    }
+                }
+                cur_buffer.Add(poly[i + 1] + dir.RotateBy(Math.PI / 2, Vector3d.ZAxis) * buff[i] * 4);
+                cur_buffer.Add(poly[i + 1] + dir.RotateBy(-Math.PI / 2, Vector3d.ZAxis) * buff[i] * 4);
+                cur_buffer.Add(cur_buffer.First());
+                list_buffer.Add(PassageWayUtils.BuildPolyline(cur_buffer));
+            }
+            var ret = list_buffer.ToArray().ToCollection().UnionPolygons().Cast<Polyline>().First();
+            foreach (var polyline in list_buffer)
+                polyline.Dispose();
+            return ret;
+        }
     }
 }

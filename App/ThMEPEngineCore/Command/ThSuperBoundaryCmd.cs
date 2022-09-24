@@ -12,6 +12,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore.Command
 {
@@ -21,12 +22,16 @@ namespace ThMEPEngineCore.Command
         private DBObjectCollection _collectObjs;
         private DBObjectCollection _modelSpaceEnties;
         private ThCADCoreNTSSpatialIndex _roomTextSpatialIndex;
+        private DBObjectCollection _roomBoundaries; // 已提交到Db中
+
+        public DBObjectCollection RoomBoundaries => _roomBoundaries;
+
         public ThSuperBoundaryCmd(DBObjectCollection modelSpaceEnties, SBND_Mode mode = SBND_Mode.SBND_PICK)
         {
             ActionName = "提取房间框线";
             CommandName = "THEROC";
             _mode = mode;
-            _modelSpaceEnties = modelSpaceEnties;
+            _modelSpaceEnties = modelSpaceEnties;            
             _collectObjs = new DBObjectCollection();
             _roomTextSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         }
@@ -64,22 +69,22 @@ namespace ThMEPEngineCore.Command
             }
             Active.Database.ObjectAppended -= Database_ObjectAppended;
 
-            var roomBoundaries = new DBObjectCollection();
+            _roomBoundaries = new DBObjectCollection();
             if(_mode == SBND_Mode.SBND_PICK)
             {
-                roomBoundaries = GetRoomBoundaries(_collectObjs);
+                _roomBoundaries = GetRoomBoundaries(_collectObjs);
             }
             else
             {
-                roomBoundaries = GetRoomBoundariesByName(_collectObjs);
+                _roomBoundaries = GetRoomBoundariesByName(_collectObjs);
             }
 
-            if(roomBoundaries.Count>0)
+            if(_roomBoundaries.Count>0)
             {
-                roomBoundaries = Clean(roomBoundaries);
+                _roomBoundaries = Clean(_roomBoundaries);
             }           
 
-            PrintRooms(roomBoundaries);
+            PrintRooms(_roomBoundaries);
         }
 
         private void ExportConfig()
@@ -134,9 +139,30 @@ namespace ThMEPEngineCore.Command
                     results.Add(e.Clone() as Curve);
                 }
                 else if (e is Hatch hatch)
-                {
-                    var curves = hatch.Boundaries();
-                    curves.ForEach(c => results.Add(c));
+                {                    
+                    var polygons = ToDBObjectCollection(hatch);
+                    polygons.OfType<Entity>()
+                    .Where(o => (o is Polyline p && p.Area > 1e-6) || (o is MPolygon m && m.Area > 1e-6))
+                    .ForEach(o =>
+                    {
+                        if(o is MPolygon polygon)
+                        {
+                            var holes = polygon.Holes();
+                            if (holes.Count > 0)
+                            {
+                                results.Add(polygon);
+                                holes.ForEach(h => h.Dispose());
+                            }
+                            else
+                            {
+                                results.Add(polygon.Shell());
+                            }
+                        }
+                        else
+                        {
+                            results.Add(o);
+                        }                        
+                    });
                 }
                 else 
                 {
@@ -160,8 +186,11 @@ namespace ThMEPEngineCore.Command
                 }
                 else if (e is Hatch hatch)
                 {
-                    var polygons = hatch.BoundariesEx();
-                    polygons.OfType<Entity>().ForEach(k =>
+                    var polygons = ToDBObjectCollection(hatch); 
+                    polygons
+                    .OfType<Entity>()
+                    .Where(o=>(o is Polyline p && p.Area>1e-6) || (o is MPolygon m && m.Area > 1e-6))
+                    .ForEach(k =>
                     {
                         if(k is Polyline poly)
                         {
@@ -174,7 +203,16 @@ namespace ThMEPEngineCore.Command
                         {
                             if (HasRoomName(polygon))
                             {
-                                polygon.Loops().ForEach(l => results.Add(l));
+                                var holes = polygon.Holes();
+                                if (holes.Count > 0)
+                                {
+                                    results.Add(polygon);
+                                    holes.ForEach(h => h.Dispose());
+                                }
+                                else
+                                {
+                                    results.Add(polygon.Shell());
+                                }
                             }
                         }
                         else
@@ -189,6 +227,25 @@ namespace ThMEPEngineCore.Command
                 }
             });
             return results;
+        }
+
+        private DBObjectCollection ToDBObjectCollection(Hatch hatch)
+        {
+            var boundaries = hatch.Boundaries().ToCollection();
+            var roomBuilder = new ThRoomOutlineBuilderEngine();
+            roomBuilder.Build(boundaries);
+            return FilterPolygonEdges(roomBuilder.Areas);
+        }
+
+        private DBObjectCollection FilterPolygonEdges(DBObjectCollection polygons)
+        {
+            var mPolygons = polygons.OfType<MPolygon>().ToCollection();
+            var polylines = polygons.OfType<Polyline>().ToCollection();
+            var mPolygonEdges = mPolygons.OfType<MPolygon>().SelectMany(o => o.Loops()).ToCollection();
+            var roomSimplifer = new ThRoomOutlineSimplifier();
+            var filterEdges = roomSimplifer.OverKill(mPolygonEdges, polylines).OfType<DBObject>().ToHashSet();
+            mPolygonEdges.MDispose();
+            return polygons.OfType<DBObject>().Where(o => !filterEdges.Contains(o)).ToCollection();
         }
 
         private bool HasRoomName(Entity room)

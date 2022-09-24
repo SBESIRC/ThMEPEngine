@@ -72,7 +72,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             SingleDoor nowDoor = DoorList[0];
 
            
-            Vector3d downDoor = nowDoor.DownFirst - nowDoor.DownSecond;
+            Vector3d downDoor = nowDoor.DownFirst - nowDoor.DownSecond;  //从左到右
             Polyline UpPl = nowDoor.UpstreamRegion.ClearedPl;
 
 
@@ -80,10 +80,24 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             double tmpDis = 0;
             double tmpX = 0;
 
-            if (downDoor.Length < pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1))
+            if (downDoor.Length < pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1)-5)
             {
-                tmpDis = downDoor.Length / (nowDoor.PipeIdList.Count * 2 + 1);
-                tmpDis = ((int)tmpDis / 10) * 10;
+                Point3d newEnd = new Point3d();
+                if (!ProcessedData.LeftToRight) newEnd = nowDoor.DownSecond + pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1) * downDoor.GetNormal();
+                else newEnd = nowDoor.DownFirst - pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1) * downDoor.GetNormal();
+
+                Polyline boundary = RegionList[0].ClearedPl.Buffer(20).OfType<Polyline>().ToList().First(); 
+                if (boundary.Contains(newEnd))
+                {
+                    tmpDis = pipeSpaceing;
+                    if (!ProcessedData.LeftToRight) nowDoor.DownFirst = newEnd;
+                    else nowDoor.DownSecond = newEnd;
+                }
+                else 
+                {
+                    tmpDis = downDoor.Length / (nowDoor.PipeIdList.Count * 2 + 1);
+                    tmpDis = ((int)tmpDis / 10) * 10;
+                }
             }
             else 
             {

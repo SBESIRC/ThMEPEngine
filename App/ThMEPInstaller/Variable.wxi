@@ -7,13 +7,13 @@
     <!-- The manufacturer, for setup package publisher and folder info -->
     <?define Manufacturer = "天华AI研究中心" ?>
     <!-- The version number of this setup package-->
-    <?define Version = "1.9.42" ?>
+    <?define Version = "1.9.43" ?>
     <!-- Bundle logo-->
     <?define Logo = "Resources\Logo.ico" ?>
     <!-- Bundle EULA rtf document-->
     <?define Eula = "Resources\License_zh-CN.rtf" ?>
     <!-- Product code -->
-    <?define ProductCode = "28425BF3-B44A-4E60-90F7-92CC0CE5E447" ?>
+    <?define ProductCode = "81E47F60-4680-4453-9F9D-790C498A01DD" ?>
     <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
     <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
     <!-- Autoloader path. -->

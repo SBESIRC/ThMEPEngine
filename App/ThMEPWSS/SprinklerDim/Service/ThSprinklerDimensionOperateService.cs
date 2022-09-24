@@ -52,6 +52,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         /// <summary>
         /// 选取最长的一根标注位
+        /// 去掉已经标注的最长的，计算的时候不计算已经标注的，但是返回结果里保留已经标注的点后续决定是否删除
         /// </summary>
         /// <param name="undimensionedLine"></param>
         /// <param name="collineation"></param>
@@ -134,10 +135,12 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         /// <summary>
         /// 打断去除过已经标注的组
+        /// 1/2的比例基本不会出现跳点
+        /// 如果没被管住的点是单点，只记录单点，不记录两个点的线段
         /// </summary>
         /// <param name="pts"></param>
-        /// <param name="line"></param>
-        /// <param name="line2"></param>
+        /// <param name="line">刨除已标注的点</param>
+        /// <param name="line2">整根的标注的点</param>
         /// <param name="isXAxis"></param>
         /// <param name="step"></param>
         /// <returns></returns>
@@ -152,6 +155,7 @@ namespace ThMEPWSS.SprinklerDim.Service
             {
                 ThSprinklerDimGroup iPtIndex = one[one.Count - 1];
                 ThSprinklerDimGroup jPtIndex = DimedPtRemoved[i];
+                //当前点和前一个点的距离》1.5步长 ||  跳点 =》起一条新的线
                 if (ThCoordinateService.GetOriginalValue(pts[jPtIndex.pt], isXAxis) - ThCoordinateService.GetOriginalValue(pts[iPtIndex.pt], isXAxis) > 1.5 * step || Math.Abs(DimedPtNotRemovedIndex.IndexOf(iPtIndex.pt) - DimedPtNotRemovedIndex.IndexOf(jPtIndex.pt)) != 1)
                 {
                     lines.Add(one);
@@ -159,6 +163,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 }
                 else
                 {
+                    //存在原来的线里
                     one.Add(jPtIndex);
                 }
             }

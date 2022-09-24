@@ -30,6 +30,7 @@ namespace ThMEPTCH.Model
             Slabs = new List<ThTCHSlab>();
             Windows = new List<ThTCHWindow>();
             Railings = new List<ThTCHRailing>();
+            Rooms = new List<ThTCHSpace>();
             MemoryStoreyId = null;
         }
         [ProtoMember(31)]
@@ -46,5 +47,7 @@ namespace ThMEPTCH.Model
         public List<ThTCHColumn> Columns { get; set; }
         [ProtoMember(37)]
         public List<ThTCHBeam> Beams { get; set; }
+        [ProtoMember(38)]
+        public List<ThTCHSpace> Rooms { get; set; }
     }
 }

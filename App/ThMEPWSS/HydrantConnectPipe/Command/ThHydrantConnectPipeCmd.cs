@@ -368,7 +368,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             tchPipe.DnType = "DN";
             tchPipe.Dn = 65.0;
             tchPipe.Gradient = 0.0;
-            tchPipe.Weight = 3.5;
+            tchPipe.Weight = 0.35;
             tchPipe.HideLevel = 0;
             tchPipe.DocScale = docScale;
             tchPipe.DimID = new ThTCHTwtPipeDimStyle

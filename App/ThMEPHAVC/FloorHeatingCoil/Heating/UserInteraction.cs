@@ -171,6 +171,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //Update
             CreateTmpPipeList();
             CreateNowTree();
+            check();
             CompleteTmpPipeList();
             SaveResults();
 
@@ -560,5 +561,29 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Parameter.ClearWholePipeDis = 50;
 
         }
+
+        public void check()
+        {
+
+            bool flag = false;
+            for (int i = 0; i < RegionList.Count; i++)
+            {
+                if (RegionList[i].ChildRegion.Count == 0)
+                {
+                    if (RegionList[i].MainPipe == null || RegionList[i].MainPipe.Count == 0 || RegionList[i].MainPipe[0] < 0) 
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+            }
+
+            if (flag)
+            {
+                //throw new NotSupportedException("住宅模式不支持含有多个门的输出。");
+                throw new NotSupportedException(ThFloorHeatingCommon.Error_roomRoute);
+            }
+        }
+
     }
 }

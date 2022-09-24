@@ -143,7 +143,7 @@ namespace ThMEPTCH.CAD
                 }
                 else
                 {
-                    var slabSpace = polyline.Buffer(10)[0] as Polyline;
+                    var slabSpace = polyline.TPSimplify(1).Buffer(10)[0] as Polyline;
                     var slab = new THStructureSlab();
                     slab.Outline = slabSpace;
                     if (slabHatchLines.Any(o => o.Contains(polyline)))
@@ -226,7 +226,7 @@ namespace ThMEPTCH.CAD
         {
             List<THStructureBeam> result = new List<THStructureBeam>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
-            var beamInfoQueue = new Queue<THStructureDBText>(beamMarks.Where(o => o.Content.Contains('x')));
+            var beamInfoQueue = new Queue<THStructureDBText>(beamMarks.Where(o => o.Content.Contains('x') || o.Content.Contains('X') || o.Content.Contains('×')));
             var beamBGInfos = beamMarks.Where(o => o.Content.Contains("BG"));
             var beamBGInfoDic = beamBGInfos.ToDictionary(key => key.Point.TransformBy(Matrix3d.Displacement(key.Vector * 250)), value => value);
             var markedBeams = new List<Line>();
@@ -238,12 +238,12 @@ namespace ThMEPTCH.CAD
                 var objs = new DBObjectCollection();
                 if (beamBGInfo.IsNull())
                 {
-                    var pl = beamInfo.Outline.BufferPL(150)[0] as Polyline;
+                    var pl = beamInfo.Outline.BufferPL(100)[0] as Polyline;
                     objs = spatialIndex.SelectCrossingPolygon(pl);
                 }
                 else
                 {
-                    var pl1 = beamInfo.Outline.BufferPL(150)[0] as Polyline;
+                    var pl1 = beamInfo.Outline.BufferPL(100)[0] as Polyline;
                     var pl2 = beamBGInfo.Outline.BufferPL(150)[0] as Polyline;
                     objs = spatialIndex.SelectCrossingPolygon(pl1).Union(spatialIndex.SelectCrossingPolygon(pl2));
                 }
@@ -255,7 +255,9 @@ namespace ThMEPTCH.CAD
                     if (markLines.Count() == 1)
                     {
                         var line = markLines.First();
-                        var beamContents = beamInfo.Content.Split('x');
+                        var beamContents = beamInfo.Content.Contains('x') ? beamInfo.Content.Split('x') :
+                            beamInfo.Content.Contains('X') ? beamInfo.Content.Split('X') :
+                            beamInfo.Content.Contains('×') ? beamInfo.Content.Split('×') : new[] { "0", "0" };
                         double.TryParse(beamContents[0],out double beamWidth);
                         double.TryParse(beamContents[1], out double beamHeight);
                         var pl = line.ExtendLine(-100).Buffer(beamWidth + 15);

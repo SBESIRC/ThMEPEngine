@@ -24,10 +24,10 @@ public static partial class ThTCHDescendingDataReflection {
         string.Concat(
           "ChlUaFRDSERlc2NlbmRpbmdEYXRhLnByb3RvGhNUaFRDSEdlb21ldHJ5LnBy",
           "b3RvItEBChNUaFRDSERlc2NlbmRpbmdEYXRhEh8KB291dGxpbmUYASABKAsy",
-          "Di5UaFRDSFBvbHlsaW5lEhUKDWlzX2Rlc2NlbmRpbmcYAiABKAgSGQoRZGVz",
+          "Di5UaFRDSE1Qb2x5Z29uEhUKDWlzX2Rlc2NlbmRpbmcYAiABKAgSGQoRZGVz",
           "Y2VuZGluZ19oZWlnaHQYAyABKAESHAoUZGVzY2VuZGluZ190aGlja25lc3MY",
           "BCABKAESIQoZZGVzY2VuZGluZ193cmFwX3RoaWNrbmVzcxgFIAEoARImCg5v",
-          "dXRsaW5lX2J1ZmZlchgGIAEoCzIOLlRoVENIUG9seWxpbmViBnByb3RvMw=="));
+          "dXRsaW5lX2J1ZmZlchgGIAEoCzIOLlRoVENITVBvbHlnb25iBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -89,10 +89,10 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
 
   /// <summary>Field number for the "outline" field.</summary>
   public const int OutlineFieldNumber = 1;
-  private global::ThTCHPolyline outline_;
+  private global::ThTCHMPolygon outline_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThTCHPolyline Outline {
+  public global::ThTCHMPolygon Outline {
     get { return outline_; }
     set {
       outline_ = value;
@@ -149,10 +149,10 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
 
   /// <summary>Field number for the "outline_buffer" field.</summary>
   public const int OutlineBufferFieldNumber = 6;
-  private global::ThTCHPolyline outlineBuffer_;
+  private global::ThTCHMPolygon outlineBuffer_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThTCHPolyline OutlineBuffer {
+  public global::ThTCHMPolygon OutlineBuffer {
     get { return outlineBuffer_; }
     set {
       outlineBuffer_ = value;
@@ -311,7 +311,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
     }
     if (other.outline_ != null) {
       if (outline_ == null) {
-        Outline = new global::ThTCHPolyline();
+        Outline = new global::ThTCHMPolygon();
       }
       Outline.MergeFrom(other.Outline);
     }
@@ -329,7 +329,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
     }
     if (other.outlineBuffer_ != null) {
       if (outlineBuffer_ == null) {
-        OutlineBuffer = new global::ThTCHPolyline();
+        OutlineBuffer = new global::ThTCHMPolygon();
       }
       OutlineBuffer.MergeFrom(other.OutlineBuffer);
     }
@@ -350,7 +350,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
           break;
         case 10: {
           if (outline_ == null) {
-            Outline = new global::ThTCHPolyline();
+            Outline = new global::ThTCHMPolygon();
           }
           input.ReadMessage(Outline);
           break;
@@ -373,7 +373,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
         }
         case 50: {
           if (outlineBuffer_ == null) {
-            OutlineBuffer = new global::ThTCHPolyline();
+            OutlineBuffer = new global::ThTCHMPolygon();
           }
           input.ReadMessage(OutlineBuffer);
           break;
@@ -395,7 +395,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
           break;
         case 10: {
           if (outline_ == null) {
-            Outline = new global::ThTCHPolyline();
+            Outline = new global::ThTCHMPolygon();
           }
           input.ReadMessage(Outline);
           break;
@@ -418,7 +418,7 @@ public sealed partial class ThTCHDescendingData : pb::IMessage<ThTCHDescendingDa
         }
         case 50: {
           if (outlineBuffer_ == null) {
-            OutlineBuffer = new global::ThTCHPolyline();
+            OutlineBuffer = new global::ThTCHMPolygon();
           }
           input.ReadMessage(OutlineBuffer);
           break;

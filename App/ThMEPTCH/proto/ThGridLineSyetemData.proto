@@ -1,0 +1,12 @@
+syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThTCHGeometry.proto";
+import "ThCircleLableGroupData.proto";
+import "ThDimensionGroupData.proto";
+
+message ThGridLineSyetemData {
+    ThTCHRootData root = 1;
+    repeated ThTCHPolyline grid_lines = 2;
+    repeated ThCircleLableGroupData circle_lable_groups = 3;
+    repeated ThDimensionGroupData dimension_groups = 4;
+}

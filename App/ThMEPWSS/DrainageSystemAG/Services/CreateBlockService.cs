@@ -44,11 +44,11 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                                 id.SetDynBlockValue(dyAttr.Key, dyAttr.Value);
                             }
                         }
-                        var createResult = new CreateResult(id, item.createPoint, item.equipmentType, item.floorId, item.tag, item.layerName,item.belongBlockId);
+                        var createResult = new CreateResult(id, item.createPoint, item.equipmentType, item.floorId, item.tag, item.layerName, item.belongBlockId, item.blockName, item.attNameValues);
                         createRes.Add(createResult);
                     }
-                    catch (Exception ex) 
-                    {                    
+                    catch (Exception ex)
+                    {
                     }                    
                 }
             }
