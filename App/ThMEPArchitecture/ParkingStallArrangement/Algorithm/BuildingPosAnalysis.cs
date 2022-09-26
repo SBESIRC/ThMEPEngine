@@ -26,7 +26,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<Vector2D> BestVectors = new List<Vector2D>();
         private List<OSubArea> InitSubAreas;//初始子区域
 
-        private int BuildingMoveDistance;//建筑横纵偏移最大距离
+        public int BuildingMoveDistance;//建筑横纵偏移最大距离
         private int SampleDistance;//采样间距
 
         private double HalfLaneWidth = -0.1 + VMStock.RoadWidth / 2;
@@ -42,12 +42,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         static BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
         public BuildingPosAnalysis(ParkingStallArrangementViewModel parameterViewModel)
         {
-            //BuildingMoveDistance = parameterViewModel.BuildingMoveDistance;
-            //SampleDistance = parameterViewModel.SampleDistance;
-            BuildingMoveDistance = 500;
-            SampleDistance = 500;
+            BuildingMoveDistance = parameterViewModel.BuildingMoveDistance;
+            SampleDistance = parameterViewModel.SampleDistance;
+            //BuildingMoveDistance = 500;
+            //SampleDistance = 500;
             UpdateMovingVector();
-            InitSubAreas = OInterParameter.GetOSubAreas(null);
+            //InitSubAreas = OInterParameter.GetOSubAreas(null);
         }
 
         private void UpdateMovingVector()
@@ -114,6 +114,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             if (BPC == null) BPC = new BuildingPosCalculate();
             return BPC.CalculateScore(index, vector);
+        }
+        public void UpdataGA()
+        {
+            var bestVectors = new List<Vector2D>();
+            for (int i = 0; i < OInterParameter.MovingBounds.Count; i++)
+            {
+                BuildingPosGAAnalysis buildingPosGA = new BuildingPosGAAnalysis(i, this);
+                buildingPosGA.Process();
+                bestVectors.Add(buildingPosGA.Best);
+            }
+            OInterParameter.UpdateBuildings(bestVectors);
         }
         public void UpdateBest()
         {

@@ -244,9 +244,10 @@ namespace ThMEPArchitecture.MultiProcess
                 //BPC.CalculateScore(BPA.PotentialMovingVectors);
                 //BPC.CalculateBest(true);
 
-                BPA.UpdateBest();
+                BPA.UpdataGA();
+                //BPA.UpdateBest();
                 OInterParameter.Buildings.ForEach(b => b.ToDbPolylines().ForEach(pl => { pl.AddToCurrentSpace(); DisplayParkingStall.Add(pl); }));
-                ProcessAndDisplay(null,1,stopWatch);
+                ProcessAndDisplay(null, 1, stopWatch);
                 //OInterParameter.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace());
                 //lanes.Get<LineString>(true).ForEach(l => l.ToDbPolyline().AddToCurrentSpace());
                 //ProcessAndDisplay(null, 0, stopWatch);
