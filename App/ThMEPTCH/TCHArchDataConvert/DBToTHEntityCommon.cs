@@ -13,19 +13,19 @@ namespace ThMEPTCH.TCHArchDataConvert
 {
     class DBToTHEntityCommon
     {
-        public static THArchEntityBase DBArchToTHArch(TArchEntity dbArchEntity) 
+        public static THArchEntityBase DBArchToTHArch(TArchEntity dbArchEntity)
         {
             if (dbArchEntity is TArchWall archWall)
-                return TArchWallToEntityWall(archWall, 0, 0, 0, 0, new Vector3d(0,0,0));
+                return TArchWallToEntityWall(archWall, 0, 0, 0, 0, new Vector3d(0, 0, 0));
             else if (dbArchEntity is TArchDoor archDoor)
                 return TArchDoorToEntityDoor(archDoor);
             else if (dbArchEntity is TArchWindow archWindow)
                 return TArchWindowToEntityWindow(archWindow);
             return null;
         }
-        public static WallEntity TArchWallToEntityWall(TArchWall arch, double leftSpOffSet, double leftEpOffSet, double rightSpOffSet, double rightEpOffSet,Vector3d moveOffSet)
+        public static WallEntity TArchWallToEntityWall(TArchWall arch, double leftSpOffSet, double leftEpOffSet, double rightSpOffSet, double rightEpOffSet, Vector3d moveOffSet)
         {
-            WallEntity wallEntity = new WallEntity(arch);
+            var wallEntity = new WallEntity(arch);
             var z = arch.StartPoint.Z;
             var spX = Math.Floor(arch.StartPoint.X);
             var spY = Math.Floor(arch.StartPoint.Y);
@@ -38,7 +38,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             wallEntity.LeftWidth = arch.LeftWidth;
             wallEntity.RightWidth = arch.RightWidth;
             wallEntity.Height = arch.Height;
-            wallEntity.EnumMaterial = arch.EnumMaterial;
+            wallEntity.EnumMaterial = arch.Material;
             if (arch.IsArc)
             {
                 var sp = wallEntity.StartPoint;

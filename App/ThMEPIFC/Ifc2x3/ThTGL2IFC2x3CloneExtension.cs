@@ -232,7 +232,7 @@ namespace ThMEPIFC.Ifc2x3
                 NewBrep.Outer = brep.Outer.CloneAndCreateNew(model);
                 result = NewBrep;
             }
-            else if(body is IfcFaceBasedSurfaceModel surfaceModel)
+            else if (body is IfcFaceBasedSurfaceModel surfaceModel)
             {
                 var newSurface = model.Instances.New<IfcFaceBasedSurfaceModel>();
                 var faceSet = surfaceModel.FbsmFaces.FirstOrDefault();
@@ -246,7 +246,7 @@ namespace ThMEPIFC.Ifc2x3
             return result;
         }
 
-        private static IfcDirection CloneAndCreateNew(this IfcDirection direction,IfcStore model)
+        private static IfcDirection CloneAndCreateNew(this IfcDirection direction, IfcStore model)
         {
             var result = model.Instances.New<IfcDirection>();
             result.SetXYZ(direction.X, direction.Y, direction.Z);
@@ -278,29 +278,27 @@ namespace ThMEPIFC.Ifc2x3
             return result;
         }
 
-        private static IfcClosedShell CloneAndCreateNew(this IfcClosedShell closedShell,IfcStore model)
+        private static IfcClosedShell CloneAndCreateNew(this IfcClosedShell closedShell, IfcStore model)
         {
             var result = model.Instances.New<IfcClosedShell>();
             result.CfsFaces.AddRange(closedShell.CfsFaces.Select(o => o.CloneAndCreateNew(model)));
             return result;
         }
-        
-        private static IfcFace CloneAndCreateNew(this IfcFace face,IfcStore model)
+
+        private static IfcFace CloneAndCreateNew(this IfcFace face, IfcStore model)
         {
             var result = model.Instances.New<IfcFace>();
             result.Bounds.Add(face.Bounds.FirstOrDefault().CloneAndCreateNew(model));
             return result;
-            
-
         }
-        
+
         private static IfcFaceBound CloneAndCreateNew(this IfcFaceBound faceBound, IfcStore model)
         {
             var result = model.Instances.New<IfcFaceBound>();
             result.Bound = faceBound.Bound.CloneAndCreateNew(model);
             return result;
         }
-        
+
         private static IfcLoop CloneAndCreateNew(this IfcLoop loop, IfcStore model)
         {
             IfcLoop result;
@@ -320,8 +318,8 @@ namespace ThMEPIFC.Ifc2x3
             }
             return result;
         }
-        
-        private static IfcCartesianPoint CloneAndCreateNewXYZ(this IfcCartesianPoint point,IfcStore model)
+
+        private static IfcCartesianPoint CloneAndCreateNewXYZ(this IfcCartesianPoint point, IfcStore model)
         {
             var Newpt = model.Instances.New<IfcCartesianPoint>();
             Newpt.SetXYZ(point.X, point.Y, point.Z);
@@ -366,20 +364,20 @@ namespace ThMEPIFC.Ifc2x3
             return result;
         }
 
-        private static IfcConnectedFaceSet CloneAndCreateNew(this IfcConnectedFaceSet faceSet,IfcStore model)
+        private static IfcConnectedFaceSet CloneAndCreateNew(this IfcConnectedFaceSet faceSet, IfcStore model)
         {
             var result = model.Instances.New<IfcConnectedFaceSet>();
-            foreach(var face in faceSet.CfsFaces)
+            foreach (var face in faceSet.CfsFaces)
             {
                 result.CfsFaces.Add(face.CloneAndCreateNew(model));
             }
             return result;
         }
 
-        private static IfcProfileDef CloneAndCreateNew(this IfcProfileDef profileDef,IfcStore model)
+        private static IfcProfileDef CloneAndCreateNew(this IfcProfileDef profileDef, IfcStore model)
         {
             IfcProfileDef result;
-            if(profileDef is IfcRectangleProfileDef rectangleProfileDef)
+            if (profileDef is IfcRectangleProfileDef rectangleProfileDef)
             {
                 result = model.Instances.New<IfcRectangleProfileDef>(d =>
                 {
@@ -389,7 +387,7 @@ namespace ThMEPIFC.Ifc2x3
                     //d.Position = rectangleProfileDef.Position.CloneAndCreateNew(model);
                 });
             }
-            else if(profileDef is IfcArbitraryClosedProfileDef arbitraryClosedProfileDef)
+            else if (profileDef is IfcArbitraryClosedProfileDef arbitraryClosedProfileDef)
             {
                 result = model.Instances.New<IfcArbitraryClosedProfileDef>(d =>
                 {
@@ -414,7 +412,7 @@ namespace ThMEPIFC.Ifc2x3
             return compositeCurve;
         }
 
-        private static IfcCompositeCurveSegment CloneAndCreateNew(this IfcCompositeCurveSegment segment,IfcStore model)
+        private static IfcCompositeCurveSegment CloneAndCreateNew(this IfcCompositeCurveSegment segment, IfcStore model)
         {
             var result = model.Instances.New<IfcCompositeCurveSegment>(s =>
             {
@@ -427,7 +425,7 @@ namespace ThMEPIFC.Ifc2x3
         private static IfcCurve CloneAndCreateNew(this IfcCurve ifcCurve, IfcStore model)
         {
             IfcCurve result;
-            if(ifcCurve is IfcPolyline ifcPolyline)
+            if (ifcCurve is IfcPolyline ifcPolyline)
             {
                 var poly = model.Instances.New<IfcPolyline>();
                 foreach (var point in ifcPolyline.Points)
@@ -446,7 +444,7 @@ namespace ThMEPIFC.Ifc2x3
         private static IfcProperty CloneAndCreateNew(this IfcProperty property, IfcStore model)
         {
             IfcProperty result;
-            if(property is IfcPropertySingleValue propertySingleValue)
+            if (property is IfcPropertySingleValue propertySingleValue)
             {
                 result = model.Instances.New<IfcPropertySingleValue>(p =>
                 {
@@ -463,11 +461,11 @@ namespace ThMEPIFC.Ifc2x3
 
         private static IfcValue CloneAndCreateNew(this IfcValue value)
         {
-            if(value is IfcText ifcText)
+            if (value is IfcText ifcText)
             {
                 return new IfcText(ifcText.ToString());
             }
-            else if(value is IfcLengthMeasure ifcLengthMeasure)
+            else if (value is IfcLengthMeasure ifcLengthMeasure)
             {
                 return new IfcLengthMeasure(double.Parse(ifcLengthMeasure.Value.ToString()));
             }

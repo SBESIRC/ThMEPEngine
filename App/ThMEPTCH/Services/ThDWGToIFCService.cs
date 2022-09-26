@@ -32,7 +32,6 @@ namespace ThMEPTCH.Services
         ThCADCoreNTSSpatialIndex spatialIndex;
         ThCADCoreNTSSpatialIndex entitySpatialIndex;
         ThCADCoreNTSSpatialIndex dbEntitySpatialIndex;//new
-        List<THArchEntityBase> entityBases = new List<THArchEntityBase>();
         Dictionary<MPolygon, THArchEntityBase> entityDic = new Dictionary<MPolygon, THArchEntityBase>();
         Dictionary<Polyline, THStructureEntity> dbEntityDic = new Dictionary<Polyline, THStructureEntity>();//new
         List<FloorCurveEntity> cadCurveEntities = new List<FloorCurveEntity>();
@@ -143,7 +142,7 @@ namespace ThMEPTCH.Services
                 var railingColls = new DBObjectCollection();
                 var thisOpeningEntities = new Dictionary<Polyline, ThTCHOpening>();
                 var openingColls = new DBObjectCollection();
-                var rooms =  new List<ThTCHSpace>();
+                var rooms = new List<ThTCHSpace>();
 
                 foreach (var item in curveEntities)
                 {
@@ -206,7 +205,7 @@ namespace ThMEPTCH.Services
                             thisOpeningEntities.Add(pLine, opening);
                         }
                     }
-                    else if(item.EntitySystem.Contains("房间"))
+                    else if (item.EntitySystem.Contains("房间"))
                     {
                         var outline = item.EntityCurve.GetTransformedCopy(matrix) as Entity;
                         openingColls.Add(outline);
@@ -849,12 +848,12 @@ namespace ThMEPTCH.Services
 
                 // 给房间设置名称
                 var roomVisitors = visitors.Where(o => o is THDBRoomExtractionVisitor);
-                if(roomVisitors.Count()==1)
+                if (roomVisitors.Count() == 1)
                 {
                     var roomVisitor = roomVisitors.First() as THDBRoomExtractionVisitor;
                     var roomCurves = roomVisitor.Results
-                        .Where(o=>o.Data!=null && o.Data is FloorCurveEntity)
-                        .Select(o=>o.Data)
+                        .Where(o => o.Data != null && o.Data is FloorCurveEntity)
+                        .Select(o => o.Data)
                         .OfType<FloorCurveEntity>()
                         .ToList();
                     ThSetRoomNameService.SetFromCurrentDb(roomCurves);
@@ -965,19 +964,37 @@ namespace ThMEPTCH.Services
             return res.OrderBy(o => o.Elevation).ToList();
         }
 
-        void InitFloorDBEntity(List<TArchEntity> allTArchEntities, List<THStructureEntity> allDBEntities)
+        void InitFloorDBEntity(List<TArchEntity> allTArchEntities, List<THStructureEntity> allDBEntities, bool wallFix = true)
         {
             var addTArchColl = new DBObjectCollection();
-            foreach (var item in allTArchEntities)
+            // 对天正墙做融合处理
+            if (wallFix)
             {
-                var thEntity = DBToTHEntityCommon.DBArchToTHArch(item);
-                if (thEntity == null)
-                    continue;
-                entityBases.Add(thEntity);
-                if (null == thEntity.Outline)
-                    continue;
-                addTArchColl.Add(thEntity.Outline);
-                entityDic.Add(thEntity.Outline, thEntity);
+                // 弧墙暂不处理
+                var archWalls = allTArchEntities.OfType<TArchWall>().Where(o => !o.IsArc).ToList();
+                var archEntitiesFilter = allTArchEntities.Except(archWalls).ToList();
+                EntitiesLoop(archEntitiesFilter, addTArchColl);
+
+                var thArchWalls = new List<WallEntity>();
+                foreach (var item in archWalls)
+                {
+                    var thEntity = DBToTHEntityCommon.DBArchToTHArch(item) as WallEntity;
+                    if (thEntity == null)
+                        continue;
+                    if (null == thEntity.Outline)
+                        continue;
+                    thArchWalls.Add(thEntity);
+                }
+
+                ThArchWallFixer.Union(thArchWalls).ForEach(o =>
+                {
+                    addTArchColl.Add(o.Outline);
+                    entityDic.Add(o.Outline, o);
+                });
+            }
+            else
+            {
+                EntitiesLoop(allTArchEntities, addTArchColl);
             }
             spatialIndex = new ThCADCoreNTSSpatialIndex(addTArchColl);
             addTArchColl.Clear();
@@ -996,6 +1013,21 @@ namespace ThMEPTCH.Services
             entitySpatialIndex = new ThCADCoreNTSSpatialIndex(addTArchColl);
             dbEntitySpatialIndex = new ThCADCoreNTSSpatialIndex(addDBColl);
         }
+
+        void EntitiesLoop(List<TArchEntity> archEntities, DBObjectCollection addTArchColl)
+        {
+            foreach (var item in archEntities)
+            {
+                var thEntity = DBToTHEntityCommon.DBArchToTHArch(item);
+                if (thEntity == null)
+                    continue;
+                if (null == thEntity.Outline)
+                    continue;
+                addTArchColl.Add(thEntity.Outline);
+                entityDic.Add(thEntity.Outline, thEntity);
+            }
+        }
+
         List<THArchEntityBase> FloorEntitys(Polyline outPLine, out List<FloorCurveEntity> curveEntities)
         {
             curveEntities = new List<FloorCurveEntity>();
@@ -1037,7 +1069,7 @@ namespace ThMEPTCH.Services
 
         private ThTCHSpace CreateRoom(Entity entity)
         {
-            if(entity is MPolygon polygon)
+            if (entity is MPolygon polygon)
             {
                 return new ThTCHSpace(polygon);
             }

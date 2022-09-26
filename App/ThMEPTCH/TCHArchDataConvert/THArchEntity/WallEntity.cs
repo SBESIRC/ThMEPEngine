@@ -17,7 +17,7 @@ namespace ThMEPTCH.TCHArchDataConvert.THArchEntity
         public double Height { get; set; }
         public EnumTCHWallMaterial EnumMaterial { get; set; }
 
-        public WallEntity(TArchEntity dbWall):base(dbWall)
+        public WallEntity(TArchEntity dbWall) : base(dbWall)
         {
             //
         }
