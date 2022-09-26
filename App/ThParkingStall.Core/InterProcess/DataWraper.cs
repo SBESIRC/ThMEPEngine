@@ -124,7 +124,8 @@ namespace ThParkingStall.Core.InterProcess
                 var subAreas = InterParameter.GetSubAreas(chromosome);
                 List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
                 MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-                var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
+                Polygon CaledBound = new Polygon(new LinearRing(new Coordinate[0]));
+                var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition,ref CaledBound);
                 Result.Add(ParkingCount);
             }
             return Result;

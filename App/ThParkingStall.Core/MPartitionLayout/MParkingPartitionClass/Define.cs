@@ -40,6 +40,8 @@ namespace ThParkingStall.Core.MPartitionLayout
                 LoopThroughEnd = true;
                 DisConsideringLoopThroughEnd = VMStock.AllowLoopThroughEnd;
             }
+            else
+                LoopThroughEnd = false;
 
             //LayoutMode = ((int)VMStock.RunMode);
             AllowCompactedLane = VMStock.BoundaryShrink;

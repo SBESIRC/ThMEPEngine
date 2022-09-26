@@ -19,7 +19,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static bool LogInfo = false;
         public static int ThreadCnt = 1;
         public static Serilog.Core.Logger Logger;
-        public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros, ref MParkingPartitionPro mParkingPartition, bool display = false)
+        public static int CalculateTheTotalNumOfParkingSpace(List<SubArea> subAreas, ref List<MParkingPartitionPro> mParkingPartitionPros, ref MParkingPartitionPro mParkingPartition, ref Polygon CaledIntegralBound, bool display = false)
         {
             if (subAreas.Count == 0)
             {
@@ -34,7 +34,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             MParkingPartitionPro.LayoutScareFactor_SingleVert = VMStock.LayoutScareFactor_SingleVert;
             MParkingPartitionPro.SingleVertModulePlacementFactor = VMStock.SingleVertModulePlacementFactor;
             MParkingPartitionPro.ScareEnabledForBackBackModule = VMStock.DoubleRowModularDecrease200;
-            MParkingPartitionPro.LoopThroughEnd = false; ;
+            CaledIntegralBound = new Polygon(new LinearRing(new Coordinate[0]));
 
             var Walls = new BlockingCollection<LineString>();
             var Cars = new BlockingCollection<InfoCar>();
@@ -86,6 +86,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 mParkingPartition.Pillars = pillars;
                 mParkingPartition.OutputLanes = lanes;
                 var newbound = MParkingPartitionPro.CalIntegralBound(pillars, lanes, obstacles, cars);
+                CaledIntegralBound = newbound;
                 //Display(newbound);
                 //mParkingPartition.OutputLanes = new List<LineSegment>();
                 var ensuredLanes = new List<LineSegment>();

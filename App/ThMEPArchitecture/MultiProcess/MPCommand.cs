@@ -40,6 +40,7 @@ using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThParkingStall.Core.IO;
 using ThParkingStall.Core.OInterProcess;
+using static ThMEPArchitecture.PartitionLayout.DisplayTools;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -405,7 +406,15 @@ namespace ThMEPArchitecture.MultiProcess
 #endif
             List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
             MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+            Polygon CaledBound = new Polygon(new LinearRing(new Coordinate[0]));
+            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition,ref CaledBound, true);
+            string Boundlayer = "AI-参考地库轮廓";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(Boundlayer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, Boundlayer, 141);
+            }
+            Display(CaledBound, 141, Boundlayer);
             var strBest = $"最大车位数{ParkingStallCount}\n";
             Logger?.Information(strBest);
             Active.Editor.WriteMessage(strBest);

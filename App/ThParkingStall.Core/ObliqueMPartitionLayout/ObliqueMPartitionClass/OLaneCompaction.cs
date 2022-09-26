@@ -543,7 +543,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var intersected_vert_cars = intersected_vert_car_infos.Select(e => e.Polyline).ToList();
             rec = PolyFromLines(line, line.Translation(vec.Normalize() * maxLength));
             rec = rec.Scale(ScareFactorForCollisionCheck);
-            var crossed_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(rec).Cast<Polygon>();
+            var crossed_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(rec).Cast<Polygon>().Where(o => Boundary.Contains(o.Centroid.Coordinate));
             var coord_obs = new List<Coordinate>();
             foreach (var coos in crossed_obs.Select(e => e.Coordinates))
                 coord_obs.AddRange(coos);
@@ -569,7 +569,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             //车道
             var offset_line_buffer = PolyFromLines(line, line.Translation(vec.Normalize() * maxLength));
             offset_line_buffer = offset_line_buffer.Scale(ScareFactorForCollisionCheck);
-            var crossed_lane_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(offset_line_buffer);
+            var crossed_lane_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(offset_line_buffer).Where(o => Boundary.Contains(o.Centroid.Coordinate));
             if (crossed_lane_obs.Count() > 0)
             {
                 var linetest = new LineSegment(line);

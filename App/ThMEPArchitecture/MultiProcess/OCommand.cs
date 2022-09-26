@@ -341,9 +341,15 @@ namespace ThMEPArchitecture.MultiProcess
         }
         void ProcessPartitionGlobally(List<OSubArea> subAreas, ref Polygon caledBound)
         {
+            string Boundlayer = "AI-参考地库轮廓";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(Boundlayer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, Boundlayer, 141);
+            }
             GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
             caledBound = globalBusiness.CalBound();
-            Display(caledBound);
+            Display(caledBound, 141, Boundlayer);
             if (ObliqueMPartition.AllowProcessEndLanes)
             {
                 var integralObliqueMPartition = globalBusiness.ProcessEndLanes();

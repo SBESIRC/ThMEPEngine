@@ -136,7 +136,8 @@ namespace ThParkingStall.Core
                         }
                         List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
                         MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-                        var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition);
+                        Polygon CaledBound = new Polygon(new LinearRing(new Coordinate[0]));
+                        var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition,ref CaledBound);
                         if (LogAllInfo)
                         {
                             Logger?.Information($"区域计算用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");

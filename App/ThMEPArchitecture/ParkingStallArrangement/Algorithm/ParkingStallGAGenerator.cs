@@ -17,6 +17,8 @@ using ThMEPArchitecture.MultiProcess;
 using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
+using NetTopologySuite.Geometries;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
     public class ParkingStallGAGenerator : IDisposable
@@ -622,8 +624,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var chrom = chromosomeCollection.Chromosomes[i];
                 var subAreas = InterParameter.GetSubAreas(chrom);
                 List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-                MParkingPartitionPro mParkingPartition=new MParkingPartitionPro();
-                inputSolution[i].ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
+                MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+                Polygon CaledBound = new Polygon(new LinearRing(new Coordinate[0]));
+                inputSolution[i].ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, ref CaledBound);
             }
         }
         private List<List<Chromosome>> CreateNextGeneration2(List<Chromosome> solutions)
