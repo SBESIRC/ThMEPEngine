@@ -46,6 +46,22 @@ namespace ThParkingStall.Core.MPartitionLayout
             return res;
         }
     }
+    public class RampPro
+    {
+        public RampPro(Polygon region, List<Coordinate> points, List<Vector2D> vecs)
+        {
+            if (points.Count == Vecs.Count)
+            {
+                Region = region;
+                Points = points;
+                Vecs = vecs;
+            }
+        }
+        public Polygon Region { get; set; }
+        public List<Coordinate> Points { get; set; }
+        public List<Vector2D> Vecs { get; set; }
+    }
+
     public class CarBoxPlus
     {
         public CarBoxPlus() { }

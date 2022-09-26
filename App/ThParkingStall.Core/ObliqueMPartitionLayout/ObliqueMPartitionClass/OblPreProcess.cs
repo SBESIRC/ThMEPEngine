@@ -64,6 +64,22 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 }
             }
         }
+
+        public void ProcessRampDatas(List<RampPro> ramps)
+        {
+            foreach (var ramp in ramps)
+            {
+                var region = ramp.Region;
+                for (int i = 0; i < ramp.Points.Count; i++)
+                {
+                    var point = ramp.Points[i];
+                    var vec = ramp.Vecs[i];
+                    var test_line_from_point = LineSegmentSDL(point, vec, MaxLength);
+
+                }
+            }
+        }
+
         private void ConvertRampDatas()
         {
             if (RampList.Count > 0)
