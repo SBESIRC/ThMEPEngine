@@ -270,8 +270,13 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             if (ptestvec.Distance(pt) < length) gvec = -gvec;
             //与车道模块相交处理
             STRtree<Polygon> carBoxesStrTree = new STRtree<Polygon>();
+            var carBoxesSpatialIndexList = CarBoxesSpatialIndex.SelectAll().Cast<Polygon>().ToList();
+            carBoxesSpatialIndexList.ForEach(polygon => carBoxesStrTree.Insert(polygon.EnvelopeInternal, polygon));
             CarBoxes.ForEach(polygon => carBoxesStrTree.Insert(polygon.EnvelopeInternal, polygon));
-            var inilinesplitcarboxes = SplitLine(line, CarBoxes).Where(e => e.Length > 1).First();
+            var lanes_cutter = new List<Polygon>(CarBoxes);
+            IniLanes.Where(e => !IsParallelLine(line, e.Line)).Select(e => e.Line).ToList().ForEach(e => lanes_cutter.Add(PolyFromLine(e)));
+            var inilinesplitcarboxes = SplitLine(line, lanes_cutter).Where(e => e.Length > 1).First();
+
             //解决车道线靠墙的方向有车道线的情况
             var line_to_wall = TranslateReservedConnection(line, -gvec.Normalize() * length);
             var wall_buffer = line_to_wall.Buffer(/*DisLaneWidth / 2 - 1*/DisModulus /*+ DisLaneWidth*/);

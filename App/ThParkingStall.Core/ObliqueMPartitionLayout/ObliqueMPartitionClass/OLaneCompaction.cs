@@ -40,6 +40,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var newlanes = new List<Lane>();
             var eldlanes=new List<Lane>();
             var compacted = false;
+            RemoveDuplicatedLanes(IniLanes);
             CompactForGenerateLanes(IniLanes,OutBoundary,Boundary,ObstaclesSpatialIndex,CarSpatialIndex,Cars,InitialLanes,MaxLength,
                 ref newlanes,ref eldlanes,ref compacted);
             if (compacted)

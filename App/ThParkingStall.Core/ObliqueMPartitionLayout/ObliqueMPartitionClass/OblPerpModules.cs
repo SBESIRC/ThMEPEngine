@@ -41,6 +41,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     IniLanes.Add(lane);
                 }
             }
+            IniLanes.AddRange(lanes);
             #endregion
             for (int i = 0; i < lanes.Count; i++)
             {
