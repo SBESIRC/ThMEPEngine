@@ -367,7 +367,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 var generated_LoopThroughEnd = false;
                 if (LoopThroughEnd)
                 {
-                    var distance_allow_generate_loopthrough_end = DisAllowMaxLaneLength;
+                    var distance_allow_generate_loopthrough_end = DisConsideringLoopThroughEnd;
                     if (split.Length >= distance_allow_generate_loopthrough_end)
                     {
                         var dis_singleModule_depth = DisCarAndHalfLane + CollisionD - CollisionTOP;
@@ -537,7 +537,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 var generate_split_lanes = new List<LineSegment>();
                 if (paras.CarModulesToAdd.Count == 1)
                 {
-                    if (split.Length > DisAllowMaxLaneLength * 2)
+                    if (split.Length > DisAllowMaxLaneLength*2)
                     {
                         var para_module = new CarModule(pl, split, -vec);
                         var generate_line = para_module.Line;
@@ -561,7 +561,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     var generate_module_paras = paras.CarModulesToAdd
                    .Where(e => lane.ClosestPoint(e.Line.MidPoint).Distance(e.Line.MidPoint) > 10)
                    .Where(e => e.Vec.Dot(vec) < 0)
-                   .Where(e => e.Line.Length > DisAllowMaxLaneLength * 2).ToList();
+                   .Where(e => e.Line.Length > DisAllowMaxLaneLength*2).ToList();
 
                     foreach (var para in generate_module_paras)
                     {

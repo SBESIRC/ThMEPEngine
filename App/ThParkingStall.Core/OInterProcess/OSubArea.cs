@@ -65,7 +65,14 @@ namespace ThParkingStall.Core.OInterProcess
                     obliqueMPartition.BuildingBoxes = BuildingBounds.Select(e => e.Clone()).ToList();
                     obliqueMPartition.ObstaclesSpatialIndex = new MNTSSpatialIndex(Buildings);
                     obliqueMPartition.QuickCalculate = !IgnoreCache && VMStock.SpeedUpMode;
-                    ObliqueMPartition.LoopThroughEnd = false;
+                    if (VMStock.AllowLoopThroughEnd > 20000)
+                    {
+                        ObliqueMPartition.LoopThroughEnd = true;
+                        obliqueMPartition.DisConsideringLoopThroughEnd = VMStock.AllowLoopThroughEnd;
+                    }
+                    else
+                        ObliqueMPartition.LoopThroughEnd = false;
+                    obliqueMPartition.DisAllowMaxLaneLength = VMStock.DisAllowMaxLaneLength;
 #if DEBUG
                     var s = MDebugTools.AnalysisPolygon(obliqueMPartition.Boundary);
                     string dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);

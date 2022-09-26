@@ -783,7 +783,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var generated_LoopThroughEnd = false;
                 if (LoopThroughEnd)
                 {
-                    var distance_allow_generate_loopthrough_end = DisAllowMaxLaneLength;
+                    var distance_allow_generate_loopthrough_end = DisConsideringLoopThroughEnd;
                     if (split.Length >= distance_allow_generate_loopthrough_end)
                     {
                         var dis_singleModule_depth = DisCarAndHalfLane + CollisionD - CollisionTOP;

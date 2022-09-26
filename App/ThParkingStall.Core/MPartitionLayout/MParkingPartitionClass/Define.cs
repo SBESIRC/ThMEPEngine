@@ -35,6 +35,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             ThicknessOfPillarConstruct = VMStock.ColumnAdditionalSize;
             HasImpactOnDepthForPillarConstruct = VMStock.ColumnAdditionalInfluenceLaneWidth;
             DisAllowMaxLaneLength = VMStock.DisAllowMaxLaneLength;
+            if (VMStock.AllowLoopThroughEnd > 30000)
+            {
+                LoopThroughEnd = true;
+                DisConsideringLoopThroughEnd = VMStock.AllowLoopThroughEnd;
+            }
+
             //LayoutMode = ((int)VMStock.RunMode);
             AllowCompactedLane = VMStock.BoundaryShrink;
 
@@ -155,7 +161,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
         public static double SingleVertModulePlacementFactor = 1.0;
         public static bool LoopThroughEnd = false;//尽端环通
-        public double DisAllowMaxLaneLength = 50000;//允许生成车道最大长度-尽端环通车道条件判断长度
+        public double DisAllowMaxLaneLength = 50000;//允许生成车道最大长度-
+        public double DisConsideringLoopThroughEnd = 50000;//尽端环通车道条件判断长度
         public bool AllowCompactedLane = false;
         public bool hasCompactedLane = false;
         private int CalCompactLaneCount = 0;
