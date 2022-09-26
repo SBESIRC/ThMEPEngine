@@ -57,7 +57,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var lanespacialindex = new MNTSSpatialIndex(IniLanes.Select(e => e.Line.ToLineString()));
             RemoveDuplicatedLanes(IniLanes);
             var adjLanes = new List<Lane>();
-            foreach (var lane in IniLanes)
+            foreach (var lane in IniLanes.Where(e => !e.ISCopiedFromCarmodelus))
             {
                 var line = lane.Line;
                 var segs = new List<LineSegment>();
@@ -83,7 +83,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             foreach (var lane in adjLanes)
             {
                 var found = false;
-                foreach (var iniLane in IniLanes)
+                foreach (var iniLane in IniLanes.Where(e => !e.ISCopiedFromCarmodelus))
                 {
                     if (HasOverlay(lane.Line, iniLane.Line) && IsAdverseVector(lane.Vec, iniLane.Vec))
                     {
@@ -103,6 +103,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             for (int i = 0; i < oriLanes.Count; i++)
             {
                 var lane = oriLanes[i];
+                if (lane.ISCopiedFromCarmodelus) continue;
                 CompactedLaneGroup group = new CompactedLaneGroup();
                 group.CompactedLanes.Add(new CompactedLane(lane));
                 if (oriLanes_reversedVectorIndexes.Contains(i))
@@ -124,7 +125,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 oriLine = oriLine.Scale(ScareFactorForCollisionCheck);
                 var rec = PolyFromLines(oriLine, oriLine.Translation(group_vec.Normalize() * maxLength));
                 rec = rec.Scale(ScareFactorForCollisionCheck);
-                var intersected_lanes = IniLanes.Where(e => e.Line.IntersectPoint(rec).Count() > 0);
+                var intersected_lanes = IniLanes.Where(e => !e.ISCopiedFromCarmodelus).Where(e => e.Line.IntersectPoint(rec).Count() > 0);
                 intersected_lanes = intersected_lanes.Where(e => e.Vec.Normalize() == group_vec.Normalize());
                 intersected_lanes = intersected_lanes.Where(e => Boundary.ClosestPoint(e.Line.MidPoint).Distance(e.Line.MidPoint) > 10);
                 //相连在同一根车道上
@@ -167,6 +168,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             //移动目标车道线
             var addlanes = new List<Lane>();
             eldlanes = new List<Lane>();
+            compactedLanesgroup = compactedLanesgroup.Where(e => e.CompactedLanes[0].MoveableDistance > 0).ToList();
             foreach (var group in compactedLanesgroup)
             {
                 foreach (var lane in group.CompactedLanes)

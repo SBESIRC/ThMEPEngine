@@ -41,7 +41,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     IniLanes.Add(lane);
                 }
             }
-            IniLanes.AddRange(lanes);
+            IniLanes.AddRange(lanes.Select(e =>
+            {
+                e.ISCopiedFromCarmodelus = true;
+                return e;
+            }));
             #endregion
             for (int i = 0; i < lanes.Count; i++)
             {

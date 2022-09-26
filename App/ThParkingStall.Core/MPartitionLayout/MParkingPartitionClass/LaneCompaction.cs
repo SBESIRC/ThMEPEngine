@@ -40,7 +40,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             var lanespacialindex = new MNTSSpatialIndex(IniLanes.Select(e => e.Line.ToLineString()));
             RemoveDuplicatedLanes(IniLanes);
             var adjLanes = new List<Lane>();
-            foreach (var lane in IniLanes)
+            foreach (var lane in IniLanes.Where(e => !e.ISCopiedFromCarmodelus))
             {
                 var line = lane.Line;
                 var segs = new List<LineSegment>();

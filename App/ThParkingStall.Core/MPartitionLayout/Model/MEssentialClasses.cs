@@ -27,6 +27,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool IsGeneratedForLoopThrough = false;
         public bool IsAdjLaneForProcessLoopThroughEnd = false;
         public bool NotCopyReverseForLaneCompaction=false;
+        public bool ISCopiedFromCarmodelus = false;
         public void Copy(Lane lane)
         {
             CanBeMoved=lane.CanBeMoved;
@@ -36,6 +37,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             IsGeneratedForLoopThrough=lane.IsGeneratedForLoopThrough;
             IsAdjLaneForProcessLoopThroughEnd=lane.IsAdjLaneForProcessLoopThroughEnd;
             NotCopyReverseForLaneCompaction=lane.NotCopyReverseForLaneCompaction;
+            ISCopiedFromCarmodelus=lane.ISCopiedFromCarmodelus;
         }
         public Lane Clone()
         {
