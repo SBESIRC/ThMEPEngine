@@ -32,7 +32,7 @@ namespace ThMEPTCH.CAD
 
         public override bool CheckLayerValid(Entity e)
         {
-            return e.Layer == "S_BEAM_TEXT_VERT";
+            return e.Layer.StartsWith("S_BEAM_TEXT");
         }
 
         private List<ThRawIfcBuildingElementData> HandleElement(Entity entity, Matrix3d matrix)
