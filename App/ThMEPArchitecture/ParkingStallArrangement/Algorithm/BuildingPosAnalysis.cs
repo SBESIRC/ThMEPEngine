@@ -81,7 +81,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 var bound = OInterParameter.MovingBounds[k];
                 PotentialMovingVectors.Add(new List<Vector2D>());
-                //if (bound.Intersects(CenterLaneGeo)) throw new Exception("建筑物与核心车道相交!");
+                if (bound.Intersects(CenterLaneGeo)) throw new Exception("建筑物与核心车道相交!");
                 for (int i = -StepCnts; i < StepCnts+1; i++)
                 {
                     for (int j = -StepCnts; j < StepCnts+1; j++)
