@@ -247,7 +247,7 @@ namespace ThMEPArchitecture.MultiProcess
                 BPA.UpdateBest();
                 OInterParameter.Buildings.ForEach(b => b.ToDbPolylines().ForEach(pl => { pl.AddToCurrentSpace(); DisplayParkingStall.Add(pl); }));
                 ProcessAndDisplay(null,1,stopWatch);
-                OInterParameter.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace());
+                //OInterParameter.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace());
                 //lanes.Get<LineString>(true).ForEach(l => l.ToDbPolyline().AddToCurrentSpace());
                 //ProcessAndDisplay(null, 0, stopWatch);
             }
@@ -297,7 +297,10 @@ namespace ThMEPArchitecture.MultiProcess
             var moveDistance = SolutionID * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 OInterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = OInterParameter.GetOSubAreas(solution);
+            subAreas.ForEach(s => s.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace()));
             subAreas.ForEach(s => s.UpdateParkingCnts(true));
+            //subAreas.ForEach(s => s.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace()));
+
             var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
             Polygon caledBound = new Polygon(new LinearRing(new Coordinate[0]));
             ProcessPartitionGlobally(subAreas, ref caledBound);

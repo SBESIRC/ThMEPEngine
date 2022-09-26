@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPArchitecture.MultiProcess;
 using ThMEPArchitecture.ViewModel;
 using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.MPartitionLayout;
@@ -297,6 +298,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             var BPC = new BuildingPosCalculate();
             InitSubAreas = BPC.InitSubAreas;
+            InitSubAreas.ForEach(s => s.Display("初始小分区"));
             var scoresList = BPC.CalculateScore(PotentialMovingVectors);
             var bestVectors = new List<Vector2D>();
             for (int i = 0; i < PotentialMovingVectors.Count; i++)

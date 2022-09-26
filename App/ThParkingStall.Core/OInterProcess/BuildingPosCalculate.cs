@@ -185,7 +185,7 @@ namespace ThParkingStall.Core.OInterProcess
         public List<List<MSubArea>> DynamicSubAreas = new List<List<MSubArea>>();
 
         private double halfLaneWidth = -0.1 + VMStock.RoadWidth / 2;
-
+        static BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
         //1.获取所有可能的移动方案
         //网格+特殊点 
         //筛选合理解
@@ -208,14 +208,15 @@ namespace ThParkingStall.Core.OInterProcess
             MovingBounds = movingBounds;
             foreach(var bound in MovingBounds)
             {
+                var MaxBound = bound.Buffer(halfLaneWidth + VMStock.BuildingMoveDistance);//半车道 + 最大位移距离
                 DynamicSubAreas.Add(new List<MSubArea>());
                 for (int i = 0;i < InitSubAreas.Count; i++)
                 {
                     var tempArea = InitSubAreas[i];
-                    if (tempArea.Region.Intersects(bound))
+                    if (tempArea.Region.Intersects(MaxBound))
                     {
                         var mSubArea = new MSubArea(tempArea, bound,i);
-                        if (mSubArea.IsVaild) DynamicSubAreas.Last().Add(mSubArea);
+                        DynamicSubAreas.Last().Add(mSubArea);
                     }
                 }
             }
@@ -254,7 +255,7 @@ namespace ThParkingStall.Core.OInterProcess
     {
         //终于在眼泪中明白
         //有些人 一旦错过就不在
-        public bool IsVaild = false;
+        //public bool IsVaild = false;
         public int InitParkingCnt;
         public int InitIndex;
         private List<LineString> Walls;
@@ -294,7 +295,7 @@ namespace ThParkingStall.Core.OInterProcess
                 if (bound.Intersects(building)) buildingsToMove.Add(building);
                 else buildingsNotMove.Add(building);
             }
-            if(buildingsToMove.Count == 0) return;//分区不包含可动建筑。该分区不需要考虑
+            //if(buildingsToMove.Count == 0) return;//分区不包含可动建筑。该分区不需要考虑
             //筛选可动坡道
             foreach (var ramp in ramps)
             {
@@ -308,11 +309,12 @@ namespace ThParkingStall.Core.OInterProcess
                 else BBsNotMove.Add(BB);
             }
             var objs = new GeometryCollection(Walls.Cast<Geometry>().ToList().Concat(buildings.Cast<Geometry>()).ToArray());
-            var maxBound = bound.Buffer(maxMoveDistance,MitreParam);
+            var maxBound = bound.Buffer(maxMoveDistance);
             // 筛选动态车道
             foreach (var lane in lanes)
             {
-                var Rect = lane.GetRect(halfLaneWidth);
+                //var Rect = lane.GetRect(VMStock.RoadWidth);
+                var Rect = lane.Buffer(halfLaneWidth);
                 if(Rect.Intersects(maxBound))
                 {
                     var posLane = lane.Positivize();
@@ -323,7 +325,7 @@ namespace ThParkingStall.Core.OInterProcess
                 }
                 else LanesNotMove.Add(lane);
             }
-            IsVaild = true;
+            //IsVaild = true;
         }
 
         public OSubArea GetMovedArea(Vector2D vector)

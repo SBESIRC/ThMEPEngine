@@ -145,7 +145,8 @@ namespace ThParkingStall.Core.OInterProcess
         public static List<OSubArea> GetMovingOsubAreas()
         {
             var subAreas = new List<OSubArea>();
-
+            var halfRoadWidth = VMStock.RoadWidth/2;
+            InitSegLines.UpdateSegLines(TotalArea, BoundarySpatialIndex);
             var SegLineStrings = InitSegLines.Select(l => l.Splitter).ToList().ToLineStrings();
             var vaildLanes = InitSegLines.Select(l => l.VaildLane).ToList().ToLineStrings();
             var areas = TotalArea.Shell.GetPolygons(SegLineStrings);//区域分割
@@ -153,15 +154,14 @@ namespace ThParkingStall.Core.OInterProcess
             //var vaildSegSpatialIndex = new MNTSSpatialIndex(SegLineStrings.Cast<Geometry>().ToList());
             //var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
 
-            var maxBound = MovingBounds.Select(b =>b.Buffer(VMStock.BuildingMoveDistance,MitreParam) as Polygon).ToList();
+            var maxBound = MovingBounds.Select(b =>b.Buffer(VMStock.BuildingMoveDistance+ halfRoadWidth) as Polygon).ToList();
             // 创建子区域列表
             for (int i = 0; i < areas.Count; i++)
             {
                 var area = areas[i];
-
-                var Mbounds = new MultiPolygon( maxBound.Where(b =>b.Intersects(area)).ToArray());
-                var maxExtend = Mbounds.Union(area);
-
+                var intSectedBounds = maxBound.Where(b => b.Intersects(area)).ToList();
+                intSectedBounds.Add(area);
+                var maxExtend = new MultiPolygon(intSectedBounds.ToArray()).Union();
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
                 var subLanes = vaildLanes.GetCommonParts(area);
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
@@ -332,6 +332,9 @@ namespace ThParkingStall.Core.OInterProcess
             }
             _BuildingSpatialIndex = new MNTSSpatialIndex(_Buildings);
             _BuildingBoundSPIndex = new MNTSSpatialIndex(_BuildingBounds);
+            var allObjs = TotalArea.Shell.ToLineStrings().Cast<Geometry>().ToList();
+            allObjs.AddRange(Buildings);
+            _BoundarySpatialIndex = new MNTSSpatialIndex(allObjs);
         }
     }
 }

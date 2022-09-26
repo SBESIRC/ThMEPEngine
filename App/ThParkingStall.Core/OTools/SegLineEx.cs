@@ -406,12 +406,25 @@ namespace ThParkingStall.Core.OTools
             }
             if(baseLine == null) return null;
             //3.(若需要连到边界)则以2的线中点为基点，左右buffer找到最远距离对应的线
-            var basePt = baseLine.MidPoint;
+            Coordinate basePt;
+            Coordinate p0 = baseLine.P0;
+            Coordinate p1 = baseLine.P1;
+
+            if (!Connections.Item1 && Connections.Item2)
+            {
+                basePt = connectedPart.P0;
+                p0 = connectedPart.P0;
+            }
+                
+            else if(!Connections.Item2 && Connections.Item1)
+            {
+                basePt = connectedPart.P1;
+                p1 = connectedPart.P1;
+            }
+            else basePt = baseLine.MidPoint;
             var bufferLine = basePt.LineBuffer(halfWidth-(2*SegTol), baseLine.DirVector());//buffer基线,确保不碰到上一步的障碍物
             var bufferLstr = bufferLine.ToLineString();
             var normalVec = bufferLine.NormalVector();
-            Coordinate p0 = baseLine.P0;
-            Coordinate p1 = baseLine.P1;
             if (Connections.Item1)//起始连接到边界
             {
                 var rect = bufferLine.ShiftBuffer(MaxDistance, normalVec.Negate());//无限远buffer
