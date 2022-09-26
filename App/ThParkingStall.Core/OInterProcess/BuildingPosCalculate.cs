@@ -221,7 +221,7 @@ namespace ThParkingStall.Core.OInterProcess
                 }
             }
         }
-        public  List<List<int>> CalculateScore(List<List<Vector2D>> potentialMovingVectors,bool Update = false)
+        public  List<List<int>> CalculateScore(List<List<Vector2D>> potentialMovingVectors)
         {
             var BestVectors = new List<Vector2D>();
             var BestParkingCnts = new List<int>();
@@ -248,6 +248,15 @@ namespace ThParkingStall.Core.OInterProcess
             }
             return Scores;
         }
+        public int CalculateScore(int idx,Vector2D vector)
+        {
+            //var bound = MovingBounds[idx];
+            var DMsubAreas = DynamicSubAreas[idx];
+            var movedAreas = DMsubAreas.Select(s => s.GetMovedArea(vector)).ToList();
+            movedAreas.ForEach(a => a.UpdateParkingCnts(true));
+            return movedAreas.Sum(a => a.Count);
+        }
+
     }
     //动态子区域，包含可动建筑，可动坡道，动态车道(与可动建筑距离<最大可动距离)的尽端车道
     //每个可动建筑对应一个动态子区域

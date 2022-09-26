@@ -30,7 +30,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private int SampleDistance;//采样间距
 
         private double HalfLaneWidth = -0.1 + VMStock.RoadWidth / 2;
-
+        private Geometry CenterLaneGeo;
+        private BuildingPosCalculate BPC;
         //1.获取所有可能的移动方案
         //网格+特殊点 
         //筛选合理解
@@ -47,36 +48,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             SampleDistance = 500;
             UpdateMovingVector();
             InitSubAreas = OInterParameter.GetOSubAreas(null);
-        }
-        private void _UpdateMovingVector()
-        {
-            var lanes = OInterParameter.GetBoundLanes();
-            var halfLaneWidth = -0.1 + VMStock.RoadWidth / 2;
-            lanes = lanes.Buffer(halfLaneWidth, MitreParam);
-            var StepCnts = BuildingMoveDistance / SampleDistance;
-            AffineTransformation transformation = new AffineTransformation();
-            for (int k = 0;k<OInterParameter.MovingBounds.Count;k++)
-            {
-                var bound = OInterParameter.MovingBounds[k];
-                PotentialMovingVectors.Add(new List<Vector2D>());
-                if (bound.Intersects(lanes)) throw new Exception("Bound Intsects With Initial Bound Lines!");
-                for(int i = -StepCnts; i < StepCnts; i++)
-                {
-                    for(int j = -StepCnts; j < StepCnts; j++)
-                    {
-                        var x = i * SampleDistance;
-                        var y = j * SampleDistance;
-                        var vector = new Vector2D(x, y);
-                        transformation.SetToTranslation(x, y);
-                        var newBound = transformation.Transform(bound);
-                        if (newBound.Disjoint(lanes))
-                        {
-                            PotentialMovingVectors[k].Add(vector);
-                        }
-                    }
-                }
-            }
-            ;
         }
 
         private void UpdateMovingVector()
@@ -102,8 +73,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     centerLanes.Add(new LineSegment(ordered.First(), ordered.Last()));
                 }
             }
-            var CenterLaneGeo = new MultiLineString(centerLanes.ToLineStrings().ToArray()).Buffer(HalfLaneWidth,MitreParam);
-            CenterLaneGeo.Get<Polygon>(false).ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
+            CenterLaneGeo = new MultiLineString(centerLanes.ToLineStrings().ToArray()).Buffer(HalfLaneWidth,MitreParam);
+            //CenterLaneGeo.Get<Polygon>(false).ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
             var StepCnts = BuildingMoveDistance / SampleDistance;
             AffineTransformation transformation = new AffineTransformation();
             for (int k = 0; k < OInterParameter.MovingBounds.Count; k++)
@@ -129,176 +100,26 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
         }
 
-
-        //单进程更新车位个数
-        public void UpdateParkingCntSP()
+        public bool IsVaild(int index,Vector2D vector)
         {
             AffineTransformation transformation = new AffineTransformation();
-            var halfLaneWidth =-0.1+ VMStock.RoadWidth / 2;
-            for (int k = 0; k < OInterParameter.MovingBounds.Count; k++)
-            {
-                var bound = OInterParameter.MovingBounds[k];
-                var selected = OInterParameter.dynamicSubAreas.Where(s => s.Region.Intersects(bound)).ToList();
-                if (selected.Count != 1) throw new Exception("Building cross two Areas");
-                var subArea = selected[0];
-                var buildings = subArea.Buildings;
-                var ramps = subArea.Ramps;
-                var buildingBounds = subArea.BuildingBounds;
-                var lanes = subArea.VaildLanes;
-                var walls = subArea.Walls;
-
-                var objs = new GeometryCollection(walls.Cast<Geometry>().ToList().Concat(buildings.Cast<Geometry>()).ToArray());
-                var ConnectionList = new List<(bool, bool)>();
-                foreach(var lane in lanes)
-                {
-                    var posLane = lane.Positivize();
-                    bool negConnect = posLane.P0.ToPoint().Distance(objs) < (halfLaneWidth-0.1);
-                    bool posConnect = posLane.P1.ToPoint().Distance(objs) < (halfLaneWidth-0.1);
-                    ConnectionList.Add((negConnect, posConnect));
-                }
-
-                var buildingsToMove = new List<Polygon>();
-                var buildingsNotMove = new List<Polygon>();
-                
-                var rampsToMove = new List<ORamp>();
-                var rampsNotMove = new List<ORamp>();
-                
-                var BBsToMove = new List<Polygon>();
-                var BBsNotMove = new List<Polygon>();
-                foreach (var building in buildings)
-                {
-                    if (bound.Intersects(building))buildingsToMove.Add(building);
-                    else buildingsNotMove.Add(building);
-                }
-                foreach (var ramp in ramps)
-                {
-                    if (bound.Intersects(ramp.Area)) rampsToMove.Add(ramp);
-                    else rampsNotMove.Add(ramp);
-                }
-                foreach (var BB in buildingBounds)
-                {
-                    if (bound.Intersects(BB)) BBsToMove.Add(BB);
-                    else BBsNotMove.Add(BB);
-                }
-                int maxCnt = 0;
-                Vector2D BestVector = new Vector2D();
-                foreach (var vec in PotentialMovingVectors[k])
-                {
-                    transformation.SetToTranslation(vec.X, vec.Y);
-                    var new_builds = buildingsToMove.Select(b => transformation.Transform(b) as Polygon).ToList();
-                    var new_ramps = rampsToMove.Select(r => r.Transform(vec)).ToList();
-                    var new_BBs = BBsToMove.Select(b => transformation.Transform(b) as Polygon).ToList();
-                    new_builds.AddRange(buildingsNotMove);
-                    new_ramps.AddRange(rampsNotMove);
-                    new_BBs.AddRange(BBsNotMove);
-
-                    var boundarySPIdx = new MNTSSpatialIndex(new_builds.Cast<Geometry>().ToList().Concat(walls));
-                    var newLanes = new List<LineSegment>();
-
-                    for(int i=0;i< lanes.Count; i++)
-                    {
-                        var lane = lanes[i];
-                        var connection = ConnectionList[i];
-                        newLanes.Add(lane.GetVaildLane(connection, boundarySPIdx));
-                    }
-
-                    var new_SubArea = new OSubArea(subArea.Region, newLanes,subArea.Walls,new_builds,new_ramps,new_BBs);
-                    new_SubArea.UpdateParkingCnts(true);
-                    if (new_SubArea.Count > maxCnt)
-                    {
-                        maxCnt = new_SubArea.Count;
-                        BestVector = vec;
-                    }
-                }
-                BestVectors.Add(BestVector);
-            }
+            var bound = OInterParameter.MovingBounds[index];
+            transformation.SetToTranslation(vector.X, vector.Y);
+            var newBound = transformation.Transform(bound);
+            if (newBound.Disjoint(CenterLaneGeo)) return true;
+            else return false;
         }
 
-        public void UpdateSolution()
+        public int CalculateScore(int index,Vector2D vector)
         {
-            AffineTransformation transformation = new AffineTransformation();
-            var halfLaneWidth = VMStock.RoadWidth / 2;
-            for (int k = 0; k < OInterParameter.MovingBounds.Count; k++)
-            {
-                var bound = OInterParameter.MovingBounds[k];
-                var bestVector = BestVectors[k];
-                OSubArea subArea = OInterParameter.dynamicSubAreas.First();
-                int idx = 0;
-                foreach(var osub in OInterParameter.dynamicSubAreas)
-                {
-                    if (osub.Region.Intersects(bound))
-                    {
-                        subArea = osub; break;
-                    }
-                    idx++;
-                }
-                //var selected = OInterParameter.dynamicSubAreas.Where(s => s.Region.Intersects(bound)).ToList();
-                //if (selected.Count != 1) throw new Exception("Building cross two Areas");
-                //var subArea = selected[0];
-                var buildings = subArea.Buildings;
-                var ramps = subArea.Ramps;
-                var buildingBounds = subArea.BuildingBounds;
-                var lanes = subArea.VaildLanes;
-                var walls = subArea.Walls;
-
-                var objs = new GeometryCollection(walls.Cast<Geometry>().ToList().Concat(buildings.Cast<Geometry>()).ToArray());
-                var ConnectionList = new List<(bool, bool)>();
-                foreach (var lane in lanes)
-                {
-                    var posLane = lane.Positivize();
-                    bool negConnect = posLane.P0.ToPoint().Distance(objs) < (halfLaneWidth - 0.1);
-                    bool posConnect = posLane.P1.ToPoint().Distance(objs) < (halfLaneWidth - 0.1);
-                    ConnectionList.Add((negConnect, posConnect));
-                }
-                var buildingsToMove = new List<Polygon>();
-                var buildingsNotMove = new List<Polygon>();
-
-                var rampsToMove = new List<ORamp>();
-                var rampsNotMove = new List<ORamp>();
-
-                var BBsToMove = new List<Polygon>();
-                var BBsNotMove = new List<Polygon>();
-                foreach (var building in buildings)
-                {
-                    if (bound.Intersects(building)) buildingsToMove.Add(building);
-                    else buildingsNotMove.Add(building);
-                }
-                foreach (var ramp in ramps)
-                {
-                    if (bound.Intersects(ramp.Area)) rampsToMove.Add(ramp);
-                    else rampsNotMove.Add(ramp);
-                }
-                foreach (var BB in buildingBounds)
-                {
-                    if (bound.Intersects(BB)) BBsToMove.Add(BB);
-                    else BBsNotMove.Add(BB);
-                }
-                transformation.SetToTranslation(bestVector.X, bestVector.Y);
-                var new_builds = buildingsToMove.Select(b => transformation.Transform(b) as Polygon).ToList();
-                var new_ramps = rampsToMove.Select(r => r.Transform(bestVector)).ToList();
-                var new_BBs = BBsToMove.Select(b => transformation.Transform(b) as Polygon).ToList();
-                new_builds.AddRange(buildingsNotMove);
-                new_ramps.AddRange(rampsNotMove);
-                new_BBs.AddRange(BBsNotMove);
-
-                var boundarySPIdx = new MNTSSpatialIndex(new_builds.Cast<Geometry>().ToList().Concat(walls));
-                var newLanes = new List<LineSegment>();
-
-                for (int i = 0; i < lanes.Count; i++)
-                {
-                    var lane = lanes[i];
-                    var connection = ConnectionList[i];
-                    newLanes.Add(lane.GetVaildLane(connection, boundarySPIdx));
-                }
-                OInterParameter.dynamicSubAreas[idx] = new OSubArea(subArea.Region, newLanes, subArea.Walls, new_builds, new_ramps, new_BBs);
-            }
+            if (BPC == null) BPC = new BuildingPosCalculate();
+            return BPC.CalculateScore(index, vector);
         }
-
         public void UpdateBest()
         {
             var BPC = new BuildingPosCalculate();
             InitSubAreas = BPC.InitSubAreas;
-            InitSubAreas.ForEach(s => s.Display("初始小分区"));
+            //InitSubAreas.ForEach(s => s.Display("初始小分区"));
             var scoresList = BPC.CalculateScore(PotentialMovingVectors);
             var bestVectors = new List<Vector2D>();
             for (int i = 0; i < PotentialMovingVectors.Count; i++)
