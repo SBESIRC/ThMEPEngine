@@ -62,9 +62,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 }
             }
         }
+
         private bool IsTargetLayer(string layer)
         {
-            return layer.ToUpper() == "W-FRPT-SPRL-EQPM";
+            return layer.Contains("EQPM");
         }
         private bool IsValve(Entity entity)
         {
