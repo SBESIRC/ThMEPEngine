@@ -707,7 +707,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 //var dist = obb.Centroid.Distance(obb.Shell) - 1;
                 //obb = (Polygon)obb.Buffer(-dist, MitreParam);
                 MovingBounds[i] = bound;
-                bound.ToDbMPolygon().AddToCurrentSpace();
+                //bound.ToDbMPolygon().AddToCurrentSpace();
             }
             //var MovingBoundSPindex = new MNTSSpatialIndex(MovingBounds);
 

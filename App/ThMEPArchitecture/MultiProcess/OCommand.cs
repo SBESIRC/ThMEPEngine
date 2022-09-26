@@ -234,6 +234,7 @@ namespace ThMEPArchitecture.MultiProcess
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
 
+                ProcessAndDisplay(null, 0, stopWatch);
                 //ParameterStock.RunMode = MultiSolutionList[i];
                 //var lanes = OInterParameter.GetBoundLanes();
                 var BPA = new BuildingPosAnalysis(ParameterViewModel);
