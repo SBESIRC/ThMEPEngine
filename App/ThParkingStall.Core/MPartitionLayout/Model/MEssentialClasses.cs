@@ -25,6 +25,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool GEndAdjLine = false;
         public bool CanExtend = true;
         public bool IsGeneratedForLoopThrough = false;
+        public bool IsGeneratedForRestrictLength = false;
         public bool IsAdjLaneForProcessLoopThroughEnd = false;
         public bool NotCopyReverseForLaneCompaction=false;
         public bool ISCopiedFromCarmodelus = false;

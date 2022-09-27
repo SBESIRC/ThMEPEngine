@@ -954,7 +954,9 @@ namespace ThParkingStall.Core.MPartitionLayout
                         {
                             var split_vec = Vector(split_lane).Normalize().GetPerpendicularVector();
                             var lane_a = new Lane(split_lane, split_vec);
+                            lane_a.IsGeneratedForRestrictLength = true;
                             var lane_b = new Lane(split_lane, -split_vec);
+                            lane_b.IsGeneratedForRestrictLength = true;
                             tmpLanesToAdd.Add(lane_a);
                             tmpLanesToAdd.Add(lane_b);
                             generate_split_lanes.Add(split_lane);
