@@ -115,6 +115,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             if (BPC == null) BPC = new BuildingPosCalculate();
             return BPC.CalculateScore(index, vector);
         }
+        public int InitScore(int index)
+        {
+            if (BPC == null) BPC = new BuildingPosCalculate();
+            return BPC.DynamicSubAreas[index].Sum(s => s.InitParkingCnt);
+        }
         public void UpdataGA()
         {
             var bestVectors = new List<Vector2D>();
