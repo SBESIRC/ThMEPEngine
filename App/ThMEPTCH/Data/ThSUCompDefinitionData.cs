@@ -23,11 +23,11 @@ public static partial class ThSUCompDefinitionDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChxUaFNVQ29tcERlZmluaXRpb25EYXRhLnByb3RvGhJUaFNVRmFjZURhdGEu",
-          "cHJvdG8aE1RoVENIR2VvbWV0cnkucHJvdG8iTwoWVGhTVUNvbXBEZWZpbml0",
-          "aW9uRGF0YRIXCg9kZWZpbml0aW9uX25hbWUYASABKAkSHAoFZmFjZXMYAiAD",
-          "KAsyDS5UaFNVRmFjZURhdGFiBnByb3RvMw=="));
+          "cHJvdG8iTwoWVGhTVUNvbXBEZWZpbml0aW9uRGF0YRIXCg9kZWZpbml0aW9u",
+          "X25hbWUYASABKAkSHAoFZmFjZXMYAiADKAsyDS5UaFNVRmFjZURhdGFiBnBy",
+          "b3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThSUFaceDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThSUFaceDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::ThSUCompDefinitionData), global::ThSUCompDefinitionData.Parser, new[]{ "DefinitionName", "Faces" }, null, null, null, null)
         }));

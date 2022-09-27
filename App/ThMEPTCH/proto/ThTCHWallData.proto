@@ -5,6 +5,11 @@ import "ThTCHWindowData.proto";
 import "ThTCHOpeningData.proto";
 import "ThTCHBuiltElementData.proto";
 
+enum WallTypeEnum{
+    PARTITIONING = 0;
+    SHEAR = 1;
+}
+
 message ThTCHWallData {
     ThTCHBuiltElementData build_element = 1;
 
@@ -16,5 +21,6 @@ message ThTCHWallData {
     repeated ThTCHDoorData doors = 6;
     repeated ThTCHWindowData windows = 7;
     repeated ThTCHOpeningData openings = 8;
+    WallTypeEnum wall_type = 9;
 }
 

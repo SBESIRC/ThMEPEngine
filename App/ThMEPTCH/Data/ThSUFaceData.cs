@@ -22,14 +22,15 @@ public static partial class ThSUFaceDataReflection {
   static ThSUFaceDataReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VHZW9tZXRyeS5wcm90bxoWVGhT",
-          "VU1hdGVyaWFsRGF0YS5wcm90byJTCgxUaFNVRmFjZURhdGESHgoEbWVzaBgB",
-          "IAEoCzIQLlRoU1VQb2x5Z29uTWVzaBIjCghtYXRlcmlhbBgCIAEoCzIRLlRo",
-          "U1VNYXRlcmlhbERhdGFiBnByb3RvMw=="));
+          "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VHZW9tZXRyeS5wcm90bxoTVGhU",
+          "Q0hHZW9tZXRyeS5wcm90bxoWVGhTVU1hdGVyaWFsRGF0YS5wcm90byJ4CgxU",
+          "aFNVRmFjZURhdGESHgoEbWVzaBgBIAEoCzIQLlRoU1VQb2x5Z29uTWVzaBIj",
+          "CghtYXRlcmlhbBgCIAEoCzIRLlRoU1VNYXRlcmlhbERhdGESIwoLZmFjZV9u",
+          "b3JtYWwYAyABKAsyDi5UaFRDSFZlY3RvcjNkYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThSUGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThSUGeometryReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "Mesh", "Material" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "Mesh", "Material", "FaceNormal" }, null, null, null, null)
         }));
   }
   #endregion
@@ -72,6 +73,7 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   public ThSUFaceData(ThSUFaceData other) : this() {
     mesh_ = other.mesh_ != null ? other.mesh_.Clone() : null;
     material_ = other.material_ != null ? other.material_.Clone() : null;
+    faceNormal_ = other.faceNormal_ != null ? other.faceNormal_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -105,6 +107,18 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     }
   }
 
+  /// <summary>Field number for the "face_normal" field.</summary>
+  public const int FaceNormalFieldNumber = 3;
+  private global::ThTCHVector3d faceNormal_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::ThTCHVector3d FaceNormal {
+    get { return faceNormal_; }
+    set {
+      faceNormal_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -122,6 +136,7 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     }
     if (!object.Equals(Mesh, other.Mesh)) return false;
     if (!object.Equals(Material, other.Material)) return false;
+    if (!object.Equals(FaceNormal, other.FaceNormal)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -131,6 +146,7 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     int hash = 1;
     if (mesh_ != null) hash ^= Mesh.GetHashCode();
     if (material_ != null) hash ^= Material.GetHashCode();
+    if (faceNormal_ != null) hash ^= FaceNormal.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -157,6 +173,10 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
       output.WriteRawTag(18);
       output.WriteMessage(Material);
     }
+    if (faceNormal_ != null) {
+      output.WriteRawTag(26);
+      output.WriteMessage(FaceNormal);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -175,6 +195,10 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
       output.WriteRawTag(18);
       output.WriteMessage(Material);
     }
+    if (faceNormal_ != null) {
+      output.WriteRawTag(26);
+      output.WriteMessage(FaceNormal);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -190,6 +214,9 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     }
     if (material_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Material);
+    }
+    if (faceNormal_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(FaceNormal);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -214,6 +241,12 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
         Material = new global::ThSUMaterialData();
       }
       Material.MergeFrom(other.Material);
+    }
+    if (other.faceNormal_ != null) {
+      if (faceNormal_ == null) {
+        FaceNormal = new global::ThTCHVector3d();
+      }
+      FaceNormal.MergeFrom(other.FaceNormal);
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -244,6 +277,13 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
           input.ReadMessage(Material);
           break;
         }
+        case 26: {
+          if (faceNormal_ == null) {
+            FaceNormal = new global::ThTCHVector3d();
+          }
+          input.ReadMessage(FaceNormal);
+          break;
+        }
       }
     }
   #endif
@@ -271,6 +311,13 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
             Material = new global::ThSUMaterialData();
           }
           input.ReadMessage(Material);
+          break;
+        }
+        case 26: {
+          if (faceNormal_ == null) {
+            FaceNormal = new global::ThTCHVector3d();
+          }
+          input.ReadMessage(FaceNormal);
           break;
         }
       }

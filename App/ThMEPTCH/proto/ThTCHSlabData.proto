@@ -2,7 +2,13 @@ syntax = "proto3";
 import "ThTCHDescendingData.proto";
 import "ThTCHBuiltElementData.proto";
 
+enum SlabTypeEnum{
+    FLOOR = 0;
+    BASE_SLAB = 1;
+}
+
 message ThTCHSlabData{
     ThTCHBuiltElementData build_element = 1;
     repeated ThTCHDescendingData descendings = 2;
+    SlabTypeEnum slab_type = 3;
 }
