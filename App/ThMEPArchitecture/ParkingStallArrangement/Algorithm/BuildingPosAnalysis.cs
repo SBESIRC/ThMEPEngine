@@ -27,11 +27,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<OSubArea> InitSubAreas;//初始子区域
 
         public int BuildingMoveDistance;//建筑横纵偏移最大距离
-        private int SampleDistance;//采样间距
-
+        private double SampleDistance;//采样间距
+        private int SampleCnt;
         private double HalfLaneWidth = -0.1 + VMStock.RoadWidth / 2;
         private Geometry CenterLaneGeo;
         private BuildingPosCalculate BPC;
+
+        public ParkingStallArrangementViewModel VM;
         //1.获取所有可能的移动方案
         //网格+特殊点 
         //筛选合理解
@@ -43,7 +45,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public BuildingPosAnalysis(ParkingStallArrangementViewModel parameterViewModel)
         {
             BuildingMoveDistance = parameterViewModel.BuildingMoveDistance;
-            SampleDistance = parameterViewModel.SampleDistance;
+            SampleCnt = (int)(Math.Sqrt( parameterViewModel.PopulationCount * parameterViewModel.IterationCount)/2);
+            //SampleDistance = parameterViewModel.SampleDistance;
+            SampleDistance =BuildingMoveDistance / SampleCnt;
+            VM = parameterViewModel;
             //BuildingMoveDistance = 500;
             //SampleDistance = 500;
             UpdateMovingVector();
@@ -75,16 +80,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             CenterLaneGeo = new MultiLineString(centerLanes.ToLineStrings().ToArray()).Buffer(HalfLaneWidth,MitreParam);
             //CenterLaneGeo.Get<Polygon>(false).ForEach(p => p.ToDbMPolygon().AddToCurrentSpace());
-            var StepCnts = BuildingMoveDistance / SampleDistance;
+            //var StepCnts = BuildingMoveDistance / SampleDistance;
             AffineTransformation transformation = new AffineTransformation();
             for (int k = 0; k < OInterParameter.MovingBounds.Count; k++)
             {
                 var bound = OInterParameter.MovingBounds[k];
                 PotentialMovingVectors.Add(new List<Vector2D>());
                 if (bound.Intersects(CenterLaneGeo)) throw new Exception("建筑物与核心车道相交!");
-                for (int i = -StepCnts; i < StepCnts+1; i++)
+                for (int i = -SampleCnt; i < SampleCnt + 1; i++)
                 {
-                    for (int j = -StepCnts; j < StepCnts+1; j++)
+                    for (int j = -SampleCnt; j < SampleCnt + 1; j++)
                     {
                         var x = i * SampleDistance;
                         var y = j * SampleDistance;

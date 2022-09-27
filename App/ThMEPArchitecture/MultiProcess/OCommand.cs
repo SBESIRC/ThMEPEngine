@@ -245,8 +245,8 @@ namespace ThMEPArchitecture.MultiProcess
                 //BPC.CalculateScore(BPA.PotentialMovingVectors);
                 //BPC.CalculateBest(true);
 
-                BPA.UpdataGA();
-                //BPA.UpdateBest();
+                if(ParameterViewModel.UseGA)BPA.UpdataGA();
+                else BPA.UpdateBest();
                 var entities = new List<Entity>();
                 using (AcadDatabase acad = AcadDatabase.Active())
                 {

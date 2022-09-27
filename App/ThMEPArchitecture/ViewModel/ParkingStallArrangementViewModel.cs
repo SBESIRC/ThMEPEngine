@@ -131,7 +131,17 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("BuildingMoveDistance");
             }
         }
-
+        //障碍物移位是否用遗传算法
+        private bool _UseGA = true;
+        public bool UseGA
+        {
+            get { return _UseGA; }
+            set
+            {
+                _UseGA = value;
+                RaisePropertyChanged("UseGA");
+            }
+        }
         //平行车位尺寸,长度
         private int _ParallelSpotLength = 6000; //mm
 
@@ -549,6 +559,16 @@ namespace ThMEPArchitecture.ViewModel
             {
                 _MaxTimespan = value;
                 RaisePropertyChanged("MaxTimespan");
+            }
+        }
+        private int _MaxEqualCnt = 10;
+        public int MaxEqualCnt
+        {
+            get { return _MaxEqualCnt; }
+            set
+            {
+                _MaxEqualCnt = value;
+                RaisePropertyChanged("MaxEqualCnt");
             }
         }
         private int _BorderlineMoveRange = 0;

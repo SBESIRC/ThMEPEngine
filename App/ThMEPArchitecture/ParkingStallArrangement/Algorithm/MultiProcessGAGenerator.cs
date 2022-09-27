@@ -66,6 +66,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             IterationCount = parameterViewModel == null ? 60 : parameterViewModel.IterationCount;
 
             PopulationSize = parameterViewModel == null ? 80 : parameterViewModel.PopulationCount;//种群数量
+            MaxCount = parameterViewModel == null ? 10 : parameterViewModel.MaxEqualCnt;//相同退出次数
             if (PopulationSize < 3) throw (new ArgumentOutOfRangeException("种群数量至少为3"));
             //默认值 核心数 -1,最多为种群数
             int max_process;

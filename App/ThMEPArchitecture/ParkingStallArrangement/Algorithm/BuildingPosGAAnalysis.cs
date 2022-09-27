@@ -41,6 +41,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             _BuildingPosAnalysis = buildingPosAnalysis;
             Max = buildingPosAnalysis.BuildingMoveDistance;
             Min = -Max;
+            PopulationSize = buildingPosAnalysis.VM.PopulationCount;
+            IterationCount = buildingPosAnalysis.VM.IterationCount;
+            MaxCount = buildingPosAnalysis.VM.MaxEqualCnt;
         }
         private int Index { get; set; }
         private BuildingPosAnalysis _BuildingPosAnalysis { get; set; }
