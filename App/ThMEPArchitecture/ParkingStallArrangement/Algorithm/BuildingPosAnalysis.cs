@@ -127,7 +127,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 BuildingPosGAAnalysis buildingPosGA = new BuildingPosGAAnalysis(i, this);
                 buildingPosGA.Process();
-                bestVectors.Add(buildingPosGA.Best);
+                if (InitScore(i) < buildingPosGA.BestScore)
+                    bestVectors.Add(buildingPosGA.Best);
+                else
+                    bestVectors.Add(Vector2D.Zero);
             }
             OInterParameter.UpdateBuildings(bestVectors);
         }

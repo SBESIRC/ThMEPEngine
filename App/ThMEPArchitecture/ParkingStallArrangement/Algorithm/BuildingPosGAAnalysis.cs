@@ -45,6 +45,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private int Index { get; set; }
         private BuildingPosAnalysis _BuildingPosAnalysis { get; set; }
         public Vector2D Best { get; set; }
+        public int BestScore { get; set; }
 
         #region parameters
         public static int PopulationSize = 5;
@@ -61,6 +62,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public void Process()
         {
             Best = Run().First().Vector;
+            BestScore = Run().First().Score;
         }
         List<BuildingPosGene> Run()
         {
