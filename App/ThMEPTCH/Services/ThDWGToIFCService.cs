@@ -1267,6 +1267,7 @@ namespace ThMEPTCH.Services
             structureSlab.BuildElement.Height = slabPolyline.StructureThickness;
             structureSlab.BuildElement.EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
             structureSlab.BuildElement.Outline.ZOffSet(-slabPolyline.SurfaceThickness);
+            structureSlab.SlabType = SlabTypeEnum.BaseSlab;
 
             var architectureSlab = new ThTCHSlabData();
             architectureSlab.BuildElement = new ThTCHBuiltElementData();
@@ -1274,6 +1275,7 @@ namespace ThMEPTCH.Services
             architectureSlab.BuildElement.Outline = outPLine.ToTCHMPolygon();
             architectureSlab.BuildElement.Height = slabPolyline.SurfaceThickness;
             architectureSlab.BuildElement.EnumMaterial = EnumSlabMaterial.ReinforcedConcrete.GetDescription();
+            architectureSlab.SlabType = SlabTypeEnum.Floor;
 
             var outPLineColl = new DBObjectCollection { outPLine };
             foreach (var item in slabPolyline.InnerSlabOpenings)

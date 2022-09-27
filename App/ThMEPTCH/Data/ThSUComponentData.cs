@@ -23,13 +23,12 @@ public static partial class ThSUComponentDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChdUaFNVQ29tcG9uZW50RGF0YS5wcm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90",
-          "bxoWVGhTVU1hdGVyaWFsRGF0YS5wcm90bxocVGhTVUNvbXBEZWZpbml0aW9u",
-          "RGF0YS5wcm90byJ7ChFUaFNVQ29tcG9uZW50RGF0YRIYChBkZWZpbml0aW9u",
-          "X2luZGV4GAEgASgFEicKD3RyYW5zZm9ybWF0aW9ucxgCIAEoCzIOLlRoVENI",
-          "TWF0cml4M2QSIwoIbWF0ZXJpYWwYAyABKAsyES5UaFNVTWF0ZXJpYWxEYXRh",
-          "YgZwcm90bzM="));
+          "bxoWVGhTVU1hdGVyaWFsRGF0YS5wcm90byJ7ChFUaFNVQ29tcG9uZW50RGF0",
+          "YRIYChBkZWZpbml0aW9uX2luZGV4GAEgASgFEicKD3RyYW5zZm9ybWF0aW9u",
+          "cxgCIAEoCzIOLlRoVENITWF0cml4M2QSIwoIbWF0ZXJpYWwYAyABKAsyES5U",
+          "aFNVTWF0ZXJpYWxEYXRhYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, global::ThSUCompDefinitionDataReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::ThSUComponentData), global::ThSUComponentData.Parser, new[]{ "DefinitionIndex", "Transformations", "Material" }, null, null, null, null)
         }));

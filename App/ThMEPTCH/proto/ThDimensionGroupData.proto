@@ -8,6 +8,7 @@ message ThAlignedDimension{
     ThTCHPoint3d x_line2_point = 3;
     ThTCHPoint3d dim_line_point = 4;
     string mark = 5;
+    repeated ThTCHLine dim_lines = 6;
 }
 
 message ThDimensionGroupData {

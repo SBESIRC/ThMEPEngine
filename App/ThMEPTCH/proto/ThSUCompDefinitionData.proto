@@ -1,6 +1,5 @@
 syntax = "proto3";
 import "ThSUFaceData.proto";
-import "ThTCHGeometry.proto";
 
 message ThSUCompDefinitionData {
     string definition_name = 1;
