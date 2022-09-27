@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 using ThMEPTCH.CAD;
 using ThMEPTCH.PropertyServices.PropertyModels;
 
@@ -224,13 +225,41 @@ namespace ThMEPTCH.Services
 
         private ThAlignedDimension ConvertTo(AlignedDimension dimension)
         {
-            return new ThAlignedDimension()
+            var xLine1Point = dimension.XLine1Point;
+            var xLine2Point = dimension.XLine2Point;
+            var dimLinePoint = dimension.DimLinePoint;
+            var projectionPt = dimLinePoint.GetProjectPtOnLine(xLine1Point, xLine2Point);
+            var dir = projectionPt.GetVectorTo(dimLinePoint);
+            var xLine1PointExtend = xLine1Point + dir;
+            var xLine2PointExtend = xLine2Point + dir;
+
+            var alignedDimension = new ThAlignedDimension()
             {
-                XLine1Point = dimension.XLine1Point.ToTCHPoint(),
-                XLine2Point = dimension.XLine2Point.ToTCHPoint(),
-                DimLinePoint = dimension.DimLinePoint.ToTCHPoint(),
+                XLine1Point = xLine1Point.ToTCHPoint(),
+                XLine2Point = xLine2Point.ToTCHPoint(),
+                DimLinePoint = dimLinePoint.ToTCHPoint(),
                 Mark = dimension.DimensionText,
             };
+
+            var xLine1 = new ThTCHLine()
+            {
+                StartPt = xLine1Point.ToTCHPoint(),
+                EndPt = xLine1PointExtend.ToTCHPoint()
+            };            
+            alignedDimension.DimLines.Add(xLine1);
+            var xLine2 = new ThTCHLine()
+            {
+                StartPt = xLine2Point.ToTCHPoint(),
+                EndPt = xLine2PointExtend.ToTCHPoint(),
+            };
+            alignedDimension.DimLines.Add(xLine2);
+            var dimLine = new ThTCHLine()
+            {
+                StartPt = xLine1Point.ToTCHPoint(),
+                EndPt = xLine2Point.ToTCHPoint(),
+            };
+            alignedDimension.DimLines.Add(dimLine);
+            return alignedDimension;
         }
     }
 }
