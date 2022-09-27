@@ -9,10 +9,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPTCH.TCHArchDataConvert;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPTCH.Services
 {
@@ -28,7 +28,6 @@ namespace ThMEPTCH.Services
         /// <returns></returns>
         public static List<WallEntity> Union(List<WallEntity> thArchWalls)
         {
-            // 暂不考虑偏心墙
             var geometryDict = new Dictionary<Line, WallEntity>();
             thArchWalls.ForEach(o => geometryDict.Add(o.CenterCurve as Line, o));
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometryDict.Select(o => o.Key).ToCollection());
