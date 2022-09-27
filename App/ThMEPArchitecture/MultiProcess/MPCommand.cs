@@ -616,7 +616,7 @@ namespace ThMEPArchitecture.MultiProcess
             entities.AddRange(subArea.BoundingBoxes.Select(polygon => polygon.ToDbMPolygon(4, layer)));
             entities.ShowBlock(blockName, layer);
         }
-        private static Polyline ToDbPolyline(this LineString lstr, int coloridx, string layer)
+        public static Polyline ToDbPolyline(this LineString lstr, int coloridx, string layer)
         {
             var pline = lstr.ToDbPolyline();
             pline.Layer = layer;
