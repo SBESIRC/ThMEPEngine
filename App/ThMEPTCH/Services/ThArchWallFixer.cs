@@ -12,6 +12,7 @@ using ThCADExtension;
 using ThMEPTCH.TCHArchDataConvert;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
 using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPTCH.Services
 {
@@ -90,7 +91,7 @@ namespace ThMEPTCH.Services
                         Material = archEntity.Material,
 
                         // 标识信息
-                        Id = archEntity.Id + parallelWall.Id,
+                        Id = (ulong)ThMEPDbUniqueIdService.Combine(archEntity.Id, parallelWall.Id),
                     };
 
                     geometryDict.Remove(parallel);
