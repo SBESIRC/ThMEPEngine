@@ -38,7 +38,7 @@ using ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess;
 using static ThMEPArchitecture.PartitionLayout.DisplayTools;
 using ThParkingStall.Core.Tools;
 using ThParkingStall.Core.ObliqueMPartitionLayout;
-
+using ThMEPArchitecture.MultiProcess;
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThOArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -247,11 +247,40 @@ namespace ThMEPArchitecture.MultiProcess
 
                 BPA.UpdataGA();
                 //BPA.UpdateBest();
-                OInterParameter.Buildings.ForEach(b => b.ToDbPolylines().ForEach(pl => { pl.AddToCurrentSpace(); DisplayParkingStall.Add(pl); }));
-                ProcessAndDisplay(null, 1, stopWatch);
+                var entities = new List<Entity>();
+                using (AcadDatabase acad = AcadDatabase.Active())
+                {
+                    if (!acad.Layers.Contains( "障碍物"))
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "障碍物", 0);
+                    if (!acad.Layers.Contains("分区线"))
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "分区线", 0);
+                    if (!acad.Layers.Contains("地库边界"))
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "地库边界", 0);
+
+                }
+                foreach (var b in OInterParameter.Buildings)
+                {
+                    var pl = b.Shell.ToDbPolyline(5,"障碍物");
+                    DisplayParkingStall.Add(pl);
+                    entities.Add(pl);
+                }
+                foreach(var l in OInterParameter.InitSegLines)
+                {
+                    var line = l.Splitter.ToDbLine(2, "分区线");
+                    DisplayParkingStall.Add(line);
+                    entities.Add(line);
+                }
+                var newBound = CaledBound.Shell.ToDbPolyline(1, "地库边界");
+                entities.Add(newBound);
+                DisplayParkingStall.Add(newBound);
+                //DisplayParkingStall.MoveAddedEntities();
+                //OInterParameter.Buildings.ForEach(b => entities.Add( b.Shell.ToDbPolyline(5, "障碍物")));
+                //OInterParameter.Buildings.ForEach(b => b.ToDbPolylines().ForEach(pl => { pl.AddToCurrentSpace(); DisplayParkingStall.Add(pl); }));
+                ProcessAndDisplay(null, 1, stopWatch,false);
                 //OInterParameter.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace());
                 //lanes.Get<LineString>(true).ForEach(l => l.ToDbPolyline().AddToCurrentSpace());
                 //ProcessAndDisplay(null, 0, stopWatch);
+                entities.ShowBlock("障碍物移位结果", "障碍物移位结果");
             }
         }
         private void ProcessTheBlock(BlockReference block)
@@ -293,8 +322,8 @@ namespace ThMEPArchitecture.MultiProcess
                 }
             }
         }
-
-        private void ProcessAndDisplay(Genome solution, int SolutionID = 0, Stopwatch stopWatch = null)
+        private Polygon CaledBound;
+        private void ProcessAndDisplay(Genome solution, int SolutionID = 0, Stopwatch stopWatch = null,bool disPlayBound = true)
         {
             var moveDistance = SolutionID * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 OInterParameter.TotalArea.Coordinates.Min(c => c.X));
@@ -304,8 +333,9 @@ namespace ThMEPArchitecture.MultiProcess
             //subAreas.ForEach(s => s.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace()));
 
             var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
-            Polygon caledBound = new Polygon(new LinearRing(new Coordinate[0]));
-            ProcessPartitionGlobally(subAreas, ref caledBound);
+            //Polygon caledBound = new Polygon(new LinearRing(new Coordinate[0]));
+            CaledBound = ProcessPartitionGlobally(subAreas,disPlayBound);
+            
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
@@ -321,7 +351,7 @@ namespace ThMEPArchitecture.MultiProcess
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 DisplayLogger?.Information($"最大车位数: {ParkingStallCount}");
-                var areaPerStall = caledBound.Area*0.001*0.001 / ParkingStallCount;
+                var areaPerStall = CaledBound.Area*0.001*0.001 / ParkingStallCount;
                 DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆");
                 DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
 
@@ -344,7 +374,7 @@ namespace ThMEPArchitecture.MultiProcess
             //SubAreaParkingCnt.Clear();
             ReclaimMemory();
         }
-        void ProcessPartitionGlobally(List<OSubArea> subAreas, ref Polygon caledBound)
+        Polygon ProcessPartitionGlobally(List<OSubArea> subAreas, bool disPlayBound = true)
         {
             string Boundlayer = "AI-参考地库轮廓";
             using (AcadDatabase acad = AcadDatabase.Active())
@@ -353,8 +383,8 @@ namespace ThMEPArchitecture.MultiProcess
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, Boundlayer, 141);
             }
             GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
-            caledBound = globalBusiness.CalBound();
-            Display(caledBound, 141, Boundlayer);
+            var caledBound = globalBusiness.CalBound();
+            if(disPlayBound) Display(caledBound, 141, Boundlayer);
             if (ObliqueMPartition.AllowProcessEndLanes)
             {
                 var integralObliqueMPartition = globalBusiness.ProcessEndLanes();
@@ -369,6 +399,7 @@ namespace ThMEPArchitecture.MultiProcess
                     subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
                 }
             }
+            return caledBound;
         }
         private void ShowTitle(int ParkingStallCount, double areaPerStall, double TotalSeconds)
         {
