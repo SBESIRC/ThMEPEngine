@@ -34,6 +34,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private BuildingPosCalculate BPC;
 
         public ParkingStallArrangementViewModel VM;
+        public Serilog.Core.Logger Logger { get; set; }
         //1.获取所有可能的移动方案
         //网格+特殊点 
         //筛选合理解
@@ -128,15 +129,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public void UpdataGA()
         {
             var bestVectors = new List<Vector2D>();
+            Logger?.Information("-----------------");
+            Logger?.Information("障碍物迭代");
             for (int i = 0; i < OInterParameter.MovingBounds.Count; i++)
             {
+                Logger?.Information($"障碍物迭代:{i}/{OInterParameter.MovingBounds.Count}");
                 BuildingPosGAAnalysis buildingPosGA = new BuildingPosGAAnalysis(i, this);
                 buildingPosGA.Process();
-                if (InitScore(i) < buildingPosGA.BestScore)
+                Logger?.Information($"第{i}区最佳得分:{buildingPosGA.BestScore}");
+                var initScore = InitScore(i);
+                Logger?.Information($"第{i}区初始得分:{initScore}");
+                if (initScore < buildingPosGA.BestScore)
                     bestVectors.Add(buildingPosGA.Best);
                 else
                     bestVectors.Add(Vector2D.Zero);
             }
+            Logger?.Information("-----------------");
             OInterParameter.UpdateBuildings(bestVectors);
         }
         public void UpdateBest()

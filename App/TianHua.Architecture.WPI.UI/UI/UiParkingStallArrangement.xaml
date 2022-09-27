@@ -49,7 +49,7 @@
                         <Label>mm</Label>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Visibility="{Binding AdvancedSettingVisibility}">
-                        <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding UseGA}" Checked="CheckBox_Checked">使用遗传算法</CheckBox>
+                        <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding UseGA}">使用遗传算法</CheckBox>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
@@ -73,7 +73,7 @@
                         <Label>X</Label>
                         <TextBox Width="40" Margin="5,5,5,5" Text="{Binding VerticalSpotWidth}"></TextBox>
                         <Label>mm</Label>
-                        <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding DoubleRowModularDecrease200}" Checked="CheckBox_Checked">背靠背缩进200</CheckBox>
+                        <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding DoubleRowModularDecrease200}">背靠背缩进200</CheckBox>
                     </StackPanel>
                     <StackPanel  Orientation="Horizontal">
                         <Label>车道宽度：</Label>

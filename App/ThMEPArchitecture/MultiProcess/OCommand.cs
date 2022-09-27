@@ -238,6 +238,7 @@ namespace ThMEPArchitecture.MultiProcess
                 //ParameterStock.RunMode = MultiSolutionList[i];
                 //var lanes = OInterParameter.GetBoundLanes();
                 var BPA = new BuildingPosAnalysis(ParameterViewModel);
+                BPA.Logger = Logger;
                 //BPA.UpdateParkingCntSP();
                 //BPA.UpdateSolution();
 

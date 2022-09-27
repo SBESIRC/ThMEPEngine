@@ -41,8 +41,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             _BuildingPosAnalysis = buildingPosAnalysis;
             Max = buildingPosAnalysis.BuildingMoveDistance;
             Min = -Max;
-            PopulationSize = buildingPosAnalysis.VM.PopulationCount;
-            IterationCount = buildingPosAnalysis.VM.IterationCount;
+            PopulationSize = /*buildingPosAnalysis.VM.PopulationCount;*/5;
+            IterationCount = /*buildingPosAnalysis.VM.IterationCount;*/5;
             MaxCount = buildingPosAnalysis.VM.MaxEqualCnt;
         }
         private int Index { get; set; }
@@ -64,8 +64,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         #endregion
         public void Process()
         {
-            Best = Run().First().Vector;
-            BestScore = Run().First().Score;
+            var gene = Run().First();
+            Best = gene.Vector;
+            BestScore = gene.Score;
         }
         List<BuildingPosGene> Run()
         {
@@ -129,6 +130,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 solution.Score = _BuildingPosAnalysis.CalculateScore(Index, solution.Vector);
             }
             sorted = inputSolutions.OrderByDescending(e => e.Score).ToList();
+            var numstr = "";
+            sorted.Select(e => e.Score).ToList().ForEach(s => numstr += s + ",");
+            if (numstr.Length > 0) numstr.Remove(numstr.Length - 1);
+            _BuildingPosAnalysis.Logger.Information($"第{CurIteration}代计算结果: {numstr}");
             maxNums = sorted.First().Score;
             var rst = new List<BuildingPosGene>();
             // SelectionSize 直接保留
