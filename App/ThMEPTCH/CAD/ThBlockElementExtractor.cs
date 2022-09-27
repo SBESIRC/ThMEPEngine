@@ -1,14 +1,15 @@
-﻿using AcHelper;
+﻿using System.Linq;
+using System.Collections.Generic;
+using AcHelper;
 using Linq2Acad;
-using System.Linq;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
-using ThCADExtension;
 
-namespace ThPlatform3D.Data
+namespace ThMEPTCH.CAD
 {
     public class ThBlockElementExtractor
     {
@@ -29,13 +30,17 @@ namespace ThPlatform3D.Data
                     .ForEach(o =>
                     {
                         var mcs2wcs = o.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        var containers = new List<string> { "*MODELSPACE"};
-                        _visitor.Results.AddRange(DoExtract(o, mcs2wcs, containers));
+                        var uid2ms = ThMEPDbUniqueIdService.Combine(
+                            ThMEPDbUniqueIdService.UniqueId(o.ObjectId),
+                            ThMEPDbUniqueIdService.UniqueId(acadDatabase.ModelSpace.ObjectId));
+                        var containers = new List<object> { "*MODELSPACE"};
+                        _visitor.Results.AddRange(DoExtract(o, mcs2wcs, containers, uid2ms));
                     });
             }
         }
 
-        private List<ThRawIfcDistributionElementData> DoExtract(BlockReference blockReference,Matrix3d matrix,List<string> containers)
+        private List<ThRawIfcDistributionElementData> DoExtract(BlockReference blockReference,
+            Matrix3d matrix,List<object> containers, int uid)
         {
             // containers 是blockReference的名称集合
             using (var acadDb = AcadDatabase.Use(blockReference.Database))
@@ -76,27 +81,20 @@ namespace ThPlatform3D.Data
                                     continue;
                                 }
                                 if (_visitor.IsBuildElementBlockReference(blockObj))
-                                {
-                                    if (_visitor is ISetContainer iSetContainer)
-                                    {
-                                        iSetContainer.SetContainers(newContainers);
-                                    }
+                                {   
                                     if (_visitor.CheckLayerValid(blockObj) && _visitor.IsDistributionElement(blockObj))
                                     {
-                                        _visitor.DoExtract(results, blockObj, matrix);
+                                        _visitor.DoExtract(results, blockObj, matrix, newContainers, uid);
                                         continue;
                                     }                                    
                                 }
                                 var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                results.AddRange(DoExtract(blockObj, mcs2wcs, newContainers));
+                                var uid2ms = ThMEPDbUniqueIdService.Combine(uid, ThMEPDbUniqueIdService.UniqueId(objId));
+                                results.AddRange(DoExtract(blockObj, mcs2wcs, newContainers, uid2ms));
                             }
                             else
                             {
-                                if (_visitor is ISetContainer iSetContainer)
-                                {
-                                    iSetContainer.SetContainers(newContainers);
-                                }                               
-                                _visitor.DoExtract(results, dbObj, matrix);
+                                _visitor.DoExtract(results, dbObj, matrix, newContainers, uid);
                             }
                         }
                         // 过滤XClip外的图元信息

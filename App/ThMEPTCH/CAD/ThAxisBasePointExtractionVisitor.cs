@@ -4,9 +4,9 @@ using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThPlatform3D.Data
+namespace ThMEPTCH.CAD
 {
-    public class ThAxisBasePointExtractionVisitor : ThDistributionElementExtractionVisitor,ISetContainer
+    public class ThAxisBasePointExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         private List<string> _containers;
         public List<string> Containers => _containers;
@@ -18,10 +18,15 @@ namespace ThPlatform3D.Data
 
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
-            if(dbObj is BlockReference br)
+            DoExtract(elements, dbObj, matrix,new List<object>(),0);
+        }
+
+        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix, List<object> containers, int uid)
+        {
+            if (dbObj is BlockReference br)
             {
                 elements.AddRange(HandleBlockReference(br, matrix));
-            }            
+            }
         }
 
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
@@ -34,7 +39,7 @@ namespace ThPlatform3D.Data
             }
         }
 
-        public void SetContainers(List<string> containers)
+        public void Set(List<string> containers)
         {
             _containers=containers;
         }

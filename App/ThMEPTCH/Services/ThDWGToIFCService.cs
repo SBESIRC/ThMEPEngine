@@ -467,6 +467,8 @@ namespace ThMEPTCH.Services
                 return null;
             }
             LoadCustomElements();
+            LoadAxisElements();
+
             var allEntitys = null != archDBData ? archDBData.AllTArchEntitys() : GetArchEntities();
             var allDBEntitys = null != archDBData ? new List<THStructureEntity>() : GetDBStructureEntities(floorOrigin.Select(o => o.FloorOutLine).ToList());
             InitFloorDBEntity(allEntitys, allDBEntitys);
@@ -480,13 +482,14 @@ namespace ThMEPTCH.Services
                 var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntity).Cast<TArchDoor>().ToList();
                 var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntity).Cast<TArchWindow>().ToList();
                 var walls = entityConvert.WallDataDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
-                floor.FloorEntitys.AddRange(walls);
+                floor.FloorEntitys.AddRange(walls);                
 
                 var allSlabs = new List<ThTCHSlabData>();
                 var thisRailingEntitys = new Dictionary<Polyline, ThTCHRailingData>();
                 var railingColls = new DBObjectCollection();
                 var thisOpeningEntities = new Dictionary<Polyline, ThTCHOpeningData>();
                 var openingColls = new DBObjectCollection();
+
                 foreach (var item in curveEntities)
                 {
                     if (item.EntitySystem.Contains("楼板"))
@@ -538,6 +541,13 @@ namespace ThMEPTCH.Services
                             opening.BuildElement.Properties.Add(new ThTCHProperty() { Key = "ElevationDisplay", Value = prop.ElevationDisplay.ToString() });
                             thisOpeningEntities.Add(pLine, opening);
                         }
+                    }
+                    else if(item.EntitySystem.Contains("轴网"))
+                    {
+                        var aixEntity = new FloorCurveEntity(item.Id, 
+                            item.EntityCurve.GetTransformedCopy(matrix),
+                            item.EntitySystem,item.Property);
+                        floor.FloorEntitys.Add(aixEntity);// 轴网需要构建出来
                     }
                 }
 
@@ -669,6 +679,15 @@ namespace ThMEPTCH.Services
                         buildingStorey.Railings.Add(copyItem);
                     }
 
+                    var axisDatas = levelEntitys.FloorEntitys
+                        .OfType<FloorCurveEntity>()
+                        .Where(o => o.EntitySystem == "轴网")
+                        .ToList();
+                    if (axisDatas.Count > 0)
+                    {
+                        buildingStorey.GridLineSystem = BuildGridLineSystem(axisDatas);
+                    }
+
                     buildingStorey.Walls.AddRange(walls);
                 }
                 thTCHBuildingData.Storeys.Add(buildingStorey);
@@ -676,6 +695,12 @@ namespace ThMEPTCH.Services
             thSite.Buildings.Add(thTCHBuildingData);
             thPrj.Site = thSite;
             return thPrj;
+        }
+
+        private ThGridLineSyetemData BuildGridLineSystem(List<FloorCurveEntity> axisDatas)
+        {
+            var builder = new ThTCHGridLineSystemBuilder(axisDatas);
+            return builder.Build();
         }
 
         private List<FloorCurveEntity> BuildFloorSlab(List<FloorCurveEntity> data, DBObjectCollection textColl)
@@ -859,6 +884,24 @@ namespace ThMEPTCH.Services
                     ThSetRoomNameService.SetFromCurrentDb(roomCurves);
                     cadCurveEntities.AddRange(roomCurves);
                 }
+            }
+        }
+
+        private void LoadAxisElements()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var axisLineEngine = new ThTCHAxisLineExtractionEngine();
+                axisLineEngine.Extract(acadDb.Database);
+                cadCurveEntities.AddRange(axisLineEngine.Results.Select(o=>o.Data).OfType<FloorCurveEntity>());
+
+                var axisGridDimensionEngine = new ThTCHAxisGridDimensionExtractionEngine();
+                axisGridDimensionEngine.Extract(acadDb.Database);
+                cadCurveEntities.AddRange(axisGridDimensionEngine.Results.Select(o => o.Data).OfType<FloorCurveEntity>());
+
+                var axisContinuousDimensionEngine = new ThTCHAxisContinuousDimensionExtractionEngine();
+                axisContinuousDimensionEngine.Extract(acadDb.Database);
+                cadCurveEntities.AddRange(axisContinuousDimensionEngine.Results.Select(o => o.Data).OfType<FloorCurveEntity>());
             }
         }
 

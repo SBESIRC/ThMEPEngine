@@ -26,6 +26,26 @@ namespace ThMEPTCH.CAD
 
     public static class ThProtoBufExtension
     {
+        public static ThTCHCircle ToTCHCircle(this Circle circle)
+        {
+            ThTCHCircle tchCircle = new ThTCHCircle();
+            if (circle.IsNull())
+                return tchCircle;
+            tchCircle.Center = circle.Center.ToTCHPoint();
+            tchCircle.Radius = circle.Radius;
+            return tchCircle;
+        }
+
+        public static ThTCHLine ToTCHLine(this Line line)
+        {
+            ThTCHLine tchLine = new ThTCHLine();
+            if (tchLine.IsNull())
+                return tchLine;
+            tchLine.StartPt = line.StartPoint.ToTCHPoint();
+            tchLine.EndPt = line.EndPoint.ToTCHPoint();
+            return tchLine;
+        }
+
         public static ThTCHPolyline ToTCHPolyline(this Line line)
         {
             ThTCHPolyline tchPolyline = new ThTCHPolyline();
