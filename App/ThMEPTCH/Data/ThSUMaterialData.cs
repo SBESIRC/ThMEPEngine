@@ -23,7 +23,7 @@ public static partial class ThSUMaterialDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChZUaFNVTWF0ZXJpYWxEYXRhLnByb3RvIq4BChBUaFNVTWF0ZXJpYWxEYXRh",
-          "EhUKDW1hdGVyaWFsX25hbWUYASABKAkSDQoFYWxwaGEYAiABKAUSDgoGaGFz",
+          "EhUKDW1hdGVyaWFsX25hbWUYASABKAkSDQoFYWxwaGEYAiABKAISDgoGaGFz",
           "UkdCGAMgASgIEhQKB2NvbG9yX3IYBCABKAVIAIgBARIUCgdjb2xvcl9nGAUg",
           "ASgFSAGIAQESFAoHY29sb3JfYhgGIAEoBUgCiAEBQgoKCF9jb2xvcl9yQgoK",
           "CF9jb2xvcl9nQgoKCF9jb2xvcl9iYgZwcm90bzM="));
@@ -102,10 +102,10 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
 
   /// <summary>Field number for the "alpha" field.</summary>
   public const int AlphaFieldNumber = 2;
-  private int alpha_;
+  private float alpha_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public int Alpha {
+  public float Alpha {
     get { return alpha_; }
     set {
       alpha_ = value;
@@ -215,7 +215,7 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
       return true;
     }
     if (MaterialName != other.MaterialName) return false;
-    if (Alpha != other.Alpha) return false;
+    if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Alpha, other.Alpha)) return false;
     if (HasRGB != other.HasRGB) return false;
     if (ColorR != other.ColorR) return false;
     if (ColorG != other.ColorG) return false;
@@ -228,7 +228,7 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
   public override int GetHashCode() {
     int hash = 1;
     if (MaterialName.Length != 0) hash ^= MaterialName.GetHashCode();
-    if (Alpha != 0) hash ^= Alpha.GetHashCode();
+    if (Alpha != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Alpha);
     if (HasRGB != false) hash ^= HasRGB.GetHashCode();
     if (HasColorR) hash ^= ColorR.GetHashCode();
     if (HasColorG) hash ^= ColorG.GetHashCode();
@@ -255,9 +255,9 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
       output.WriteRawTag(10);
       output.WriteString(MaterialName);
     }
-    if (Alpha != 0) {
-      output.WriteRawTag(16);
-      output.WriteInt32(Alpha);
+    if (Alpha != 0F) {
+      output.WriteRawTag(21);
+      output.WriteFloat(Alpha);
     }
     if (HasRGB != false) {
       output.WriteRawTag(24);
@@ -289,9 +289,9 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
       output.WriteRawTag(10);
       output.WriteString(MaterialName);
     }
-    if (Alpha != 0) {
-      output.WriteRawTag(16);
-      output.WriteInt32(Alpha);
+    if (Alpha != 0F) {
+      output.WriteRawTag(21);
+      output.WriteFloat(Alpha);
     }
     if (HasRGB != false) {
       output.WriteRawTag(24);
@@ -322,8 +322,8 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
     if (MaterialName.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(MaterialName);
     }
-    if (Alpha != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Alpha);
+    if (Alpha != 0F) {
+      size += 1 + 4;
     }
     if (HasRGB != false) {
       size += 1 + 1;
@@ -352,7 +352,7 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
     if (other.MaterialName.Length != 0) {
       MaterialName = other.MaterialName;
     }
-    if (other.Alpha != 0) {
+    if (other.Alpha != 0F) {
       Alpha = other.Alpha;
     }
     if (other.HasRGB != false) {
@@ -386,8 +386,8 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
           MaterialName = input.ReadString();
           break;
         }
-        case 16: {
-          Alpha = input.ReadInt32();
+        case 21: {
+          Alpha = input.ReadFloat();
           break;
         }
         case 24: {
@@ -425,8 +425,8 @@ public sealed partial class ThSUMaterialData : pb::IMessage<ThSUMaterialData>
           MaterialName = input.ReadString();
           break;
         }
-        case 16: {
-          Alpha = input.ReadInt32();
+        case 21: {
+          Alpha = input.ReadFloat();
           break;
         }
         case 24: {

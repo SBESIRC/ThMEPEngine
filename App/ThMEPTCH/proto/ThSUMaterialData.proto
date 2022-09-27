@@ -2,7 +2,7 @@ syntax = "proto3";
 
 message ThSUMaterialData {
     string material_name = 1;
-    int32 alpha = 2;
+    float alpha = 2;
     bool hasRGB = 3;
     optional int32 color_r = 4;
     optional int32 color_g = 5;
