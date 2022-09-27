@@ -1,8 +1,10 @@
 syntax = "proto3";
 import "ThSUGeometry.proto";
+import "ThTCHGeometry.proto";
 import "ThSUMaterialData.proto";
 
 message ThSUFaceData {
     ThSUPolygonMesh mesh = 1;
     ThSUMaterialData material = 2;
+    ThTCHVector3d face_normal = 3;
 }

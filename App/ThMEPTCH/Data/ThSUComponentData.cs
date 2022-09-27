@@ -24,14 +24,14 @@ public static partial class ThSUComponentDataReflection {
         string.Concat(
           "ChdUaFNVQ29tcG9uZW50RGF0YS5wcm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90",
           "bxoWVGhTVU1hdGVyaWFsRGF0YS5wcm90bxocVGhTVUNvbXBEZWZpbml0aW9u",
-          "RGF0YS5wcm90byKOAQoRVGhTVUNvbXBvbmVudERhdGESKwoKZGVmaW5pdGlv",
-          "bhgBIAEoCzIXLlRoU1VDb21wRGVmaW5pdGlvbkRhdGESJwoPdHJhbnNmb3Jt",
-          "YXRpb25zGAIgASgLMg4uVGhUQ0hNYXRyaXgzZBIjCghtYXRlcmlhbBgDIAEo",
-          "CzIRLlRoU1VNYXRlcmlhbERhdGFiBnByb3RvMw=="));
+          "RGF0YS5wcm90byJ7ChFUaFNVQ29tcG9uZW50RGF0YRIYChBkZWZpbml0aW9u",
+          "X2luZGV4GAEgASgFEicKD3RyYW5zZm9ybWF0aW9ucxgCIAEoCzIOLlRoVENI",
+          "TWF0cml4M2QSIwoIbWF0ZXJpYWwYAyABKAsyES5UaFNVTWF0ZXJpYWxEYXRh",
+          "YgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, global::ThSUCompDefinitionDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUComponentData), global::ThSUComponentData.Parser, new[]{ "Definition", "Transformations", "Material" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUComponentData), global::ThSUComponentData.Parser, new[]{ "DefinitionIndex", "Transformations", "Material" }, null, null, null, null)
         }));
   }
   #endregion
@@ -72,7 +72,7 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThSUComponentData(ThSUComponentData other) : this() {
-    definition_ = other.definition_ != null ? other.definition_.Clone() : null;
+    definitionIndex_ = other.definitionIndex_;
     transformations_ = other.transformations_ != null ? other.transformations_.Clone() : null;
     material_ = other.material_ != null ? other.material_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -84,15 +84,15 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     return new ThSUComponentData(this);
   }
 
-  /// <summary>Field number for the "definition" field.</summary>
-  public const int DefinitionFieldNumber = 1;
-  private global::ThSUCompDefinitionData definition_;
+  /// <summary>Field number for the "definition_index" field.</summary>
+  public const int DefinitionIndexFieldNumber = 1;
+  private int definitionIndex_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThSUCompDefinitionData Definition {
-    get { return definition_; }
+  public int DefinitionIndex {
+    get { return definitionIndex_; }
     set {
-      definition_ = value;
+      definitionIndex_ = value;
     }
   }
 
@@ -135,7 +135,7 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     if (ReferenceEquals(other, this)) {
       return true;
     }
-    if (!object.Equals(Definition, other.Definition)) return false;
+    if (DefinitionIndex != other.DefinitionIndex) return false;
     if (!object.Equals(Transformations, other.Transformations)) return false;
     if (!object.Equals(Material, other.Material)) return false;
     return Equals(_unknownFields, other._unknownFields);
@@ -145,7 +145,7 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override int GetHashCode() {
     int hash = 1;
-    if (definition_ != null) hash ^= Definition.GetHashCode();
+    if (DefinitionIndex != 0) hash ^= DefinitionIndex.GetHashCode();
     if (transformations_ != null) hash ^= Transformations.GetHashCode();
     if (material_ != null) hash ^= Material.GetHashCode();
     if (_unknownFields != null) {
@@ -166,9 +166,9 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     output.WriteRawMessage(this);
   #else
-    if (definition_ != null) {
-      output.WriteRawTag(10);
-      output.WriteMessage(Definition);
+    if (DefinitionIndex != 0) {
+      output.WriteRawTag(8);
+      output.WriteInt32(DefinitionIndex);
     }
     if (transformations_ != null) {
       output.WriteRawTag(18);
@@ -188,9 +188,9 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-    if (definition_ != null) {
-      output.WriteRawTag(10);
-      output.WriteMessage(Definition);
+    if (DefinitionIndex != 0) {
+      output.WriteRawTag(8);
+      output.WriteInt32(DefinitionIndex);
     }
     if (transformations_ != null) {
       output.WriteRawTag(18);
@@ -210,8 +210,8 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public int CalculateSize() {
     int size = 0;
-    if (definition_ != null) {
-      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Definition);
+    if (DefinitionIndex != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeInt32Size(DefinitionIndex);
     }
     if (transformations_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Transformations);
@@ -231,11 +231,8 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     if (other == null) {
       return;
     }
-    if (other.definition_ != null) {
-      if (definition_ == null) {
-        Definition = new global::ThSUCompDefinitionData();
-      }
-      Definition.MergeFrom(other.Definition);
+    if (other.DefinitionIndex != 0) {
+      DefinitionIndex = other.DefinitionIndex;
     }
     if (other.transformations_ != null) {
       if (transformations_ == null) {
@@ -264,11 +261,8 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
         default:
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
-        case 10: {
-          if (definition_ == null) {
-            Definition = new global::ThSUCompDefinitionData();
-          }
-          input.ReadMessage(Definition);
+        case 8: {
+          DefinitionIndex = input.ReadInt32();
           break;
         }
         case 18: {
@@ -300,11 +294,8 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
         default:
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
-        case 10: {
-          if (definition_ == null) {
-            Definition = new global::ThSUCompDefinitionData();
-          }
-          input.ReadMessage(Definition);
+        case 8: {
+          DefinitionIndex = input.ReadInt32();
           break;
         }
         case 18: {
