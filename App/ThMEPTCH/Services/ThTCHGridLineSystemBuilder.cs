@@ -238,7 +238,7 @@ namespace ThMEPTCH.Services
                 XLine1Point = xLine1Point.ToTCHPoint(),
                 XLine2Point = xLine2Point.ToTCHPoint(),
                 DimLinePoint = dimLinePoint.ToTCHPoint(),
-                Mark = dimension.DimensionText,
+                Mark = dimension.Measurement.ToString(),
             };
 
             var xLine1 = new ThTCHLine()
