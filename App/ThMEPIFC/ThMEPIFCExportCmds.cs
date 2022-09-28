@@ -124,7 +124,8 @@ namespace ThMEPIFC
                     var isFile = System.IO.File.Exists(ifcFilePath);
                     if (isFile)
                     {
-                        System.IO.File.Delete(ifcFilePath);
+                        //System.IO.File.Delete(ifcFilePath);
+                        Active.Editor.WriteLine($"IFC文件路径：[{ifcFilePath}]");
                     }
                 }
             }
