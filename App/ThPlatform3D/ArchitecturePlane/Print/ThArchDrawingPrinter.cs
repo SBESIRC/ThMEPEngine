@@ -8,6 +8,7 @@ using acadApp = Autodesk.AutoCAD.ApplicationServices;
 using ThPlatform3D.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Linq;
+using ThPlatform3D.ArchitecturePlane.Service;
 
 namespace ThPlatform3D.ArchitecturePlane.Print
 {
@@ -24,7 +25,8 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         /// 收集所有当前图纸打印的物体
         /// </summary>
         public ObjectIdCollection ObjIds { get; protected set; }
-        protected ThPlanePrintParameter PrintParameter { get; set; }       
+        protected ThPlanePrintParameter PrintParameter { get; set; }   
+
         public ThArchDrawingPrinter(ThSvgParseInfo input, ThPlanePrintParameter printParameter)
         {
             Geos = input.Geos;
@@ -72,7 +74,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         protected virtual ObjectIdCollection PrintKanXian(Database db, ThGeometry geo)
         {
             var config = ThKanXianPrinter.GetConfig();
-            bool isHidden = geo.Properties.ContainsKey("stroke-dasharray");
+            bool isHidden = geo.Properties.IsHiddenKanxian();
             if (isHidden)
             {
                 config.LineType = "Hidden";
