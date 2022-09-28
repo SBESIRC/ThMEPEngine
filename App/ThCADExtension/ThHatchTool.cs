@@ -76,7 +76,7 @@ namespace ThCADExtension
             }
             return curves;
         }
-        private static Circle ToCircle(Curve2dCollection curve2ds)
+        public static Circle ToCircle(Curve2dCollection curve2ds)
         {
             var first = curve2ds[0];
             var second = curve2ds[1];
@@ -102,7 +102,7 @@ namespace ThCADExtension
                 return new Circle();
             }
         }
-        private static Polyline ToPolyline(Curve2dCollection curve2ds, Plane plane,  double tolerance = 1e-4)
+        public static Polyline ToPolyline(Curve2dCollection curve2ds, Plane plane,  double tolerance = 1e-4)
         {
             var segments = new PolylineSegmentCollection();
             foreach (Curve2d cv in curve2ds)
