@@ -202,6 +202,11 @@ namespace ThMEPTCH.CAD
             return new Point3d(point.X, point.Y, point.Z);
         }
 
+        public static Vector3d ToVector(this ThTCHVector3d vector)
+        {
+            return new Vector3d(vector.X, vector.Y, vector.Z);
+        }
+
         public static ThTCHVector3d ToTCHVector(this Vector3d vector)
         {
             return new ThTCHVector3d() { X = vector.X, Y = vector.Y, Z = vector.Z };
