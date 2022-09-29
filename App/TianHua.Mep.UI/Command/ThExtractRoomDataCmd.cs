@@ -407,6 +407,7 @@ namespace TianHua.Mep.UI.Command
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(wallVisitor);
             extractor.Extract(database);
+            extractor.ExtractFromMS(database);
 
             var totalObjs = wallVisitor.Results
                 .Select(o => o.Geometry).ToCollection();
