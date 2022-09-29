@@ -853,6 +853,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             return new DrawPipeData(focus, 50, 0, pipeId);
             DrawUtils.ShowGeometry(focus, "l6VCenter", 0, 50, 50);
         }
+        public void TransformBy(Matrix3d matrix)
+        {
+            CenterPoint = CenterPoint.TransformBy(matrix);
+            RightPoint = RightPoint.TransformBy(matrix);
+            LeftPoint = LeftPoint.TransformBy(matrix);
+            DoorLeft = DoorLeft.TransformBy(matrix);
+            DoorRight = DoorRight.TransformBy(matrix);
+        }
     }
 
     //点位移动信息
@@ -869,6 +877,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             this.DoorId = doorId;
             this.LeftPoint = leftPoint;
             this.RightPoint = rightPoint;
+        }
+        public void TransformBy(Matrix3d matrix)
+        {
+            LeftPoint = LeftPoint.TransformBy(matrix);
+            RightPoint = RightPoint.TransformBy(matrix);
         }
     }
     
