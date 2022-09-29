@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -160,9 +161,17 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                     var ent = entity.Geometry;
                     if (ent is Entity entity1)
                     {
-                        var entGeo = entity1.GeometricExtents.ToNTSPolygon();
-                        if (ntsGeo.Intersects(entGeo))
-                            entities.Add(entity1);
+                        try
+                        {
+                            var entGeo = entity1.GeometricExtents.ToNTSPolygon();
+                            if (ntsGeo.Intersects(entGeo))
+                                entities.Add(entity1);
+                        }
+                        catch (Exception ex)
+                        {
+                            if (ex.Message.Equals("eNullExtents"))
+                                continue;
+                        }
                     }
                 }
                 if (null == entities || entities.Count < 1)
