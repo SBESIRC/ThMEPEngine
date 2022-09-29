@@ -319,7 +319,7 @@ namespace ThParkingStall.Core.OInterProcess
                 for (int k = 0; k < _Ramps.Count; k++)
                 {
                     var ramp = _Ramps[k];
-                    if (bound.Intersects(ramp.Area)) _Ramps[k] = ramp.Transform(vector);
+                    if (bound.Intersects(ramp.InsertPt.ToPoint())) _Ramps[k] = ramp.Transform(vector);
                     
                 }
                 // 筛选可动bounding

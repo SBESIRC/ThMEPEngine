@@ -40,6 +40,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         public List<Line> CAD_SegLines = new List<Line>();// 提取到的cad分区线
         public List<Polyline> CAD_Obstacles = new List<Polyline>();//提取到的cad障碍物
         public List<Polyline> CAD_Ramps = new List<Polyline>();// 提取到的cad坡道
+        public List<Line> CAD_RampLines = new List<Line>();
         public List<Polyline> CAD_MovingBounds = new List<Polyline>();//提取到的cad可动建筑框线
         // NTS 数据结构
         //public Polygon Basement;//地库，面域部分为可布置区域
@@ -132,7 +133,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             ParameterStock.AreaMax = MaxArea;
             UpdateObstacles();//更新障碍物
             UpdateRampPolgons();//更新坡道polygon
-
+            UpdateRamps();
             UpdateMovingBounds();//更新可动建筑框线
             Buildings = Obstacles.Concat(RampPolygons).ToList();
             //Basement = OverlayNGRobust.Overlay(WallLine, new MultiPolygon(Buildings.ToArray()), SpatialFunction.Difference).
@@ -259,6 +260,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     }
                 }
             }
+            if (layerName.Contains("坡道出口标记"))
+            {
+                if (ent is Line line)
+                {
+                     CAD_RampLines.Add(line);
+                }
+            }
             if (layerName.Contains("分割线") || layerName.Contains("分区线"))
             {
                 if (ent is Line line)
@@ -300,6 +308,33 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             {
                 var UnionedRamps = new MultiPolygon(CAD_Ramps.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
                 RampPolygons = UnionedRamps.Get<Polygon>(true);
+            }
+        }
+        private void UpdateRamps()
+        {
+            var minLength = 4000;
+            var maxLength = 9000;
+            var rampLines = CAD_RampLines.Select(l => l.ToNTSLineSegment()).ToList();
+            foreach (var rampLine in rampLines)
+            {
+                var rampPolys = RampSpatialIndex.SelectCrossingGeometry(rampLine.ToLineString()).Cast<Polygon>();
+                
+                foreach(var rampPoly in rampPolys)
+                {
+                    var shell = rampPoly.Shell;
+                    bool IsCCW =shell.IsCCW;
+                    var exitLines = shell.ToLineSegments();
+                    foreach(var exitLine in exitLines)
+                    {
+                        if (exitLine.Length < minLength || exitLine.Length > maxLength) continue;
+                        var intSection = rampLine.Intersection(exitLine);
+                        if (intSection == null) continue;
+                        Vector2D direction;
+                        if (IsCCW) direction = exitLine.DirVector().RotateByQuarterCircle(-1);
+                        else direction = exitLine.DirVector().RotateByQuarterCircle(1);
+                        Ramps.Add(new ORamp(intSection, direction));
+                    }
+                }
             }
         }
         //更新空间索引
@@ -662,8 +697,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //2.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
             SegLines = merged.Select(l => l.GetBaseLine(WallLine)).Where(l =>l!=null).ToList();
             SegLines.ForEach(l => { l.Splitter = l.Splitter.OExtend(1);l.IsInitLine = true; });
-            //3,处理坡道
-            UpdateRamps();
+            //3,处理坡道(逻辑更新，使用特殊的坡道线作为出入口标记)
+            //UpdateRamps();
             //4.获取最大全连接车道，若有未连接的，移除+标记+报错
             var groups = SegLines.GroupSegLines(2).OrderBy(g => g.Count).ToList();
             for (int i = 0; i < groups.Count - 1; i++)
@@ -783,21 +818,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             return Isvaild;
         }
         //更新坡道
-        private void UpdateRamps()
-        {
-            var lineSegs = SegLines.Select(seg =>seg.Splitter).ToList();
-            for (int i = SegLines.Count - 1; i >= 0; i--)
-            {
-                var segLine = SegLines[i];
-                var ramp = RampSpatialIndex.SelectCrossingGeometry(segLine.Splitter.ToLineString()).Cast<Polygon>();
-                if (ramp.Count() > 0)
-                {
-                    Ramps.Add(new ORamp(segLine, ramp.First()));
-                    if(lineSegs.GetIntersections( WallLine,i).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
-                    else SegLines[i].IsFixed = true;
-                }
-            }
-        }
+        //private void _UpdateRamps()//旧逻辑，弃用
+        //{
+        //    var lineSegs = SegLines.Select(seg =>seg.Splitter).ToList();
+        //    for (int i = SegLines.Count - 1; i >= 0; i--)
+        //    {
+        //        var segLine = SegLines[i];
+        //        var ramp = RampSpatialIndex.SelectCrossingGeometry(segLine.Splitter.ToLineString()).Cast<Polygon>();
+        //        if (ramp.Count() > 0)
+        //        {
+        //            Ramps.Add(new ORamp(segLine, ramp.First()));
+        //            if(lineSegs.GetIntersections( WallLine,i).Count < 2) SegLines.RemoveAt(i);//移除仅有一个交点的线
+        //            else SegLines[i].IsFixed = true;
+        //        }
+        //    }
+        //}
+
+        
         #endregion
 
         public void ShowLowerUpperBound(string layer = "最大最小值")

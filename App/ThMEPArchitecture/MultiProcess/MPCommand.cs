@@ -591,7 +591,7 @@ namespace ThMEPArchitecture.MultiProcess
                 entities.AddRange(subArea.VaildLanes.Select(l => l.ToDbLine(2, layer)));
             entities.AddRange(subArea.Walls.Select(wall => wall.ToDbPolyline(1, layer)));
             entities.AddRange(subArea.Buildings.Select(polygon => polygon.ToDbMPolygon(5, layer)));
-            entities.AddRange(subArea.Ramps.Select(ramp => ramp.Area.ToDbMPolygon(3, layer)));
+            entities.AddRange(subArea.Ramps.Select(ramp => ramp.InsertPt.LineBuffer(1000,ramp.GetVector().RotateByQuarterCircle(1)).ToDbLine(3, layer)));
             entities.AddRange(subArea.BuildingBounds.Select(polygon => polygon.ToDbMPolygon(4, layer)));
             entities.ShowBlock(blockName, layer);
         }

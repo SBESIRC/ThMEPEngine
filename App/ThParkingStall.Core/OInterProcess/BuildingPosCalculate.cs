@@ -121,7 +121,7 @@ namespace ThParkingStall.Core.OInterProcess
             }
             foreach (var ramp in ramps)
             {
-                if (bound.Intersects(ramp.Area)) rampsToMove.Add(ramp);
+                if (bound.Intersects(ramp.InsertPt.ToPoint())) rampsToMove.Add(ramp);
                 else rampsNotMove.Add(ramp);
             }
             foreach (var BB in buildingBounds)
@@ -308,7 +308,7 @@ namespace ThParkingStall.Core.OInterProcess
             //筛选可动坡道
             foreach (var ramp in ramps)
             {
-                if (bound.Intersects(ramp.Area)) rampsToMove.Add(ramp);
+                if (bound.Intersects(ramp.InsertPt.ToPoint())) rampsToMove.Add(ramp);
                 else rampsNotMove.Add(ramp);
             }
             // 筛选可动bounding
