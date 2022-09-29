@@ -27,18 +27,19 @@ namespace ThMEPWSS.SprinklerDim.Data
         //----input
         public ThMEPOriginTransformer Transformer { get; set; } = new ThMEPOriginTransformer();
         public List<ThIfcFlowSegment> TchPipeData { private get; set; } = new List<ThIfcFlowSegment>();
+        public List<Curve> LinePipeData { private get; set; } = new List<Curve>();
+        public List<Entity> LinePipeTextData { private get; set; } = new List<Entity>();
         public List<Point3d> SprinklerPt { get; set; } = new List<Point3d>();
         public List<ThExtractorBase> InputExtractors { get; set; }
         public List<Curve> AxisCurvesData { get; set; } = new List<Curve>();
 
-        //---private
-        private List<Entity> WallData { get; set; } = new List<Entity>(); //mpolygon //polyline
-        private List<Entity> RoomData { get; set; } = new List<Entity>(); //mpolygon //polyline
+        public List<ThIfcRoom> RoomIFCData { get; set; } = new List<ThIfcRoom>();
 
+        //---private
 
         //----output
-        public List<Line> TchPipe { get; private set; } = new List<Line>();
-        public List<Polyline> TchPipeText { get; private set; } = new List<Polyline>();
+        public List<Line> Pipe { get; private set; } = new List<Line>();
+        public List<Polyline> PipeTextPl { get; private set; } = new List<Polyline>();
         public List<Polyline> Column { get; set; } = new List<Polyline>();
         public List<Polyline> Wall { get; set; } = new List<Polyline>(); //mpolygon //polyline
         public List<MPolygon> Room { get; set; } = new List<MPolygon>(); //mpolygon //polyline
@@ -50,6 +51,8 @@ namespace ThMEPWSS.SprinklerDim.Data
             RemoveDuplicateSprinklerPt();
             CreateTchPipe();
             CreateTchPipeText();
+            ProcessLinePipe();
+            ProcessLinePipeText();
             Transform();
             ProjectOntoXYPlane();
         }
@@ -58,13 +61,13 @@ namespace ThMEPWSS.SprinklerDim.Data
         public void CreateTchPipe()
         {
             var line = TchPipeData.Select(o => o.Outline).OfType<Line>().Where(x => x.Length >= LineTol);
-            TchPipe.AddRange(line);
+            Pipe.AddRange(line);
         }
 
         public void CreateTchPipeText()
         {
             var textGeom = TchPipeData.Select(o => o.Outline).OfType<DBText>().Select(x => x.TextOBB()).ToList();
-            TchPipeText.AddRange(textGeom);
+            PipeTextPl.AddRange(textGeom);
         }
         public void RemoveDuplicateSprinklerPt()
         {
@@ -73,31 +76,66 @@ namespace ThMEPWSS.SprinklerDim.Data
 
         public void ProcessArchitechData()
         {
+            var wallData = new List<Entity>(); //mpolygon //polyline
+            var roomData = new List<Entity>(); //mpolygon //polyline
+
             if (InputExtractors != null && InputExtractors.Count() > 0)
             {
                 var architectureWallExtractor = InputExtractors.Where(o => o is ThSprinklerArchitectureWallExtractor).First() as ThSprinklerArchitectureWallExtractor;
                 var shearWallExtractor = InputExtractors.Where(o => o is ThSprinklerShearWallExtractor).First() as ThSprinklerShearWallExtractor;
                 var columnExtractor = InputExtractors.Where(o => o is ThSprinklerColumnExtractor).First() as ThSprinklerColumnExtractor;
-                var roomExtractor = InputExtractors.Where(o => o is ThSprinklerRoomExtractor).First() as ThSprinklerRoomExtractor;
+                //var roomExtractor = InputExtractors.Where(o => o is ThSprinklerRoomExtractor).First() as ThSprinklerRoomExtractor;
 
-                WallData.AddRange(architectureWallExtractor.Walls);
-                WallData.AddRange(shearWallExtractor.Walls);
+                wallData.AddRange(architectureWallExtractor.Walls);
+                wallData.AddRange(shearWallExtractor.Walls);
                 Column.AddRange(columnExtractor.Columns);
-                roomExtractor.Rooms.ForEach(x => RoomData.Add(x.Boundary as Entity));
+                RoomIFCData.ForEach(x => roomData.Add(x.Boundary as Entity));
 
-                Wall.AddRange(WallData.OfType<Polyline>());
-                Wall.AddRange(WallData.OfType<MPolygon>().Select(x => x.Shell()));
-                Wall.AddRange(WallData.OfType<MPolygon>().SelectMany(x => x.Holes()));
+                Wall.AddRange(wallData.OfType<Polyline>());
+                Wall.AddRange(wallData.OfType<MPolygon>().Select(x => x.Shell()));
+                Wall.AddRange(wallData.OfType<MPolygon>().SelectMany(x => x.Holes()));
 
-                //Room.AddRange(RoomData.OfType<Polyline>());
-                //Room.AddRange(RoomData.OfType<MPolygon>().Select(x => x.Shell()));
-                //Room.AddRange(RoomData.OfType<MPolygon>().SelectMany(x => x.Holes()));
-
-                Room.AddRange(RoomData.OfType<Polyline>().Select(x => ThMPolygonTool.CreateMPolygon(x)));
-                Room.AddRange(RoomData.OfType<MPolygon>());
+                Room.AddRange(roomData.OfType<Polyline>().Select(x => ThMPolygonTool.CreateMPolygon(x)));
+                Room.AddRange(roomData.OfType<MPolygon>());
 
             }
         }
+
+        public void ProcessLinePipe()
+        {
+            foreach (var item in LinePipeData)
+            {
+                if (item is Line l)
+                {
+                    Pipe.Add(l);
+                }
+                else if (item is Polyline pl)
+                {
+                    Pipe.AddRange(PolylineToLine(pl));
+                }
+            }
+        }
+
+        public void ProcessLinePipeText()
+        {
+            foreach (var item in LinePipeTextData)
+            {
+                Polyline geom = null;
+                if (item is DBText dbtext)
+                {
+                    geom = dbtext.TextOBB();
+                }
+                else if (item is MText mtext)
+                {
+                    geom = mtext.TextOBB();
+                }
+                if (geom != null)
+                {
+                    PipeTextPl.Add(geom);
+                }
+            }
+        }
+
 
         public void ProcessAxisCurve()
         {
@@ -109,14 +147,32 @@ namespace ThMEPWSS.SprinklerDim.Data
                 }
                 else if (item is Polyline pl)
                 {
-                    AxisCurves.AddRange(ThSprinklerLineService.PolylineToLine(pl));
+                    AxisCurves.AddRange(PolylineToLine(pl));
                 }
             }
         }
+
+        public static List<Line> PolylineToLine(Polyline pl)
+        {
+            var returnL = new List<Line>();
+            var nCount = pl.NumberOfVertices - 1;
+            if (pl.Closed == true)
+            {
+                nCount = nCount + 1;
+            }
+            for (int i = 0; i < nCount; i++)
+            {
+                returnL.Add(new Line(pl.GetPoint3dAt(i % pl.NumberOfVertices), pl.GetPoint3dAt((i + 1) % pl.NumberOfVertices)));
+            }
+
+            return returnL;
+        }
+
+
         public void ProjectOntoXYPlane()
         {
-            TchPipe.ForEach(x => x.ProjectOntoXYPlane());
-            TchPipeText.ForEach(x => x.ProjectOntoXYPlane());
+            Pipe.ForEach(x => x.ProjectOntoXYPlane());
+            PipeTextPl.ForEach(x => x.ProjectOntoXYPlane());
             SprinklerPt = SprinklerPt.Select(x => new Point3d(x.X, x.Y, 0)).ToList();
             Column.ForEach(x => x.ProjectOntoXYPlane());
             Wall.ForEach(x => x.ProjectOntoXYPlane());
@@ -125,8 +181,8 @@ namespace ThMEPWSS.SprinklerDim.Data
         }
         public void Transform()
         {
-            TchPipe.ForEach(x => Transformer.Transform(x));
-            TchPipeText.ForEach(x => Transformer.Transform(x));
+            Pipe.ForEach(x => Transformer.Transform(x));
+            PipeTextPl.ForEach(x => Transformer.Transform(x));
             SprinklerPt = SprinklerPt.Select(x => Transformer.Transform(x)).ToList();
             Column.ForEach(x => Transformer.Transform(x));
             Wall.ForEach(x => Transformer.Transform(x));
@@ -136,8 +192,8 @@ namespace ThMEPWSS.SprinklerDim.Data
         }
         public void Print()
         {
-            DrawUtils.ShowGeometry(TchPipe, "l0Pipe", 140);
-            DrawUtils.ShowGeometry(TchPipeText, "l0pipeText", 140);
+            DrawUtils.ShowGeometry(Pipe, "l0Pipe", 140);
+            DrawUtils.ShowGeometry(PipeTextPl, "l0pipeText", 140);
             SprinklerPt.ForEach(x => DrawUtils.ShowGeometry(x, "l0sprinkler", 3));
 
             DrawUtils.ShowGeometry(Wall, "l0wall", 1);

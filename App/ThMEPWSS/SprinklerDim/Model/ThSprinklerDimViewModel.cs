@@ -5,7 +5,9 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Input;
+
 using Autodesk.AutoCAD.ApplicationServices;
 
 using AcHelper;
@@ -26,6 +28,28 @@ namespace ThMEPWSS.SprinklerDim.Model
             set
             {
                 _UseTCHDim = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private int _Scale { get; set; }
+        public int Scale
+        {
+            get { return _Scale; }
+            set
+            {
+                _Scale = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private ObservableCollection<int> _ScaleList { get; set; }
+        public ObservableCollection<int> ScaleList
+        {
+            get { return _ScaleList; }
+            set
+            {
+                _ScaleList = value;
                 this.RaisePropertyChanged();
             }
         }
@@ -67,6 +91,8 @@ namespace ThMEPWSS.SprinklerDim.Model
         public ThSprinklerDimViewModel()
         {
             UseTCHDim = 1;
+            Scale = 100;
+            ScaleList = new ObservableCollection<int>() { 100, 150 };
             TCHDBPath = Path.GetTempPath() + "TG20.db";
         }
     }

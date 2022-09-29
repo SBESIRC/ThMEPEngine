@@ -23,13 +23,13 @@ namespace ThMEPWSS.SprinklerDim.Service
 {
     public static class ThSprinklerDimInsertService
     {
-        public static void ToCADDim(List<ThSprinklerDimension> dims)
+        public static void ToCADDim(List<ThSprinklerDimension> dims, double scale)
         {
-            var cadDim = DimModelToCADDim(dims);
+            var cadDim = DimModelToCADDim(dims, scale);
             InsertDim(cadDim);
         }
 
-        private static List<RotatedDimension> DimModelToCADDim(List<ThSprinklerDimension> dims)
+        private static List<RotatedDimension> DimModelToCADDim(List<ThSprinklerDimension> dims, double scale)
         {
             var cadDim = new List<RotatedDimension>();
             foreach (var dim in dims)
@@ -48,6 +48,10 @@ namespace ThMEPWSS.SprinklerDim.Service
                     newDim.DimLinePoint = dimBasePt;
                     newDim.Rotation = rotation;
                     newDim.Dimtxt = 350;
+                    if (scale==150)
+                    {
+                        newDim.Dimtxt = 450;
+                    }
                     newDim.Dimscale = 1;
                     cadDim.Add(newDim);
                 }
@@ -81,9 +85,9 @@ namespace ThMEPWSS.SprinklerDim.Service
         }
 
 
-        public static void ToTCHDim(List<ThSprinklerDimension> dims,string tchDBPath)
+        public static void ToTCHDim(List<ThSprinklerDimension> dims, double scale, string tchDBPath)
         {
-            var dbDimsModel = DimToDBDimModel(dims);
+            var dbDimsModel = DimToDBDimModel(dims, scale);
 
             var tchDrawSprinklerDimService = new TCHDrawSprinklerDimService(tchDBPath);
             tchDrawSprinklerDimService.Init(dbDimsModel);
@@ -91,7 +95,7 @@ namespace ThMEPWSS.SprinklerDim.Service
 
         }
 
-        private static List<ThTCHSprinklerDim> DimToDBDimModel(List<ThSprinklerDimension> dims)
+        private static List<ThTCHSprinklerDim> DimToDBDimModel(List<ThSprinklerDimension> dims, double scale)
         {
             var tchDimModeList = new List<ThTCHSprinklerDim>();
 
@@ -120,8 +124,8 @@ namespace ThMEPWSS.SprinklerDim.Service
                 var tchDim = new ThTCHSprinklerDim();
                 tchDim.FirstPoint = item.DimPts.First();
                 tchDim.Rotation = rotation;
-                tchDim.Scale = 100;
-                tchDim.Dist2DimLine = dist / tchDim.Scale;
+                tchDim.Scale = scale;
+                tchDim.Dist2DimLine = dist / scale;
                 tchDim.LayoutRotation = layoutRotation;
                 tchDim.SegmentValues.AddRange(ptDist);
                 tchDim.System = "喷淋";

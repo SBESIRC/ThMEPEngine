@@ -13,6 +13,7 @@ using NetTopologySuite.Operation.Relate;
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPWSS.SprinklerDim.Model;
+using ThMEPWSS.SprinklerDim.Data;
 
 namespace ThMEPWSS.SprinklerDim.Service
 {
@@ -22,11 +23,17 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             var dict = new Dictionary<Point3d, double>();
 
+            var lineObjs = pipeLine.ToCollection();
+            var lineSpIdx = new ThCADCoreNTSSpatialIndex(lineObjs);
+
             foreach (var pt in sprinkPts)
             {
                 if (dict.ContainsKey(pt) == false)
                 {
-                    var connectL = pipeLine.Where(x => x.GetDistToPoint(pt, false) <= 200).OrderBy(x => x.GetDistToPoint(pt, false));
+                    var poly = PtToFrame(pt, 200);
+                    var nearL = lineSpIdx.SelectCrossingPolygon(poly).OfType<Line>().ToList();
+
+                    var connectL = nearL.OrderBy(x => x.GetDistToPoint(pt, false));
                     if (connectL.Any())
                     {
                         var angle = connectL.First().Angle;
@@ -41,6 +48,26 @@ namespace ThMEPWSS.SprinklerDim.Service
             return dict;
         }
 
+        public static Polyline PtToFrame(Point3d pt, double r)
+        {
+            var dirX = new Vector3d(1, 0, 0);
+            var dirY = new Vector3d(0, 1, 0);
+
+            var pt0 = pt - dirX * r - dirY * r;
+            var pt1 = pt - dirX * r + dirY * r;
+            var pt2 = pt + dirX * r + dirY * r;
+            var pt3 = pt + dirX * r - dirY * r;
+
+            var pl = new Polyline();
+            pl.AddVertexAt(0, pt0.ToPoint2d(), 0, 0, 0);
+            pl.AddVertexAt(1, pt1.ToPoint2d(), 0, 0, 0);
+            pl.AddVertexAt(2, pt2.ToPoint2d(), 0, 0, 0);
+            pl.AddVertexAt(3, pt3.ToPoint2d(), 0, 0, 0);
+            pl.Closed = true;
+
+            return pl;
+        }
+
         /// <summary>
         /// 生成德劳内三角（DT）
         /// </summary>
@@ -51,51 +78,60 @@ namespace ThMEPWSS.SprinklerDim.Service
             var points = sprinkPts.ToCollection();
             var dtLine = points.DelaunayTriangulation();
             var dtPls = dtLine.OfType<Polyline>().ToList();
+
             var dtLinesAll = ThSprinklerLineService.PolylineToLine(dtPls);
             dtLinesAll = dtLinesAll.Distinct().ToList();
 
             return dtLinesAll;
         }
 
-        ///// <summary>
-        ///// 找所有正交的德劳内三角（DT）线段
-        ///// find all segments having orthogonal angle in Delaunary Triangulation of points
-        ///// </summary>
-        ///// <param name="sprinkPts">点位</param>
-        ///// <param name="dtSeg">正交的DT线段</param>
-        ///// <returns></returns>
-        //public static List<Line> FindOrthogonalAngleFromDT(List<Point3d> sprinkPts, List<Line> dtSeg)
+
+
+        //public static List<Line> GetDTSeg(List<Point3d> sprinkPts, out List<Line> dtSeg, out Dictionary<Point3d, List<Line>> ptDtOriDict)
         //{
-        //    var angleTol = 1;
-        //    List<Line> dtOrthogonalSeg = new List<Line>();
+        //    var tol = new Tolerance(1, 1);
+        //    var points = sprinkPts.ToCollection();
+        //    var dtLine = points.DelaunayTriangulation();
+        //    var dtPls = dtLine.OfType<Polyline>().ToList();
+        //    var dtPlsObjs = dtPls.ToCollection();
+        //    var dtplsSpIdx = new ThCADCoreNTSSpatialIndex(dtPlsObjs);
 
-        //    //var points = sprinkPts.ToCollection();
-        //    //var dtLine = points.DelaunayTriangulation();
-        //    //var dtPls = dtLine.Cast<Polyline>().ToList();
-        //    //var dtLinesAll = ThSprinklerLineService.PolylineToLine(dtPls);
 
-        //    foreach (Point3d pt in sprinkPts)
+        //    ptDtOriDict = new Dictionary<Point3d, List<Line>>();
+        //    foreach (var pt in sprinkPts)
         //    {
-        //        var ptLines = ThSprinklerLineService.GetConnLine(pt, dtSeg, ThSprinklerDimCommon.Tol_ptToLine);
-        //        if (ptLines.Count > 0)
+        //        if (ptDtOriDict.ContainsKey(pt) == false)
         //        {
-        //            for (int i = 0; i < ptLines.Count; i++)
+        //            ptDtOriDict.Add(pt, new List<Line>());
+        //        }
+
+        //        var ptFrame = PtToFrame(pt, 1);
+        //        var dtplsSelect = dtplsSpIdx.SelectCrossingPolygon(ptFrame).OfType<Polyline>().ToList();
+        //        foreach (var dtPlsNear in dtplsSelect)
+        //        {
+        //            var ptIndex = -1;
+        //            for (int i = 0; i < dtPlsNear.NumberOfVertices; i++)
         //            {
-        //                for (int j = i + 1; j < ptLines.Count; j++)
+        //                if (dtPlsNear.GetPoint3dAt(i).IsEqualTo(pt, tol))
         //                {
-        //                    if (ThSprinklerLineService.IsOrthogonalAngle(ptLines[i].Angle, ptLines[j].Angle, angleTol))
-        //                    {
-        //                        dtOrthogonalSeg.Add(ptLines[i]);
-        //                        dtOrthogonalSeg.Add(ptLines[j]);
-        //                    }
+        //                    ptIndex = i;
+        //                    break;
         //                }
         //            }
+        //            if (ptIndex >= 0)
+        //            {
+
+        //            }
+
         //        }
+
         //    }
 
-        //    dtOrthogonalSeg = dtOrthogonalSeg.Distinct().ToList();
 
-        //    return dtOrthogonalSeg;
+        //    //var dtLinesAll = ThSprinklerLineService.PolylineToLine(dtPls);
+        //    dtLinesAll = dtLinesAll.Distinct().ToList();
+
+
         //}
 
         /// <summary>
@@ -604,34 +640,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             return filterGroup;
         }
 
-        //public static List<Line> FilterDTOrthogonalToPipe(List<Line> dtOrthogonalSeg, Dictionary<Point3d, double> ptAngleDict)
-        //{
-        //    var filterDTOrth = new List<Line>();
-
-        //    var tol = new Tolerance(1, 1);
-        //    var angleTol = 1;
-        //    foreach (var pair in ptAngleDict)
-        //    {
-        //        var pt = pair.Key;
-
-        //        var connectLine = ThSprinklerLineService.GetConnLine(pt, dtOrthogonalSeg, tol);
-        //        if (connectLine.Any())
-        //        {
-        //            var sameWithPt = connectLine.Where(x => ThSprinklerLineService.IsOrthogonalAngle(x.Angle, pair.Value, angleTol));
-        //            if (sameWithPt.Any())
-        //            {
-        //                filterDTOrth.AddRange(sameWithPt);
-        //            }
-        //            else
-        //            {
-        //                filterDTOrth.AddRange(connectLine);
-        //            }
-        //        }
-        //    }
-
-        //    return filterDTOrth;
-        //}
-
         /// <summary>
         /// 筛选DT：和连接点同方向的DT线
         /// </summary>
@@ -693,13 +701,15 @@ namespace ThMEPWSS.SprinklerDim.Service
         public static Dictionary<Point3d, List<Line>> GetConnectPtDict(List<Point3d> sprinkPts, List<Line> dtSeg)
         {
             var ptDtDict = new Dictionary<Point3d, List<Line>>();
+            var dtSegObj = dtSeg.ToCollection();
+            var dtSegIdx = new ThCADCoreNTSSpatialIndex(dtSegObj);
 
             foreach (var pt in sprinkPts)
             {
                 if (ptDtDict.ContainsKey(pt) == false)
                 {
                     ptDtDict.Add(pt, new List<Line>());
-                    var connectLine = ThSprinklerLineService.GetConnLine(pt, dtSeg, ThSprinklerDimCommon.Tol_ptToLine);
+                    var connectLine = ThSprinklerLineService.GetConnLine(pt, dtSegIdx, 10);
                     ptDtDict[pt].AddRange(connectLine);
                 }
             }
@@ -801,6 +811,9 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             var angleTol = 1;
             var allLine = ptDtDict.SelectMany(x => x.Value).Distinct().ToList();
+            var allLineobjs = allLine.ToCollection();
+            var allLineSpIdx = new ThCADCoreNTSSpatialIndex(allLineobjs);
+            var tol = new Tolerance(1, 1);
             var addNew = new Dictionary<Point3d, List<Line>>();
 
             for (int i = 0; i < ptDtDict.Count(); i++)
@@ -817,25 +830,46 @@ namespace ThMEPWSS.SprinklerDim.Service
                     addNew.Add(pt, new List<Line>());
                 }
 
-                var nearPts = ptAngleDict.Where(x => x.Key.DistanceTo(pt) <= lengthTol &&
-                                                    x.Key != pt &&
+                var nearLine = new List<Line>();
+                var ptFrame = PtToFrame(pt, lengthTol);
+                var ptNearLine = allLineSpIdx.SelectCrossingPolygon(ptFrame).OfType<Line>();
+                nearLine.AddRange(ptNearLine);
+
+                //找附近的点
+                var nearPts = ptAngleDict.Where(x => x.Key != pt &&
+                                                    x.Key.DistanceTo(pt) <= lengthTol &&
                                                    ThSprinklerLineService.IsOrthogonalAngle(ptAngleDict[pt], ptAngleDict[x.Key], angleTol)
                                                 ).OrderBy(x => x.Key.DistanceTo(pt)).Select(x => x.Key).ToList();
 
                 for (int j = 0; j < nearPts.Count; j++)
                 {
+                    //如果当前点已经连过线跳出
+                    if (ThSprinklerLineService.GetConnLine(nearPts[j], ptDtDict[pt], tol).Count > 0)
+                    {
+                        continue;
+                    }
+
                     var newLine = new Line(pt, nearPts[j]);
+
+                    //如果附近的点到当前点的角度符合当前点角度，则检查所有连线里是否有和当前点overlap的
                     var angleChecker = ThSprinklerLineService.IsOrthogonalAngle(ptAngleDict[pt], newLine.Angle, angleTol);
                     if (angleChecker == false)
                     {
                         continue;
                     }
 
+                    //这里需要加速，直接用index找出附近的线，远处的线肯定不是overlap的
                     //这里其实还是有bug，增加个新逻辑：检查同方向角度。后面的继续分组能找回来所以不作处理了
+
+                    var nearPtFrame = PtToFrame(nearPts[j], lengthTol);
+                    var nearPtNearLine = allLineSpIdx.SelectCrossingPolygon(nearPtFrame).OfType<Line>();
+                    nearLine.AddRange(nearPtNearLine);
+                    nearLine = nearLine.Distinct().ToList();
+
                     int idxCheckOverlap = 0;
-                    for (; idxCheckOverlap < allLine.Count; idxCheckOverlap++)
+                    for (; idxCheckOverlap < nearLine.Count; idxCheckOverlap++)
                     {
-                        var overlapCheck = ThSprinklerLineService.IsOverlapLine(allLine[idxCheckOverlap], newLine);
+                        var overlapCheck = ThSprinklerLineService.IsOverlapLine(nearLine[idxCheckOverlap], newLine);
                         // 如果存在两条线段overlap，则退出循环
                         if (overlapCheck == true)
                         {
@@ -843,11 +877,12 @@ namespace ThMEPWSS.SprinklerDim.Service
                         }
                     }
 
-                    if (idxCheckOverlap != allLine.Count)
+                    if (idxCheckOverlap != nearLine.Count)
                     {
                         continue;
                     }
 
+                    //原附近线和新生成线不重合，检查已经新加的line和新生成线是否重合
                     int idxCheckOverlapNewLine = 0;
                     for (; idxCheckOverlapNewLine < addNew[pt].Count(); idxCheckOverlapNewLine++)
                     {
@@ -858,7 +893,6 @@ namespace ThMEPWSS.SprinklerDim.Service
                             break;
                         }
                     }
-
 
                     // 当dtLines中没有重合线时
                     if (idxCheckOverlapNewLine == addNew[pt].Count)
@@ -877,6 +911,7 @@ namespace ThMEPWSS.SprinklerDim.Service
         public static void RemoveDuplicate(ref List<Line> lines)
         {
             var tol = new Tolerance(1, 1);
+
             for (int i = lines.Count - 1; i >= 0; i--)
             {
                 for (int j = i - 1; j >= 0; j--)

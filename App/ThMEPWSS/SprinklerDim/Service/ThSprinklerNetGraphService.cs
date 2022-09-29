@@ -4,7 +4,8 @@ using System.Linq;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
+using NFox.Cad;
+using ThCADCore.NTS;
 using ThMEPWSS.SprinklerDim.Model;
 
 namespace ThMEPWSS.SprinklerDim.Service
@@ -34,6 +35,66 @@ namespace ThMEPWSS.SprinklerDim.Service
         /// <param name="angle"></param>
         /// <param name="groupLine"></param>
         /// <returns></returns>
+        //public static ThSprinklerNetGroup CreateNetwork(double angle, List<Line> groupLine)
+        //{
+        //    var tol = new Tolerance(10, 10);
+        //    var lines = new List<Line>();
+        //    var graphListTemp = new List<ThSprinklerGraph>();
+
+        //    var pts = ThSprinklerLineService.LineListToPtList(groupLine);
+        //    lines.AddRange(groupLine);
+
+        //    var net = new ThSprinklerNetGroup();
+        //    net.Angle = angle;
+        //    var alreadyAdded = new List<Line>();
+        //    while (pts.Count > 0)
+        //    {
+        //        var graph = new ThSprinklerGraph();
+        //        graphListTemp.Add(graph);
+
+        //        var p = pts[0];
+        //        CreateGraph(p, lines, alreadyAdded, net, graph);
+        //        pts.RemoveAll(x => IsContains(x, net.Pts));
+        //    }
+
+        //    net.PtsGraph.AddRange(graphListTemp.OrderByDescending(x => x.SprinklerVertexNodeList.Count).ToList());
+        //    return net;
+        //}
+
+        /// <summary>
+        /// 成图
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="lines"></param>
+        /// <param name="alreadyAdded"></param>
+        /// <param name="net"></param>
+        /// <param name="graph"></param>
+        //private static void CreateGraph(Point3d p, List<Line> lines, List<Line> alreadyAdded, ThSprinklerNetGroup net, ThSprinklerGraph graph)
+        //{
+        //    var tol = new Tolerance(10, 10);
+
+        //    var connL = ThSprinklerLineService.GetConnLine(p, lines, tol);
+
+        //    for (int i = 0; i < connL.Count; i++)
+        //    {
+        //        if (alreadyAdded.Contains(connL[i]) == false)
+        //        {
+        //            var ptOther = connL[i].StartPoint;
+        //            if (p.IsEqualTo(connL[i].StartPoint, tol))
+        //            {
+        //                ptOther = connL[i].EndPoint;
+        //            }
+        //            AddEdge(p, connL[i], net, graph);
+        //            alreadyAdded.Add(connL[i]);
+
+        //            lines.RemoveAll(x => x == connL[i]);
+
+        //            CreateGraph(ptOther, lines, alreadyAdded, net, graph);
+        //        }
+        //    }
+        //}
+
+
         public static ThSprinklerNetGroup CreateNetwork(double angle, List<Line> groupLine)
         {
             var tol = new Tolerance(10, 10);
@@ -42,6 +103,9 @@ namespace ThMEPWSS.SprinklerDim.Service
 
             var pts = ThSprinklerLineService.LineListToPtList(groupLine);
             lines.AddRange(groupLine);
+
+            var linesObj = lines.ToCollection();
+            var linesIdx = new ThCADCoreNTSSpatialIndex(linesObj);
 
             var net = new ThSprinklerNetGroup();
             net.Angle = angle;
@@ -52,7 +116,7 @@ namespace ThMEPWSS.SprinklerDim.Service
                 graphListTemp.Add(graph);
 
                 var p = pts[0];
-                CreateGraph(p, lines, alreadyAdded, net, graph);
+                CreateGraph(p, linesIdx, alreadyAdded, net, graph);
                 pts.RemoveAll(x => IsContains(x, net.Pts));
             }
 
@@ -60,19 +124,12 @@ namespace ThMEPWSS.SprinklerDim.Service
             return net;
         }
 
-        /// <summary>
-        /// 成图
-        /// </summary>
-        /// <param name="p"></param>
-        /// <param name="lines"></param>
-        /// <param name="alreadyAdded"></param>
-        /// <param name="net"></param>
-        /// <param name="graph"></param>
-        private static void CreateGraph(Point3d p, List<Line> lines, List<Line> alreadyAdded, ThSprinklerNetGroup net, ThSprinklerGraph graph)
+
+        private static void CreateGraph(Point3d p, ThCADCoreNTSSpatialIndex lineListIdx, List<Line> alreadyAdded, ThSprinklerNetGroup net, ThSprinklerGraph graph)
         {
             var tol = new Tolerance(10, 10);
 
-            var connL = ThSprinklerLineService.GetConnLine(p, lines, tol);
+            var connL = ThSprinklerLineService.GetConnLine(p, lineListIdx, 10);
 
             for (int i = 0; i < connL.Count; i++)
             {
@@ -86,12 +143,14 @@ namespace ThMEPWSS.SprinklerDim.Service
                     AddEdge(p, connL[i], net, graph);
                     alreadyAdded.Add(connL[i]);
 
-                    lines.RemoveAll(x => x == connL[i]);
+                    //lines.RemoveAll(x => x == connL[i]);
 
-                    CreateGraph(ptOther, lines, alreadyAdded, net, graph);
+                    CreateGraph(ptOther, lineListIdx, alreadyAdded, net, graph);
                 }
             }
         }
+
+
 
         /// <summary>
         /// 图加边

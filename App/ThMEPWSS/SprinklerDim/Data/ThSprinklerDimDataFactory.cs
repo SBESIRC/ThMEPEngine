@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 using AcHelper;
 using NFox.Cad;
@@ -19,10 +20,12 @@ using ThMEPEngineCore.Data;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Config;
 
 using ThMEPWSS.Sprinkler.Data;
 using ThMEPWSS.Sprinkler.Service;
 using ThMEPWSS.Engine;
+
 
 namespace ThMEPWSS.SprinklerDim.Data
 {
@@ -36,12 +39,19 @@ namespace ThMEPWSS.SprinklerDim.Data
         public List<ThIfcFlowSegment> TchPipeData { get; set; }
         public List<ThExtractorBase> Extractors { get; set; }
         public List<Curve> AxisCurves { get; set; }
+        public List<ThIfcRoom> RoomsData { get; set; }
+        public List<Curve> LinePipeData { get; set; }
+        public List<Entity> LinePipeTextData { get; set; }
 
         public ThSprinklerDimDataFactory()
         {
             SprinklerPtData = new List<Point3d>();
             TchPipeData = new List<ThIfcFlowSegment>();
+            LinePipeData = new List<Curve>();
+            LinePipeTextData = new List<Entity>();
             AxisCurves = new List<Curve>();
+            RoomsData = new List<ThIfcRoom>();
+
         }
 
         /// <summary>
@@ -50,9 +60,12 @@ namespace ThMEPWSS.SprinklerDim.Data
         public void GetElements(Database database, Point3dCollection framePts)
         {
             ExtractBasicArchitechObject(database, framePts);
+            ExtractRoom(database, framePts);
             GetAllAxisCurves(database, framePts);
             GetSprinklerPtData(database, framePts);
+            GetSrpinklerPtBlkData(database, framePts);
             GetTCHPipeData(database, framePts);
+            GetLinePipeData(database, framePts);
         }
 
         private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
@@ -82,12 +95,12 @@ namespace ThMEPWSS.SprinklerDim.Data
                     Db3ExtractResults = manger.DB3ColumnVisitor.Results,
                     NonDb3ExtractResults = manger.ColumnVisitor.Results,
                 },
-                new ThSprinklerRoomExtractor()
-                {
-                    IsWithHole=true,
-                    UseDb3Engine=true,
-                    Transformer = Transformer,
-                },
+                //new ThSprinklerRoomExtractor()
+                //{
+                //    IsWithHole=true,
+                //    UseDb3Engine=true,
+                //    Transformer = Transformer,
+                //},
             };
             Extractors.ForEach(o => o.Extract(database, framePts));
 
@@ -104,6 +117,8 @@ namespace ThMEPWSS.SprinklerDim.Data
         private ThBuildingElementVisitorManager Extract(Database database)
         {
             var visitors = new ThBuildingElementVisitorManager(database);
+            visitors.ShearWallVisitor.LayerFilter = ThExtractShearWallConfig.Instance.LayerInfos.Select(x => x.Layer).ToList();
+
             var extractor = new ThBuildingElementExtractorEx();
             extractor.Accept(visitors.DB3ArchWallVisitor);
             extractor.Accept(visitors.DB3ShearWallVisitor);
@@ -114,6 +129,7 @@ namespace ThMEPWSS.SprinklerDim.Data
             //extractor.Accept(visitors.DB3WindowVisitor);
             extractor.Accept(visitors.ColumnVisitor);
             extractor.Accept(visitors.ShearWallVisitor);
+
             extractor.Extract(database);
             return visitors;
         }
@@ -130,15 +146,71 @@ namespace ThMEPWSS.SprinklerDim.Data
             SprinklerPtData.AddRange(sprinklersData);
         }
 
+        private void GetSrpinklerPtBlkData(Database database, Point3dCollection framePts)
+        {
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var blkNameFilter = ThSprinklerDimCommon.BlkFilter_Sprinkler;
+                var Blocks = acadDatabase.ModelSpace
+                      .OfType<BlockReference>()
+                      .Where(b => !b.BlockTableRecord.IsNull)
+                      .Where(b => IsBlockName(b.GetEffectiveName(), blkNameFilter))
+                      .ToList();
+
+                if (framePts.Count >= 3)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Blocks.ToCollection());
+                    var objs = spatialIndex.SelectCrossingPolygon(framePts);
+                    Blocks = objs.Cast<BlockReference>().ToList();
+                }
+
+                SprinklerPtData.AddRange(Blocks.Select(x => x.Position));
+            }
+        }
+
+        private static bool IsBlockName(string blkName, string blkNameFilter)
+        {
+            var ismatch = blkName.ToUpper().Contains(blkNameFilter.ToUpper());
+            return ismatch;
+        }
+
         private void GetTCHPipeData(Database database, Point3dCollection framePts)
         {
             var TCHPipeRecognize = new ThTCHPipeRecognitionEngine()
             {
-                LayerFilter = new List<string> { "W-FRPT-SPRL-PIPE" },
+                LayerFilter = new List<string> { ThSprinklerDimCommon.Layer_Pipe },
             };
             TCHPipeRecognize.RecognizeMS(database, framePts);
             TchPipeData.AddRange(TCHPipeRecognize.Elements.OfType<ThIfcFlowSegment>().ToList());
         }
+
+        private void GetLinePipeData(Database database, Point3dCollection framePts)
+        {
+
+            var itemExtractPl = new ExtractPipeMSPolyline()
+            {
+                ElementLayer = ThSprinklerDimCommon.LayerFilter_SPRL,
+            };
+
+            itemExtractPl.Extract(database, framePts);
+            LinePipeData.AddRange(itemExtractPl.Polys);
+
+
+            var itemExtractLine = new ExtractPipeMSLine()
+            {
+                ElementLayer = ThSprinklerDimCommon.LayerFilter_SPRL,
+            };
+
+            itemExtractLine.Extract(database, framePts);
+            LinePipeData.AddRange(itemExtractLine.Lines);
+
+
+            var itemExtractText = new ExtractPipeMSText();
+            itemExtractText.Extract(database, framePts);
+            LinePipeTextData.AddRange(itemExtractText.Texts);
+
+        }
+
 
         private void GetAllAxisCurves(Database database, Point3dCollection framePts)
         {
@@ -157,5 +229,65 @@ namespace ThMEPWSS.SprinklerDim.Data
 
         }
 
+        private void ExtractRoom(Database database, Point3dCollection framePts)
+        {
+            var isSupportMpolygon = true;
+            var isWithHole = true;
+
+            var roomBuilder = new ThRoomBuilderEngine()
+            { IsSupportMPolygon = isSupportMpolygon, };
+
+            var rooms = roomBuilder.BuildFromMS(database, framePts, isWithHole);
+            RoomsData.AddRange(rooms);
+        }
     }
+
+    class ExtractPipeMSPolyline : ThExtractPolylineService
+    {
+        public override bool IsElementLayer(string layer)
+        {
+            var ismatch = false;
+            foreach (var layerP in SplitLayers)
+            {
+                ismatch = layer.ToUpper().Contains(layerP.ToUpper());
+                if (ismatch == true)
+                {
+                    break;
+                }
+            }
+
+            return ismatch;
+        }
+    }
+
+    class ExtractPipeMSLine : ThExtractLineService
+    {
+        public override bool IsElementLayer(string layer)
+        {
+            var ismatch = false;
+            foreach (var layerP in SplitLayers)
+            {
+                ismatch = layer.ToUpper().Contains(layerP.ToUpper());
+                if (ismatch == true)
+                {
+                    break;
+                }
+            }
+
+            return ismatch;
+        }
+    }
+
+    class ExtractPipeMSText : ThExtractTextService
+    {
+        public override bool IsElementLayer(string layer)
+        {
+            var ismatch = (layer.ToUpper().Contains(ThSprinklerDimCommon.LayerFilter_W) && layer.ToUpper().Contains(ThSprinklerDimCommon.LayerFilter_NOTE)) ||
+                        (layer.ToUpper().Contains(ThSprinklerDimCommon.LayerFilter_W) && layer.ToUpper().Contains(ThSprinklerDimCommon.LayerFilter_DIMS));
+
+            return ismatch;
+        }
+    }
+
+
 }
