@@ -12,6 +12,10 @@ using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
 using ThMEPEngineCore.CAD;
 using ThCADExtension;
+using NFox.Cad;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPHVAC.Model
 {
@@ -490,17 +494,51 @@ namespace ThMEPHVAC.Model
         public static ThCADCoreNTSSpatialIndex CreateRoomOutlineIndex(Point3d srtP)
         {
             var mat = Matrix3d.Displacement(-srtP.GetAsVector());
-            var wallBounds = ThDuctPortsReadComponent.GetBoundsByLayer(ThHvacCommon.AI_ROOM_BOUNDS);
+            var rooms = ThDuctPortsReadComponent.GetBoundsByLayer(ThHvacCommon.AI_ROOM_BOUNDS);
+            var wallBounds = Clean(rooms, 50.0); // 50.0是业务端提出的闭合长度
             var mpObjs = new DBObjectCollection();
-            foreach (Polyline pl in wallBounds)
+            foreach (Entity bound in wallBounds)
             {
-                pl.Closed = true;
-                pl.DPSimplify(1);
-                pl.TransformBy(mat);
-                mpObjs.Add(ThMPolygonTool.CreateMPolygon(pl));
+                bound.TransformBy(mat);
+                if(bound is MPolygon polygon)
+                {
+                    mpObjs.Add(polygon);
+                }
+                else
+                {
+                    mpObjs.Add(ThMPolygonTool.CreateMPolygon(bound as Curve));
+                }
             }
             return new ThCADCoreNTSSpatialIndex(mpObjs);
         }
+
+        private static DBObjectCollection Clean(DBObjectCollection roomBoundaries,double closedTolerance)
+        {
+            // 把Mpolygon单独分离出来
+            var mpolygons = roomBoundaries.OfType<MPolygon>().ToCollection();
+            
+            // 对于Polyline
+            var newPolys = new DBObjectCollection();
+            var polys = roomBoundaries.OfType<Polyline>().ToCollection();
+            polys.OfType<Polyline>().ForEach(p =>
+            {
+                var newPoly = ThMEPFrameService.Simplify(p,1.0);
+                if(ThMEPFrameService.IsClosed(newPoly, closedTolerance))
+                {
+                    newPoly.Closed = true;
+                    newPolys.Add(newPoly);
+                }
+            });
+
+            // 处理
+            var roomDatas = new DBObjectCollection();
+            roomDatas = roomDatas.Union(mpolygons);
+            roomDatas = roomDatas.Union(newPolys);
+
+            var roomBuilder = new ThRoomOutlineBuilderEngine();
+            return roomBuilder.PostProcess(roomDatas);
+        }
+
         public static void SetAttr(ObjectId obj, Dictionary<string, string> attr, double angle)
         {
             var block = obj.GetDBObject<BlockReference>();
