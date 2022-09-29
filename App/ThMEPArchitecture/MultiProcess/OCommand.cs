@@ -228,7 +228,6 @@ namespace ThMEPArchitecture.MultiProcess
                 var layoutData = new OLayoutData(blk, Logger, out bool succeed);
                 if (!succeed) return;
                 layoutData.ProcessSegLines();
-                layoutData.MovingBuildingPreProcess();
                 //layoutData.SetInterParam();
                 Converter.GetDataWraper(layoutData, ParameterViewModel);
                 var stopWatch = new Stopwatch();

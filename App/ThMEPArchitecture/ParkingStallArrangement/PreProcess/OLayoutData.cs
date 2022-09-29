@@ -134,12 +134,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             UpdateObstacles();//更新障碍物
             UpdateRampPolgons();//更新坡道polygon
             UpdateRamps();
-            UpdateMovingBounds();//更新可动建筑框线
+            
             Buildings = Obstacles.Concat(RampPolygons).ToList();
             //Basement = OverlayNGRobust.Overlay(WallLine, new MultiPolygon(Buildings.ToArray()), SpatialFunction.Difference).
             //    Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             //Basement = WallLine.Difference(new MultiPolygon(Buildings.ToArray())).Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             UpdateSPIndex();//更新空间索引
+            UpdateMovingBounds();//更新可动建筑框线
             UpdateBoundaries();
             UpdateBasementInfo();
             WallLine.ToDbMPolygon().AddToCurrentSpace();
@@ -295,9 +296,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             MovingBounds = new List<Polygon>();
             if(CAD_MovingBounds.Count > 0)
             {
-                //输入打成线+求面域+union
-                var UnionedBounds = new MultiPolygon(CAD_MovingBounds.Select(pl => pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Union();
-                MovingBounds = UnionedBounds.Get<Polygon>(true);
+                foreach(var mb in CAD_MovingBounds)
+                {
+                    var poly = mb.ToNTSPolygon();
+                    if (poly.IsEmpty) continue;
+                    var bound = new GeometryCollection(BuildingSpatialIndex.SelectCrossingGeometry(poly).ToArray()).ConvexHull() as Polygon;
+                    MovingBounds.Add(bound);
+                }
             }
         }
         //更新坡道polygon
@@ -727,43 +732,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //SegLines.UpdateSegLines(SeglineIndex, WallLine, BoundarySpatialIndex, BaseLineBoundary);
             //showVaildLanes();
             return true;
-        }
-        //可动建筑预处理
-        public void MovingBuildingPreProcess()
-        {
-            if(MovingBounds.Count == 0) return;
-            //var movingBuildings = new List<Polygon>();
-            //MovingBounds.ForEach(b => movingBuildings.AddRange(BuildingSpatialIndex.SelectCrossingGeometry(b).Cast<Polygon>()));
-            
-            for (int i = 0; i < MovingBounds.Count; i++)
-            {
-                var bound = MovingBounds[i];
-                bound = new GeometryCollection(BuildingSpatialIndex.SelectCrossingGeometry(bound).ToArray()).ConvexHull() as Polygon;
-                //var dist = obb.Centroid.Distance(obb.Shell) - 1;
-                //obb = (Polygon)obb.Buffer(-dist, MitreParam);
-                MovingBounds[i] = bound;
-                //bound.ToDbMPolygon().AddToCurrentSpace();
-            }
-            //var MovingBoundSPindex = new MNTSSpatialIndex(MovingBounds);
-
-            //var halfRoadWidth = ParameterStock.RoadWidth / 2;
-
-            //foreach (var segLine in SegLines)
-            //{ 
-            //    var laneRect = segLine.Splitter.OGetRect(halfRoadWidth);
-            //    var selected = MovingBoundSPindex.SelectCrossingGeometry(laneRect).Cast<Polygon>();
-            //    if(selected.Count() == 0) continue;
-            //    var splitter = segLine.Splitter.ToLineString();
-            //    var selectedGeo = new MultiPolygon(selected.ToArray());
-            //    var IntSecCenter = splitter.Intersection(selectedGeo).Centroid;
-            //    splitter = splitter.Difference(selectedGeo).Get<LineString>().OrderBy(l => l.Length).Last();
-            //    var coors = splitter.Coordinates.ToList();
-            //    if(!IntSecCenter.IsEmpty)coors.Add(IntSecCenter.Coordinate);
-            //    coors = coors.PositiveOrder();
-            //    segLine.Splitter = new LineSegment(coors.First(), coors.Last());
-            //}
-            //showVaildLanes();
-            
         }
 
         public SegLine ToSegLine(Line line,double extendTol = 1)
