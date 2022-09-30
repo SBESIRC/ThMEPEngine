@@ -30,7 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Geometry\ThXbimCoordinateSystem3D.cs" />
-    <Compile Include="Ifc2x3\SlabxbimEngine.cs" />
+    <Compile Include="Ifc2x3\ThXbimSlabEngine.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3Builder.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3Factory.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3GeExtension.cs" />

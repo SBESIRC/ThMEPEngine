@@ -58,7 +58,7 @@ namespace ThMEPIFC.Ifc2x3
                     //    var beam = ThProtoBuf2IFC2x3Factory.CreateBeam(Model, thtchbeam, floor_origin);
                     //    beams.Add(beam);
                     //}
-                    SlabxbimEngine slabxbimEngine = new SlabxbimEngine();
+                    ThXbimSlabEngine slabxbimEngine = new ThXbimSlabEngine();
                     foreach (var thtchslab in thtchstorey.Slabs)
                     {
                         var slab = ThProtoBuf2IFC2x3Factory.CreateMeshSlab(Model, thtchslab, floor_origin, slabxbimEngine);

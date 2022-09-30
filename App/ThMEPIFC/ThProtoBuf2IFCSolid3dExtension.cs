@@ -85,17 +85,17 @@ namespace ThMEPIFC
             }
         }
 
-        public static List<IXbimSolid> GetSlabSolid(this ThTCHSlabData slab, SlabxbimEngine slabxbimEngine)
+        public static List<IXbimSolid> GetSlabSolid(this ThTCHSlabData slab, ThXbimSlabEngine slabxbimEngine)
         {
             var geometryParam = slab.BuildElement;
             var slabDes = slab.Descendings;
             XbimVector3D moveVector = XbimVector3D.Zero;
-            IXbimSolidSet solidSet = slabxbimEngine.geomEngine.CreateSolidSet();
+            IXbimSolidSet solidSet = slabxbimEngine.Engine.CreateSolidSet();
             var slabSolid = GetXBimSolid(geometryParam, moveVector, slabxbimEngine);
             foreach (var item in slabSolid)
                 solidSet.Add(item);
             var openings = new List<IXbimSolid>();
-            using (var txn = slabxbimEngine.memoryModel.BeginTransaction("Create solid"))
+            using (var txn = slabxbimEngine.Model.BeginTransaction("Create solid"))
             {
                 var thisMove = moveVector;
                 foreach (var item in slabDes)
@@ -139,13 +139,13 @@ namespace ThMEPIFC
             return solids;
         }
 
-        public static List<IXbimSolid> GetXBimSolid(ThTCHBuiltElementData geometryParam, XbimVector3D moveVector, SlabxbimEngine slabxbimEngine)
+        public static List<IXbimSolid> GetXBimSolid(ThTCHBuiltElementData geometryParam, XbimVector3D moveVector, ThXbimSlabEngine slabxbimEngine)
         {
             var resList = new List<IXbimSolid>();
             IXbimSolid geoSolid = null;
-            using (var txn = slabxbimEngine.memoryModel.BeginTransaction("Create solid"))
+            using (var txn = slabxbimEngine.Model.BeginTransaction("Create solid"))
             {
-                geoSolid = GetXBimSolid2x3(geometryParam, moveVector, slabxbimEngine.memoryModel, slabxbimEngine);
+                geoSolid = GetXBimSolid2x3(geometryParam, moveVector, slabxbimEngine.Model, slabxbimEngine);
                 txn.Commit();
             }
             if (null != geoSolid)
@@ -153,7 +153,7 @@ namespace ThMEPIFC
             return resList;
         }
 
-        private static IXbimSolid GetXBimSolid2x3(ThTCHBuiltElementData geometryStretch, XbimVector3D moveVector, MemoryModel memoryModel, SlabxbimEngine slabxbimEngine)
+        private static IXbimSolid GetXBimSolid2x3(ThTCHBuiltElementData geometryStretch, XbimVector3D moveVector, MemoryModel memoryModel, ThXbimSlabEngine slabxbimEngine)
         {
             Xbim.Ifc2x3.ProfileResource.IfcProfileDef profile = null;
             XbimPoint3D planeOrigin = XbimPoint3D.Zero + moveVector;// + ZAxis.Negated() * geometryStretch.Height;
@@ -164,20 +164,20 @@ namespace ThMEPIFC
             if (profile == null)
                 return null;
             var solid = memoryModel.ToIfcExtrudedAreaSolid(profile, ZAxis.Negated(), geometryStretch.Height);
-            var geoSolid = slabxbimEngine.geomEngine.CreateSolid(solid);
+            var geoSolid = slabxbimEngine.Engine.CreateSolid(solid);
             var realMove = moveVector;// + geometryStretch.ZAxis * geometryStretch.ZAxisOffSet;
             var trans = XbimMatrix3D.CreateTranslation(realMove.X, realMove.Y, realMove.Z);
             geoSolid = geoSolid.Transform(trans) as IXbimSolid;
             return geoSolid;
         }
 
-        private static IXbimSolid GetXBimSolid2x3(ThTCHPolyline polyline, XbimVector3D moveVector, XbimVector3D zAxis, double zHeight, SlabxbimEngine slabxbimEngine)
+        private static IXbimSolid GetXBimSolid2x3(ThTCHPolyline polyline, XbimVector3D moveVector, XbimVector3D zAxis, double zHeight, ThXbimSlabEngine slabxbimEngine)
         {
-            Xbim.Ifc2x3.ProfileResource.IfcProfileDef profile = ToIfcArbitraryClosedProfileDef(slabxbimEngine.memoryModel, polyline);
+            Xbim.Ifc2x3.ProfileResource.IfcProfileDef profile = ToIfcArbitraryClosedProfileDef(slabxbimEngine.Model, polyline);
             if (profile == null)
                 return null;
-            var solid = slabxbimEngine.memoryModel.ToIfcExtrudedAreaSolid(profile, zAxis, zHeight);
-            var geoSolid = slabxbimEngine.geomEngine.CreateSolid(solid);
+            var solid = slabxbimEngine.Model.ToIfcExtrudedAreaSolid(profile, zAxis, zHeight);
+            var geoSolid = slabxbimEngine.Engine.CreateSolid(solid);
             var trans = XbimMatrix3D.CreateTranslation(moveVector.X, moveVector.Y, moveVector.Z);
             geoSolid = geoSolid.Transform(trans) as IXbimSolid;
             return geoSolid;

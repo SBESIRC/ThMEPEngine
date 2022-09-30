@@ -662,7 +662,7 @@ namespace ThMEPIFC.Ifc2x3
         #endregion
 
         #region Slab
-        public static IfcSlab CreateMeshSlab(IfcStore model, ThTCHSlabData slab, Point3d floor_origin, SlabxbimEngine slabxbimEngine)
+        public static IfcSlab CreateMeshSlab(IfcStore model, ThTCHSlabData slab, Point3d floor_origin, ThXbimSlabEngine slabxbimEngine)
         {
             using (var txn = model.BeginTransaction("Create Slab"))
             {
