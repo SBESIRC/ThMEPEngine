@@ -54,7 +54,7 @@ namespace ThMEPIFC.Ifc2x3
 
         public static IfcStore CreateMemoryModel()
         {
-            return IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+            return IfcStore.Create(XbimSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
         }
 
         public static IfcCompositeCurve CreateIfcCompositeCurve(IfcStore model)
