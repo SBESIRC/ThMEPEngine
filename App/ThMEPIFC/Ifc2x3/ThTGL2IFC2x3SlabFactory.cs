@@ -28,8 +28,8 @@ namespace ThMEPIFC.Ifc2x3
                 //create representation
                 var solid = slab.CreateSlabSolid(Point3d.Origin);
                 var brep = model.ToIfcFacetedBrep(solid);
-                var shape = CreateBrepBody(model, brep);
-                ret.Representation = CreateProductDefinitionShape(model, shape);
+                var shape = ThIFC2x3Factory.CreateBrepBody(model, brep);
+                ret.Representation = ThIFC2x3Factory.CreateProductDefinitionShape(model, shape);
 
                 //object placement
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);
@@ -50,8 +50,8 @@ namespace ThMEPIFC.Ifc2x3
                 if (solid.Area < 1)
                     return null;
                 var mesh = model.ToIfcFaceBasedSurface(solid);
-                var shape = CreateFaceBasedSurfaceBody(model, mesh);
-                ret.Representation = CreateProductDefinitionShape(model, shape);
+                var shape = ThIFC2x3Factory.CreateFaceBasedSurfaceBody(model, mesh);
+                ret.Representation = ThIFC2x3Factory.CreateProductDefinitionShape(model, shape);
 
                 //object placement
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);

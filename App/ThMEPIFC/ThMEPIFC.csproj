@@ -30,16 +30,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Geometry\ThXbimCoordinateSystem3D.cs" />
+    <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3BrepExtension.cs" />
     <Compile Include="Ifc2x3\ThXbimSlabEngine.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3Builder.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3Factory.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3GeExtension.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3MeshExtension.cs" />
-    <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3ProxyFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3BeamFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3CloneExtension.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3ColumnFactory.cs" />
-    <Compile Include="Ifc2x3\ThTGL2IFC2x3CommonFactory.cs" />
+    <Compile Include="Ifc2x3\ThIFC2x3Factory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3DoorFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3HoleFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3MeshExtension.cs" />

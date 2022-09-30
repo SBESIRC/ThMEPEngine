@@ -1,28 +1,21 @@
-﻿using System.Linq;
-using ThMEPTCH.Model;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Xbim.Ifc;
+﻿using Xbim.Ifc;
+using System.Linq;
 using Xbim.Common;
 using Xbim.Ifc2x3.Kernel;
 using Xbim.Ifc2x3.Interfaces;
+using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.SharedBldgElements;
 using Xbim.Ifc2x3.MeasureResource;
 using Xbim.Ifc2x3.PropertyResource;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.RepresentationResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Common.Step21;
-using Xbim.IO;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.CAD;
-using Xbim.Ifc2x3.ProfileResource;
-using ThCADExtension;
 using ThCADCore.NTS;
-using Xbim.Common.Geometry;
-using Xbim.Ifc2x3.TopologyResource;
-using ThMEPIFC.Geometry;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -30,7 +23,7 @@ namespace ThMEPIFC.Ifc2x3
     {
         static public IfcStore CreateAndInitModel(string projectName, string projectId = "")
         {
-            var model = CreateModel();
+            var model = ThIFC2x3Factory.CreateModel();
             using (var txn = model.BeginTransaction("Initialize Model"))
             {
                 //there should always be one project in the model
@@ -38,7 +31,7 @@ namespace ThMEPIFC.Ifc2x3
                 //set the units to SI (mm and metres)
                 project.Initialize(ProjectUnits.SIUnitsUK);
                 //set GeometricRepresentationContext
-                project.RepresentationContexts.Add(CreateGeometricRepresentationContext(model));
+                project.RepresentationContexts.Add(ThIFC2x3Factory.CreateGeometricRepresentationContext(model));
                 //now commit the changes, else they will be rolled back at the end of the scope of the using statement
                 txn.Commit();
             }
@@ -105,7 +98,7 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcBuilding>(b =>
                 {
-                    b.Name =buildingName;
+                    b.Name = buildingName;
                     b.CompositionType = IfcElementCompositionEnum.ELEMENT;
                     b.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), site.ObjectPlacement);
                 });
@@ -362,84 +355,6 @@ namespace ThMEPIFC.Ifc2x3
                 txn.Commit();
             }
         }
-
-        #region ThProtobuf2IFC2x3CommonFactory
-        public static IfcShapeRepresentation CreateBrepBody(IfcStore model, IfcRepresentationItem item)
-        {
-            var context = GetGeometricRepresentationContext(model);
-            if (context != null)
-            {
-                return model.Instances.New<IfcShapeRepresentation>(s =>
-                {
-                    s.Items.Add(item);
-                    s.ContextOfItems = context;
-                    s.RepresentationType = "Brep";
-                    s.RepresentationIdentifier = "Body";
-                });
-            }
-            return null;
-        }
-
-        public static IfcShapeRepresentation CreateSweptSolidBody(IfcStore model, IfcRepresentationItem item)
-        {
-            var context = GetGeometricRepresentationContext(model);
-            if (context != null)
-            {
-                return model.Instances.New<IfcShapeRepresentation>(s =>
-                {
-                    s.Items.Add(item);
-                    s.ContextOfItems = context;
-                    s.RepresentationType = "SweptSolid";
-                    s.RepresentationIdentifier = "Body";
-                });
-            }
-            return null;
-        }
-
-        public static IfcShapeRepresentation CreateFaceBasedSurfaceBody(IfcStore model, IfcRepresentationItem item)
-        {
-            var context = GetGeometricRepresentationContext(model);
-            if (context != null)
-            {
-                return model.Instances.New<IfcShapeRepresentation>(s =>
-                {
-                    s.Items.Add(item);
-                    s.ContextOfItems = context;
-                    s.RepresentationType = "SurfaceModel";
-                    s.RepresentationIdentifier = "Body";
-                });
-            }
-            return null;
-        }
-
-        public static IfcProductDefinitionShape CreateProductDefinitionShape(IfcStore model, IfcShapeRepresentation representation)
-        {
-            return model.Instances.New<IfcProductDefinitionShape>(s =>
-            {
-                s.Representations.Add(representation);
-            });
-        }
-
-        private static IfcGeometricRepresentationContext GetGeometricRepresentationContext(IfcStore model)
-        {
-            return model.Instances.FirstOrDefault<IfcGeometricRepresentationContext>();
-        }
-
-        private static IfcStore CreateModel()
-        {
-            return IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
-        }
-
-        private static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
-        {
-            return model.Instances.New<IfcGeometricRepresentationContext>(c =>
-            {
-                c.Precision = ThTGL2IFCCommon.PRECISION;
-                c.CoordinateSpaceDimension = new IfcDimensionCount(3);
-                c.WorldCoordinateSystem = model.ToIfcAxis2Placement3D(Point3d.Origin);
-            });
-        }
-        #endregion
 
         #region Wall
         public static IfcWall CreateWall(IfcStore model, ThTCHWallData wall, Point3d floor_origin)
@@ -730,21 +645,18 @@ namespace ThMEPIFC.Ifc2x3
         #endregion
 
         #region Slab
-        public static IfcSlab CreateMeshSlab(IfcStore model, ThTCHSlabData slab, Point3d floor_origin, ThXbimSlabEngine slabxbimEngine)
+        public static IfcSlab CreateBrepSlab(IfcStore model, ThTCHSlabData slab, Point3d floor_origin, ThXbimSlabEngine slabxbimEngine)
         {
             using (var txn = model.BeginTransaction("Create Slab"))
             {
                 var ret = model.Instances.New<IfcSlab>();
-                ret.Name = "TH Slab";
-                var xbimSolids = slab.GetSlabSolid(slabxbimEngine);
-                IfcRepresentationItem body = CreateSlabIfcFacetedBrep(model, xbimSolids);
-                var modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
-                var shape = model.Instances.New<IfcShapeRepresentation>();
-                shape.ContextOfItems = modelContext;
-                shape.RepresentationType = "SurfaceModel";
-                shape.RepresentationIdentifier = "Body";
-                shape.Items.Add(body);
-                ret.Representation = CreateProductDefinitionShape(model, shape);
+                ret.Name = "Slab";
+
+                //create representation
+                var solids = slab.GetSlabSolid(slabxbimEngine);
+                var body = model.CreateIfcFacetedBrep(solids);
+                var shape = ThIFC2x3Factory.CreateBrepBody(model, body);
+                ret.Representation = ThIFC2x3Factory.CreateProductDefinitionShape(model, shape);
 
                 //object placement
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);
@@ -771,53 +683,6 @@ namespace ThMEPIFC.Ifc2x3
                 txn.Commit();
                 return ret;
             }
-        }
-
-        public static IfcFacetedBrep CreateSlabIfcFacetedBrep(IfcStore model, List<IXbimSolid> solids)
-        {
-            //var shells = solid.Shells.First();
-            var NewBrep = model.Instances.New<IfcFacetedBrep>();
-            var ifcClosedShell = model.Instances.New<IfcClosedShell>();
-            foreach (var solid in solids)
-            {
-                foreach (var face in solid.Faces)
-                {
-                    var ifcface = model.Instances.New<IfcFace>();
-                    var ifcFaceOuterBound = model.Instances.New<IfcFaceOuterBound>();
-                    IfcPolyLoop ifcloop = model.Instances.New<IfcPolyLoop>();
-                    //foreach (var vertex in face.OuterBound.Vertices)
-                    foreach (var pt in face.OuterBound.Points)
-                    {
-                        var Newpt = model.Instances.New<IfcCartesianPoint>();
-                        Newpt.SetXYZ(pt.X, pt.Y, pt.Z);
-                        ifcloop.Polygon.Add(Newpt);
-                    }
-                    ifcFaceOuterBound.Bound = ifcloop;
-                    ifcface.Bounds.Add(ifcFaceOuterBound);
-                    var innerBounds = face.InnerBounds;
-                    if (innerBounds != null && innerBounds.Count > 0)
-                    {
-                        foreach (var innerBound in innerBounds)
-                        {
-                            IfcPolyLoop ifcInnerloop = model.Instances.New<IfcPolyLoop>();
-                            foreach (var pt in innerBound.Points)
-                            {
-                                var Newpt = model.Instances.New<IfcCartesianPoint>();
-                                Newpt.SetXYZ(pt.X, pt.Y, pt.Z);
-                                ifcInnerloop.Polygon.Add(Newpt);
-                            }
-                            var ifcFaceBound = model.Instances.New<IfcFaceBound>();
-                            ifcFaceBound.Bound = ifcInnerloop;
-                            ifcface.Bounds.Add(ifcFaceBound);
-                        }
-                    }
-
-                    ifcClosedShell.CfsFaces.Add(ifcface);
-                }
-            }
-            NewBrep.Outer = ifcClosedShell;
-            
-            return NewBrep;
         }
         #endregion
 
@@ -875,10 +740,9 @@ namespace ThMEPIFC.Ifc2x3
                 ret.Name = "SU Element";
 
                 IfcFaceBasedSurfaceModel mesh = model.ToIfcFaceBasedSurface(def);
-                var shape = CreateFaceBasedSurfaceBody(model, mesh);
-                
-                ret.Representation = CreateProductDefinitionShape(model, shape);
-                 
+                var shape = ThIFC2x3Factory.CreateFaceBasedSurfaceBody(model, mesh);
+                ret.Representation = ThIFC2x3Factory.CreateProductDefinitionShape(model, shape);
+
                 //object placement
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(trans);
 

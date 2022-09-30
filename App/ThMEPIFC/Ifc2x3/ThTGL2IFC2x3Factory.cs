@@ -19,7 +19,7 @@ namespace ThMEPIFC.Ifc2x3
     {
         static public IfcStore CreateAndInitModel(string projectName, string projectId = "")
         {
-            var model = CreateModel();
+            var model = ThIFC2x3Factory.CreateModel();
             using (var txn = model.BeginTransaction("Initialize Model"))
             {
                 //there should always be one project in the model
@@ -27,7 +27,7 @@ namespace ThMEPIFC.Ifc2x3
                 //set the units to SI (mm and metres)
                 project.Initialize(ProjectUnits.SIUnitsUK);
                 //set GeometricRepresentationContext
-                project.RepresentationContexts.Add(CreateGeometricRepresentationContext(model));
+                project.RepresentationContexts.Add(ThIFC2x3Factory.CreateGeometricRepresentationContext(model));
                 //now commit the changes, else they will be rolled back at the end of the scope of the using statement
                 txn.Commit();
             }

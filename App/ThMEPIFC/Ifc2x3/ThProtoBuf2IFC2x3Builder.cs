@@ -1,13 +1,11 @@
 ﻿using System;
 using Xbim.IO;
 using Xbim.Ifc;
-using ThMEPTCH.Model;
+using ThMEPTCH.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.SharedBldgElements;
-using ThMEPTCH.CAD;
-using Xbim.Ifc2x3.GeometricModelResource;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -62,8 +60,8 @@ namespace ThMEPIFC.Ifc2x3
                     ThXbimSlabEngine slabxbimEngine = new ThXbimSlabEngine();
                     foreach (var thtchslab in thtchstorey.Slabs)
                     {
-                        var slab = ThProtoBuf2IFC2x3Factory.CreateMeshSlab(Model, thtchslab, floor_origin, slabxbimEngine);
-                        if (null !=slab)
+                        var slab = ThProtoBuf2IFC2x3Factory.CreateBrepSlab(Model, thtchslab, floor_origin, slabxbimEngine);
+                        if (null != slab)
                             slabs.Add(slab);
                     }
                     foreach (var thtchrailing in thtchstorey.Railings)
