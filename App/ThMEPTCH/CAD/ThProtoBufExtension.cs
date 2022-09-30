@@ -133,6 +133,22 @@ namespace ThMEPTCH.CAD
             return null;
         }
 
+        public static Entity ToPolygon(this ThTCHMPolygon tchMPolygon)
+        {
+            if (!tchMPolygon.IsNull())
+            {
+                if (tchMPolygon.Holes.IsNull() || tchMPolygon.Holes.Count == 0)
+                {
+                    return tchMPolygon.Shell.ToPolyline();
+                }
+                else
+                {
+                    return ThMPolygonTool.CreateMPolygon(tchMPolygon.Shell.ToPolyline(), tchMPolygon.Holes.Select(o => o.ToPolyline() as Curve).ToList());
+                }
+            }
+            return null;
+        }
+
         public static Polyline ToPolyline(this ThTCHPolyline tchPolyline)
         {
             if (tchPolyline.Segments.Count == 0)

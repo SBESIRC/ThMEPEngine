@@ -129,7 +129,7 @@ namespace ThMEPIFC
                     }
                 }
             }
-            catch
+            catch(System.Exception ex)
             {
                 // 未知错误
             }

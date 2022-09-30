@@ -58,9 +58,10 @@ namespace ThMEPIFC.Ifc2x3
                     //    var beam = ThProtoBuf2IFC2x3Factory.CreateBeam(Model, thtchbeam, floor_origin);
                     //    beams.Add(beam);
                     //}
+                    SlabxbimEngine slabxbimEngine = new SlabxbimEngine();
                     foreach (var thtchslab in thtchstorey.Slabs)
                     {
-                        var slab = ThProtoBuf2IFC2x3Factory.CreateMeshSlab(Model, thtchslab, floor_origin);
+                        var slab = ThProtoBuf2IFC2x3Factory.CreateMeshSlab(Model, thtchslab, floor_origin, slabxbimEngine);
                         if (null !=slab)
                             slabs.Add(slab);
                     }
@@ -118,7 +119,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     try
                     {
-                        Model.SaveAs(filepath, StorageType.Ifc);
+                        Model.SaveAs(filepath, IfcStorageType.Ifc);
                     }
                     catch (System.Exception e)
                     {

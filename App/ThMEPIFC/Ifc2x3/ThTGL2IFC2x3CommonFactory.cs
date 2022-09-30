@@ -72,7 +72,7 @@ namespace ThMEPIFC.Ifc2x3
 
         private static IfcStore CreateModel()
         {
-            return IfcStore.Create(XbimSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+            return IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
         }
 
         private static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)

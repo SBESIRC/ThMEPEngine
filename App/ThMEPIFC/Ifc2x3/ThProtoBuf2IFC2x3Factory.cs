@@ -20,6 +20,8 @@ using ThMEPTCH.CAD;
 using Xbim.Ifc2x3.ProfileResource;
 using ThCADExtension;
 using ThCADCore.NTS;
+using Xbim.Common.Geometry;
+using Xbim.Ifc2x3.TopologyResource;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -357,7 +359,7 @@ namespace ThMEPIFC.Ifc2x3
 
         private static IfcStore CreateModel()
         {
-            return IfcStore.Create(XbimSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+            return IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
         }
 
         private static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
@@ -389,23 +391,23 @@ namespace ThMEPIFC.Ifc2x3
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
 
                 // add properties
-                //model.Instances.New<IfcRelDefinesByProperties>(rel =>
-                //{
-                //    rel.Name = "THifc properties";
-                //    rel.RelatedObjects.Add(ret);
-                //    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
-                //    {
-                //        pset.Name = "Basic set of THifc properties";
-                //        foreach (var item in wall.Properties)
-                //        {
-                //            pset.HasProperties.Add(model.Instances.New<IfcPropertySingleValue>(p =>
-                //            {
-                //                p.Name = item.Key;
-                //                p.NominalValue = new IfcText(item.Value.ToString());
-                //            }));
-                //        }
-                //    });
-                //});
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
+                    rel.Name = "THifc properties";
+                    rel.RelatedObjects.Add(ret);
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
+                        pset.Name = "Basic set of THifc properties";
+                        foreach (var item in wall.BuildElement.Properties)
+                        {
+                            pset.HasProperties.Add(model.Instances.New<IfcPropertySingleValue>(p =>
+                            {
+                                p.Name = item.Key;
+                                p.NominalValue = new IfcText(item.Value.ToString());
+                            }));
+                        }
+                    });
+                });
 
                 txn.Commit();
                 return ret;
@@ -660,26 +662,94 @@ namespace ThMEPIFC.Ifc2x3
         #endregion
 
         #region Slab
-        public static IfcSlab CreateMeshSlab(IfcStore model, ThTCHSlabData slab, Point3d floor_origin)
+        public static IfcSlab CreateMeshSlab(IfcStore model, ThTCHSlabData slab, Point3d floor_origin, SlabxbimEngine slabxbimEngine)
         {
             using (var txn = model.BeginTransaction("Create Slab"))
             {
                 var ret = model.Instances.New<IfcSlab>();
                 ret.Name = "TH Slab";
-                //create representation
-                var solid = slab.CreateSlabSolid(Point3d.Origin);
-                if (solid.Area < 1)
-                    return null;
-                var mesh = model.ToIfcFaceBasedSurface(solid);
-                var shape = CreateFaceBasedSurfaceBody(model, mesh);
+                var xbimSolids = slab.GetSlabSolid(slabxbimEngine);
+                IfcRepresentationItem body = CreateSlabIfcFacetedBrep(model, xbimSolids);
+                var modelContext = model.Instances.OfType<IfcGeometricRepresentationContext>().FirstOrDefault();
+                var shape = model.Instances.New<IfcShapeRepresentation>();
+                shape.ContextOfItems = modelContext;
+                shape.RepresentationType = "SurfaceModel";
+                shape.RepresentationIdentifier = "Body";
+                shape.Items.Add(body);
                 ret.Representation = CreateProductDefinitionShape(model, shape);
 
                 //object placement
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);
 
+                // add properties
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
+                    rel.Name = "THifc properties";
+                    rel.RelatedObjects.Add(ret);
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
+                        pset.Name = "Basic set of THifc properties";
+                        foreach (var item in slab.BuildElement.Properties)
+                        {
+                            pset.HasProperties.Add(model.Instances.New<IfcPropertySingleValue>(p =>
+                            {
+                                p.Name = item.Key;
+                                p.NominalValue = new IfcText(item.Value.ToString());
+                            }));
+                        }
+                    });
+                });
+
                 txn.Commit();
                 return ret;
             }
+        }
+
+        public static IfcFacetedBrep CreateSlabIfcFacetedBrep(IfcStore model, List<IXbimSolid> solids)
+        {
+            //var shells = solid.Shells.First();
+            var NewBrep = model.Instances.New<IfcFacetedBrep>();
+            var ifcClosedShell = model.Instances.New<IfcClosedShell>();
+            foreach (var solid in solids)
+            {
+                foreach (var face in solid.Faces)
+                {
+                    var ifcface = model.Instances.New<IfcFace>();
+                    var ifcFaceOuterBound = model.Instances.New<IfcFaceOuterBound>();
+                    IfcPolyLoop ifcloop = model.Instances.New<IfcPolyLoop>();
+                    //foreach (var vertex in face.OuterBound.Vertices)
+                    foreach (var pt in face.OuterBound.Points)
+                    {
+                        var Newpt = model.Instances.New<IfcCartesianPoint>();
+                        Newpt.SetXYZ(pt.X, pt.Y, pt.Z);
+                        ifcloop.Polygon.Add(Newpt);
+                    }
+                    ifcFaceOuterBound.Bound = ifcloop;
+                    ifcface.Bounds.Add(ifcFaceOuterBound);
+                    var innerBounds = face.InnerBounds;
+                    if (innerBounds != null && innerBounds.Count > 0)
+                    {
+                        foreach (var innerBound in innerBounds)
+                        {
+                            IfcPolyLoop ifcInnerloop = model.Instances.New<IfcPolyLoop>();
+                            foreach (var pt in innerBound.Points)
+                            {
+                                var Newpt = model.Instances.New<IfcCartesianPoint>();
+                                Newpt.SetXYZ(pt.X, pt.Y, pt.Z);
+                                ifcInnerloop.Polygon.Add(Newpt);
+                            }
+                            var ifcFaceBound = model.Instances.New<IfcFaceBound>();
+                            ifcFaceBound.Bound = ifcInnerloop;
+                            ifcface.Bounds.Add(ifcFaceBound);
+                        }
+                    }
+
+                    ifcClosedShell.CfsFaces.Add(ifcface);
+                }
+            }
+            NewBrep.Outer = ifcClosedShell;
+            
+            return NewBrep;
         }
         #endregion
 
@@ -717,7 +787,7 @@ namespace ThMEPIFC.Ifc2x3
                 ret.Description = space.BuildElement.Root.Name;
 
                 //create representation
-                var profile = model.ToIfcArbitraryProfileDefWithVoids(space.BuildElement.Outline.ToPolyline());
+                var profile = model.ToIfcArbitraryProfileDefWithVoids(space.BuildElement.Outline.ToPolygon());
                 var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, space.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);

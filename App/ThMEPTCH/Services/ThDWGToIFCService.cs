@@ -489,7 +489,7 @@ namespace ThMEPTCH.Services
                 var railingColls = new DBObjectCollection();
                 var thisOpeningEntities = new Dictionary<Polyline, ThTCHOpeningData>();
                 var openingColls = new DBObjectCollection();
-
+                var rooms = new List<ThTCHRoomData>();
                 foreach (var item in curveEntities)
                 {
                     if (item.EntitySystem.Contains("楼板"))
@@ -541,6 +541,18 @@ namespace ThMEPTCH.Services
                             opening.BuildElement.Properties.Add(new ThTCHProperty() { Key = "ElevationDisplay", Value = prop.ElevationDisplay.ToString() });
                             thisOpeningEntities.Add(pLine, opening);
                         }
+                    }
+                    else if (item.EntitySystem.Contains("房间"))
+                    {
+                        var outline = item.EntityCurve.GetTransformedCopy(matrix) as Entity;
+                        openingColls.Add(outline);
+                        var room = CreateRoomData(outline);
+                        var prop = item.Property as RoomProperty;
+                        room.BuildElement.Height = prop.Height;
+                        room.BuildElement.Root.Name = prop.Name;
+                        room.BuildElement.Outline.ZOffSet(prop.BottomElevation);
+                        room.BuildElement.Root.GlobalId = prjId + item.Id;
+                        rooms.Add(room);
                     }
                     else if(item.EntitySystem.Contains("轴网"))
                     {
@@ -598,6 +610,7 @@ namespace ThMEPTCH.Services
                     }
                 }
                 floor.FloorEntitys.AddRange(allSlabs);
+                floor.FloorEntitys.AddRange(rooms);
                 floor.FloorEntitys.AddRange(thisRailingEntitys.Select(c => c.Value).ToList());
             }
 
@@ -646,6 +659,7 @@ namespace ThMEPTCH.Services
                     foreach (var item in levelEntitys.FloorEntitys.OfType<ThTCHWallData>().ToList())
                     {
                         var copyItem = item.Clone();
+                        copyItem.BuildElement.Properties.Add(new ThTCHProperty { Key = "材料", Value = "TH-加气混凝土" });
                         if (Math.Abs(copyItem.BuildElement.Height) < 10)
                             copyItem.BuildElement.Height = floor.LevelHeight;
                         foreach (var door in copyItem.Doors)
@@ -667,6 +681,7 @@ namespace ThMEPTCH.Services
                     foreach (var item in slabs)
                     {
                         var copyItem = item.Clone();
+                        copyItem.BuildElement.Properties.Add(new ThTCHProperty { Key = "材料", Value = "TH-钢筋混凝土" });
                         copyItem.BuildElement.Root.GlobalId += buildingStorey.Number;
                         buildingStorey.Slabs.Add(copyItem);
                     }
@@ -677,6 +692,16 @@ namespace ThMEPTCH.Services
                         var copyItem = railing.Clone();
                         copyItem.BuildElement.Root.GlobalId += buildingStorey.Number;
                         buildingStorey.Railings.Add(copyItem);
+                    }
+
+                    //加房间
+                    var rooms = levelEntitys.FloorEntitys.OfType<ThTCHRoomData>().ToList();
+                    foreach (var room in rooms)
+                    {
+                        var copyItem = room.Clone();
+                        copyItem.BuildElement.Root.GlobalId += buildingStorey.Number;
+                        copyItem.BuildElement.Height = buildingStorey.Height;
+                        buildingStorey.Rooms.Add(copyItem);
                     }
 
                     var axisDatas = levelEntitys.FloorEntitys
@@ -1124,6 +1149,22 @@ namespace ThMEPTCH.Services
             {
                 throw new NotSupportedException();
             }
+        }
+
+        private ThTCHRoomData CreateRoomData(Entity entity)
+        {
+            ThTCHRoomData room = new ThTCHRoomData();
+            room.BuildElement = new ThTCHBuiltElementData();
+            room.BuildElement.Root = new ThTCHRootData();
+            if (entity is MPolygon polygon)
+            {
+                room.BuildElement.Outline = polygon.ToTCHMPolygon();
+            }
+            else if (entity is Polyline polyline)
+            {
+                room.BuildElement.Outline = polyline.ToTCHMPolygon();
+            }
+            return room;
         }
 
         private ThTCHOpening CreateOpening(Polyline pline)

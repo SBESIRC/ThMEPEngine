@@ -116,7 +116,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     try
                     {
-                        Model.SaveAs(filepath, StorageType.Ifc);
+                        Model.SaveAs(filepath, IfcStorageType.Ifc);
                     }
                     catch (System.Exception e)
                     {
