@@ -1,8 +1,8 @@
-﻿using Xbim.Ifc;
+﻿using System;
+using Xbim.Ifc;
 using System.Collections.Generic;
 using Xbim.Ifc2x3.TopologyResource;
 using Xbim.Ifc2x3.GeometricModelResource;
-using System;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -25,24 +25,11 @@ namespace ThMEPIFC.Ifc2x3
             return faceBasedSurface;
         }
 
-        public static IfcFaceBasedSurfaceModel ToIfcFaceBasedSurface(this IfcStore model, ThSUPolygonMesh mesh)
-        {
-            var connectedFaceSet = model.Instances.New<IfcConnectedFaceSet>();
-            var faceBasedSurface = model.Instances.New<IfcFaceBasedSurfaceModel>();
-            for (int i = 0; i < mesh.Polygons.Count; i++)
-            {
-                var vertices = Vertices(mesh, mesh.Polygons[i]);
-                connectedFaceSet.CfsFaces.Add(ToIfcFace(model, vertices));
-            }
-            faceBasedSurface.FbsmFaces.Add(connectedFaceSet);
-            return faceBasedSurface;
-        }
-
         private static List<ThTCHPoint3d> Vertices(ThSUPolygonMesh mesh, ThSUPolygon polygon)
         {
             List<ThTCHPoint3d> vertices = new List<ThTCHPoint3d>();
             for (int i = 0; i < polygon.Indices.Count; i++)
-            {
+            { 
                 vertices.Add(mesh.Points[Math.Abs(polygon.Indices[i]) - 1]);
             }
             return vertices;

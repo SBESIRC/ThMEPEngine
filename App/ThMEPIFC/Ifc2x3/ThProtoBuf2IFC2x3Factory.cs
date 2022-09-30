@@ -44,7 +44,7 @@ namespace ThMEPIFC.Ifc2x3
             {
                 var ret = model.Instances.New<IfcSite>(s =>
                 {
-                    s.ObjectPlacement = model.ToIfcLocalPlacement(WCS());
+                    s.ObjectPlacement = model.ToIfcLocalPlacement();
                 });
                 //get the project there should only be one and it should exist
                 var project = model.Instances.OfType<IfcProject>().FirstOrDefault();
@@ -52,11 +52,6 @@ namespace ThMEPIFC.Ifc2x3
                 txn.Commit();
                 return ret;
             }
-        }
-
-        private static CoordinateSystem3d WCS()
-        {
-            return Matrix3d.Identity.CoordinateSystem3d;
         }
 
         public static IfcBuilding CreateBuilding(IfcStore model, IfcSite site, ThTCHBuildingData building)
@@ -67,7 +62,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     b.Name = building.Root.Name;
                     b.CompositionType = IfcElementCompositionEnum.ELEMENT;
-                    b.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), site.ObjectPlacement);
+                    b.ObjectPlacement = model.ToIfcLocalPlacement(site.ObjectPlacement);
                 });
                 model.Instances.New<IfcRelDefinesByProperties>(rel =>
                 {
@@ -100,7 +95,7 @@ namespace ThMEPIFC.Ifc2x3
                 {
                     b.Name = buildingName;
                     b.CompositionType = IfcElementCompositionEnum.ELEMENT;
-                    b.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), site.ObjectPlacement);
+                    b.ObjectPlacement = model.ToIfcLocalPlacement(site.ObjectPlacement);
                 });
                 model.Instances.New<IfcRelDefinesByProperties>(rel =>
                 {
@@ -132,7 +127,7 @@ namespace ThMEPIFC.Ifc2x3
                 var ret = model.Instances.New<IfcBuildingStorey>(s =>
                 {
                     s.Name = storey.Number;
-                    s.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), building.ObjectPlacement);
+                    s.ObjectPlacement = model.ToIfcLocalPlacement(building.ObjectPlacement);
                     s.Elevation = storey.Elevation;
                 });
                 // setup aggregation relationship
@@ -181,7 +176,7 @@ namespace ThMEPIFC.Ifc2x3
                 var ret = model.Instances.New<IfcBuildingStorey>(s =>
                 {
                     s.Name = storeyName;
-                    s.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), building.ObjectPlacement);
+                    s.ObjectPlacement = model.ToIfcLocalPlacement(building.ObjectPlacement);
                 });
                 // setup aggregation relationship
                 var ifcRel = model.Instances.New<IfcRelAggregates>();
