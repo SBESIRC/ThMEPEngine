@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.SharedBldgElements;
 using ThMEPTCH.CAD;
+using Xbim.Ifc2x3.GeometricModelResource;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -16,7 +17,7 @@ namespace ThMEPIFC.Ifc2x3
         {
             if (Model != null)
             {
-                var site = ThProtoBuf2IFC2x3Factory.CreateSite(Model, project.Site);
+                var site = ThProtoBuf2IFC2x3Factory.CreateSite(Model);
                 var building = ThProtoBuf2IFC2x3Factory.CreateBuilding(Model, site, project.Site.Buildings[0]);
                 foreach (var thtchstorey in project.Site.Buildings[0].Storeys)
                 {
@@ -85,6 +86,27 @@ namespace ThMEPIFC.Ifc2x3
                     ThProtoBuf2IFC2x3Factory.relContainsRailings2Storey(Model, railings, storey);
                     ThProtoBuf2IFC2x3Factory.relContainsRooms2Storey(Model, rooms, storey);
                 }
+            }
+        }
+
+        static public void BuildIfcModel(IfcStore Model, ThSUProjectData project)
+        {
+            if (Model != null)
+            {
+                // 虚拟set
+                var site = ThProtoBuf2IFC2x3Factory.CreateSite(Model);
+                var building = ThProtoBuf2IFC2x3Factory.CreateBuilding(Model, site, project.Root.Name + "Building");
+                var storey = ThProtoBuf2IFC2x3Factory.CreateStorey(Model, building, "1F");
+                var definitions = project.Definitions;
+                var suElements = new List<IfcBuildingElementProxy>();
+                foreach (var element in project.Buildings)
+                {
+                    var def = definitions[element.Component.DefinitionIndex];
+                    var trans = element.Component.Transformations;
+                    var ifcBuildingElement = ThProtoBuf2IFC2x3Factory.CreatedSUElement(Model, def, trans);
+                    suElements.Add(ifcBuildingElement);
+                }
+                ThProtoBuf2IFC2x3Factory.relContainsSUElements2Storey(Model, suElements, storey);
             }
         }
 

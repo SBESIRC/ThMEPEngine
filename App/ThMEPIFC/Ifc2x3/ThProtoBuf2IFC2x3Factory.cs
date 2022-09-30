@@ -22,6 +22,7 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.TopologyResource;
+using ThMEPIFC.Geometry;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -44,7 +45,7 @@ namespace ThMEPIFC.Ifc2x3
             return model;
         }
 
-        public static IfcSite CreateSite(IfcStore model, ThTCHSiteData site)
+        public static IfcSite CreateSite(IfcStore model)
         {
             using (var txn = model.BeginTransaction("Initialise Site"))
             {
@@ -72,6 +73,39 @@ namespace ThMEPIFC.Ifc2x3
                 var ret = model.Instances.New<IfcBuilding>(b =>
                 {
                     b.Name = building.Root.Name;
+                    b.CompositionType = IfcElementCompositionEnum.ELEMENT;
+                    b.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), site.ObjectPlacement);
+                });
+                model.Instances.New<IfcRelDefinesByProperties>(rel =>
+                {
+                    rel.Name = "THifc properties";
+                    rel.RelatedObjects.Add(ret);
+                    rel.RelatingPropertyDefinition = model.Instances.New<IfcPropertySet>(pset =>
+                    {
+                        pset.Name = "Basic set of THifc properties";
+                        //foreach (var item in building.Properties)
+                        //{
+                        //    pset.HasProperties.Add(model.Instances.New<IfcPropertySingleValue>(p =>
+                        //    {
+                        //        p.Name = item.Key;
+                        //        p.NominalValue = new IfcText(item.Value.ToString());
+                        //    }));
+                        //}
+                    });
+                });
+                site.AddBuilding(ret);
+                txn.Commit();
+                return ret;
+            }
+        }
+
+        public static IfcBuilding CreateBuilding(IfcStore model, IfcSite site, string buildingName)
+        {
+            using (var txn = model.BeginTransaction("Initialise Building"))
+            {
+                var ret = model.Instances.New<IfcBuilding>(b =>
+                {
+                    b.Name =buildingName;
                     b.CompositionType = IfcElementCompositionEnum.ELEMENT;
                     b.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), site.ObjectPlacement);
                 });
@@ -142,6 +176,25 @@ namespace ThMEPIFC.Ifc2x3
                         }
                     });
                 });
+                txn.Commit();
+                return ret;
+            }
+        }
+
+        static public IfcBuildingStorey CreateStorey(IfcStore model, IfcBuilding building, string storeyName)
+        {
+            using (var txn = model.BeginTransaction("Create Storey"))
+            {
+                var ret = model.Instances.New<IfcBuildingStorey>(s =>
+                {
+                    s.Name = storeyName;
+                    s.ObjectPlacement = model.ToIfcLocalPlacement(WCS(), building.ObjectPlacement);
+                });
+                // setup aggregation relationship
+                var ifcRel = model.Instances.New<IfcRelAggregates>();
+                ifcRel.RelatingObject = building;
+                ifcRel.RelatedObjects.Add(ret);
+
                 txn.Commit();
                 return ret;
             }
@@ -289,6 +342,21 @@ namespace ThMEPIFC.Ifc2x3
                 foreach (var room in rooms)
                 {
                     relContainedIn.RelatedElements.Add(room);
+                }
+                relContainedIn.RelatingStructure = storey;
+                txn.Commit();
+            }
+        }
+
+        static public void relContainsSUElements2Storey(IfcStore model, List<IfcBuildingElementProxy> elements, IfcBuildingStorey storey)
+        {
+            using (var txn = model.BeginTransaction("relContainsSUElements2Storey"))
+            {
+                var relContainedIn = model.Instances.New<IfcRelContainedInSpatialStructure>();
+                storey.ContainsElements.Append<IIfcRelContainedInSpatialStructure>(relContainedIn);
+                foreach (var element in elements)
+                {
+                    relContainedIn.RelatedElements.Add(element);
                 }
                 relContainedIn.RelatingStructure = storey;
                 txn.Commit();
@@ -791,6 +859,29 @@ namespace ThMEPIFC.Ifc2x3
                 var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, space.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);
+                txn.Commit();
+                return ret;
+            }
+
+        }
+        #endregion
+
+        #region SU Element
+        public static IfcBuildingElementProxy CreatedSUElement(IfcStore model, ThSUCompDefinitionData def, ThTCHMatrix3d trans)
+        {
+            using (var txn = model.BeginTransaction("Create SU Element"))
+            {
+                var ret = model.Instances.New<IfcBuildingElementProxy>();
+                ret.Name = "SU Element";
+
+                IfcFaceBasedSurfaceModel mesh = model.ToIfcFaceBasedSurface(def);
+                var shape = CreateFaceBasedSurfaceBody(model, mesh);
+                
+                ret.Representation = CreateProductDefinitionShape(model, shape);
+                 
+                //object placement
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(trans);
+
                 txn.Commit();
                 return ret;
             }

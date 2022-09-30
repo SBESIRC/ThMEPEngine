@@ -251,6 +251,15 @@ namespace ThMEPTCH.CAD
             };
         }
 
+        public static Matrix3d ToMatrix3d(this ThTCHMatrix3d matrix3D)
+        {
+            return new Matrix3d(new double[] { 
+                matrix3D.Data11, matrix3D.Data12, matrix3D.Data13, matrix3D.Data14, 
+                matrix3D.Data21, matrix3D.Data22, matrix3D.Data23, matrix3D.Data24, 
+                matrix3D.Data31, matrix3D.Data32, matrix3D.Data33, matrix3D.Data34, 
+                matrix3D.Data41, matrix3D.Data42, matrix3D.Data43, matrix3D.Data44 });
+        }
+
         public static byte[] ToThBimData(this ThTCHProjectData project, ProtoBufDataType protoBufType, PlatformType platformType)
         {
             if (protoBufType == ProtoBufDataType.None || platformType == PlatformType.None)
