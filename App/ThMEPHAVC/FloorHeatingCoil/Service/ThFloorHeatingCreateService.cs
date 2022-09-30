@@ -176,7 +176,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
             }
         }
 
-        private static Dictionary<int, int> SortSingleRegionRoute(List<SinglePipe> pipeList)
+        public static Dictionary<int, int> SortSingleRegionRoute(List<SinglePipe> pipeList)
         {
             var routeDict = new Dictionary<int, int>();
             var realIdx = 0;
