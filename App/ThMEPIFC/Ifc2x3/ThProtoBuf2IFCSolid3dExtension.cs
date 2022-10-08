@@ -1,22 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using ThCADCore.NTS;
-using ThMEPTCH.CAD;
-using ThMEPTCH.Model;
-using Xbim.Common.Geometry;
-using Xbim.Geometry.Engine.Interop;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.ProfileResource;
-using Xbim.IO.Memory;
-using Xbim.Ifc4.Interfaces;
-using Xbim.Common;
-using ThMEPIFC.Ifc2x3;
 
-namespace ThMEPIFC
+using Xbim.IO.Memory;
+using Xbim.Common.Geometry;
+using Xbim.Ifc2x3.ProfileResource;
+using Xbim.Ifc2x3.GeometryResource;
+using Xbim.Ifc2x3.GeometricModelResource;
+using Xbim.Ifc;
+
+namespace ThMEPIFC.Ifc2x3
 {
     public static class ThProtoBuf2IFCSolid3dExtension
     {
@@ -24,66 +16,6 @@ namespace ThMEPIFC
         public static readonly XbimVector3D YAxis = new XbimVector3D(0, 1, 0);
         public static readonly XbimVector3D ZAxis = new XbimVector3D(0, 0, 1);
         public static readonly XbimMatrix3D WordMatrix = new XbimMatrix3D(XbimVector3D.Zero);
-
-        public static Solid3d CreateSlabSolid(this ThTCHSlabData slab, Point3d floorOrigin)
-        {
-            var moveVector = floorOrigin.GetAsVector();
-            if (slab.BuildElement.Outline.Shell.Points.Count > 0)
-            {
-                var pline = slab.BuildElement.Outline.ToPolyline();
-                moveVector += Vector3d.ZAxis.MultiplyBy(pline.Elevation);
-                var outPolyline = pline.Clone() as Polyline;
-                outPolyline.Elevation = 0;
-                outPolyline = outPolyline.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
-                var slabSolid = CreateExtrudedSolid(outPolyline, -slab.BuildElement.Height, 0.0);
-                if (slabSolid != null)
-                {
-                    foreach (var data in slab.Descendings)
-                    {
-                        if (data.IsDescending)
-                        {
-                            var outlinebuffer = data.OutlineBuffer.ToPolyline();
-                            outlinebuffer.Elevation = 0;
-                            outlinebuffer = outlinebuffer.GetTransformedCopy(Matrix3d.Displacement(moveVector)) as Polyline;
-                            var wrapSolid = CreateExtrudedSolid(outlinebuffer, -(data.DescendingHeight + data.DescendingThickness), 0);
-                            slabSolid.BooleanOperation(BooleanOperationType.BoolUnite, wrapSolid);
-
-                            var outLine = data.Outline.ToPolyline();
-                            outLine.Elevation = 0;
-                            outLine = outLine.GetTransformedCopy(Matrix3d.Displacement(moveVector + Vector3d.ZAxis.MultiplyBy(1))) as Polyline;
-                            var descendingSolid = CreateExtrudedSolid(outLine, -data.DescendingHeight-1, 0);
-                            slabSolid.BooleanOperation(BooleanOperationType.BoolSubtract, descendingSolid);
-                        }
-                        else
-                        {
-                            var outLine = data.Outline.ToPolyline();
-                            outLine.Elevation = 0;
-                            outLine = outLine.GetTransformedCopy(Matrix3d.Displacement(moveVector + Vector3d.ZAxis.MultiplyBy(1))) as Polyline;
-                            var holeSolid = CreateExtrudedSolid(outLine, -(slab.BuildElement.Height + 2), 0.0);
-                            slabSolid.BooleanOperation(BooleanOperationType.BoolSubtract, holeSolid);
-                        }
-                    }
-                }
-                return slabSolid;
-            }
-            return null;
-        }
-
-        private static Solid3d CreateExtrudedSolid(Polyline pline, double height, double taperAngle)
-        {
-            try
-            {
-                var curves = new DBObjectCollection() { pline };
-                var region = Region.CreateFromCurves(curves)[0] as Region;
-                Solid3d ent = new Solid3d();
-                ent.Extrude(region, height, taperAngle);
-                return ent;
-            }
-            catch
-            {
-                return null;
-            }
-        }
 
         public static List<IXbimSolid> GetSlabSolid(this ThTCHSlabData slab, ThXbimSlabEngine slabxbimEngine)
         {
@@ -153,10 +85,9 @@ namespace ThMEPIFC
             return resList;
         }
 
-        private static IXbimSolid GetXBimSolid2x3(ThTCHBuiltElementData geometryStretch, XbimVector3D moveVector, MemoryModel memoryModel, ThXbimSlabEngine slabxbimEngine)
+        private static IXbimSolid GetXBimSolid2x3(ThTCHBuiltElementData geometryStretch, XbimVector3D moveVector, IfcStore memoryModel, ThXbimSlabEngine slabxbimEngine)
         {
             Xbim.Ifc2x3.ProfileResource.IfcProfileDef profile = null;
-            XbimPoint3D planeOrigin = XbimPoint3D.Zero + moveVector;// + ZAxis.Negated() * geometryStretch.Height;
             if (geometryStretch.Outline != null && geometryStretch.Outline.Shell != null && geometryStretch.Outline.Shell.Points.Count > 0)
             {
                 profile = ToIfcArbitraryClosedProfileDef(memoryModel, geometryStretch.Outline.Shell);
@@ -183,7 +114,7 @@ namespace ThMEPIFC
             return geoSolid;
         }
 
-        public static IfcArbitraryClosedProfileDef ToIfcArbitraryClosedProfileDef(this MemoryModel model, ThTCHPolyline e)
+        public static IfcArbitraryClosedProfileDef ToIfcArbitraryClosedProfileDef(this IfcStore model, ThTCHPolyline e)
         {
             return model.Instances.New<IfcArbitraryClosedProfileDef>(d =>
             {
@@ -192,7 +123,7 @@ namespace ThMEPIFC
             });
         }
 
-        public static IfcCompositeCurve ToIfcCompositeCurve(this MemoryModel model, ThTCHPolyline polyline)
+        public static IfcCompositeCurve ToIfcCompositeCurve(this IfcStore model, ThTCHPolyline polyline)
         {
             var compositeCurve = CreateIfcCompositeCurve(model);
             var pts = polyline.Points;
@@ -203,8 +134,8 @@ namespace ThMEPIFC
                 {
                     //直线
                     var poly = model.Instances.New<IfcPolyline>();
-                    poly.Points.Add(ToIfcCartesianPoint(model, pts[segment.Index[0].ToInt()].Point3D2XBimPoint()));
-                    poly.Points.Add(ToIfcCartesianPoint(model, pts[segment.Index[1].ToInt()].Point3D2XBimPoint()));
+                    poly.Points.Add(model.ToIfcCartesianPoint(pts[segment.Index[0].ToInt()]));
+                    poly.Points.Add(model.ToIfcCartesianPoint(pts[segment.Index[1].ToInt()]));
                     curveSegement.ParentCurve = poly;
                     compositeCurve.Segments.Add(curveSegement);
                 }
@@ -230,13 +161,13 @@ namespace ThMEPIFC
                         var trimmedCurve = model.Instances.New<IfcTrimmedCurve>();
                         trimmedCurve.BasisCurve = model.Instances.New<IfcCircle>(c =>
                         {
-                        c.Radius = radius;
-                        c.Position = ToIfcAxis2Placement2D(model, arcCenter, XAxis);
+                            c.Radius = radius;
+                            c.Position = ToIfcAxis2Placement2D(model, arcCenter, XAxis);
                         });
                         trimmedCurve.MasterRepresentation = Xbim.Ifc2x3.GeometryResource.IfcTrimmingPreference.CARTESIAN;
                         trimmedCurve.SenseAgreement = isCl;
-                        trimmedCurve.Trim1.Add(ToIfcCartesianPoint(model, pt1));
-                        trimmedCurve.Trim2.Add(ToIfcCartesianPoint(model, pt2));
+                        trimmedCurve.Trim1.Add(model.ToIfcCartesianPoint(pt1));
+                        trimmedCurve.Trim2.Add(model.ToIfcCartesianPoint(pt2));
                         curveSegement.ParentCurve = trimmedCurve;
                         compositeCurve.Segments.Add(curveSegement);
                     }
@@ -245,24 +176,17 @@ namespace ThMEPIFC
             return compositeCurve;
         }
 
-        private static IfcCompositeCurve CreateIfcCompositeCurve(MemoryModel model)
+        private static IfcCompositeCurve CreateIfcCompositeCurve(IfcStore model)
         {
             return model.Instances.New<IfcCompositeCurve>();
         }
 
-        private static IfcCompositeCurveSegment CreateIfcCompositeCurveSegment(MemoryModel model)
+        private static IfcCompositeCurveSegment CreateIfcCompositeCurveSegment(IfcStore model)
         {
             return model.Instances.New<IfcCompositeCurveSegment>(s =>
             {
                 s.SameSense = true;
             });
-        }
-
-        public static IfcCartesianPoint ToIfcCartesianPoint(this MemoryModel model, XbimPoint3D point)
-        {
-            var pt = model.Instances.New<IfcCartesianPoint>();
-            pt.SetXYZ(point.X, point.Y, point.Z);
-            return pt;
         }
 
         public static int ToInt(this uint value)
@@ -328,43 +252,13 @@ namespace ThMEPIFC
             return 2;
         }
 
-        public static IfcAxis2Placement2D ToIfcAxis2Placement2D(this MemoryModel model, XbimPoint3D point, XbimVector3D direction)
+        public static IfcAxis2Placement2D ToIfcAxis2Placement2D(this IfcStore model, XbimPoint3D point, XbimVector3D direction)
         {
             return model.Instances.New<IfcAxis2Placement2D>(p =>
             {
-                p.Location = ToIfcCartesianPoint(model, new XbimPoint3D(point.X, point.Y, 0));
-                p.RefDirection = ToIfcDirection(model, direction);
+                p.Location = model.ToIfcCartesianPoint(new XbimPoint3D(point.X, point.Y, 0));
+                p.RefDirection = model.ToIfcDirection(direction);
             });
         }
-
-        public static IfcDirection ToIfcDirection(this MemoryModel model, XbimVector3D vector)
-        {
-            var direction = model.Instances.New<IfcDirection>();
-            direction.SetXYZ(vector.X, vector.Y, vector.Z);
-            return direction;
-        }
-
-        public static IfcExtrudedAreaSolid ToIfcExtrudedAreaSolid(this MemoryModel model, IfcProfileDef profile, XbimVector3D direction, double depth)
-        {
-            return model.Instances.New<IfcExtrudedAreaSolid>(s =>
-            {
-                s.Depth = depth;
-                s.SweptArea = profile;
-                s.ExtrudedDirection = ToIfcDirection(model, direction);
-                s.Position = ToIfcAxis2Placement3D(model, XbimPoint3D.Zero);
-            });
-        }
-
-        public static IfcAxis2Placement3D ToIfcAxis2Placement3D(this MemoryModel model, XbimPoint3D point)
-        {
-            var placement = model.Instances.New<IfcAxis2Placement3D>();
-            placement.Location = ToIfcCartesianPoint(model, point);
-            return placement;
-        }
-        public static XbimVector3D Point3D2Vector(this XbimPoint3D point3D)
-        {
-            return new XbimVector3D(point3D.X, point3D.Y, point3D.Z);
-        }
-
     }
 }

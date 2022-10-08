@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Geometry\ThXbimCoordinateSystem3D.cs" />
+    <Compile Include="Geometry\ThProtoBufExtension.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3BrepExtension.cs" />
     <Compile Include="Ifc2x3\ThXbimSlabEngine.cs" />
     <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3Builder.cs" />
@@ -59,7 +60,7 @@
     <Compile Include="ThMEPIFCExportCmds.cs" />
     <Compile Include="ThMEPIFCInternalCmds.cs" />
     <Compile Include="THModelMergeService.cs" />
-    <Compile Include="ThProtoBuf2IFCSolid3dExtension.cs" />
+    <Compile Include="Ifc2x3\ThProtoBuf2IFCSolid3dExtension.cs" />
     <Compile Include="ThTGL2IFCCommon.cs" />
     <Compile Include="ThTGL2IFCService.cs" />
     <Compile Include="ThTGL2IFCSolid3dExtension.cs" />

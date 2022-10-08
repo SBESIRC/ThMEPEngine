@@ -3,6 +3,9 @@ using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.GeometricConstraintResource;
 using ThMEPIFC.Geometry;
+using Xbim.Ifc2x3.GeometricModelResource;
+using Xbim.Ifc2x3.ProfileResource;
+using Xbim.IO.Memory;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -45,6 +48,35 @@ namespace ThMEPIFC.Ifc2x3
             });
         }
 
+        public static IfcLocalPlacement ToIfcLocalPlacement(this IfcStore model,
+            ThTCHPoint3d origin, IfcObjectPlacement relative_to = null)
+        {
+            return model.Instances.New<IfcLocalPlacement>(l =>
+            {
+                l.PlacementRelTo = relative_to;
+                l.RelativePlacement = model.ToIfcAxis2Placement3D(origin.ToXbimPoint3D());
+            });
+        }
+
+        public static IfcExtrudedAreaSolid ToIfcExtrudedAreaSolid(this IfcStore model, IfcProfileDef profile, XbimVector3D direction, double depth)
+        {
+            return model.Instances.New<IfcExtrudedAreaSolid>(s =>
+            {
+                s.Depth = depth;
+                s.SweptArea = profile;
+                s.ExtrudedDirection = model.ToIfcDirection(direction);
+                s.Position = model.ToIfcAxis2Placement3D(XbimPoint3D.Zero);
+            });
+        }
+
+        public static IfcAxis2Placement3D ToIfcAxis2Placement3D(this IfcStore model, XbimPoint3D point)
+        {
+            return model.Instances.New<IfcAxis2Placement3D>(p =>
+            {
+                p.Location = ToIfcCartesianPoint(model, point);
+            });
+        }
+
         private static IfcAxis2Placement3D ToIfcAxis2Placement3D(this IfcStore model, ThTCHMatrix3d m)
         {
             return model.ToIfcAxis2Placement3D(new ThXbimCoordinateSystem3D(m));
@@ -60,7 +92,7 @@ namespace ThMEPIFC.Ifc2x3
             });
         }
 
-        private static IfcCartesianPoint ToIfcCartesianPoint(this IfcStore model, XbimPoint3D point)
+        public static IfcCartesianPoint ToIfcCartesianPoint(this IfcStore model, XbimPoint3D point)
         {
             return model.Instances.New<IfcCartesianPoint>(c =>
             {
