@@ -118,6 +118,8 @@ namespace ThMEPLighting.Garage.Model
 
         public void Transform()
         {
+            //Transformer = new ThMEPEngineCore.Algorithm.ThMEPOriginTransformer(Point3d.Origin); // for test
+
             // 移动到原点
             // 若图元离原点非常远（大于1E+10)，精度会受很大影响
             Transformer.Transform(DxCenterLines.ToCollection());

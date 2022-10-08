@@ -57,7 +57,6 @@ namespace ThMEPLighting.Garage.Engine
             regionBorders.ForEach(r =>
             {
                 // 移动到近原点位置，解决超远问题
-                //r.Transformer = new ThMEPEngineCore.Algorithm.ThMEPOriginTransformer(Point3d.Origin); // for test
                 r.Transform();
 
                 // 布置
