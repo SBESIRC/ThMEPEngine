@@ -8,8 +8,6 @@ namespace ThPlatform3D.ArchitecturePlane.Service
 {
     internal static class ThGeometryQuerier
     {
-        public const string HiddenKanxianLTypeKeyWord1 = "stroke-dasharray";
-
         public static DBObjectCollection GetWalls(this List<ThGeometry> geos)
         {
             var results = new DBObjectCollection();
@@ -50,12 +48,12 @@ namespace ThPlatform3D.ArchitecturePlane.Service
 
         public static List<ThGeometry> GetHiddenKanXians(this List<ThGeometry> geos)
         {
-            return GetKanXians(geos).Where(o => o.Properties.IsHiddenKanxian()).ToList();
+            return GetKanXians(geos).Where(o => o.Properties.IsHiddenKanXian()).ToList();
         }
 
-        public static bool IsHiddenKanxian(this Dictionary<string,object> properties)
+        public static bool IsHiddenKanXian(this Dictionary<string,object> properties)
         {
-            return properties.ContainsKey(HiddenKanxianLTypeKeyWord1);
+            return properties.GetLineType().ToUpper() == "HIDDEN";
         }
     }
 }

@@ -74,7 +74,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         protected virtual ObjectIdCollection PrintKanXian(Database db, ThGeometry geo)
         {
             var config = ThKanXianPrinter.GetConfig();
-            bool isHidden = geo.Properties.IsHiddenKanxian();
+            bool isHidden = geo.Properties.IsHiddenKanXian();
             if (isHidden)
             {
                 config.LineType = "Hidden";
