@@ -20,8 +20,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     public static class TableTools
     {
         static bool TableImported = false;
-        //static string FilePath = ThCADCommon.ParkingStallTablePath();
-        static string FilePath = "C://Users//zhangwenxuan//Desktop//地库指标表格.dwg";
+        static string FilePath = ThCADCommon.ParkingStallTablePath();
+        //static string FilePath = "C://Users//zhangwenxuan//Desktop//地库指标表格.dwg";
         static Table _OrgTable;
         static Table OrgTable { get { return _OrgTable; } }
         static Point3d OrgMidPt;
