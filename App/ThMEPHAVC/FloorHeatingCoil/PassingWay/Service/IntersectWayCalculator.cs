@@ -25,6 +25,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
         public Polyline buff_region = null;
         public List<BufferPoly> shortest_way = null;
 
+        bool if_move_last2_segment = false;
+
         public IntersectWayCalculator(
             Polyline region,
             int main_index,
@@ -33,7 +35,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             List<PipeInput> pipe_inputs,
             List<List<Line>> equispaces_lines,
             List<List<double>> equispaced_buffers,
-            List<List<Polyline>> equispaced_segments)
+            List<List<Polyline>> equispaced_segments,
+            bool if_move_last2_segment = false)
         {
             this.region = region;
             this.main_index = main_index;
@@ -108,9 +111,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
             return false;
         }
 
-        Polyline GetBufferPolygon(int index,bool turn_left)
+        Polyline GetBufferPolygon(int index, bool turn_left)
         {
-            Polyline ret = GetBufferPolygonBase(index,turn_left);
+            Polyline ret = GetBufferPolygonBase(index, turn_left);
             if (ret == null) return null;
             if (index == main_index)
             {
@@ -334,7 +337,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 var is_start_closer_to_pin = polygon_points.First().DistanceTo(pipe_inputs[index].pin) <= p.DistanceTo(pipe_inputs[index].pin);
                 var is_end_closer_to_pout = polygon_points.Last().DistanceTo(out_point) <= p.DistanceTo(out_point);
                 var first_dis = polygon_points.First().DistanceTo(p);
-                if (!is_start_closer_to_pin && !inter_with_last_seg && first_dis > 10) 
+                if (!is_start_closer_to_pin && !inter_with_last_seg && first_dis > 10)
                 {
                     return null;
                 }
@@ -371,7 +374,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     if (p != ep && p.DistanceTo(ep) < polygon_points.Last().DistanceTo(ep))
                     {
                         polygon_points.RemoveRange(polygon_points.Count - 2, 2);
-                        polygon_points[polygon_points.Count-1] = p;
+                        polygon_points[polygon_points.Count - 1] = p;
                     }
                 }
             }
@@ -434,11 +437,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 if (inter_sets.Count == 0) continue;
                 // update line points
                 var line_points = PassageWayUtils.GetPolyPoints(equispaced_segments[index][i]);
-                var line_set = inter_sets.Except(line_points,new Point3dComparer());
+                var line_set = inter_sets.Except(line_points, new Point3dComparer());
                 foreach (var point in line_set)
                     IntersectUtils.InsertPoint(point, ref line_points, 1e-3);
                 // update polygon points
-                var polygon_set = inter_sets.Except(polygon_points,new Point3dComparer());
+                var polygon_set = inter_sets.Except(polygon_points, new Point3dComparer());
                 foreach (var point in polygon_set)
                     IntersectUtils.InsertPoint(point, ref polygon_points, 1e-3);
                 // calculate intersect points' index
@@ -525,6 +528,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     target_points.RemoveAt(i);
             }
             shortest_way[index].poly = target_points;
+            if (if_move_last2_segment)
+                move_last2_segment(index);
         }
         void GetIntersectWayBuffer(int index)
         {
@@ -569,7 +574,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 var dp = target_points[1] - target_points[2];
                 if (dp.Length + pipe_inputs[index].in_buffer < buffer / 4 || dp.Length < pipe_inputs[index].in_buffer)
                 {
-                    if (pipe_inputs[index].in_buffer > buffer / 4 - 10 && buffs[2] == buffer / 4 || dp.Length < 10) 
+                    if (pipe_inputs[index].in_buffer > buffer / 4 - 10 && buffs[2] == buffer / 4 || dp.Length < 10)
                     {
                         target_points[3] += dp;
                         target_points.RemoveAt(1);
@@ -613,7 +618,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // 显示boundary
             //PassageShowUtils.ShowEntity(boundary, index % 7 + 1);
             List<bool> is_movable = new List<bool>(shortest_way[index].poly.Count);
-            for(int i = 0; i < shortest_way[index].buff.Count; ++i)
+            for (int i = 0; i < shortest_way[index].buff.Count; ++i)
             {
                 if (shortest_way[index].buff[i] < buffer / 4)
                     is_movable.Add(false);
@@ -866,7 +871,81 @@ namespace ThMEPHVAC.FloorHeatingCoil
             apts.Add(bpts.Last());
             return PassageWayUtils.BuildPolyline(apts);
         }
-
+        void move_last2_segment(int index)
+        {
+            if (pipe_inputs[index].is_out_free == false) return;
+            // 判断路径最后是不是z字形
+            var points = shortest_way[index].poly;
+            int c = points.Count;
+            if (c < 4) return;
+            var p_1 = points[c - 1];
+            var p_2 = points[c - 2];
+            var p_3 = points[c - 3];
+            var p_4 = points[c - 4];
+            var dp_1 = PassageWayUtils.GetDirBetweenTwoPoint(p_2, p_1);
+            var dp_3 = PassageWayUtils.GetDirBetweenTwoPoint(p_4, p_3);
+            if (dp_3 != dp_1) return;
+            if (dp_3 != dp_1) return;
+            // 找到出口所在边
+            points = PassageWayUtils.GetPolyPoints(region);
+            var pre = PassageWayUtils.GetSegIndexOnPolygon(p_1, points);
+            var next = (pre + 1) % points.Count;
+            var line = new Line(points[pre], points[next]);
+            // 新的位置
+            var new_p_1 = line.GetClosestPointTo(p_3, false);
+            // 新的最后一段的buffer
+            var dir = dp_3;
+            var p = p_4 + (p_3 - p_3) / 2;
+            double buff = buffer / 4;
+            for (int j = 0; j < equispaced_lines[index].Count; ++j)
+            {
+                var p0 = equispaced_lines[index][j].StartPoint;
+                var p1 = equispaced_lines[index][j].EndPoint;
+                var line_dir = PassageWayUtils.GetDirBetweenTwoPoint(p0, p1);
+                if (dir % 2 == line_dir % 2)
+                {
+                    var dis = equispaced_lines[index][j].GetClosestPointTo(p, false).DistanceTo(p);
+                    if (PassageWayUtils.PointOnSegment(p, p0, p1) || dis < equispaced_buffers[index][j])
+                    {
+                        buff = equispaced_buffers[index][j];
+                        break;
+                    }
+                }
+            }
+            // 判断新点是否在自由移动范围内
+            if (!pipe_inputs[index].check(new_p_1, buff, room_buffer)) return;
+            if (index > 0)
+            {
+                // 新位置不能与前一条管道交叉
+                Point3d pre_p_1 = new Point3d(0, 0, 0);
+                if (shortest_way[index - 1].poly != null && shortest_way[index - 1].poly.Count > 0)
+                    pre_p_1 = shortest_way[index - 1].poly.Last();
+                else
+                    pre_p_1 = equispaced_lines[index - 1].Last().GetClosestPointTo(pipe_inputs[index - 1].pout, false);
+                if (PassageWayUtils.PointOnSegment(pre_p_1, points[pre], points[next]))
+                {
+                    if (pre_p_1.DistanceTo(points[pre]) > new_p_1.DistanceTo(points[pre]))
+                        return;
+                }
+            }
+            if (index < pipe_inputs.Count - 1)
+            {
+                // 新位置不能与后一条管道交叉
+                Point3d next_p_1 = new Point3d(0, 0, 0);
+                if (shortest_way[index + 1].poly != null && shortest_way[index + 1].poly.Count > 0)
+                    next_p_1 = shortest_way[index + 1].poly.Last();
+                else
+                    next_p_1 = equispaced_lines[index + 1].Last().GetClosestPointTo(pipe_inputs[index + 1].pout, false);
+                if (PassageWayUtils.PointOnSegment(next_p_1, points[pre], points[next]))
+                {
+                    if (next_p_1.DistanceTo(points[next]) > new_p_1.DistanceTo(points[next]))
+                        return;
+                }
+            }
+            shortest_way[index].poly[c - 3] = new_p_1;
+            shortest_way[index].poly.RemoveRange(c - 2, 2);
+            PassageShowUtils.PrintMassage("去除第" + index.ToString() + "段z字形线");
+        }
         public void ShowResult()
         {
             for (int i = 0; i < shortest_way.Count; ++i)

@@ -1,4 +1,5 @@
 ﻿using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPEngineCore.Model.Common
 {
@@ -14,7 +15,22 @@ namespace ThMEPEngineCore.Model.Common
                 var newLayer = ThMEPXRefService.OriginalFromXref(_layer);
                 if (newLayer.Length != _layer.Length)
                 {
-                    _display = "*|" + newLayer;
+                    var prefix = GetDisplayPrefix(_layer);
+                    if (string.IsNullOrEmpty(prefix))
+                    {
+                        _display = "*|" + newLayer;
+                    }
+                    else
+                    {
+                        if(prefix.Length<=40)
+                        {
+                            _display = prefix + "|" + newLayer;
+                        }
+                        else
+                        {
+                            _display = prefix.Substring(0, 40) + "*|" + newLayer;
+                        }
+                    }
                 }
                 else
                 {
@@ -42,6 +58,24 @@ namespace ThMEPEngineCore.Model.Common
             {
                 _display = value;
             }
+        }
+
+        private string GetDisplayPrefix(string xrefLayer)
+        {
+            // 已绑定外参
+            if (xrefLayer.Matches("*`$#`$*"))
+            {
+                return xrefLayer.Substring(0, xrefLayer.IndexOf('$'));
+            }
+
+            // 未绑定外参
+            if (xrefLayer.Matches("*|*"))
+            {
+                return xrefLayer.Substring(0, xrefLayer.IndexOf('|'));
+            }
+
+            // 其他非外参
+            return "";
         }
     }
 }

@@ -404,7 +404,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             var newWall = new ThTCHWall(pl, entity.Height);
             newWall.Uuid = projectId + entity.DBId;
             newWall.Width = entity.LeftWidth + entity.RightWidth;
-            newWall.EnumMaterial = entity.EnumMaterial.GetDescription();
+            newWall.EnumMaterial = entity.Material.GetDescription();
             //var newWall = new ThTCHWall(entity.StartPoint,entity.EndPoint,entity.RightWidth+entity.LeftWidth, entity.WallHeight);
             return newWall;
         }
@@ -423,7 +423,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             newWall.BuildElement.Root.GlobalId = projectId + entity.DBId;
             newWall.BuildElement.Origin = new ThTCHPoint3d() { X = 0, Y = 0, Z = 0 };
             newWall.BuildElement.XVector = new ThTCHVector3d() { X = 0, Y = 0, Z = 0 };
-            newWall.BuildElement.EnumMaterial = entity.EnumMaterial.GetDescription();
+            newWall.BuildElement.EnumMaterial = entity.Material.GetDescription();
             return newWall;
         }
 

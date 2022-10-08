@@ -6,6 +6,8 @@ using NFox.Cad;
 using System.Collections.Generic;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.UndergroundSpraySystem.General;
+
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
@@ -30,42 +32,33 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public static void AddPipeLine(DBObjectCollection dbObjs, FireHydrantSystemIn fireHydrantSysIn, 
             List<Point3dEx> pointList, List<Line> lineList)
         {
-            double pipeLenTor = 20.0;
-            foreach (var f in dbObjs)
+            foreach(var obj in dbObjs)
             {
-                if (f is Line fline)
+                if(obj is Line line)
                 {
-                    if(fline.Length < pipeLenTor)
-                    {
-                        continue;//小于20的直线跳过
-                    }
-                    var pt1 = new Point3dEx(fline.StartPoint.X, fline.StartPoint.Y, 0);
-                    var pt2 = new Point3dEx(fline.EndPoint.X, fline.EndPoint.Y, 0);
-                    
-                    pointList.Add(pt1);
-                    pointList.Add(pt2);
-                    ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
-                    lineList.Add(new Line(pt1._pt, pt2._pt));
+                    var pt1 = line.StartPoint.Point3dZ0();
+                    var pt2 = line.EndPoint.Point3dZ0();
+                    lineList.Add(new Line(pt1, pt2));
                 }
-                if(f is Polyline fl)
+                if(obj is Polyline pline)
                 {
-                    var ptPre = fl.GetPoint3dAt(0);
-                    for (int i = 1; i < fl.NumberOfVertices; i++)
+                    for (int i = 0; i < pline.NumberOfVertices-1; i++)
                     {
-                        var pti = fl.GetPoint3dAt(i);
-                        var pt1 = new Point3dEx(ptPre.X, ptPre.Y, 0);
-                        var pt2 = new Point3dEx(pti.X, pti.Y, 0);
-                        if(pt1._pt.DistanceTo(pt2._pt) < pipeLenTor)
-                        {
-                            continue;
-                        }
-                        pointList.Add(pt1);
-                        pointList.Add(pt2);
-                        ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
-                        lineList.Add(new Line(pt1._pt, pt2._pt));
-                        ptPre = fl.GetPoint3dAt(i);
+                        var pt1 = pline.GetPoint3dAt(i).Point3dZ0();
+                        var pt2 = pline.GetPoint3dAt(i+1).Point3dZ0();
+             
+                        lineList.Add(new Line(pt1, pt2));
                     }
                 }
+            }
+            lineList = PipeLineList.CleanLaneLines3(lineList);
+            foreach(var line in lineList)
+            {
+                var pt1 = new Point3dEx(line.StartPoint);
+                var pt2 = new Point3dEx(line.EndPoint);
+                pointList.Add(pt1);
+                pointList.Add(pt2);
+                ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
             }
         }
 

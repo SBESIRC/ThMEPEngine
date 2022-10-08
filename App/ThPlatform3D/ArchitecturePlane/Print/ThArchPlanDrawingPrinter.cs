@@ -24,6 +24,9 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         }
         public override void Print(Database db)
         {
+            // 前处理
+            Preprocess();
+
             // 打印对象
             PrintGeos(db, Geos);
 
@@ -33,16 +36,18 @@ namespace ThPlatform3D.ArchitecturePlane.Print
             //wallLines = wallLines.FilterSmallLines(5.0);
 
             // 打印门垛、门窗标注 
-            AppendToObjIds(PrintDoorStones(db,ComponentInfos.Where(o => o.Type.IsDoor()).ToList()));
-            AppendToObjIds(PrintDoorMarks(db, ComponentInfos.Where(o => o.Type.IsDoor()).ToList()));
-            AppendToObjIds(PrintWindowMarks(db, ComponentInfos.Where(o => o.Type.IsWindow()).ToList()));
+            var doorComponents = ComponentInfos.GetDoorComponents();
+            var windowComponents = ComponentInfos.GetWindowComponents();
+            AppendToObjIds(PrintDoorStones(db, doorComponents));
+            AppendToObjIds(PrintDoorMarks(db, doorComponents));
+            AppendToObjIds(PrintWindowMarks(db, windowComponents));
 
             // 插入块
-            AppendToObjIds(InsertDoors(db, ComponentInfos.Where(o => o.Type.IsDoor()).ToList()));
-            AppendToObjIds(InsertWindows(db, ComponentInfos.Where(o => o.Type.IsWindow()).ToList()));
+            AppendToObjIds(InsertDoors(db, doorComponents));
+            AppendToObjIds(InsertWindows(db, windowComponents));
 
             // 调整窗块的比列
-            UpdateWindowBlkThick(db, ComponentInfos.Where(o => o.Type.IsWindow()).ToList());
+            UpdateWindowBlkThick(db, windowComponents);
 
             // 打印标题文字
             AppendToObjIds(PrintHeadText(db));
@@ -51,6 +56,23 @@ namespace ThPlatform3D.ArchitecturePlane.Print
             //wallLines.MDispose();
         }
        
+        private void Preprocess()
+        {
+            // 过滤门洞处隐藏的看线
+            FilterDoorHiddenKanXian();
+
+            // 
+        }
+
+        private void FilterDoorHiddenKanXian()
+        {
+            var hiddenKanxians = Geos.GetHiddenKanXians();
+            var doorComponents = ComponentInfos.GetDoorComponents();
+            var filter = new ThDoorHiddenKanxianFilter(doorComponents, hiddenKanxians);
+            var removeKanxians = filter.Filter();
+            Geos = Geos.Except(removeKanxians).ToList();
+        }
+
         private void PrintGeos(Database db, List<ThGeometry> geos)
         {
             using (var acadDb = AcadDatabase.Use(db))

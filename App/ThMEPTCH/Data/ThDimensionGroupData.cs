@@ -23,17 +23,18 @@ public static partial class ThDimensionGroupDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChpUaERpbWVuc2lvbkdyb3VwRGF0YS5wcm90bxoTVGhUQ0hSb290RGF0YS5w",
-          "cm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90byKzAQoSVGhBbGlnbmVkRGltZW5z",
+          "cm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90byLSAQoSVGhBbGlnbmVkRGltZW5z",
           "aW9uEhwKBHJvb3QYASABKAsyDi5UaFRDSFJvb3REYXRhEiQKDXhfbGluZTFf",
           "cG9pbnQYAiABKAsyDS5UaFRDSFBvaW50M2QSJAoNeF9saW5lMl9wb2ludBgD",
           "IAEoCzINLlRoVENIUG9pbnQzZBIlCg5kaW1fbGluZV9wb2ludBgEIAEoCzIN",
-          "LlRoVENIUG9pbnQzZBIMCgRtYXJrGAUgASgJIl0KFFRoRGltZW5zaW9uR3Jv",
-          "dXBEYXRhEhwKBHJvb3QYASABKAsyDi5UaFRDSFJvb3REYXRhEicKCmRpbWVu",
-          "c2lvbnMYAiADKAsyEy5UaEFsaWduZWREaW1lbnNpb25iBnByb3RvMw=="));
+          "LlRoVENIUG9pbnQzZBIMCgRtYXJrGAUgASgJEh0KCWRpbV9saW5lcxgGIAMo",
+          "CzIKLlRoVENITGluZSJdChRUaERpbWVuc2lvbkdyb3VwRGF0YRIcCgRyb290",
+          "GAEgASgLMg4uVGhUQ0hSb290RGF0YRInCgpkaW1lbnNpb25zGAIgAygLMhMu",
+          "VGhBbGlnbmVkRGltZW5zaW9uYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThAlignedDimension), global::ThAlignedDimension.Parser, new[]{ "Root", "XLine1Point", "XLine2Point", "DimLinePoint", "Mark" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThAlignedDimension), global::ThAlignedDimension.Parser, new[]{ "Root", "XLine1Point", "XLine2Point", "DimLinePoint", "Mark", "DimLines" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ThDimensionGroupData), global::ThDimensionGroupData.Parser, new[]{ "Root", "Dimensions" }, null, null, null, null)
         }));
   }
@@ -80,6 +81,7 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
     xLine2Point_ = other.xLine2Point_ != null ? other.xLine2Point_.Clone() : null;
     dimLinePoint_ = other.dimLinePoint_ != null ? other.dimLinePoint_.Clone() : null;
     mark_ = other.mark_;
+    dimLines_ = other.dimLines_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -149,6 +151,17 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
     }
   }
 
+  /// <summary>Field number for the "dim_lines" field.</summary>
+  public const int DimLinesFieldNumber = 6;
+  private static readonly pb::FieldCodec<global::ThTCHLine> _repeated_dimLines_codec
+      = pb::FieldCodec.ForMessage(50, global::ThTCHLine.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHLine> dimLines_ = new pbc::RepeatedField<global::ThTCHLine>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThTCHLine> DimLines {
+    get { return dimLines_; }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -169,6 +182,7 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
     if (!object.Equals(XLine2Point, other.XLine2Point)) return false;
     if (!object.Equals(DimLinePoint, other.DimLinePoint)) return false;
     if (Mark != other.Mark) return false;
+    if(!dimLines_.Equals(other.dimLines_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -181,6 +195,7 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
     if (xLine2Point_ != null) hash ^= XLine2Point.GetHashCode();
     if (dimLinePoint_ != null) hash ^= DimLinePoint.GetHashCode();
     if (Mark.Length != 0) hash ^= Mark.GetHashCode();
+    hash ^= dimLines_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -219,6 +234,7 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
       output.WriteRawTag(42);
       output.WriteString(Mark);
     }
+    dimLines_.WriteTo(output, _repeated_dimLines_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -249,6 +265,7 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
       output.WriteRawTag(42);
       output.WriteString(Mark);
     }
+    dimLines_.WriteTo(ref output, _repeated_dimLines_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -274,6 +291,7 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
     if (Mark.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(Mark);
     }
+    size += dimLines_.CalculateSize(_repeated_dimLines_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -313,6 +331,7 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
     if (other.Mark.Length != 0) {
       Mark = other.Mark;
     }
+    dimLines_.Add(other.dimLines_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -360,6 +379,10 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
           Mark = input.ReadString();
           break;
         }
+        case 50: {
+          dimLines_.AddEntriesFrom(input, _repeated_dimLines_codec);
+          break;
+        }
       }
     }
   #endif
@@ -405,6 +428,10 @@ public sealed partial class ThAlignedDimension : pb::IMessage<ThAlignedDimension
         }
         case 42: {
           Mark = input.ReadString();
+          break;
+        }
+        case 50: {
+          dimLines_.AddEntriesFrom(ref input, _repeated_dimLines_codec);
           break;
         }
       }

@@ -41,8 +41,8 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 }
 
                 //转换器
-                var transformer = ThMEPWSSUtils.GetTransformer(frames);
-                //var transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                //var transformer = ThMEPWSSUtils.GetTransformer(frames);
+                var transformer = new ThMEPEngineCore.Algorithm.ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
 
                 //提取数据
@@ -57,7 +57,10 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 var dataProcess = new ThSprinklerDimDataProcessService()
                 {
                     InputExtractors = dataFactory.Extractors,
+                    RoomIFCData = dataFactory.RoomsData,
                     TchPipeData = dataFactory.TchPipeData,
+                    LinePipeData = dataFactory.LinePipeData,
+                    LinePipeTextData = dataFactory.LinePipeTextData,
                     SprinklerPt = dataFactory.SprinklerPtData,
                     AxisCurvesData = dataFactory.AxisCurves,
                     Transformer = transformer,
@@ -74,7 +77,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
         public void ThSprinklerDimNoUI()
         {
             var vm = new ThSprinklerDimViewModel();
-            vm.UseTCHDim = 1;
+            vm.UseTCHDim = 0;
 
             using (var cmd = new ThSprinklerDimCmd(vm))
             {
@@ -93,17 +96,20 @@ namespace ThMEPWSS.SprinklerDim.Cmd
         [CommandMethod("TIANHUACAD", "ThSprinklerDimTestDimCAD", CommandFlags.Modal)]
         public void ThSprinklerDimTestDimCAD()
         {
+            var vm = new ThSprinklerDimViewModel();
+            vm.UseTCHDim = 0;
+            vm.Scale = 150;
 
             var pts = new List<Point3d>();
             pts.Add(new Point3d(0, 0, 0));
             pts.Add(new Point3d(1000, 1000, 0));
-            pts.Add(new Point3d(2000, 2000, 0));
+            pts.Add(new Point3d(3000, 3000, 0));
             var dir = (pts.Last() - pts.First()).GetNormal().RotateBy(90 * System.Math.PI / 180, Vector3d.ZAxis);
             var dist = 800;
 
             var dim = new ThSprinklerDimension(pts, dir, dist);
 
-            ThSprinklerDimInsertService.ToCADDim(new List<ThSprinklerDimension>() { dim });
+            ThSprinklerDimInsertService.ToCADDim(new List<ThSprinklerDimension>() { dim }, vm.Scale);
 
         }
 
@@ -113,6 +119,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
         {
             var vm = new ThSprinklerDimViewModel();
             vm.UseTCHDim = 1;
+            vm.Scale = 150;
 
             var pts = new List<Point3d>();
             pts.Add(new Point3d(0, 0, 0));
@@ -123,7 +130,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
 
             var dim = new ThSprinklerDimension(pts, dir, dist);
 
-            ThSprinklerDimInsertService.ToTCHDim(new List<ThSprinklerDimension>() { dim }, vm.TCHDBPath);
+            ThSprinklerDimInsertService.ToTCHDim(new List<ThSprinklerDimension>() { dim }, vm.Scale, vm.TCHDBPath);
         }
     }
 }

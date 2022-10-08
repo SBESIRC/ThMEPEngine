@@ -46,7 +46,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 points = points.Where(pt => pt.DistanceTo(o.Key.StartPoint) < o.Key.Length + 10.0)
                     .Where(pt => pt.DistanceTo(o.Key.EndPoint) < o.Key.Length + 10.0)
                     .OrderBy(pt => pt.DistanceTo(o.Key.StartPoint)).ToList();
-                if (points.Count > 1)
+                if (points.Count > 1 && points.First().DistanceTo(points.Last()) > 1.0)
                 {
                     results.Add(new Line(points.First(), points.Last()));
                 }

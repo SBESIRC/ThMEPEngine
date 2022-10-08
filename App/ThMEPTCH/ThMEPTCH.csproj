@@ -71,6 +71,15 @@
     </When>
   </Choose>
   <ItemGroup>
+    <Compile Include="CAD\ThAxisBasePointExtractionEngine.cs" />
+    <Compile Include="CAD\ThAxisBasePointExtractionVisitor.cs" />
+    <Compile Include="CAD\ThTCHAxisContinuousDimensionExtractionEngine.cs" />
+    <Compile Include="CAD\ThTCHAxisGridDimensionExtractionEngine.cs" />
+    <Compile Include="CAD\ThTCHAxisLineExtractionEngine.cs" />
+    <Compile Include="CAD\ThTCHAxisGridDimensionExtractionVisitor.cs" />
+    <Compile Include="CAD\ThTCHAxisContinuousDimensionExtractionVisitor.cs" />
+    <Compile Include="CAD\ThTCHAxisLineExtractionVisitor.cs" />
+    <Compile Include="CAD\ThBlockElementExtractor.cs" />
     <Compile Include="CAD\THDBHoleExtractionVisitor.cs" />
     <Compile Include="CAD\THDBRoomExtractionVisitor.cs" />
     <Compile Include="CAD\ThDBVisitorExtension.cs" />
@@ -134,6 +143,7 @@
     <Compile Include="PropertyServices\PropertyModels\HoleProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\RoomProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\SlabProperty.cs" />
+    <Compile Include="PropertyServices\PropertyModels\TCHAxisProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\TCHDoorProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\TCHWallProperty.cs" />
     <Compile Include="PropertyServices\PropertyModels\TCHWindowProperty.cs" />
@@ -210,6 +220,8 @@
     <Compile Include="PropertyServices\THNumPropertyEditor.cs" />
     <Compile Include="PropertyServices\THTextPropertyEditor.cs" />
     <Compile Include="Services\ThArchitectureDescendingService.cs" />
+    <Compile Include="Services\ThArchWallFixer.cs" />
+    <Compile Include="Services\ThCircleLableGrouper.cs" />
     <Compile Include="Services\ThDescendingBuffer.cs" />
     <Compile Include="Services\ThDWGToIFCModels.cs" />
     <Compile Include="Services\ThDWGToIFCService.cs" />
@@ -217,6 +229,7 @@
     <Compile Include="Services\ThIfcStoreyParseTool.cs" />
     <Compile Include="Services\ThPolylineFixer.cs" />
     <Compile Include="Services\ThSetRoomNameService.cs" />
+    <Compile Include="Services\ThTCHGridLineSystemBuilder.cs" />
     <Compile Include="TCHArchDataConvert\DBToTHEntityCommon.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchDBData.cs" />
     <Compile Include="TCHArchDataConvert\TCHArchSQL.cs" />
@@ -270,7 +283,34 @@
     <Compile Include="ThMEPTCHApp.cs" />
     <Compile Include="ThMEPTCHCommon.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="proto\ThCircleLableGroupData.proto" />
+    <None Include="proto\ThDimensionGroupData.proto" />
+    <None Include="proto\ThGridLineSyetemData.proto" />
+    <None Include="proto\ThSUBuildingElementData.proto" />
+    <None Include="proto\ThSUCompDefinitionData.proto" />
+    <None Include="proto\ThSUComponentData.proto" />
+    <None Include="proto\ThSUFaceData.proto" />
+    <None Include="proto\ThSUGeometry.proto" />
+    <None Include="proto\ThSUMaterialData.proto" />
+    <None Include="proto\ThSUProjectData.proto" />
+    <None Include="proto\ThTCHBuildingData.proto" />
+    <None Include="proto\ThTCHBuildingStoreyData.proto" />
+    <None Include="proto\ThTCHBuiltElementData.proto" />
+    <None Include="proto\ThTCHDescendingData.proto" />
+    <None Include="proto\ThTCHDoorData.proto" />
+    <None Include="proto\ThTCHGeometry.proto" />
+    <None Include="proto\ThTCHOpeningData.proto" />
+    <None Include="proto\ThTCHProjectData.proto" />
+    <None Include="proto\ThTCHProperty.proto" />
+    <None Include="proto\ThTCHRailingData.proto" />
+    <None Include="proto\ThTCHRoomData.proto" />
+    <None Include="proto\ThTCHRootData.proto" />
+    <None Include="proto\ThTCHSiteData.proto" />
+    <None Include="proto\ThTCHSlabData.proto" />
+    <None Include="proto\ThTCHWallData.proto" />
+    <None Include="proto\ThTCHWindowData.proto" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
       <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>

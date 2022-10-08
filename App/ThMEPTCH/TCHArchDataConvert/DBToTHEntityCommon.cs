@@ -1,31 +1,33 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using GeometryExtensions;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using ThCADExtension;
+using System.Collections.Generic;
+
+using GeometryExtensions;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+
 using ThMEPTCH.CAD;
-using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
+using ThCADExtension;
 using ThMEPTCH.TCHArchDataConvert.THArchEntity;
+using ThMEPTCH.TCHArchDataConvert.TCHArchTables;
 
 namespace ThMEPTCH.TCHArchDataConvert
 {
     class DBToTHEntityCommon
     {
-        public static THArchEntityBase DBArchToTHArch(TArchEntity dbArchEntity) 
+        public static THArchEntityBase DBArchToTHArch(TArchEntity dbArchEntity)
         {
             if (dbArchEntity is TArchWall archWall)
-                return TArchWallToEntityWall(archWall, 0, 0, 0, 0, new Vector3d(0,0,0));
+                return TArchWallToEntityWall(archWall, 0, 0, 0, 0, new Vector3d(0, 0, 0));
             else if (dbArchEntity is TArchDoor archDoor)
                 return TArchDoorToEntityDoor(archDoor);
             else if (dbArchEntity is TArchWindow archWindow)
                 return TArchWindowToEntityWindow(archWindow);
             return null;
         }
-        public static WallEntity TArchWallToEntityWall(TArchWall arch, double leftSpOffSet, double leftEpOffSet, double rightSpOffSet, double rightEpOffSet,Vector3d moveOffSet)
+        public static WallEntity TArchWallToEntityWall(TArchWall arch, double leftSpOffSet, double leftEpOffSet, double rightSpOffSet, double rightEpOffSet, Vector3d moveOffSet)
         {
-            WallEntity wallEntity = new WallEntity(arch);
+            var wallEntity = new WallEntity(arch);
             var z = arch.StartPoint.Z;
             var spX = Math.Floor(arch.StartPoint.X);
             var spY = Math.Floor(arch.StartPoint.Y);
@@ -38,7 +40,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             wallEntity.LeftWidth = arch.LeftWidth;
             wallEntity.RightWidth = arch.RightWidth;
             wallEntity.Height = arch.Height;
-            wallEntity.EnumMaterial = arch.EnumMaterial;
+            wallEntity.Material = arch.Material;
             if (arch.IsArc)
             {
                 var sp = wallEntity.StartPoint;
@@ -105,7 +107,6 @@ namespace ThMEPTCH.TCHArchDataConvert
             {
                 var sp = wallEntity.StartPoint;
                 var ep = wallEntity.EndPoint;
-                wallEntity.CenterCurve = new Line(sp, ep);
                 var wallDir = (ep - sp).GetNormal();
                 var normal = Vector3d.ZAxis;
                 var leftDir = normal.CrossProduct(wallDir).GetNormal();
@@ -113,6 +114,16 @@ namespace ThMEPTCH.TCHArchDataConvert
                 var spRight = sp - leftDir.MultiplyBy(arch.RightWidth) - wallDir.MultiplyBy(rightSpOffSet);
                 var epLeft = ep + leftDir.MultiplyBy(arch.LeftWidth) + wallDir.MultiplyBy(leftEpOffSet);
                 var epRight = ep - leftDir.MultiplyBy(arch.RightWidth) + wallDir.MultiplyBy(rightEpOffSet);
+
+                if (wallEntity.LeftWidth.Equals(wallEntity.RightWidth))
+                {
+                    wallEntity.CenterCurve = new Line(sp, ep);
+                }
+                else
+                {
+                    // 处理偏心墙
+                    wallEntity.CenterCurve = new Line(GetCenter(spLeft, spRight), GetCenter(epLeft, epRight));
+                }
                 wallEntity.LeftCurve = new Line(spLeft, epLeft);
                 wallEntity.RightCurve = new Line(spRight, epRight);
                 var segments = new PolylineSegmentCollection();
@@ -125,7 +136,6 @@ namespace ThMEPTCH.TCHArchDataConvert
                 //newPLine.Closed = false;
                 wallEntity.Outline = ThMPolygonTool.CreateMPolygon(newPLine, new List<Curve> { });
                 wallEntity.Outline.Elevation = z;
-
             }
             return wallEntity;
         }
@@ -145,6 +155,7 @@ namespace ThMEPTCH.TCHArchDataConvert
             };
             return entity;
         }
+
         private static MPolygon GetDoorOutline(TArchDoor arch)
         {
             // 用MPolygon处理带洞的场景
@@ -165,10 +176,16 @@ namespace ThMEPTCH.TCHArchDataConvert
             };
             return entity;
         }
+
         private static MPolygon GetWindowOutline(TArchWindow arch)
         {
             // 用MPolygon处理带洞的场景
             return ThMPolygonTool.CreateMPolygon(arch.Profile());
+        }
+
+        private static Point3d GetCenter(Point3d first, Point3d second)
+        {
+            return new Point3d((first.X + second.X) / 2, (first.Y + second.Y) / 2, (first.Z + second.Z) / 2);
         }
     }
 }

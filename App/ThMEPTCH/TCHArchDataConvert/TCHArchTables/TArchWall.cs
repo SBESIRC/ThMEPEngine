@@ -5,15 +5,15 @@ namespace ThMEPTCH.TCHArchDataConvert.TCHArchTables
 {
     public class TArchWall : TArchEntity
     {
-        public Point3d EndPoint { get; set; }
         public Point3d StartPoint { get; set; }
+        public Point3d EndPoint { get; set; }
         public double LeftWidth { get; set; }
         public double RightWidth { get; set; }
         public bool IsArc { get; set; }
         public double Bulge { get; set; }
         public double Height { get; set; }
         public double Elevation { get; set; }
-        public EnumTCHWallMaterial EnumMaterial { get; set; }
+        public EnumTCHWallMaterial Material { get; set; }
 
         public override bool IsValid()
         {

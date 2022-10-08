@@ -1,12 +1,14 @@
-﻿using NFox.Cad;
+﻿using System.Linq;
+using System.Windows.Input;
+
 using AcHelper;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using System.Linq;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using CommunityToolkit.Mvvm.Input;
+
 using ThMEPWSS.Command;
 using ThMEPWSS.Sprinkler.Model;
 
@@ -20,6 +22,7 @@ namespace ThMEPWSS.ViewModel
         {
             Parameter = new ThSprinklerModel();
         }
+
         public ICommand SprinklerCheckCmd => new RelayCommand(CheckClick);
 
         private void CheckClick()
@@ -33,6 +36,7 @@ namespace ThMEPWSS.ViewModel
                 }
             }
         }
+
         private bool CheckParameter()
         {
             // ToDO

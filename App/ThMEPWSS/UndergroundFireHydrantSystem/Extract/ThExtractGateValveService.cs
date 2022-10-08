@@ -53,7 +53,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
         private bool IsHYDTPipeLayer(string layer)
         {
-            return layer.ToUpper() == "W-FRPT-HYDT-EQPM";
+            return layer.Contains("EQPM");
         }
 
         private bool IsValveBlock(BlockReference blockReference)

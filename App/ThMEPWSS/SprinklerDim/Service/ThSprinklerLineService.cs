@@ -5,6 +5,8 @@ using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
+using ThCADCore.NTS;
+
 namespace ThMEPWSS.SprinklerDim.Service
 {
     internal class ThSprinklerLineService
@@ -13,6 +15,17 @@ namespace ThMEPWSS.SprinklerDim.Service
         {
             var connLines = lineList.Where(x => x.StartPoint.IsEqualTo(pt, tol) ||
                                                 x.EndPoint.IsEqualTo(pt, tol)).ToList();
+            return connLines;
+        }
+
+        public static List<Line> GetConnLine(Point3d pt, ThCADCoreNTSSpatialIndex lineListIdx, double tol)
+        {
+            var ptFrame = ThSprinklerNetworkService.PtToFrame(pt, tol);
+            var selectItem = lineListIdx.SelectCrossingPolygon(ptFrame).OfType<Line>();
+            var ptTol = new Tolerance(tol, tol);
+
+            var connLines = selectItem.Where(x => x.StartPoint.IsEqualTo(pt, ptTol) ||
+                                                x.EndPoint.IsEqualTo(pt, ptTol)).ToList();
             return connLines;
         }
 
@@ -70,21 +83,6 @@ namespace ThMEPWSS.SprinklerDim.Service
             return dtLines;
         }
 
-        public static List<Line> PolylineToLine(Polyline pl)
-        {
-            var returnL = new List<Line>();
-            var nCount = pl.NumberOfVertices;
-            if (pl.Closed == true)
-            {
-                nCount = nCount + 1;
-            }
-            for (int i = 0; i < nCount; i++)
-            {
-                returnL.Add(new Line(pl.GetPoint3dAt(i % pl.NumberOfVertices), pl.GetPoint3dAt((i + 1) / pl.NumberOfVertices)));
-            }
-
-            return returnL;
-        }
 
         public static bool IsParallelAngle(double angleA, double angleB, double tol)
         {

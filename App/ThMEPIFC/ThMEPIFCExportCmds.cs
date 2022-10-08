@@ -4,6 +4,12 @@ using System.Windows.Forms;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPTCH.Services;
+using System.IO;
+using System.IO.Pipes;
+using System.Security.Principal;
+using Autodesk.AutoCAD.EditorInput;
+using System.Diagnostics;
+using System.Linq;
 
 namespace ThMEPIFC
 {
@@ -54,6 +60,137 @@ namespace ThMEPIFC
             }
         }
 
+        /// <summary>
+        /// 天正图纸转IFC，IFC转Viewer
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THDWG2IFC2P3D", CommandFlags.Modal)]
+        public void THDWG2IFC2P3D()
+        {
+            try
+            {
+                Active.Editor.WriteLine($"开始读入图纸。");
+                Stopwatch sw = new Stopwatch();
+                //选择保存路径
+                var time = DateTime.Now.ToString("HHmmss");
+                var fileName = "模型数据" + time + ".ifc";
+                var ifcFilePath = Path.Combine(Path.GetTempPath(), fileName);
+                //var ifcFilePath = SaveFilePath("ifc");
+                if (string.IsNullOrEmpty(ifcFilePath))
+                {
+                    return;
+                }
+                sw.Start();
+                // 读取并解析CAD图纸数据
+                ThStopWatchService.Start();
+                var service = new ThDWGToIFCService(string.Empty);
+                var project = service.DWGToProjectData(false, false);
+                if (project != null)
+                {
+                    sw.Stop();
+                    Active.Editor.WriteLine($"读入并解析图纸完成，耗时{sw.ElapsedMilliseconds}毫秒。");
+                    sw.Reset();
+
+                    Active.Editor.WriteLine($"开始转IFC。");
+                    sw.Start();
+                    ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
+                    Tgl2IfcService.GenerateIfcModelAndSave(project, ifcFilePath);
+                    sw.Stop();
+                    Active.Editor.WriteLine($"转IFC完成，耗时{sw.ElapsedMilliseconds}毫秒。");
+                    sw.Reset();
+
+                    Active.Editor.WriteLine($"开始传输数据。");
+                    sw.Start();
+                    using (Stream stream = new FileStream(ifcFilePath, FileMode.Open))
+                    using (var pipeClient = new NamedPipeClientStream(".",
+                        "THCAD2IFC2P3DPIPE",
+                        PipeDirection.Out,
+                        PipeOptions.None,
+                        TokenImpersonationLevel.Impersonation))
+                    {
+                        try
+                        {
+                            BinaryReader r = new BinaryReader(stream);
+                            var bytes = r.ReadBytes((int)stream.Length);
+                            //var bytes = project.ToThBimData(ProtoBufDataType.PushType, PlatformType.CADPlatform);
+                            pipeClient.Connect(5000);
+                            pipeClient.Write(bytes, 0, bytes.Length);
+                            sw.Stop();
+                            Active.Editor.WriteLine($"传输数据完成，耗时{sw.ElapsedMilliseconds}毫秒。");
+                        }
+                        catch (System.Exception ex)
+                        {
+                            Active.Editor.WriteLine($"传输数据失败：{ex.Message}。");
+                        }
+                    }
+                    var isFile = System.IO.File.Exists(ifcFilePath);
+                    if (isFile)
+                    {
+                        //System.IO.File.Delete(ifcFilePath);
+                        Active.Editor.WriteLine($"IFC文件路径：[{ifcFilePath}]");
+                    }
+                }
+            }
+            catch(System.Exception ex)
+            {
+                // 未知错误
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THBIM2IFC", CommandFlags.Modal)]
+        public void THBIM2IFC()
+        {
+            //选择thbim文件
+            var filePath = OpenTHBIMFile("请选择需要导出IFC的thbim文件:");
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return;
+            }
+
+            //选择保存路径
+            var ifcFilePath = SaveFilePath("ifc");
+            if (string.IsNullOrEmpty(ifcFilePath))
+            {
+                return;
+            }
+            FileStream fsRead = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            BinaryReader r = new BinaryReader(fsRead);
+            byte[] fileArray = r.ReadBytes((int)fsRead.Length);
+            fsRead.Dispose();
+            try
+            {
+                var DataHead = fileArray.Take(10).ToArray();
+                //84 = 'T' 72 = 'H' 
+                if (DataHead[0] == 84 && DataHead[1] == 72 && DataHead[2] == 3 && DataHead[3] == 2)
+                {
+                    //SU THBim 文件
+                    var DataBody = fileArray.Skip(10).ToArray();
+                    var su_Project = new ThSUProjectData();
+                    Google.Protobuf.MessageExtensions.MergeFrom(su_Project, DataBody);
+                    ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
+                    Tgl2IfcService.GenerateIfcModelAndSave(su_Project, ifcFilePath);
+                    var isFile = System.IO.File.Exists(ifcFilePath);
+                    if (isFile)
+                    {
+                        Active.Editor.WriteLine($"IFC文件路径：[{ifcFilePath}]");
+                    }
+                }
+                else
+                {
+                    Active.Editor.WriteLine($"该文件不符合SU导出的thbim标准，请检查文件。");
+                    return;
+                }
+
+            }
+            catch (System.Exception ex)
+            {
+                Active.Editor.WriteLine($"thbim文件解析失败。");
+            }
+            finally
+            {
+                r.Dispose();
+            }
+        }
+
         private string SaveFilePath(string fileExt)
         {
             var time = DateTime.Now.ToString("HHmmss");
@@ -70,6 +207,16 @@ namespace ThMEPIFC
                 return savePath;
             }
             return string.Empty;
+        }
+
+        private string OpenTHBIMFile(string Msg)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Title = Msg;
+            dlg.DefaultExt = ".thbim"; // Default file extension
+            dlg.Filter = "TGL THBIM|*.thbim"; // Filter files by extension
+            var result = dlg.ShowDialog();
+            return (result == DialogResult.OK) ? dlg.FileName : string.Empty;
         }
     }
 }

@@ -1,24 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
 using Linq2Acad;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Extension;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model.Hvac;
 
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPHVAC.FloorHeatingCoil.Data
 {
@@ -153,6 +144,23 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             }
 
             return polys;
+        }
+
+        public static List<Line> ExtractLineMsNotClone(Database database, List<string> layers)
+        {
+            var lines = new List<Line>();
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var l = acadDatabase.ModelSpace
+                  .OfType<Line>()
+                  .Where(o => IsElementLayer(o.Layer, layers))
+                  .OfType<Line>()
+                  .ToList();
+
+                lines.AddRange(l);
+            }
+
+            return lines;
         }
 
         public static List<Hatch> ExtractHatch(List<string> layerName)

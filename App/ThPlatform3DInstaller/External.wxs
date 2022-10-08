@@ -65,6 +65,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{73447F36-3568-443F-8668-67185F7BF5A9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Google.Protobuf.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" Guid="{A4615012-4FF2-4D13-8724-6D6BF172258F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\MathNet.Numerics.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Spatial" Guid="{875BED5E-AC90-4DD6-8447-CD609D518E9E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_MathNet_Spatial" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\MathNet.Spatial.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -135,6 +141,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{0C814A86-4D61-4D76-9194-C79341F83A2A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Google.Protobuf.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" Guid="{1C0C7D4C-2F39-4783-AA12-D9340D401A54}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\MathNet.Numerics.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Spatial" Guid="{326A5E9A-D7C6-407E-BB2F-84447CE3AE4F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_MathNet_Spatial" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\MathNet.Spatial.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -168,6 +180,8 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Spatial" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_Features" />
@@ -190,6 +204,8 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Spatial" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

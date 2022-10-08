@@ -26,7 +26,9 @@
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
+
         <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
                Margin="0 10 0 0" Height="24"
                Content="使用标注："/>
@@ -36,18 +38,28 @@
             IsChecked="{Binding UseTCHDim,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"
         />
         <RadioButton Grid.Row="1" Grid.Column="1"
-                        Height="24"
+                     Height="24"
             GroupName="rbUseTCHDim" Content="CAD标注"
             IsChecked="{Binding UseTCHDim,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"
         />
+        <Label Grid.Row="2" Grid.Column="0"
+               Margin="0 10 0 0" Height="24"
+               Content="出图比例："/>
 
-        <Button Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center"    
-                Margin="10 10 5 0"
+        <ComboBox Grid.Row="2" Grid.Column="1" Height="24" Width="50"   
+                  HorizontalAlignment="Left" 
+                   Margin="0 10 0 0"
+                  SelectedItem="{Binding Scale,Mode=TwoWay}"
+				  ItemsSource="{Binding ScaleList,Mode=OneWay}">
+        </ComboBox>
+
+        <Button Grid.Row="3" Grid.Column="0" HorizontalAlignment="Center"    
+                Margin="10 15 5 0"
                   Height="24" Width="60"
             Content="视频教程" Command="{Binding SprinklerDimHelpCmd}"/>
 
-        <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center"   
-                Margin="10 10 5 0"
+        <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Center"   
+                Margin="10 15 5 0"
                   Height="24" Width="60"
             Content="确定" Command="{Binding SprinklerDimLayoutCmd}"/>
 

@@ -14,7 +14,7 @@ using ThMEPHVAC.FloorHeatingCoil.Heating;
 
 namespace ThMEPHVAC.FloorHeatingCoil
 {
-    class PassagePipeGenerator:IDisposable
+    class PassagePipeGenerator : IDisposable
     {
         // 输入数据
         Polyline region;
@@ -36,8 +36,17 @@ namespace ThMEPHVAC.FloorHeatingCoil
         List<List<double>> equispaced_buffers { get; set; }
         List<List<Polyline>> equispaced_segments { get; set; }
         List<BufferPoly> shortest_way { get; set; }
-        public PassagePipeGenerator(Polyline region, List<DrawPipeData> pipe_in_list, List<DrawPipeData> pipe_out_list, int main_index, double buffer = 600, double room_buffer = 100, int mode = 0)
+
+        // 默认开关
+        bool if_move_last2_segment = false;           // 是否去除倒数第二段
+        bool if_move_to_origin = true;                // 是否移动到原点
+        bool ifdef_main_pipe_direction = false;       // 是否按照传入的方向定义主导管线转向
+        Vector3d transform_vector = new Vector3d(0, 0, 0);
+        bool main_pipe_turn_left = false;
+
+        public PassagePipeGenerator(Polyline region, List<DrawPipeData> pipe_in_list, List<DrawPipeData> pipe_out_list, int main_index, double buffer = 600, double room_buffer = 100, int mode = 0, int main_pipe_turn_left = -1)
         {
+            PreMove(region, pipe_in_list, pipe_out_list, 0, if_move_to_origin);
             PassageDataPreprocessor passageDataPreprocess = new PassageDataPreprocessor(region, pipe_in_list, pipe_out_list, main_index, buffer, room_buffer, mode);
             this.region = passageDataPreprocess.region;
             this.buffer = passageDataPreprocess.buffer;
@@ -47,6 +56,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
             this.mode = passageDataPreprocess.mode;
             this.main_has_output = passageDataPreprocess.main_has_output;
             this.main_pipe_input = passageDataPreprocess.main_pipe_input;
+            ifdef_main_pipe_direction = main_pipe_turn_left != -1;
+            this.main_pipe_turn_left = main_pipe_turn_left == 1;
+            PreMove(region, pipe_in_list, pipe_out_list, 1, if_move_to_origin);
         }
         public void CalculatePipeline()
         {
@@ -60,7 +72,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 CalculateMainShortestWay();
                 CalculateMainWay();
             }
-            else if (mode == 1) 
+            else if (mode == 1)
             {
                 StartRoomCalculator startRoomCalculator = new StartRoomCalculator(region, pipe_inputs);
                 startRoomCalculator.CalculatePipeline();
@@ -72,6 +84,41 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 heatingRoomCalculator.Calculate();
                 this.outputs.Add(heatingRoomCalculator.output);
             }
+            RecoverMove(if_move_to_origin);
+        }
+        void PreMove(Polyline region, List<DrawPipeData> pipe_in_list, List<DrawPipeData> pipe_out_list, int mode = 0, bool is_move = false)
+        {
+            // 参数mode
+            // 0:将输入移动到原点
+            // 1:恢复输入
+            Matrix3d m = Matrix3d.Identity;
+            if (is_move == false) return;
+            if (mode == 0)
+            {
+                transform_vector = Point3d.Origin - region.GetPoint3dAt(0);
+                m = Matrix3d.Displacement(transform_vector);
+            }
+            else
+            {
+                m = Matrix3d.Displacement(-transform_vector);
+            }
+            // 输入区域移动
+            region.TransformBy(m);
+            // 输入点位移动
+            for (int i = 0; i < pipe_in_list.Count; i++)
+                pipe_in_list[i].TransformBy(m);
+            for (int i = 0; i < pipe_out_list.Count; i++)
+                pipe_out_list[i].TransformBy(m);
+        }
+        void RecoverMove(bool is_move = false)
+        {
+            if (is_move == false)
+                return;
+            Matrix3d m = Matrix3d.Displacement(-transform_vector);
+            for (int i = 0; i < outputs.Count; ++i)
+                outputs[i].TransformBy(m);
+            for (int i = 0; i < change_point_datas.Count; ++i)
+                change_point_datas[i].TransformBy(m);
         }
         void CalculateDirectionWay()
         {
@@ -125,7 +172,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         void CalculateIntersectWay()
         {
             // 初始化计算管线
-            IntersectWayCalculator intersectWayCalculator = new IntersectWayCalculator(region, main_index, buffer, room_buffer, pipe_inputs, equispaced_lines, equispaced_buffers, equispaced_segments);
+            IntersectWayCalculator intersectWayCalculator = new IntersectWayCalculator(region, main_index, buffer, room_buffer, pipe_inputs, equispaced_lines, equispaced_buffers, equispaced_segments, if_move_last2_segment);
             // 如果主导管线有出口，则按照两边向主导管线的顺序计算管线导向路径
             if (main_has_output)
             {
@@ -133,7 +180,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     intersectWayCalculator.Calculate(i, true);
                 for (int i = pipe_inputs.Count - 1; i > main_index; --i)
                     intersectWayCalculator.Calculate(i, false);
-                intersectWayCalculator.Calculate(main_index, main_index < pipe_inputs.Count / 2);
+                if (ifdef_main_pipe_direction)
+                    intersectWayCalculator.Calculate(main_index, main_pipe_turn_left);
+                else
+                    intersectWayCalculator.Calculate(main_index, main_index < pipe_inputs.Count / 2);
             }
             // 如果主导管线没有出口，则只计算非主导管线导向路径
             else
@@ -142,7 +192,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     intersectWayCalculator.Calculate(i, true);
                 for (int i = pipe_inputs.Count - 1; i > main_index; --i)
                     intersectWayCalculator.Calculate(i, false);
-                if(main_index>=0)
+                if (main_index >= 0)
                     intersectWayCalculator.Calculate(main_index, true);
             }
             shortest_way = intersectWayCalculator.shortest_way;
@@ -156,14 +206,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
         void CheckPoutMoved()
         {
             // 计算修改过的管线出口
-            for(int i = 0; i < pipe_inputs.Count; ++i)
+            for (int i = 0; i < pipe_inputs.Count; ++i)
             {
                 var point = shortest_way[i].poly.Last();
                 var radius = shortest_way[i].buff.Last();
                 var dir = pipe_inputs[i].end_dir;
-                if(point.DistanceTo(pipe_inputs[i].pout)>1)
+                if (point.DistanceTo(pipe_inputs[i].pout) > 1)
                 {
-                    if (dir % 2 != 0) 
+                    if (dir % 2 != 0)
                     {
                         var left_point = new Point3d(point.X - radius, point.Y, 0);
                         var right_point = new Point3d(point.X + radius, point.Y, 0);
@@ -171,7 +221,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     }
                     else
                     {
-                        var left_point = new Point3d(point.X, point.Y+radius, 0);
+                        var left_point = new Point3d(point.X, point.Y + radius, 0);
                         var right_point = new Point3d(point.X, point.Y - radius, 0);
                         change_point_datas.Add(new ChangePointData(pipe_inputs[i].pipe_id, pipe_inputs[i].door_id, left_point, right_point));
                     }
@@ -187,10 +237,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
             Line line = null;
             switch (dir)
             {
-                case 0: line=new Line(new Point3d(env.MinX, axis, 0), new Point3d(env.MaxX, axis, 0));break;
-                case 1: line=new Line(new Point3d(axis, env.MinY, 0), new Point3d(axis, env.MaxY, 0));break;
-                case 2: line=new Line(new Point3d(env.MaxX, axis, 0), new Point3d(env.MinX, axis, 0));break;
-                case 3: line=new Line(new Point3d(axis, env.MaxY, 0), new Point3d(axis, env.MinY, 0));break;
+                case 0: line = new Line(new Point3d(env.MinX, axis, 0), new Point3d(env.MaxX, axis, 0)); break;
+                case 1: line = new Line(new Point3d(axis, env.MinY, 0), new Point3d(axis, env.MaxY, 0)); break;
+                case 2: line = new Line(new Point3d(env.MaxX, axis, 0), new Point3d(env.MinX, axis, 0)); break;
+                case 3: line = new Line(new Point3d(axis, env.MaxY, 0), new Point3d(axis, env.MinY, 0)); break;
             }
             var last_lines = line.ToNTSLineString().Intersection(region.ToNTSPolygon()).ToDbCollection().Cast<Polyline>().ToList();
             if (last_lines.Count > 0)
@@ -249,7 +299,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // 添加至输出列表
 
             if (main_output.shape == null) main_output.shape = new Polyline();
-            if(true)
+            if (true)
             {
                 if (main_index == outputs.Count)
                     outputs.Add(main_output);

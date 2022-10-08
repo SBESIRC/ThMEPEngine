@@ -23,15 +23,14 @@ public static partial class ThSUGeometryReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChJUaFNVR2VvbWV0cnkucHJvdG8aE1RoVENIR2VvbWV0cnkucHJvdG8iHgoL",
-          "VGhTVVBvbHlnb24SDwoHaW5kaWNlcxgBIAMoBSJxCg9UaFNVUG9seWdvbk1l",
+          "VGhTVVBvbHlnb24SDwoHaW5kaWNlcxgBIAMoBSJQCg9UaFNVUG9seWdvbk1l",
           "c2gSHQoGcG9pbnRzGAEgAygLMg0uVGhUQ0hQb2ludDNkEh4KCHBvbHlnb25z",
-          "GAIgAygLMgwuVGhTVVBvbHlnb24SHwoHbm9ybWFscxgDIAMoCzIOLlRoVENI",
-          "VmVjdG9yM2RiBnByb3RvMw=="));
+          "GAIgAygLMgwuVGhTVVBvbHlnb25iBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::ThSUPolygon), global::ThSUPolygon.Parser, new[]{ "Indices" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUPolygonMesh), global::ThSUPolygonMesh.Parser, new[]{ "Points", "Polygons", "Normals" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUPolygonMesh), global::ThSUPolygonMesh.Parser, new[]{ "Points", "Polygons" }, null, null, null, null)
         }));
   }
   #endregion
@@ -254,7 +253,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
   public ThSUPolygonMesh(ThSUPolygonMesh other) : this() {
     points_ = other.points_.Clone();
     polygons_ = other.polygons_.Clone();
-    normals_ = other.normals_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -286,17 +284,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
     get { return polygons_; }
   }
 
-  /// <summary>Field number for the "normals" field.</summary>
-  public const int NormalsFieldNumber = 3;
-  private static readonly pb::FieldCodec<global::ThTCHVector3d> _repeated_normals_codec
-      = pb::FieldCodec.ForMessage(26, global::ThTCHVector3d.Parser);
-  private readonly pbc::RepeatedField<global::ThTCHVector3d> normals_ = new pbc::RepeatedField<global::ThTCHVector3d>();
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public pbc::RepeatedField<global::ThTCHVector3d> Normals {
-    get { return normals_; }
-  }
-
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -314,7 +301,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
     }
     if(!points_.Equals(other.points_)) return false;
     if(!polygons_.Equals(other.polygons_)) return false;
-    if(!normals_.Equals(other.normals_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -324,7 +310,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
     int hash = 1;
     hash ^= points_.GetHashCode();
     hash ^= polygons_.GetHashCode();
-    hash ^= normals_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -345,7 +330,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
   #else
     points_.WriteTo(output, _repeated_points_codec);
     polygons_.WriteTo(output, _repeated_polygons_codec);
-    normals_.WriteTo(output, _repeated_normals_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -358,7 +342,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
     points_.WriteTo(ref output, _repeated_points_codec);
     polygons_.WriteTo(ref output, _repeated_polygons_codec);
-    normals_.WriteTo(ref output, _repeated_normals_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -371,7 +354,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
     int size = 0;
     size += points_.CalculateSize(_repeated_points_codec);
     size += polygons_.CalculateSize(_repeated_polygons_codec);
-    size += normals_.CalculateSize(_repeated_normals_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -386,7 +368,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
     }
     points_.Add(other.points_);
     polygons_.Add(other.polygons_);
-    normals_.Add(other.normals_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -410,10 +391,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
           polygons_.AddEntriesFrom(input, _repeated_polygons_codec);
           break;
         }
-        case 26: {
-          normals_.AddEntriesFrom(input, _repeated_normals_codec);
-          break;
-        }
       }
     }
   #endif
@@ -435,10 +412,6 @@ public sealed partial class ThSUPolygonMesh : pb::IMessage<ThSUPolygonMesh>
         }
         case 18: {
           polygons_.AddEntriesFrom(ref input, _repeated_polygons_codec);
-          break;
-        }
-        case 26: {
-          normals_.AddEntriesFrom(ref input, _repeated_normals_codec);
           break;
         }
       }

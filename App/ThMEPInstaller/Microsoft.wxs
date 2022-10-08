@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <?include Variable.wxi ?>
+    <Fragment>
+        <?if $(var.Configuration) = Debug ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" Guid="{2AD5881A-22C0-4B69-AB8D-9BAE140D8A9D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Microsoft.Bcl.HashCode.dll" />
+            </Component>
+        </DirectoryRef>
+        <?elseif $(var.Configuration) = Release ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" Guid="{9FC6D82F-4DD7-47E2-B9AB-3D3283023A28}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Microsoft.Bcl.HashCode.dll" />
+            </Component>
+        </DirectoryRef>
+        <?endif?>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsAppMicrosoft">
+            <?if $(var.Configuration) = Debug ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" />
+            <?elseif $(var.Configuration) = Release ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" />
+            <?endif?>
+        </ComponentGroup>
+    </Fragment>
+</Wix>

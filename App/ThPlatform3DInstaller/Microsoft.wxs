@@ -17,6 +17,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_IO_RecyclableMemoryStream" Guid="{6226D5E8-1EDF-430B-A7BC-99BFCEF0B713}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Microsoft_IO_RecyclableMemoryStream" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Microsoft.IO.RecyclableMemoryStream.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" Guid="{4A1AF286-DA67-402A-80B1-17112AA093C4}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Microsoft.Bcl.HashCode.dll" />
+            </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
@@ -33,6 +36,9 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_IO_RecyclableMemoryStream" Guid="{D8B43FB3-AAB3-46FC-93AB-98C0C067FD60}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Microsoft_IO_RecyclableMemoryStream" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Microsoft.IO.RecyclableMemoryStream.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" Guid="{A29DCE53-08B9-4B2E-B311-B849A7EABCC8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Microsoft.Bcl.HashCode.dll" />
+            </Component>
         </DirectoryRef>
         <?endif?>
     </Fragment>
@@ -43,11 +49,13 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Extensions_Logging_Abstractions" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Extensions_Options" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_IO_RecyclableMemoryStream" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Extensions_Logging" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Extensions_Logging_Abstractions" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Extensions_Options" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_IO_RecyclableMemoryStream" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Microsoft_Bcl_HashCode" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

@@ -26,7 +26,7 @@ namespace ThMEPTCH.CAD
 
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
-            elements.AddRange(HandleTCHElement(dbObj, matrix,0));
+            elements.AddRange(HandleTCHElement(dbObj, matrix, 0));
         }
 
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix, int uid)
@@ -60,7 +60,7 @@ namespace ThMEPTCH.CAD
             if (IsBuildElement(tch) && CheckLayerValid(tch) && tch.Visible && tch.Bounds.HasValue)
             {
                 var archWall = tch.Database.LoadWallFromDb(tch.ObjectId, matrix, uid);
-                if(archWall.IsValid())
+                if (archWall.IsValid())
                 {
                     results.Add(new ThRawIfcBuildingElementData()
                     {
@@ -74,8 +74,8 @@ namespace ThMEPTCH.CAD
 
         private Polyline CreateOutline(TArchWall archWall)
         {
-            var wallEntity = DBToTHEntityCommon.TArchWallToEntityWall(archWall,0,0,0,0,new Vector3d(0,0,0));
-            if(wallEntity.Outline !=null)
+            var wallEntity = DBToTHEntityCommon.TArchWallToEntityWall(archWall, 0, 0, 0, 0, new Vector3d(0, 0, 0));
+            if (wallEntity.Outline != null)
             {
                 return wallEntity.Outline.Shell();
             }

@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.CAD
@@ -26,7 +27,12 @@ namespace ThMEPEngineCore.CAD
 
         public static int Combine(int uid1, int uid2)
         {
-            return uid1 ^ uid2;
+            return HashCode.Combine(uid1, uid2);
+        }
+
+        public static int Combine(ulong uid1, ulong uid2)
+        {
+            return HashCode.Combine(uid1, uid2);
         }
     }
 }

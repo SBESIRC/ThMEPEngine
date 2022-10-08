@@ -13,12 +13,12 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPTCH.Services;
-using ThPlatform3D.Data;
 using ThPlatform3D.Common;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.IO.SVG;
 using ThPlatform3D.ArchitecturePlane.Print;
 using acadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPTCH.CAD;
 
 namespace ThPlatform3D.ArchitecturePlane
 {
@@ -347,9 +347,10 @@ namespace ThPlatform3D.ArchitecturePlane
 
         private DBObjectCollection GetAxisObjects()
         {
-            var extraction = new ThAxisElementExtractionEngine();
-            extraction.Extract(Active.Document.Database);
-            return extraction.Results.Select(o => o.Geometry).ToCollection();
+            //var extraction = new ThTCHAxisLineExtractionEngine();
+            //extraction.Extract(Active.Document.Database);
+            //return extraction.Results.Select(o => o.Geometry).ToCollection();
+            return new DBObjectCollection();
         }
 
         private DBObjectCollection GetBasePoints()

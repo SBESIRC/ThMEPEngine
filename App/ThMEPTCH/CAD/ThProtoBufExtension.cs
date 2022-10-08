@@ -26,6 +26,26 @@ namespace ThMEPTCH.CAD
 
     public static class ThProtoBufExtension
     {
+        public static ThTCHCircle ToTCHCircle(this Circle circle)
+        {
+            ThTCHCircle tchCircle = new ThTCHCircle();
+            if (circle.IsNull())
+                return tchCircle;
+            tchCircle.Center = circle.Center.ToTCHPoint();
+            tchCircle.Radius = circle.Radius;
+            return tchCircle;
+        }
+
+        public static ThTCHLine ToTCHLine(this Line line)
+        {
+            ThTCHLine tchLine = new ThTCHLine();
+            if (tchLine.IsNull())
+                return tchLine;
+            tchLine.StartPt = line.StartPoint.ToTCHPoint();
+            tchLine.EndPt = line.EndPoint.ToTCHPoint();
+            return tchLine;
+        }
+
         public static ThTCHPolyline ToTCHPolyline(this Line line)
         {
             ThTCHPolyline tchPolyline = new ThTCHPolyline();
@@ -113,6 +133,22 @@ namespace ThMEPTCH.CAD
             return null;
         }
 
+        public static Entity ToPolygon(this ThTCHMPolygon tchMPolygon)
+        {
+            if (!tchMPolygon.IsNull())
+            {
+                if (tchMPolygon.Holes.IsNull() || tchMPolygon.Holes.Count == 0)
+                {
+                    return tchMPolygon.Shell.ToPolyline();
+                }
+                else
+                {
+                    return ThMPolygonTool.CreateMPolygon(tchMPolygon.Shell.ToPolyline(), tchMPolygon.Holes.Select(o => o.ToPolyline() as Curve).ToList());
+                }
+            }
+            return null;
+        }
+
         public static Polyline ToPolyline(this ThTCHPolyline tchPolyline)
         {
             if (tchPolyline.Segments.Count == 0)
@@ -182,6 +218,11 @@ namespace ThMEPTCH.CAD
             return new Point3d(point.X, point.Y, point.Z);
         }
 
+        public static Vector3d ToVector(this ThTCHVector3d vector)
+        {
+            return new Vector3d(vector.X, vector.Y, vector.Z);
+        }
+
         public static ThTCHVector3d ToTCHVector(this Vector3d vector)
         {
             return new ThTCHVector3d() { X = vector.X, Y = vector.Y, Z = vector.Z };
@@ -208,6 +249,15 @@ namespace ThMEPTCH.CAD
                 Data43 = matrix[3, 2],
                 Data44 = matrix[3, 3],
             };
+        }
+
+        public static Matrix3d ToMatrix3d(this ThTCHMatrix3d matrix3D)
+        {
+            return new Matrix3d(new double[] { 
+                matrix3D.Data11, matrix3D.Data12, matrix3D.Data13, matrix3D.Data14, 
+                matrix3D.Data21, matrix3D.Data22, matrix3D.Data23, matrix3D.Data24, 
+                matrix3D.Data31, matrix3D.Data32, matrix3D.Data33, matrix3D.Data34, 
+                matrix3D.Data41, matrix3D.Data42, matrix3D.Data43, matrix3D.Data44 });
         }
 
         public static byte[] ToThBimData(this ThTCHProjectData project, ProtoBufDataType protoBufType, PlatformType platformType)

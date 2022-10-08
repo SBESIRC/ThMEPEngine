@@ -64,7 +64,7 @@ namespace ThMEPHVAC
                 // input region
                 var room_result = Active.Editor.GetEntity("select room region");
                 if (room_result.Status != PromptStatus.OK) return;
-                Polyline room = acadDatabase.Element<Polyline>(room_result.ObjectId);
+                Polyline room = acadDatabase.Element<Polyline>(room_result.ObjectId).Clone() as Polyline;
                 // input in pipe num
                 var in_pipe_num_result = Active.Editor.GetInteger("input in pipe num");
                 if (in_pipe_num_result.Status != PromptStatus.OK) return;
@@ -115,7 +115,7 @@ namespace ThMEPHVAC
                 //    pipe_out_list[i].DoorRight = line.EndPoint;
                 //}
 
-                double buffer = 400;
+                double buffer = 500;
                 double room_buffer = 100;
                 // core process
                 PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(room, pipe_in_list, pipe_out_list, main_index, buffer, room_buffer, 0);

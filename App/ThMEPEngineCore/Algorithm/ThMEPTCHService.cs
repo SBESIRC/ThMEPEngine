@@ -207,7 +207,8 @@ namespace ThMEPEngineCore.Algorithm
         private static string Kind(this Entity e)
         {
             dynamic obj = e.AcadObject;
-            return obj.GetKind as string;
+            var kind = obj.GetKind as string;
+            return kind != null ? kind : "";
         }
 
         /// <summary>

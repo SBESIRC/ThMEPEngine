@@ -7,7 +7,7 @@ using Xbim.Ifc2x3.RepresentationResource;
 
 namespace ThMEPIFC.Ifc2x3
 {
-    public partial class ThTGL2IFC2x3Factory
+    public class ThIFC2x3Factory
     {
         public static IfcShapeRepresentation CreateBrepBody(IfcStore model, IfcRepresentationItem item)
         {
@@ -65,17 +65,17 @@ namespace ThMEPIFC.Ifc2x3
             });
         }
 
-        private static IfcGeometricRepresentationContext GetGeometricRepresentationContext(IfcStore model)
+        public static IfcGeometricRepresentationContext GetGeometricRepresentationContext(IfcStore model)
         {
             return model.Instances.FirstOrDefault<IfcGeometricRepresentationContext>();
         }
 
-        private static IfcStore CreateModel()
+        public static IfcStore CreateModel()
         {
-            return IfcStore.Create(XbimSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
+            return IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
         }
 
-        private static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
+        public static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
         {
             return model.Instances.New<IfcGeometricRepresentationContext>(c =>
             {

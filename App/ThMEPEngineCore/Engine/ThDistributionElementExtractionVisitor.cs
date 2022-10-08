@@ -67,5 +67,11 @@ namespace ThMEPEngineCore.Engine
         {
             return blockReference.BlockTableRecord.IsValid;
         }
+        public virtual void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix, List<object> containers, int uid)
+        {
+            // containers 记录父级的信息(eg.父块的名称,父块的Id)
+            // uid用于对元素的唯一表示，用于增量更新
+            DoExtract(elements, dbObj, matrix);
+        }
     }
 }

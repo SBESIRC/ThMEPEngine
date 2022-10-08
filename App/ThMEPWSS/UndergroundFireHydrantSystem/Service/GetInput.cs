@@ -37,10 +37,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
             PipeLine.AddPipeLine(dbObjs, fireHydrantSysIn, pointList, lineList);
          
-            if (PipeLine.HasSitong(fireHydrantSysIn))
-            {
-                return false;
-            }
+            //if (PipeLine.HasSitong(fireHydrantSysIn))
+            //{
+            //    return false;
+            //}
 
             var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
             markEngine.Extract(acadDatabase.Database, selectArea);

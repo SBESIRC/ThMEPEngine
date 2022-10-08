@@ -101,7 +101,10 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 var dataProcess = new ThSprinklerDimDataProcessService()
                 {
                     InputExtractors = dataFactory.Extractors,
+                    RoomIFCData = dataFactory.RoomsData,
                     TchPipeData = dataFactory.TchPipeData,
+                    LinePipeData = dataFactory.LinePipeData,
+                    LinePipeTextData = dataFactory.LinePipeTextData,
                     SprinklerPt = dataFactory.SprinklerPtData,
                     AxisCurvesData = dataFactory.AxisCurves,
                     Transformer = transformer,
@@ -111,23 +114,23 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 dataProcess.Print();
 
                 var dims = ThSprinklerDimEngine.LayoutDimEngine(dataProcess, printTag, out var xUnDimedPtsAll, out var yUnDimedPtsAll);
-
-                dims.ForEach(x => x.Reset(transformer));
-                xUnDimedPtsAll = xUnDimedPtsAll.Select(x => transformer.Reset(x)).ToList();
-                yUnDimedPtsAll = yUnDimedPtsAll.Select(x => transformer.Reset(x)).ToList();
-
+               
                 if (debugSwitch)
                 {
                     ThSprinklerDimInsertService.ToDebugDim(dims, printTag);
                 }
 
+                dims.ForEach(x => x.Reset(transformer));
+                xUnDimedPtsAll = xUnDimedPtsAll.Select(x => transformer.Reset(x)).ToList();
+                yUnDimedPtsAll = yUnDimedPtsAll.Select(x => transformer.Reset(x)).ToList();
+
                 if (ViewModel.UseTCHDim == 1)
                 {
-                    ThSprinklerDimInsertService.ToTCHDim(dims, ViewModel.TCHDBPath);
+                    ThSprinklerDimInsertService.ToTCHDim(dims, ViewModel.Scale, ViewModel.TCHDBPath);
                 }
                 else if (ViewModel.UseTCHDim == 0)
                 {
-                    ThSprinklerDimInsertService.ToCADDim(dims);
+                    ThSprinklerDimInsertService.ToCADDim(dims, ViewModel.Scale);
                 }
 
                 ThSprinklerDimInsertService.InsertUnTagPt(xUnDimedPtsAll, true);

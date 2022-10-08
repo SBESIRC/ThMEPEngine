@@ -1,16 +1,18 @@
 ﻿using System;
-using Linq2Acad;
+using System.Linq;
+using System.Collections.Generic;
+
 using DotNetARX;
-using ThCADCore.NTS;
-using ThCADExtension;
+using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
-using ThMEPEngineCore.Algorithm;
+
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.Engine
 {
@@ -151,7 +153,7 @@ namespace ThMEPWSS.Engine
                 if (block == null
                     || !block.Bounds.HasValue
                     || !(block.Name.Contains("$TwtSys$00000131")
-                        || block.Name.Contains("$ATTACHMENT$00000094") 
+                        || block.Name.Contains("$ATTACHMENT$00000094")
                         || block.Name.Contains("$TwtSys$00000125")))
                 {
                     continue;
@@ -164,6 +166,12 @@ namespace ThMEPWSS.Engine
                     {
                         continue;
                     }
+                }
+
+                // 过滤重复喷头
+                if (Elements.OfType<ThSprinkler>().Any(o => o.Position.DistanceTo(block.Position) < 1.0))
+                {
+                    continue;
                 }
 
                 var sprinkler = new ThSprinkler()

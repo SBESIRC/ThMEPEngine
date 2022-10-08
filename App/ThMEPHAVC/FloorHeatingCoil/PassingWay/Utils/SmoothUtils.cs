@@ -49,7 +49,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             if (is_round)
             {
                 for (int i = 0; i < points.Count; ++i)
-                    points[i] = new Point3d((int)points[i].X, (int)points[i].Y, 0);
+                    points[i] = new Point3d(Math.Round(points[i].X), Math.Round(points[i].Y), 0);
             }
             for(int i = 0; i < points.Count; ++i)
             {

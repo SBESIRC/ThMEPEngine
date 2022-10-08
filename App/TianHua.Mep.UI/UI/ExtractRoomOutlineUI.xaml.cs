@@ -1,12 +1,15 @@
 ﻿using System;
-using System.Windows;
+using System.Linq;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Media.Imaging;
 using ThControlLibraryWPF.CustomControl;
 using TianHua.Mep.UI.ViewModel;
 using ThMEPEngineCore.Model.Common;
-using System.Linq;
 
 namespace TianHua.Mep.UI.UI
 {
@@ -19,6 +22,10 @@ namespace TianHua.Mep.UI.UI
         private string DoorCloseImgUrl = @"/TianHua.Mep.UI;component/Resource/Image/关闭.png";
         private Dictionary<string, bool> _controlNameEnableDict=new Dictionary<string, bool>();
 
+        private bool _lbArchwallLayerConfig_InMouseSelectionMode = false;
+        private List<ListBoxItem> _lbArchwallLayerConfig_SelectedItems = new List<ListBoxItem>();
+        private bool _lbDoorBlkConfig_InMouseSelectionMode = false;
+        private List<ListBoxItem> _lbDoorBlkConfig_SelectedItems = new List<ListBoxItem>();
         private ThExtractRoomOutlineVM RoomOutlineVM { get; set; } 
         public ExtractRoomOutlineUI(ThExtractRoomOutlineVM roomOutlineVM)
         {
@@ -135,13 +142,13 @@ namespace TianHua.Mep.UI.UI
         private void btnDeleteLayer_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             var layers = new List<string>();
-            for (int i = 0; i < listBox.SelectedItems.Count; i++)
+            for (int i = 0; i < lbArchwallLayerConfig.SelectedItems.Count; i++)
             {
-                layers.Add((listBox.SelectedItems[i] as ThLayerInfo).Layer);
+                layers.Add((lbArchwallLayerConfig.SelectedItems[i] as ThLayerInfo).Layer);
             }
             RoomOutlineVM.RemoveLayers(layers);
-            this.listBox.ItemsSource = null;
-            this.listBox.ItemsSource = RoomOutlineVM.LayerInfos;
+            this.lbArchwallLayerConfig.ItemsSource = null;
+            this.lbArchwallLayerConfig.ItemsSource = RoomOutlineVM.LayerInfos;
         }
 
         private void btnHelp_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -272,6 +279,70 @@ namespace TianHua.Mep.UI.UI
                         this.imgShowDoorOutline.IsEnabled = item.Value;
                         break;
                 }
+            }
+        }
+
+        private void lbArchwallLayerConfig_lbItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // MouseDown时清空已选Item
+            // 同时开始"inMouseSelectionMode"
+            foreach (var item in _lbArchwallLayerConfig_SelectedItems)
+            {
+                item.ClearValue(ListBoxItem.BackgroundProperty);
+                item.ClearValue(TextElement.ForegroundProperty);
+            }
+            _lbArchwallLayerConfig_SelectedItems.Clear();
+            _lbArchwallLayerConfig_InMouseSelectionMode = true;
+        }
+
+        private void lbArchwallLayerConfig_lbItem_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            // MouseUp时停止"inMouseSelectionMode"
+            ListBoxItem mouseUpItem = sender as ListBoxItem;
+            _lbArchwallLayerConfig_InMouseSelectionMode = false;
+        }
+
+        private void lbArchwallLayerConfig_lbItem_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            ListBoxItem mouseOverItem = sender as ListBoxItem;
+            if (mouseOverItem != null && _lbArchwallLayerConfig_InMouseSelectionMode && e.LeftButton == MouseButtonState.Pressed)
+            {
+                // Mouse所在的Item设置高亮
+                mouseOverItem.Background = SystemColors.HighlightBrush;
+                mouseOverItem.SetValue(TextElement.ForegroundProperty, SystemColors.HighlightTextBrush);
+                if (!_lbArchwallLayerConfig_SelectedItems.Contains(mouseOverItem)) { _lbArchwallLayerConfig_SelectedItems.Add(mouseOverItem); }
+            }
+        }
+
+        private void lbDoorBlkConfig_lbItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // MouseDown时清空已选Item
+            // 同时开始"inMouseSelectionMode"
+            foreach (var item in _lbDoorBlkConfig_SelectedItems)
+            {
+                item.ClearValue(ListBoxItem.BackgroundProperty);
+                item.ClearValue(TextElement.ForegroundProperty);
+            }
+            _lbDoorBlkConfig_SelectedItems.Clear();
+            _lbDoorBlkConfig_InMouseSelectionMode = true;
+        }
+
+        private void lbDoorBlkConfig_lbItem_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            // MouseUp时停止"inMouseSelectionMode"
+            ListBoxItem mouseUpItem = sender as ListBoxItem;
+            _lbDoorBlkConfig_InMouseSelectionMode = false;
+        }
+
+        private void lbDoorBlkConfig_lbItem_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            ListBoxItem mouseOverItem = sender as ListBoxItem;
+            if (mouseOverItem != null && _lbDoorBlkConfig_InMouseSelectionMode && e.LeftButton == MouseButtonState.Pressed)
+            {
+                // Mouse所在的Item设置高亮
+                mouseOverItem.Background = SystemColors.HighlightBrush;
+                mouseOverItem.SetValue(TextElement.ForegroundProperty, SystemColors.HighlightTextBrush);
+                if (!_lbDoorBlkConfig_SelectedItems.Contains(mouseOverItem)) { _lbDoorBlkConfig_SelectedItems.Add(mouseOverItem); }
             }
         }
     }

@@ -274,34 +274,63 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
             ThFloorHeatingCoilInsertService.InsertPolyline(printPipe, ThFloorHeatingCommon.Layer_Coil, true);
         }
 
+        //private void PrintCoilBlk()
+        //{
+        //    var pipes = ProcessedData.PipeList.Where(x => x.ResultPolys != null && x.ResultPolys.Count > 0 && x.ResultPolys[0].Length > 1).ToList();
+
+        //    for (int i = 0; i < pipes.Count; i++)
+        //    {
+        //        var pipe = pipes[i];
+        //        SingleRegion selectRegion;
+        //        var sr = pipe.DomaintRegionList.Select(x => ProcessedData.RegionList[x]).ToList();
+        //        var noPassingSR = sr.Where(x => x.PassingPipeList.Count == 1).ToList();
+        //        if (noPassingSR.Any())
+        //        {
+        //            selectRegion = noPassingSR.OrderByDescending(x => x.ClearedPl.Area).First();
+        //        }
+        //        else
+        //        {
+        //            selectRegion = sr.OrderByDescending(x => x.ClearedPl.Area).First();
+        //        }
+
+        //        var route = i;
+        //        var suggestDist = selectRegion.SuggestDist;
+        //        var length = pipe.ResultPolys.Sum(x => x.Length); ;
+        //        length = Math.Round(length / 1000, MidpointRounding.AwayFromZero);
+
+        //        var insertPt = selectRegion.ClearedPl.GetCenterInPolyline();
+        //        Transformer.Reset(ref insertPt);
+
+        //        ThFloorHeatingCoilInsertService.InsertSuggestBlock(insertPt, route + 1, suggestDist, length, ThFloorHeatingCommon.BlkName_ShowRoute, true);
+        //    }
+        //}
+
         private void PrintCoilBlk()
         {
-            var pipes = ProcessedData.PipeList.Where(x => x.ResultPolys != null && x.ResultPolys.Count > 0 && x.ResultPolys[0].Length > 1).ToList();
+            var routeDict = ThFloorHeatingCreateService.SortSingleRegionRoute(ProcessedData.PipeList);
 
-            for (int i = 0; i < pipes.Count; i++)
+            foreach (var sr in ProcessedData.RegionList)
             {
-                var pipe = pipes[i];
-                SingleRegion selectRegion;
-                var sr = pipe.DomaintRegionList.Select(x => ProcessedData.RegionList[x]).ToList();
-                var noPassingSR = sr.Where(x => x.PassingPipeList.Count == 1).ToList();
-                if (noPassingSR.Any())
+                if (sr.HaveEquipment != 1)
                 {
-                    selectRegion = noPassingSR.OrderByDescending(x => x.ClearedPl.Area).First();
+                    //无集分水器
+                    var suggestDist = sr.SuggestDist;
+                    var route = -2;
+                    var length = 0.0;
+                    if (sr.MainPipe.Count > 0)
+                    {
+                        route = routeDict[sr.MainPipe[0]];
+                        length = ProcessedData.PipeList[sr.MainPipe[0]].ResultPolys.Sum(x => x.Length);
+                        length = Math.Round(length / 1000, MidpointRounding.AwayFromZero);
+
+                        var insertPt = sr.ClearedPl.GetCenterInPolyline();
+                        Transformer.Reset(ref insertPt);
+
+                        var tooLongColor = length > VM.TotalLenthConstraint ? 1 : -1;
+
+                        ThFloorHeatingCoilInsertService.InsertSuggestBlock(insertPt, route + 1, suggestDist, length, ThFloorHeatingCommon.BlkName_ShowRoute, warningColor: tooLongColor);
+                    }
                 }
-                else
-                {
-                    selectRegion = sr.OrderByDescending(x => x.ClearedPl.Area).First();
-                }
-
-                var route = i;
-                var suggestDist = selectRegion.SuggestDist;
-                var length = pipe.ResultPolys.Sum(x => x.Length); ;
-                length = Math.Round(length / 1000, MidpointRounding.AwayFromZero);
-
-                var insertPt = selectRegion.ClearedPl.GetCenterInPolyline();
-                Transformer.Reset(ref insertPt);
-
-                ThFloorHeatingCoilInsertService.InsertSuggestBlock(insertPt, route + 1, suggestDist, length, ThFloorHeatingCommon.BlkName_ShowRoute, true);
             }
         }
 
@@ -425,6 +454,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
             var connectDoor = GetConnectDoor(RoomSet[0]);
 
+            CleanPreviousRoomSeparator(connectDoor);
+
             foreach (var door in connectDoor)
             {
                 var pt0 = door.GetPoint3dAt(0);
@@ -458,6 +489,68 @@ namespace ThMEPHVAC.FloorHeatingCoil.Cmd
 
             lines.ForEach(x => Transformer.Reset(x));
             ThFloorHeatingCoilInsertService.InsertPolyline(lines, ThFloorHeatingCommon.Layer_RoomSeparate);
+        }
+
+        private void CleanPreviousRoomSeparator(List<Polyline> frames)
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                //extract
+                var elementLayer = new List<string>() { ThFloorHeatingCommon.Layer_RoomSeparate };
+                var pllist = ThFloorHeatingDataFactory.ExtractPolylineMsNotClone(acadDatabase.Database, elementLayer);
+                var llist = ThFloorHeatingDataFactory.ExtractLineMsNotClone(acadDatabase.Database, elementLayer);
+
+                //transform
+                var itemDict = new Dictionary<Curve, Curve>(); //key:trans value:ori
+                foreach (var p in pllist)
+                {
+                    var tranP = p.Clone() as Curve;
+                    Transformer.Transform(tranP);
+                    itemDict.Add(tranP, p);
+                }
+                foreach (var p in llist)
+                {
+                    var tranP = p.Clone() as Curve;
+                    Transformer.Transform(tranP);
+                    itemDict.Add(tranP, p);
+                }
+
+                //select
+                var obj = itemDict.Select(x => x.Key).ToCollection();
+                var idx = new ThCADCoreNTSSpatialIndex(obj);
+                var selectItem = new List<Curve>();
+
+                foreach (var frame in frames)
+                {
+                    var frameL1 = frame.GetPoint3dAt(0).DistanceTo(frame.GetPoint3dAt(1));
+                    var frameL2 = frame.GetPoint3dAt(1).DistanceTo(frame.GetPoint3dAt(2));
+                    var frameLength = frameL1 > frameL2 ? frameL1 : frameL2;
+
+                    var selectobj = idx.SelectCrossingPolygon(frame);
+                    var selectItemTemp = selectobj.OfType<Curve>();
+
+                    foreach (var item in selectItemTemp)
+                    {
+                        var trim = frame.Trim(item).OfType<Curve>();
+                        if (trim.Any() && (trim.First().GetLength() / frameLength > 0.6))
+                        {
+                            selectItem.Add(item);
+                        }
+                    }
+                }
+                selectItem = selectItem.Distinct().ToList();
+
+
+                //remove
+                foreach (var tranP in selectItem)
+                {
+                    var p = itemDict[tranP];
+                    p.UpgradeOpen();
+                    p.Erase();
+                    p.DowngradeOpen();
+                }
+            }
         }
 
         private static List<Polyline> GetConnectDoor(ThRoomSetModel roomSet)

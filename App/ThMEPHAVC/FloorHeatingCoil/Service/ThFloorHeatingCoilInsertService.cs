@@ -18,7 +18,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
 {
     public static class ThFloorHeatingCoilInsertService
     {
-        public static void InsertSuggestBlock(Point3d insertPt, int route, double suggestDist, double length, string insertBlkName, bool withColor = false)
+        public static void InsertSuggestBlock(Point3d insertPt, int route, double suggestDist, double length, string insertBlkName, bool withColor = false, int warningColor = -1)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -44,6 +44,14 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     var blk = acadDatabase.Element<BlockReference>(objId);
                     blk.UpgradeOpen();//切换属性对象为写的状态
                     blk.ColorIndex = route % 6;
+                    blk.DowngradeOpen();//为了安全，将属性对象的状态改为读
+                }
+
+                if (warningColor >=0)
+                {
+                    var blk = acadDatabase.Element<BlockReference>(objId);
+                    blk.UpgradeOpen();//切换属性对象为写的状态
+                    blk.ColorIndex = warningColor;
                     blk.DowngradeOpen();//为了安全，将属性对象的状态改为读
                 }
             }
@@ -201,9 +209,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                     LayerTools.UnLockLayer(database, item);
                     LayerTools.UnFrozenLayer(database, item);
                     LayerTools.UnOffLayer(database, item);
+                    LayerTools.SetPrintLayer(database, item, layer.IsPlottable);
 
                     ThFloorHeatingCommon.LayerLineType.TryGetValue(item, out var lineType);
-                    if (lineType==null || lineType=="")
+                    if (lineType == null || lineType == "")
                     {
                         continue;
                     }
@@ -212,7 +221,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Service
                         continue;
                     currentDb.Linetypes.Import(lineTypesTemplate, true);
 
-                  
                 }
             }
         }

@@ -36,10 +36,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance, Entity entity)
         {
-            var sprinklersClone = sprinklers.OfType<ThSprinkler>()
-                .Where(o => o.Category == Category)
-                .Where(o => entity.EntityContains(o.Position))
-                .ToList();
+            var sprinklersClone = sprinklers.OfType<ThSprinkler>().Where(o => o.Category == Category).Where(o => entity.EntityContains(o.Position)).ToList();
             var result = new HashSet<Line>();
             while (sprinklersClone.Count > 0)
             {
@@ -48,7 +45,13 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var kdTree = new ThCADCoreNTSKdTree(1.0);
                 sprinklersClone.ForEach(o => kdTree.InsertPoint(o.Position));
                 var closePointList = ThSprinklerKdTreeService.QueryOther(kdTree, position, tolerance);
-                closePointList.ForEach(o => result.Add(new Line(position, o)));
+                closePointList.ForEach(o =>
+                {
+                    if (position.DistanceTo(o) > 1.0)
+                    {
+                        result.Add(new Line(position, o));
+                    }
+                });
             }
             return result;
         }
@@ -56,17 +59,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
         private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Entity entity)
         {
             var polygon = entity.ToNTSPolygonalGeometry();
-            var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("Height")
-                                                      || Convert.ToDouble(g.Properties["Height"]) > BeamHeight)
-                                             .Select(g => g.Boundary)
-                                             .Where(g => polygon.Intersects(g.ToNTSGeometry()))
-                                             .ToCollection();
+            var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("Height") || Convert.ToDouble(g.Properties["Height"]) > BeamHeight).Select(g => g.Boundary).Where(g => polygon.Intersects(g.ToNTSGeometry())).ToCollection();
             var result = new HashSet<Line>();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
             lines.ForEach(o =>
             {
-                var line = new Line(o.StartPoint, o.EndPoint);
-                var filter = spatialIndex.SelectCrossingPolygon(line.Buffer(1.0));
+                var filter = spatialIndex.SelectCrossingPolygon(o.Buffer(1.0));
                 if (filter.Count == 0)
                 {
                     result.Add(o);

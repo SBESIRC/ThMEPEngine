@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
@@ -33,6 +34,26 @@ namespace ThPlatform3D.ArchitecturePlane.Service
                 }
             });
             return results;
+        }
+
+        public static List<ThGeometry> GetKanXians(this List<ThGeometry> geos)
+        {
+            return geos.Where(o => o.Properties.IsKanXian()).ToList();
+        }
+
+        public static List<ThGeometry> GetDuanMians(this List<ThGeometry> geos)
+        {
+            return geos.Where(o => o.Properties.IsDuanMian()).ToList();
+        }
+
+        public static List<ThGeometry> GetHiddenKanXians(this List<ThGeometry> geos)
+        {
+            return GetKanXians(geos).Where(o => o.Properties.IsHiddenKanXian()).ToList();
+        }
+
+        public static bool IsHiddenKanXian(this Dictionary<string,object> properties)
+        {
+            return properties.GetLineType().ToUpper() == "HIDDEN";
         }
     }
 }

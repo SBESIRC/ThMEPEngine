@@ -36,10 +36,15 @@ namespace ThMEPHVAC.FloorHeatingCoil
         double buffer_coefficent = 0.8;                             // 向内做buffer的系数，需要大于0.5
         double buffer_threshold = 150;                                     // 最小间距
 
+        // 移动到原点
+        bool if_move_to_origin = true;
+        Vector3d transform_vector = new Vector3d(0, 0, 0);
+
         RoomPipeGenerator1() { }
 
         public RoomPipeGenerator1(Polyline room, List<DrawPipeData> pipe_in_list, double buffer, double room_buffer = 100)
         {
+            PreMove(room, pipe_in_list, 0, if_move_to_origin);
             this.room = SmoothUtils.SmoothPolygonByRoundXY(room);
             pipe_in_list[0].CenterPoint = room.GetClosestPointTo(pipe_in_list[0].CenterPoint, false);
             this.pipe_input = new PipeInput(pipe_in_list[0]);
@@ -49,12 +54,42 @@ namespace ThMEPHVAC.FloorHeatingCoil
             output = new PipeOutput();
             output.pipe_id = 0;
             output.skeleton = new List<Polyline>();
+            PreMove(room, pipe_in_list, 1, if_move_to_origin);
         }
         public void CalculatePipeline()
         {
             buffer_tree = GetBufferTree(room,0);
 
             AddInputSegment();
+            RecoverMove(if_move_to_origin);
+        }
+        void PreMove(Polyline region, List<DrawPipeData> pipe_in_list, int mode = 0, bool is_move = false)
+        {
+            // 参数mode
+            // 0:将输入移动到原点
+            // 1:恢复输入
+            Matrix3d m = Matrix3d.Identity;
+            if (is_move == false) return;
+            if (mode == 0)
+            {
+                transform_vector = Point3d.Origin - region.GetPoint3dAt(0);
+                m = Matrix3d.Displacement(transform_vector);
+            }
+            else
+            {
+                m = Matrix3d.Displacement(-transform_vector);
+            }
+            // 输入区域移动
+            region.TransformBy(m);
+            // 输入点位移动
+            pipe_in_list[0].TransformBy(m);
+        }
+        void RecoverMove(bool is_move = false)
+        {
+            if (is_move == false)
+                return;
+            Matrix3d m = Matrix3d.Displacement(-transform_vector);
+            output.TransformBy(m);
         }
         BufferTreeNode GetBufferTree(Polyline poly, int depth, bool flag = true, BufferTreeNode parent = null)
         {

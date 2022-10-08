@@ -228,6 +228,11 @@ namespace ThPlatform3D.ArchitecturePlane.Service
             {
                 return 0.0;
             }
+        }  
+        public static double ToDouble(this string value)
+        {
+            var values = value.GetDoubles();
+            return values.Count == 1 ? values[0] : 0.0;
         }
     }
 }

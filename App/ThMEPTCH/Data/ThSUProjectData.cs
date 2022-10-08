@@ -23,13 +23,15 @@ public static partial class ThSUProjectDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChVUaFNVUHJvamVjdERhdGEucHJvdG8aE1RoVENIUm9vdERhdGEucHJvdG8a",
-          "HVRoU1VCdWlsZGluZ0VsZW1lbnREYXRhLnByb3RvIlwKD1RoU1VQcm9qZWN0",
-          "RGF0YRIcCgRyb290GAEgASgLMg4uVGhUQ0hSb290RGF0YRIrCglidWlsZGlu",
-          "Z3MYAiADKAsyGC5UaFNVQnVpbGRpbmdFbGVtZW50RGF0YWIGcHJvdG8z"));
+          "HVRoU1VCdWlsZGluZ0VsZW1lbnREYXRhLnByb3RvGhxUaFNVQ29tcERlZmlu",
+          "aXRpb25EYXRhLnByb3RvIooBCg9UaFNVUHJvamVjdERhdGESHAoEcm9vdBgB",
+          "IAEoCzIOLlRoVENIUm9vdERhdGESKwoJYnVpbGRpbmdzGAIgAygLMhguVGhT",
+          "VUJ1aWxkaW5nRWxlbWVudERhdGESLAoLZGVmaW5pdGlvbnMYAyADKAsyFy5U",
+          "aFNVQ29tcERlZmluaXRpb25EYXRhYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThSUBuildingElementDataReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThSUBuildingElementDataReflection.Descriptor, global::ThSUCompDefinitionDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUProjectData), global::ThSUProjectData.Parser, new[]{ "Root", "Buildings" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUProjectData), global::ThSUProjectData.Parser, new[]{ "Root", "Buildings", "Definitions" }, null, null, null, null)
         }));
   }
   #endregion
@@ -72,6 +74,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
   public ThSUProjectData(ThSUProjectData other) : this() {
     root_ = other.root_ != null ? other.root_.Clone() : null;
     buildings_ = other.buildings_.Clone();
+    definitions_ = other.definitions_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -104,6 +107,17 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     get { return buildings_; }
   }
 
+  /// <summary>Field number for the "definitions" field.</summary>
+  public const int DefinitionsFieldNumber = 3;
+  private static readonly pb::FieldCodec<global::ThSUCompDefinitionData> _repeated_definitions_codec
+      = pb::FieldCodec.ForMessage(26, global::ThSUCompDefinitionData.Parser);
+  private readonly pbc::RepeatedField<global::ThSUCompDefinitionData> definitions_ = new pbc::RepeatedField<global::ThSUCompDefinitionData>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public pbc::RepeatedField<global::ThSUCompDefinitionData> Definitions {
+    get { return definitions_; }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -121,6 +135,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     }
     if (!object.Equals(Root, other.Root)) return false;
     if(!buildings_.Equals(other.buildings_)) return false;
+    if(!definitions_.Equals(other.definitions_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -130,6 +145,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     int hash = 1;
     if (root_ != null) hash ^= Root.GetHashCode();
     hash ^= buildings_.GetHashCode();
+    hash ^= definitions_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -153,6 +169,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
       output.WriteMessage(Root);
     }
     buildings_.WriteTo(output, _repeated_buildings_codec);
+    definitions_.WriteTo(output, _repeated_definitions_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -168,6 +185,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
       output.WriteMessage(Root);
     }
     buildings_.WriteTo(ref output, _repeated_buildings_codec);
+    definitions_.WriteTo(ref output, _repeated_definitions_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -182,6 +200,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Root);
     }
     size += buildings_.CalculateSize(_repeated_buildings_codec);
+    size += definitions_.CalculateSize(_repeated_definitions_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -201,6 +220,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
       Root.MergeFrom(other.Root);
     }
     buildings_.Add(other.buildings_);
+    definitions_.Add(other.definitions_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -227,6 +247,10 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
           buildings_.AddEntriesFrom(input, _repeated_buildings_codec);
           break;
         }
+        case 26: {
+          definitions_.AddEntriesFrom(input, _repeated_definitions_codec);
+          break;
+        }
       }
     }
   #endif
@@ -251,6 +275,10 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
         }
         case 18: {
           buildings_.AddEntriesFrom(ref input, _repeated_buildings_codec);
+          break;
+        }
+        case 26: {
+          definitions_.AddEntriesFrom(ref input, _repeated_definitions_codec);
           break;
         }
       }

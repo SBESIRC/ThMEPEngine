@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +48,17 @@ namespace ThMEPHVAC.FloorHeatingCoil
             foreach (var poly in skeleton)
                 poly.ColorIndex = pipe_id % 7 + 1;
             shape.ColorIndex = pipe_id % 7 + 1;
+        }
+
+        public void TransformBy(Matrix3d matrix)
+        {
+            if (shape != null)
+                shape.TransformBy(matrix);
+            if (skeleton != null)
+            {
+                for (int i = 0; i < skeleton.Count; ++i)
+                    skeleton[i].TransformBy(matrix);
+            }
         }
     }
 }

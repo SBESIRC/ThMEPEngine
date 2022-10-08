@@ -25,22 +25,32 @@ public static partial class ThTCHWallDataReflection {
           "ChNUaFRDSFdhbGxEYXRhLnByb3RvGhNUaFRDSEdlb21ldHJ5LnByb3RvGhNU",
           "aFRDSERvb3JEYXRhLnByb3RvGhVUaFRDSFdpbmRvd0RhdGEucHJvdG8aFlRo",
           "VENIT3BlbmluZ0RhdGEucHJvdG8aG1RoVENIQnVpbHRFbGVtZW50RGF0YS5w",
-          "cm90byKUAgoNVGhUQ0hXYWxsRGF0YRItCg1idWlsZF9lbGVtZW50GAEgASgL",
+          "cm90byK2AgoNVGhUQ0hXYWxsRGF0YRItCg1idWlsZF9lbGVtZW50GAEgASgL",
           "MhYuVGhUQ0hCdWlsdEVsZW1lbnREYXRhEhIKCmxlZnRfd2lkdGgYAiABKAES",
           "EwoLcmlnaHRfd2lkdGgYAyABKAESIgoLc3RhcnRfcG9pbnQYBCABKAsyDS5U",
           "aFRDSFBvaW50M2QSIAoJZW5kX3BvaW50GAUgASgLMg0uVGhUQ0hQb2ludDNk",
           "Eh0KBWRvb3JzGAYgAygLMg4uVGhUQ0hEb29yRGF0YRIhCgd3aW5kb3dzGAcg",
           "AygLMhAuVGhUQ0hXaW5kb3dEYXRhEiMKCG9wZW5pbmdzGAggAygLMhEuVGhU",
-          "Q0hPcGVuaW5nRGF0YWIGcHJvdG8z"));
+          "Q0hPcGVuaW5nRGF0YRIgCgl3YWxsX3R5cGUYCSABKA4yDS5XYWxsVHlwZUVu",
+          "dW0qKwoMV2FsbFR5cGVFbnVtEhAKDFBBUlRJVElPTklORxAAEgkKBVNIRUFS",
+          "EAFiBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, global::ThTCHDoorDataReflection.Descriptor, global::ThTCHWindowDataReflection.Descriptor, global::ThTCHOpeningDataReflection.Descriptor, global::ThTCHBuiltElementDataReflection.Descriptor, },
-        new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHWallData), global::ThTCHWallData.Parser, new[]{ "BuildElement", "LeftWidth", "RightWidth", "StartPoint", "EndPoint", "Doors", "Windows", "Openings" }, null, null, null, null)
+        new pbr::GeneratedClrTypeInfo(new[] {typeof(global::WallTypeEnum), }, null, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHWallData), global::ThTCHWallData.Parser, new[]{ "BuildElement", "LeftWidth", "RightWidth", "StartPoint", "EndPoint", "Doors", "Windows", "Openings", "WallType" }, null, null, null, null)
         }));
   }
   #endregion
 
 }
+#region Enums
+public enum WallTypeEnum {
+  [pbr::OriginalName("PARTITIONING")] Partitioning = 0,
+  [pbr::OriginalName("SHEAR")] Shear = 1,
+}
+
+#endregion
+
 #region Messages
 public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
 #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -84,6 +94,7 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
     doors_ = other.doors_.Clone();
     windows_ = other.windows_.Clone();
     openings_ = other.openings_.Clone();
+    wallType_ = other.wallType_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -186,6 +197,18 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
     get { return openings_; }
   }
 
+  /// <summary>Field number for the "wall_type" field.</summary>
+  public const int WallTypeFieldNumber = 9;
+  private global::WallTypeEnum wallType_ = global::WallTypeEnum.Partitioning;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::WallTypeEnum WallType {
+    get { return wallType_; }
+    set {
+      wallType_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -209,6 +232,7 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
     if(!doors_.Equals(other.doors_)) return false;
     if(!windows_.Equals(other.windows_)) return false;
     if(!openings_.Equals(other.openings_)) return false;
+    if (WallType != other.WallType) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -224,6 +248,7 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
     hash ^= doors_.GetHashCode();
     hash ^= windows_.GetHashCode();
     hash ^= openings_.GetHashCode();
+    if (WallType != global::WallTypeEnum.Partitioning) hash ^= WallType.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -265,6 +290,10 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
     doors_.WriteTo(output, _repeated_doors_codec);
     windows_.WriteTo(output, _repeated_windows_codec);
     openings_.WriteTo(output, _repeated_openings_codec);
+    if (WallType != global::WallTypeEnum.Partitioning) {
+      output.WriteRawTag(72);
+      output.WriteEnum((int) WallType);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -298,6 +327,10 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
     doors_.WriteTo(ref output, _repeated_doors_codec);
     windows_.WriteTo(ref output, _repeated_windows_codec);
     openings_.WriteTo(ref output, _repeated_openings_codec);
+    if (WallType != global::WallTypeEnum.Partitioning) {
+      output.WriteRawTag(72);
+      output.WriteEnum((int) WallType);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -326,6 +359,9 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
     size += doors_.CalculateSize(_repeated_doors_codec);
     size += windows_.CalculateSize(_repeated_windows_codec);
     size += openings_.CalculateSize(_repeated_openings_codec);
+    if (WallType != global::WallTypeEnum.Partitioning) {
+      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) WallType);
+    }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -365,6 +401,9 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
     doors_.Add(other.doors_);
     windows_.Add(other.windows_);
     openings_.Add(other.openings_);
+    if (other.WallType != global::WallTypeEnum.Partitioning) {
+      WallType = other.WallType;
+    }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -421,6 +460,10 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
           openings_.AddEntriesFrom(input, _repeated_openings_codec);
           break;
         }
+        case 72: {
+          WallType = (global::WallTypeEnum) input.ReadEnum();
+          break;
+        }
       }
     }
   #endif
@@ -475,6 +518,10 @@ public sealed partial class ThTCHWallData : pb::IMessage<ThTCHWallData>
         }
         case 66: {
           openings_.AddEntriesFrom(ref input, _repeated_openings_codec);
+          break;
+        }
+        case 72: {
+          WallType = (global::WallTypeEnum) input.ReadEnum();
           break;
         }
       }

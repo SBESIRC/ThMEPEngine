@@ -13,6 +13,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
     {
         public Point3d pin;
         public Point3d pout = new Point3d(0, 0, 0);
+        public Point3d origin_pout = new Point3d(0, 0, 0);
         public double in_buffer;
         public double out_buffer = -1;
         public int start_dir = -1;
@@ -43,7 +44,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
             // id
             this.pipe_id = pin_data.PipeId;
             // center
-            this.pin = new Point3d((int)pin_data.CenterPoint.X, (int)pin_data.CenterPoint.Y, 0);
+            //this.pin = new Point3d((int)pin_data.CenterPoint.X, (int)pin_data.CenterPoint.Y, 0);
+            this.pin = new Point3d(pin_data.CenterPoint.X, pin_data.CenterPoint.Y, 0);
             // buffer
             this.in_buffer = pin_data.HalfPipeWidth;
             // freedom
@@ -57,11 +59,16 @@ namespace ThMEPHVAC.FloorHeatingCoil
             this.pipe_id = pin_data.PipeId;
             this.door_id = pout_data.DoorId;
             // center
-            this.pin = new Point3d((int)pin_data.CenterPoint.X, (int)pin_data.CenterPoint.Y, 0);
-            this.pout = new Point3d((int)pout_data.CenterPoint.X, (int)pout_data.CenterPoint.Y, 0);
-            // out door
-            door_left = new Point3d((int)pout_data.DoorLeft.X, (int)pout_data.DoorLeft.Y, 0);
-            door_right = new Point3d((int)pout_data.DoorRight.X, (int)pout_data.DoorRight.Y, 0);
+            //this.pin = new Point3d((int)pin_data.CenterPoint.X, (int)pin_data.CenterPoint.Y, 0);
+            //this.pout = new Point3d((int)pout_data.CenterPoint.X, (int)pout_data.CenterPoint.Y, 0);
+            this.pin = new Point3d(pin_data.CenterPoint.X, pin_data.CenterPoint.Y, 0);
+            this.pout = new Point3d(pout_data.CenterPoint.X, pout_data.CenterPoint.Y, 0);
+            origin_pout = new Point3d(pout.X, pout.Y, pout.Z);
+            //// out door
+            //door_left = new Point3d((int)pout_data.DoorLeft.X, (int)pout_data.DoorLeft.Y, 0);
+            //door_right = new Point3d((int)pout_data.DoorRight.X, (int)pout_data.DoorRight.Y, 0);
+            this.door_left = new Point3d(pout_data.DoorLeft.X, pout_data.DoorLeft.Y, 0);
+            this.door_right = new Point3d(pout_data.DoorRight.X, pout_data.DoorRight.Y, 0);
             // buffer
             this.in_buffer = pin_data.HalfPipeWidth;
             this.out_buffer = pout_data.HalfPipeWidth;
@@ -77,7 +84,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             if (!PassageWayUtils.PointOnSegment(p, door_left, door_right))
                 return false;
-            return p.DistanceTo(door_left) > hpw + rb && p.DistanceTo(door_right) > hpw + rb;
+            return p.DistanceTo(door_left) >= hpw + rb && p.DistanceTo(door_right) >= hpw + rb;
         }
     }
 }

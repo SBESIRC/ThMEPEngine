@@ -6,7 +6,6 @@ import "ThTCHGeometry.proto";
 import "ThTCHWindowData.proto";
 import "ThTCHSlabData.proto";
 import "ThTCHRailingData.proto";
-import "ThTCHOpeningData.proto";
 import "ThTCHRoomData.proto";
 import "ThGridLineSyetemData.proto";
 

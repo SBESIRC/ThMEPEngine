@@ -23,19 +23,28 @@ public static partial class ThTCHSlabDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChNUaFRDSFNsYWJEYXRhLnByb3RvGhlUaFRDSERlc2NlbmRpbmdEYXRhLnBy",
-          "b3RvGhtUaFRDSEJ1aWx0RWxlbWVudERhdGEucHJvdG8iaQoNVGhUQ0hTbGFi",
-          "RGF0YRItCg1idWlsZF9lbGVtZW50GAEgASgLMhYuVGhUQ0hCdWlsdEVsZW1l",
-          "bnREYXRhEikKC2Rlc2NlbmRpbmdzGAIgAygLMhQuVGhUQ0hEZXNjZW5kaW5n",
-          "RGF0YWIGcHJvdG8z"));
+          "b3RvGhtUaFRDSEJ1aWx0RWxlbWVudERhdGEucHJvdG8iiwEKDVRoVENIU2xh",
+          "YkRhdGESLQoNYnVpbGRfZWxlbWVudBgBIAEoCzIWLlRoVENIQnVpbHRFbGVt",
+          "ZW50RGF0YRIpCgtkZXNjZW5kaW5ncxgCIAMoCzIULlRoVENIRGVzY2VuZGlu",
+          "Z0RhdGESIAoJc2xhYl90eXBlGAMgASgOMg0uU2xhYlR5cGVFbnVtKigKDFNs",
+          "YWJUeXBlRW51bRIJCgVGTE9PUhAAEg0KCUJBU0VfU0xBQhABYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHDescendingDataReflection.Descriptor, global::ThTCHBuiltElementDataReflection.Descriptor, },
-        new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHSlabData), global::ThTCHSlabData.Parser, new[]{ "BuildElement", "Descendings" }, null, null, null, null)
+        new pbr::GeneratedClrTypeInfo(new[] {typeof(global::SlabTypeEnum), }, null, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHSlabData), global::ThTCHSlabData.Parser, new[]{ "BuildElement", "Descendings", "SlabType" }, null, null, null, null)
         }));
   }
   #endregion
 
 }
+#region Enums
+public enum SlabTypeEnum {
+  [pbr::OriginalName("FLOOR")] Floor = 0,
+  [pbr::OriginalName("BASE_SLAB")] BaseSlab = 1,
+}
+
+#endregion
+
 #region Messages
 public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
 #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
@@ -73,6 +82,7 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
   public ThTCHSlabData(ThTCHSlabData other) : this() {
     buildElement_ = other.buildElement_ != null ? other.buildElement_.Clone() : null;
     descendings_ = other.descendings_.Clone();
+    slabType_ = other.slabType_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -105,6 +115,18 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
     get { return descendings_; }
   }
 
+  /// <summary>Field number for the "slab_type" field.</summary>
+  public const int SlabTypeFieldNumber = 3;
+  private global::SlabTypeEnum slabType_ = global::SlabTypeEnum.Floor;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public global::SlabTypeEnum SlabType {
+    get { return slabType_; }
+    set {
+      slabType_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -122,6 +144,7 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
     }
     if (!object.Equals(BuildElement, other.BuildElement)) return false;
     if(!descendings_.Equals(other.descendings_)) return false;
+    if (SlabType != other.SlabType) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -131,6 +154,7 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
     int hash = 1;
     if (buildElement_ != null) hash ^= BuildElement.GetHashCode();
     hash ^= descendings_.GetHashCode();
+    if (SlabType != global::SlabTypeEnum.Floor) hash ^= SlabType.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -154,6 +178,10 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
       output.WriteMessage(BuildElement);
     }
     descendings_.WriteTo(output, _repeated_descendings_codec);
+    if (SlabType != global::SlabTypeEnum.Floor) {
+      output.WriteRawTag(24);
+      output.WriteEnum((int) SlabType);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -169,6 +197,10 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
       output.WriteMessage(BuildElement);
     }
     descendings_.WriteTo(ref output, _repeated_descendings_codec);
+    if (SlabType != global::SlabTypeEnum.Floor) {
+      output.WriteRawTag(24);
+      output.WriteEnum((int) SlabType);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -183,6 +215,9 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(BuildElement);
     }
     size += descendings_.CalculateSize(_repeated_descendings_codec);
+    if (SlabType != global::SlabTypeEnum.Floor) {
+      size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) SlabType);
+    }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -202,6 +237,9 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
       BuildElement.MergeFrom(other.BuildElement);
     }
     descendings_.Add(other.descendings_);
+    if (other.SlabType != global::SlabTypeEnum.Floor) {
+      SlabType = other.SlabType;
+    }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -228,6 +266,10 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
           descendings_.AddEntriesFrom(input, _repeated_descendings_codec);
           break;
         }
+        case 24: {
+          SlabType = (global::SlabTypeEnum) input.ReadEnum();
+          break;
+        }
       }
     }
   #endif
@@ -252,6 +294,10 @@ public sealed partial class ThTCHSlabData : pb::IMessage<ThTCHSlabData>
         }
         case 18: {
           descendings_.AddEntriesFrom(ref input, _repeated_descendings_codec);
+          break;
+        }
+        case 24: {
+          SlabType = (global::SlabTypeEnum) input.ReadEnum();
           break;
         }
       }
