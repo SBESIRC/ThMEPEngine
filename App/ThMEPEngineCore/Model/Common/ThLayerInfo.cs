@@ -71,7 +71,7 @@ namespace ThMEPEngineCore.Model.Common
             // 未绑定外参
             if (xrefLayer.Matches("*|*"))
             {
-                return xrefLayer.Substring(0, xrefLayer.IndexOf('*'));
+                return xrefLayer.Substring(0, xrefLayer.IndexOf('|'));
             }
 
             // 其他非外参
