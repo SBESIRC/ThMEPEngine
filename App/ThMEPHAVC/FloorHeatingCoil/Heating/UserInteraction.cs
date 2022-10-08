@@ -560,6 +560,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Parameter.ClearSingleBufferDis = Parameter.SuggestDistanceRoom + 10;    //清理耳朵时的延长长度
             Parameter.ClearWholePipeDis = 50;
 
+            Parameter.SmallCoefficient = 1;
+
         }
 
         public void check()
