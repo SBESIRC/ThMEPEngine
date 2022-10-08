@@ -71,7 +71,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         static public List<SinglePipe> PipeList = new List<SinglePipe>();
         static public Dictionary<Tuple<int, int>, PipePoint> DoorPipeToPointMap = new Dictionary<Tuple<int, int>, PipePoint>();
-        static public Dictionary<int, int> MainPipeLeftRight = new Dictionary<int, int>();
 
         //散热器
         public static int RadiatorRegion = -1;
@@ -177,9 +176,6 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         //判断点是否在直线上
         static public double SmallTolerance = 0.1;
-
-        //主导管线容差
-        static public double SmallCoefficient = 1;
     }
 
     class TestData

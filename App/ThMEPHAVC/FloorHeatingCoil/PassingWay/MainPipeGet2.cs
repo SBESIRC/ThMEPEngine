@@ -215,7 +215,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
         {
             //容差
             double smallCoefficient = 1;
-            if (isSmall == 1) smallCoefficient = Parameter.SmallCoefficient;
+            if (isSmall == 1) smallCoefficient = 0.85;
 
             //管道中心线
             List<Polyline> pipeInputs = new List<Polyline>();
@@ -1026,53 +1026,46 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 bool recC = Math.Abs(close.X - closeContrary.X) < 1 || Math.Abs(close.Y - closeContrary.Y) < 1;
 
                 double tmpRoadDis = GetDis(MainPipeRoad, close);
-                if (rec)
+                if (nowDis < minDis - 20 || nowDis < Buffer * 1.5 + 20)
                 {
-                    if (nowDis < minDis - 20 || nowDis < Buffer * 1.5 + 20)
-                    {
-                        if (tmpRoadDis < roadDis + 20)
-                        {
-                            minDis = nowDis;
-                            pin = close;
-                            point = nowPt;
-                            roadDis = tmpRoadDis;
-                        }
+                    if (tmpRoadDis < roadDis + 20) {
+                        minDis = nowDis;
+                        pin = close;
+                        point = nowPt;
+                        roadDis = tmpRoadDis;
                     }
-                    //else if (Math.Abs(nowDis - minDis) < 20 && rec)
-                    //{
-                    //    bool oldRec = Math.Abs(pin.X - point.X) < 1 || Math.Abs(point.Y - pin.Y) < 1;
-                    //    if ((tmpRoadDis < roadDis || (!oldRec && rec)) && true)
-                    //    {
-                    //        minDis = nowDis;
-                    //        pin = close;
-                    //        point = nowPt;
-                    //        roadDis = tmpRoadDis;
-                    //    }
-                    //}
+                }
+                else if (Math.Abs(nowDis - minDis) < 20 && rec)
+                {
+                    bool oldRec = Math.Abs(pin.X - point.X) < 1 || Math.Abs(point.Y - pin.Y) < 1;
+                    if ((tmpRoadDis < roadDis || (!oldRec && rec)) && true)
+                    {
+                        minDis = nowDis;
+                        pin = close;
+                        point = nowPt;
+                        roadDis = tmpRoadDis;
+                    }
                 }
 
-                if (recC)
+                if (nowDisC < minDis - 20 || nowDisC < Buffer * 1.5 +20)
                 {
-                    if (nowDisC < minDis - 20 || nowDisC < Buffer * 1.5 + 20)
+                    if (tmpRoadDis < roadDis + 20)
                     {
-                        if (tmpRoadDis < roadDis + 20)
-                        {
-                            minDis = nowDisC;
-                            pin = close;
-                            point = closeContrary;
-                            roadDis = tmpRoadDis;
-                        }
+                        minDis = nowDisC;
+                        pin = close;
+                        point = closeContrary;
+                        roadDis = tmpRoadDis;
                     }
-                    else if (Math.Abs(nowDisC - minDis) < 20 && recC)
+                }
+                else if (Math.Abs(nowDisC - minDis) < 20 && recC)
+                {
+                    bool oldRec = Math.Abs(pin.X - point.X) < 1 || Math.Abs(point.Y - pin.Y) < 1;
+                    if ((tmpRoadDis < roadDis || (!oldRec && recC)) && true)
                     {
-                        bool oldRec = Math.Abs(pin.X - point.X) < 1 || Math.Abs(point.Y - pin.Y) < 1;
-                        if ((tmpRoadDis < roadDis || (!oldRec && recC)) && true)
-                        {
-                            minDis = nowDisC;
-                            pin = close;
-                            point = closeContrary;
-                            roadDis = tmpRoadDis;
-                        }
+                        minDis = nowDisC;
+                        pin = close;
+                        point = closeContrary;
+                        roadDis = tmpRoadDis;
                     }
                 }
             }

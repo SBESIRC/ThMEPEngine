@@ -46,7 +46,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
             this.equispaced_segments = equispaced_segments;
             this.equispaced_lines = equispaces_lines;
             this.equispaced_buffers = equispaced_buffers;
-            this.if_move_last2_segment = if_move_last2_segment;
 
             shortest_way = new List<BufferPoly>();
             for (int i = 0; i < pipe_inputs.Count; ++i)

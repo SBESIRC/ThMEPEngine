@@ -71,7 +71,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             ShortDir = ShortSide.GetNormal();
         }
 
-        //单侧延伸  左侧延伸
+        //单侧延伸
         public static Polyline CreateRectangle2(Point3d pt0, Point3d pt1, double length)
         {
             Vector3d dir = pt1 - pt0;
@@ -1001,8 +1001,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             // 点集重排列
             var points = PassageWayUtils.GetPolyPoints(originPl);
             points = SmoothUtils.SmoothPoints(points);
-            var si = PassageWayUtils.GetPointIndex(fixList[0], points,5);
-            var ei = PassageWayUtils.GetPointIndex(fixList[1], points,5);
+            var si = PassageWayUtils.GetPointIndex(fixList[0], points);
+            var ei = PassageWayUtils.GetPointIndex(fixList[1], points);
             int pCount = points.Count;
 
             if (si == -1 || ei == -1) 
@@ -1020,8 +1020,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 }
             }
 
-            si = PassageWayUtils.GetPointIndex(fixList[0], points,5);
-            ei = PassageWayUtils.GetPointIndex(fixList[1], points,5);
+            si = PassageWayUtils.GetPointIndex(fixList[0], points);
+            ei = PassageWayUtils.GetPointIndex(fixList[1], points);
 
             if (si == -1 || ei == -1) return originPl;
 
@@ -1077,7 +1077,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Point3d pt2 = newPl.GetPoint3dAt(i + 2);
                 Point3d pt3 = newPl.GetPoint3dAt(i + 3);
 
-                if ((pt2 - pt1).Length < 21 && (pt2 - pt1).Length > 19)
+                if ((pt2 - pt1).Length < 31 && (pt2 - pt1).Length > 29)
                 {
                     int stop = 0;
                 }
@@ -1086,9 +1086,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Vector3d vec1 = pt2 - pt1;
                 Vector3d vec2 = pt3 - pt2;
 
-                if ((Math.Abs(vec0.X) > 5 && Math.Abs(vec0.Y) > 5) ||
-                    (Math.Abs(vec1.X) > 5 && Math.Abs(vec1.Y) > 5) ||
-                    (Math.Abs(vec2.X) > 5 && Math.Abs(vec2.Y) > 5)) continue;
+                if ((Math.Abs(vec0.X) > 2 && Math.Abs(vec0.Y) > 2) ||
+                    (Math.Abs(vec1.X) > 2 && Math.Abs(vec1.Y) > 2) ||
+                    (Math.Abs(vec2.X) > 2 && Math.Abs(vec2.Y) > 2)) continue;
 
 
                 bool isTurnBack = false;
