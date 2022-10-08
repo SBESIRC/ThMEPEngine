@@ -38,9 +38,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
         List<BufferPoly> shortest_way { get; set; }
 
         // 默认开关
-        bool if_move_last2_segment = false;           // 是否去除倒数第二段
+        bool if_move_last2_segment = true;           // 是否去除倒数第二段
         bool if_move_to_origin = true;                // 是否移动到原点
-        bool ifdef_main_pipe_direction = false;       // 是否按照传入的方向定义主导管线转向
+        bool ifdef_main_pipe_direction = true;       // 是否按照传入的方向定义主导管线转向 -1：默认  0:右，1：左
         Vector3d transform_vector = new Vector3d(0, 0, 0);
         bool main_pipe_turn_left = false;
 
