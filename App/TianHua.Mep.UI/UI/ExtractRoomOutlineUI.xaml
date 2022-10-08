@@ -47,10 +47,17 @@
                 <Button Name="btnDeleteLayer" Width="60" Margin="5,0" Content="删除图层" Template="{StaticResource ButtonTemplate}" Height="20" Click="btnDeleteLayer_Click"></Button>
             </StackPanel>
         </Grid>
-        <ListBox Grid.Row="1" Grid.Column="0" x:Name="listBox" 
+        <ListBox Grid.Row="1" Grid.Column="0" x:Name="lbArchwallLayerConfig"
                              ScrollViewer.HorizontalScrollBarVisibility="Visible"
                              ScrollViewer.VerticalScrollBarVisibility="Visible"
-                             SelectionMode="Multiple" ItemsSource="{Binding LayerInfos}" Margin="5">
+                             SelectionMode="Extended" ItemsSource="{Binding LayerInfos}" Margin="5">
+            <ListBox.Resources>
+                <Style TargetType="{x:Type ListBoxItem}">
+                    <EventSetter Event="ListBoxItem.PreviewMouseLeftButtonDown" Handler="lbArchwallLayerConfig_lbItem_PreviewMouseLeftButtonDown"/>
+                    <EventSetter Event="ListBoxItem.PreviewMouseUp" Handler="lbArchwallLayerConfig_lbItem_PreviewMouseUp"/>
+                    <EventSetter Event="ListBoxItem.PreviewMouseMove" Handler="lbArchwallLayerConfig_lbItem_PreviewMouseMove"/>
+                </Style>
+            </ListBox.Resources>
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel>
@@ -94,7 +101,14 @@
                          x:Name="lbDoorBlkConfig" 
                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
-                             SelectionMode="Multiple" ItemsSource="{Binding DoorBlkInfos}" Margin="5">
+                             SelectionMode="Extended" ItemsSource="{Binding DoorBlkInfos}" Margin="5">
+                    <ListBox.Resources>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <EventSetter Event="ListBoxItem.PreviewMouseLeftButtonDown" Handler="lbDoorBlkConfig_lbItem_PreviewMouseLeftButtonDown"/>
+                            <EventSetter Event="ListBoxItem.PreviewMouseUp" Handler="lbDoorBlkConfig_lbItem_PreviewMouseUp"/>
+                            <EventSetter Event="ListBoxItem.PreviewMouseMove" Handler="lbDoorBlkConfig_lbItem_PreviewMouseMove"/>
+                        </Style>
+                    </ListBox.Resources>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <StackPanel>

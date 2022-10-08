@@ -35,6 +35,7 @@ namespace TianHua.Mep.UI.ViewModel
         public ObservableCollection<ThBlockInfo> DoorBlkInfos { get; set; }
 
         private bool _isShowDoorOpenState = false;
+        private bool _isExtractDoorObbs = false;
         public bool IsShowDoorOpenState
         {
             get => _isShowDoorOpenState;
@@ -336,14 +337,15 @@ namespace TianHua.Mep.UI.ViewModel
         {
             using (var docLock = Active.Document.LockDocument())
             {
-                if (_doorBlkObbs.Count == 0)
+                ClearTransientGraphics(_doorBlkObbs);
+                if (_isExtractDoorObbs)
                 {
                     var doorBlkNames = DoorBlkInfos.Select(o => o.Name).ToList();
                     _doorBlkObbs = ThConfigDataTool.GetDoorZones(Active.Database, _rangePts, doorBlkNames);
                 }
-                ClearTransientGraphics(_doorBlkObbs);
                 AddToTransient(_doorBlkObbs);
                 SetFocusToDwgView();
+                _isExtractDoorObbs = false;
             }
         }
         public void CloseDoorOutline()
@@ -369,6 +371,7 @@ namespace TianHua.Mep.UI.ViewModel
         {
             if (doorBlkInfos.Count > 0)
             {
+                _isExtractDoorObbs = true;
                 doorBlkInfos.ForEach(o => DoorBlkInfos.Remove(o));
             }
         }
@@ -455,6 +458,7 @@ namespace TianHua.Mep.UI.ViewModel
         {
             if(!IsDoorBlkExisted(name))
             {
+                _isExtractDoorObbs = true;
                 DoorBlkInfos.Add(new ThBlockInfo()
                 {
                     Name = name,
