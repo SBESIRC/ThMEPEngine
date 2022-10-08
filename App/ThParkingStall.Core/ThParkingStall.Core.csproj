@@ -92,6 +92,7 @@
     <Compile Include="MPartitionLayout\Utilities\MDebugTools.cs" />
     <Compile Include="MPartitionLayout\Utilities\MGeoUtilities.cs" />
     <Compile Include="MPartitionLayout\Utilities\MNTSExtensions.cs" />
+    <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblRamp.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblAdjacentLanes.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblBusiness.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblDefine.cs" />
@@ -105,7 +106,7 @@
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblPillarPostProcess.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OLaneCompaction.cs" />
     <Compile Include="ObliqueMPartitionLayout\OPostProcess\GlobalBusiness.cs" />
-	<Compile Include="OInterProcess\BuildingPosCalculate.cs" />
+    <Compile Include="OInterProcess\BuildingPosCalculate.cs" />
     <Compile Include="OInterProcess\OGene.cs" />
     <Compile Include="OInterProcess\OInterParameter.cs" />
     <Compile Include="OInterProcess\ORamp.cs" />

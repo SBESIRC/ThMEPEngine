@@ -825,6 +825,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                                         split = new LineSegment(split_un_loopthrough_cut.P0, generateLanePt.Translation(-perpVec * rest));
                                     Lane endthrough_lane = new Lane(generateLane, perpVec);
                                     endthrough_lane.IsGeneratedForLoopThrough = true;
+                                    endthrough_lane.NOTJUDGELAYOUTBYPARENT = true;
                                     paras.LanesToAdd.Add(endthrough_lane);
                                     
 
@@ -955,8 +956,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                             var split_vec = Vector(split_lane).Normalize().GetPerpendicularVector();
                             var lane_a = new Lane(split_lane, split_vec);
                             lane_a.IsGeneratedForRestrictLength = true;
+                            lane_a.NOTJUDGELAYOUTBYPARENT = true;
                             var lane_b = new Lane(split_lane, -split_vec);
                             lane_b.IsGeneratedForRestrictLength = true;
+                            lane_b.NOTJUDGELAYOUTBYPARENT= true;
                             tmpLanesToAdd.Add(lane_a);
                             tmpLanesToAdd.Add(lane_b);
                             generate_split_lanes.Add(split_lane);
@@ -979,11 +982,11 @@ namespace ThParkingStall.Core.MPartitionLayout
                         {
                             var split_lane = new LineSegment(pt_on_generate_lane, pt_on_iniLane);
                             var split_vec = Vector(split_lane).Normalize().GetPerpendicularVector();
-                            tmpLanesToAdd.Add(new Lane(split_lane, split_vec));
-                            tmpLanesToAdd.Add(new Lane(split_lane, -split_vec));
+                            tmpLanesToAdd.Add(new Lane(split_lane, split_vec) { NOTJUDGELAYOUTBYPARENT = true, IsGeneratedForRestrictLength = true });
+                            tmpLanesToAdd.Add(new Lane(split_lane, -split_vec) { NOTJUDGELAYOUTBYPARENT = true, IsGeneratedForRestrictLength = true });
                             generate_split_lanes.Add(split_lane);
                         }
-                    }                   
+                    }
                 }
                 paras.LanesToAdd.AddRange(tmpLanesToAdd);
                 foreach (var generate_split_lane in generate_split_lanes)

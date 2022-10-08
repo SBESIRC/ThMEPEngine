@@ -1,4 +1,5 @@
 ﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,6 +66,11 @@ namespace ThParkingStall.Core.OInterProcess
                     obliqueMPartition.BuildingBoxes = BuildingBounds.Select(e => e.Clone()).ToList();
                     obliqueMPartition.ObstaclesSpatialIndex = new MNTSSpatialIndex(Buildings);
                     obliqueMPartition.QuickCalculate = !IgnoreCache && VMStock.SpeedUpMode;
+                    obliqueMPartition.RampList = Ramps.Select(e =>
+                      {
+                          var ramp = new OblRamp(new Polygon(new LinearRing(new Coordinate[0])), new List<Coordinate>() { e.InsertPt }, new List<Vector2D>() { new Vector2D(e.Vector.Item1, e.Vector.Item2) });
+                          return ramp;
+                      }).ToList();
                     if (VMStock.AllowLoopThroughEnd > 20000)
                     {
                         ObliqueMPartition.LoopThroughEnd = true;

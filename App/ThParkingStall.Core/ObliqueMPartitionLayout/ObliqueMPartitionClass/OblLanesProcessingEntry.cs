@@ -92,7 +92,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             if (paras.SetGEndAdjLane != -1) IniLanes[paras.SetGEndAdjLane].GEndAdjLine = true;
             if (paras.LanesToAdd.Count > 0)
             {
-                var lanes = paras.LanesToAdd.Where(e => !e.IsGeneratedForLoopThrough && !e.IsGeneratedForRestrictLength).OrderByDescending(e => e.Line.Length);
+                var lanes = paras.LanesToAdd.Where(e => !e.NOTJUDGELAYOUTBYPARENT).OrderByDescending(e => e.Line.Length);
                 if (lanes.Count() > 0)
                     ParentDir = Vector(lanes.First().Line).GetPerpendicularVector();
                 IniLanes.AddRange(paras.LanesToAdd);

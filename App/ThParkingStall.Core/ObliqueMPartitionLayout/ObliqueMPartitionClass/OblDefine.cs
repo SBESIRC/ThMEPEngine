@@ -106,7 +106,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         private List<CarModule> CarModules = new List<CarModule>();
         public List<Coordinate> ObstacleVertexes = new List<Coordinate>();
         public List<Polygon> BuildingBoxes = new List<Polygon>();
-        public List<Ramp> RampList = new List<Ramp>();
+        public List<OblRamp> RampList = new List<OblRamp>();
         public List<Polygon> IniPillar = new List<Polygon>();
         public Polygon CaledBound { get; set; }
         /// <summary>

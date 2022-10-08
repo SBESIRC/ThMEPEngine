@@ -420,6 +420,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                                     //    perpVec = Vector(split).Normalize();
                                     Lane endthrough_lane = new Lane(generateLane, perpVec);
                                     endthrough_lane.IsGeneratedForLoopThrough = true;
+                                    endthrough_lane.NOTJUDGELAYOUTBYPARENT = true;
                                     paras.LanesToAdd.Add(endthrough_lane);
                                     split = new LineSegment(generateLanePt, split.P1);
                                     if (cond_end_disconnected)
