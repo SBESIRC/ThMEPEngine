@@ -1,6 +1,4 @@
-﻿using Autodesk.AutoCAD.Geometry;
-using Xbim.IO;
-using Xbim.Ifc;
+﻿using Xbim.Ifc;
 using Xbim.Common.Step21;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.RepresentationResource;
@@ -19,22 +17,6 @@ namespace ThMEPIFC.Ifc2x3
                     s.Items.Add(item);
                     s.ContextOfItems = context;
                     s.RepresentationType = "Brep";
-                    s.RepresentationIdentifier = "Body";
-                });
-            }
-            return null;
-        }
-
-        public static IfcShapeRepresentation CreateSweptSolidBody(IfcStore model, IfcRepresentationItem item)
-        {
-            var context = GetGeometricRepresentationContext(model);
-            if (context != null)
-            {
-                return model.Instances.New<IfcShapeRepresentation>(s =>
-                {
-                    s.Items.Add(item);
-                    s.ContextOfItems = context;
-                    s.RepresentationType = "SweptSolid";
                     s.RepresentationIdentifier = "Body";
                 });
             }
@@ -70,18 +52,21 @@ namespace ThMEPIFC.Ifc2x3
             return model.Instances.FirstOrDefault<IfcGeometricRepresentationContext>();
         }
 
-        public static IfcStore CreateModel()
+        public static IfcStore CreateMemoryModel()
         {
             return IfcStore.Create(IfcSchemaVersion.Ifc2X3, XbimStoreType.InMemoryModel);
         }
 
-        public static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
+        public static IfcCompositeCurve CreateIfcCompositeCurve(IfcStore model)
         {
-            return model.Instances.New<IfcGeometricRepresentationContext>(c =>
+            return model.Instances.New<IfcCompositeCurve>();
+        }
+
+        public static IfcCompositeCurveSegment CreateIfcCompositeCurveSegment(IfcStore model)
+        {
+            return model.Instances.New<IfcCompositeCurveSegment>(s =>
             {
-                c.Precision = ThTGL2IFCCommon.PRECISION;
-                c.CoordinateSpaceDimension = new IfcDimensionCount(3);
-                c.WorldCoordinateSystem = model.ToIfcAxis2Placement3D(Point3d.Origin);
+                s.SameSense = true;
             });
         }
     }

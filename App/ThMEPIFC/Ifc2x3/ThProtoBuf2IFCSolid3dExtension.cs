@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-
-using Xbim.IO.Memory;
+﻿using Xbim.Ifc;
 using Xbim.Common.Geometry;
+using System.Collections.Generic;
 using Xbim.Ifc2x3.ProfileResource;
-using Xbim.Ifc2x3.GeometryResource;
-using Xbim.Ifc2x3.GeometricModelResource;
-using Xbim.Ifc;
 
 namespace ThMEPIFC.Ifc2x3
 {
@@ -87,10 +82,10 @@ namespace ThMEPIFC.Ifc2x3
 
         private static IXbimSolid GetXBimSolid2x3(ThTCHBuiltElementData geometryStretch, XbimVector3D moveVector, IfcStore memoryModel, ThXbimSlabEngine slabxbimEngine)
         {
-            Xbim.Ifc2x3.ProfileResource.IfcProfileDef profile = null;
+            IfcProfileDef profile = null;
             if (geometryStretch.Outline != null && geometryStretch.Outline.Shell != null && geometryStretch.Outline.Shell.Points.Count > 0)
             {
-                profile = ToIfcArbitraryClosedProfileDef(memoryModel, geometryStretch.Outline.Shell);
+                profile = memoryModel.ToIfcArbitraryClosedProfileDef(geometryStretch.Outline.Shell);
             }
             if (profile == null)
                 return null;
@@ -104,7 +99,7 @@ namespace ThMEPIFC.Ifc2x3
 
         private static IXbimSolid GetXBimSolid2x3(ThTCHPolyline polyline, XbimVector3D moveVector, XbimVector3D zAxis, double zHeight, ThXbimSlabEngine slabxbimEngine)
         {
-            Xbim.Ifc2x3.ProfileResource.IfcProfileDef profile = ToIfcArbitraryClosedProfileDef(slabxbimEngine.Model, polyline);
+            IfcProfileDef profile = slabxbimEngine.Model.ToIfcArbitraryClosedProfileDef(polyline);
             if (profile == null)
                 return null;
             var solid = slabxbimEngine.Model.ToIfcExtrudedAreaSolid(profile, zAxis, zHeight);
@@ -112,153 +107,6 @@ namespace ThMEPIFC.Ifc2x3
             var trans = XbimMatrix3D.CreateTranslation(moveVector.X, moveVector.Y, moveVector.Z);
             geoSolid = geoSolid.Transform(trans) as IXbimSolid;
             return geoSolid;
-        }
-
-        public static IfcArbitraryClosedProfileDef ToIfcArbitraryClosedProfileDef(this IfcStore model, ThTCHPolyline e)
-        {
-            return model.Instances.New<IfcArbitraryClosedProfileDef>(d =>
-            {
-                d.ProfileType = Xbim.Ifc2x3.ProfileResource.IfcProfileTypeEnum.AREA;
-                d.OuterCurve = ToIfcCompositeCurve(model, e);
-            });
-        }
-
-        public static IfcCompositeCurve ToIfcCompositeCurve(this IfcStore model, ThTCHPolyline polyline)
-        {
-            var compositeCurve = CreateIfcCompositeCurve(model);
-            var pts = polyline.Points;
-            foreach (var segment in polyline.Segments)
-            {
-                var curveSegement = CreateIfcCompositeCurveSegment(model);
-                if (segment.Index.Count == 2)
-                {
-                    //直线
-                    var poly = model.Instances.New<IfcPolyline>();
-                    poly.Points.Add(model.ToIfcCartesianPoint(pts[segment.Index[0].ToInt()]));
-                    poly.Points.Add(model.ToIfcCartesianPoint(pts[segment.Index[1].ToInt()]));
-                    curveSegement.ParentCurve = poly;
-                    compositeCurve.Segments.Add(curveSegement);
-                }
-                else
-                {
-                    //圆弧
-                    var pt1 = pts[segment.Index[0].ToInt()].Point3D2XBimPoint();
-                    var pt2 = pts[segment.Index[2].ToInt()].Point3D2XBimPoint();
-                    var midPt = pts[segment.Index[1].ToInt()].Point3D2XBimPoint();
-                    //poly.Points.Add(ToIfcCartesianPoint(model, midPt));
-                    //计算圆心，半径
-                    var seg1 = midPt - pt1;
-                    var seg1Mid = pt1 + seg1.Normalized() * (midPt.PointDistanceToPoint(pt1) / 2);
-                    var seg2 = midPt - pt2;
-                    var seg2Mid = pt2 + seg2.Normalized() * (midPt.PointDistanceToPoint(pt2) / 2);
-                    var faceNormal = ZAxis;
-                    var mid1Dir = seg1.Normalized().CrossProduct(faceNormal);
-                    var mid2Dir = seg2.Normalized().CrossProduct(faceNormal);
-                    if (FindIntersection(seg1Mid, mid1Dir, seg2Mid, mid2Dir, out XbimPoint3D arcCenter) == 1)
-                    {
-                        bool isCl = seg1.Normalized().CrossProduct(seg2.Normalized().Negated()).Z > 0;
-                        var radius = arcCenter.PointDistanceToPoint(pt1);
-                        var trimmedCurve = model.Instances.New<IfcTrimmedCurve>();
-                        trimmedCurve.BasisCurve = model.Instances.New<IfcCircle>(c =>
-                        {
-                            c.Radius = radius;
-                            c.Position = ToIfcAxis2Placement2D(model, arcCenter, XAxis);
-                        });
-                        trimmedCurve.MasterRepresentation = Xbim.Ifc2x3.GeometryResource.IfcTrimmingPreference.CARTESIAN;
-                        trimmedCurve.SenseAgreement = isCl;
-                        trimmedCurve.Trim1.Add(model.ToIfcCartesianPoint(pt1));
-                        trimmedCurve.Trim2.Add(model.ToIfcCartesianPoint(pt2));
-                        curveSegement.ParentCurve = trimmedCurve;
-                        compositeCurve.Segments.Add(curveSegement);
-                    }
-                }
-            }
-            return compositeCurve;
-        }
-
-        private static IfcCompositeCurve CreateIfcCompositeCurve(IfcStore model)
-        {
-            return model.Instances.New<IfcCompositeCurve>();
-        }
-
-        private static IfcCompositeCurveSegment CreateIfcCompositeCurveSegment(IfcStore model)
-        {
-            return model.Instances.New<IfcCompositeCurveSegment>(s =>
-            {
-                s.SameSense = true;
-            });
-        }
-
-        public static int ToInt(this uint value)
-        {
-            return int.Parse(value.ToString());
-        }
-
-        public static XbimPoint3D Point3D2XBimPoint(this ThTCHPoint3d point)
-        {
-            return new XbimPoint3D(point.X, point.Y, point.Z);
-        }
-
-        public static double PointDistanceToPoint(this XbimPoint3D point, XbimPoint3D targetPoint)
-        {
-            var disX = (point.X - targetPoint.X);
-            var disY = (point.Y - targetPoint.Y);
-            var disZ = (point.Z - targetPoint.Z);
-            return Math.Sqrt(disX * disX + disY * disY + disZ + disZ);
-        }
-
-        /// <summary>
-        /// 直线与直线相交(XOY平面)
-        /// </summary>
-        /// <param name="s0"></param>
-        /// <param name="dir1"></param>
-        /// <param name="s1"></param>
-        /// <param name="dir2"></param>
-        /// <param name="intersectionPoint"></param>
-        /// <returns>
-        /// 0: 不相交
-        /// 1: 只有一个交点
-        /// 2: 共线
-        /// </returns>
-        public static int FindIntersection(XbimPoint3D s0, XbimVector3D dir1, XbimPoint3D s1, XbimVector3D dir2, out XbimPoint3D intersectionPoint)
-        {
-            intersectionPoint = XbimPoint3D.Zero;
-            double Linear = 0.000000001;
-            var P0 = s0;
-            var D0 = dir1;
-            var P1 = s1;
-            var D1 = dir2;
-            var E = P1 - P0;
-            var kross = D0.X * D1.Y - D0.Y * D1.X;
-            var sqrKross = kross * kross;
-            var sqrLen0 = D0.X * D0.X + D0.Y * D0.Y;
-            var sqrLen1 = D1.X * D1.X + D1.Y * D1.Y;
-            var sqlEpsilon = Linear * Linear;
-            //有一个交点
-            if (sqrKross > sqlEpsilon * sqrLen0 * sqrLen1)
-            {
-                var s = (E.X * D1.Y - E.Y * D1.X) / kross;
-                intersectionPoint = P0 + s * D0;
-                return 1;
-            }
-            //如果线是平行的
-            var sqrLenE = E.X * E.X + E.Y * E.Y;
-            kross = E.X * D0.Y - E.Y * D0.X;
-            sqrKross = kross * kross;
-
-            var value = sqlEpsilon * sqrLen0 * sqrLenE;
-            if (Math.Abs(sqrKross - value) > Linear && sqrKross > value)
-                return 0;
-            return 2;
-        }
-
-        public static IfcAxis2Placement2D ToIfcAxis2Placement2D(this IfcStore model, XbimPoint3D point, XbimVector3D direction)
-        {
-            return model.Instances.New<IfcAxis2Placement2D>(p =>
-            {
-                p.Location = model.ToIfcCartesianPoint(new XbimPoint3D(point.X, point.Y, 0));
-                p.RefDirection = model.ToIfcDirection(direction);
-            });
         }
     }
 }

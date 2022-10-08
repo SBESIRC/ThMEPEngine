@@ -1,17 +1,18 @@
-﻿using Xbim.Ifc;
-using System.Linq;
+﻿using System.Linq;
+using System.Collections.Generic;
+using Xbim.Ifc;
 using Xbim.Common;
 using Xbim.Ifc2x3.Kernel;
+using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.Interfaces;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Ifc2x3.ProductExtension;
-using Xbim.Ifc2x3.SharedBldgElements;
 using Xbim.Ifc2x3.MeasureResource;
 using Xbim.Ifc2x3.PropertyResource;
+using Xbim.Ifc2x3.SharedBldgElements;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.RepresentationResource;
-using System.Collections.Generic;
-using Xbim.Common.Geometry;
+using Xbim.Ifc2x3.GeometryResource;
 using ThMEPIFC.Geometry;
 
 namespace ThMEPIFC.Ifc2x3
@@ -22,7 +23,7 @@ namespace ThMEPIFC.Ifc2x3
 
         static public IfcStore CreateAndInitModel(string projectName, string projectId = "")
         {
-            var model = ThIFC2x3Factory.CreateModel();
+            var model = ThIFC2x3Factory.CreateMemoryModel();
             using (var txn = model.BeginTransaction("Initialize Model"))
             {
                 //there should always be one project in the model
@@ -30,11 +31,21 @@ namespace ThMEPIFC.Ifc2x3
                 //set the units to SI (mm and metres)
                 project.Initialize(ProjectUnits.SIUnitsUK);
                 //set GeometricRepresentationContext
-                project.RepresentationContexts.Add(ThIFC2x3Factory.CreateGeometricRepresentationContext(model));
+                project.RepresentationContexts.Add(CreateGeometricRepresentationContext(model));
                 //now commit the changes, else they will be rolled back at the end of the scope of the using statement
                 txn.Commit();
             }
             return model;
+        }
+
+        private static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
+        {
+            return model.Instances.New<IfcGeometricRepresentationContext>(c =>
+            {
+                c.Precision = ThTGL2IFCCommon.PRECISION;
+                c.CoordinateSpaceDimension = new IfcDimensionCount(3);
+                c.WorldCoordinateSystem = model.ToIfcAxis2Placement3D(XbimPoint3D.Zero);
+            });
         }
 
         public static IfcSite CreateSite(IfcStore model)
