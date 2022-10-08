@@ -58,6 +58,8 @@
     <Compile Include="ArchitecturePlane\Service\ThAdjustTextBoundaryService.cs" />
     <Compile Include="ArchitecturePlane\Service\ThArchPlaneUtils.cs" />
     <Compile Include="ArchitecturePlane\Service\ThComponentOutlineCreator.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThComponentQuerier.cs" />
+    <Compile Include="ArchitecturePlane\Service\ThDoorHiddenKanxianFilter.cs" />
     <Compile Include="ArchitecturePlane\Service\ThDoorNumberCreator.cs" />
     <Compile Include="ArchitecturePlane\Service\ThDoorOutlineCreator.cs" />
     <Compile Include="ArchitecturePlane\Service\ThDoorStoneCreator.cs" />
