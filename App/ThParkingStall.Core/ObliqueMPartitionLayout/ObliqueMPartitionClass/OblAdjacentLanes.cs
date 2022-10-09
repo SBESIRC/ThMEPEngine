@@ -36,7 +36,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         }
                     case ((int)LayoutDirection.FOLLOWPREVIOUS):
                         {
-                            if (ParentDir != Vector2D.Zero && _paras.LanesToAdd.Count > 0 && IsPerpVector(ParentDir, Vector(_paras.LanesToAdd[0].Line)))
+                            if (ParentDir != Vector2D.Zero && _paras.LanesToAdd.Count > 0 && (IsPerpVector(ParentDir, Vector(_paras.LanesToAdd[0].Line)) || IsParallelVector(ParentDir, Vector(_paras.LanesToAdd[0].Line))))
                             {
                                 length *= LayoutScareFactor_ParentDir;
                             }
@@ -307,7 +307,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             inilinesplitcarboxesaction = TranslateReservedConnection(inilinesplitcarboxesaction, -gvec.Normalize() * (length+DisLaneWidth/2));
             var inilinesplitcarboxesactionpolyline = PolyFromLines(inilinesplitcarboxes, inilinesplitcarboxesaction);
             var inilinesplitcarboxesactionlaneboxes = IniLanes.Where(e => IsParallelLine(e.Line, inilinesplitcarboxesaction))
-                .Select(e => e.Line.Buffer(DisLaneWidth / 2 - 0.001));
+                .Select(e => e.Line.Buffer(DisLaneWidth / 2 - 0.001).Scale(ScareFactorForCollisionCheck));
             var inilinesplitcarboxesactionpoints = new List<Coordinate>();
             foreach (var box in inilinesplitcarboxesactionlaneboxes)
             {

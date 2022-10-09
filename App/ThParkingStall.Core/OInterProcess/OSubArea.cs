@@ -62,10 +62,10 @@ namespace ThParkingStall.Core.OInterProcess
                 {
                     obliqueMPartition = new ObliqueMPartition(Walls, VaildLanes, Buildings, Region);
                     obliqueMPartition.OutputLanes = new List<LineSegment>();
-                    obliqueMPartition.OutBoundary = Region;
+                    obliqueMPartition.OutBoundary = OutBound;
                     obliqueMPartition.BuildingBoxes = BuildingBounds.Select(e => e.Clone()).ToList();
                     obliqueMPartition.ObstaclesSpatialIndex = new MNTSSpatialIndex(Buildings);
-                    obliqueMPartition.QuickCalculate = !IgnoreCache && VMStock.SpeedUpMode;
+                    obliqueMPartition.QuickCalculate = !IgnoreCache/* || VMStock.SpeedUpMode*/;
                     obliqueMPartition.RampList = Ramps.Select(e =>
                       {
                           var ramp = new OblRamp(new Polygon(new LinearRing(new Coordinate[0])), new List<Coordinate>() { e.InsertPt }, new List<Vector2D>() { new Vector2D(e.Vector.Item1, e.Vector.Item2) });

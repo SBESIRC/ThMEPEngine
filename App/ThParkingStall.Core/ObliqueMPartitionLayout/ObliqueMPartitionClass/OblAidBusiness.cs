@@ -21,7 +21,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var nonparallellines = IniLanes.Where(e => !IsParallelLine(line, e.Line)).Select(e => e.Line);
             //start
             nonparallellines = nonparallellines.OrderBy(e => e.ClosestPoint(line.P0).Distance(line.P0));
-            if (nonparallellines.Any() && nonparallellines.First().ClosestPoint(line.P0).Distance(line.P0) < 10)
+            if (nonparallellines.Any() && nonparallellines.First().ClosestPoint(line.P0).Distance(line.P0) < 20)
             {
                 if (!IsPerpLine(line, nonparallellines.First()))
                 {
@@ -72,8 +72,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             {
                 var near_wall = false;
                 foreach (var wall in Walls)
-                    if (wall.ClosestPoint(line.P0).Distance(line.P0) < 10) near_wall = true;
-                if (near_wall && Boundary.ClosestPoint(res.P0).Distance(res.P0)>10)
+                    if (wall.ClosestPoint(line.P0).Distance(line.P0) < 20) near_wall = true;
+                if (near_wall && Boundary.ClosestPoint(res.P0).Distance(res.P0)> 20)
                 {
                     var start = res.P0;
                     res.P0 = res.P0.Translation(-Vector(res).Normalize() * MaxLength);
@@ -89,7 +89,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             }
             //end
             nonparallellines = nonparallellines.OrderBy(e => e.ClosestPoint(line.P1).Distance(line.P1));
-            if (nonparallellines.Any() && nonparallellines.First().ClosestPoint(line.P1).Distance(line.P1) < 10)
+            if (nonparallellines.Any() && nonparallellines.First().ClosestPoint(line.P1).Distance(line.P1) < 20)
             {
                 if (!IsPerpLine(line, nonparallellines.First()))
                 {
@@ -135,11 +135,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     }
                 }
             }
-            else if(allow_extend_bound && Boundary.ClosestPoint(res.P1).Distance(res.P1) > 10)
+            else if(allow_extend_bound && Boundary.ClosestPoint(res.P1).Distance(res.P1) > 20)
             {
                 var near_wall = false;
                 foreach (var wall in Walls)
-                    if (wall.ClosestPoint(line.P1).Distance(line.P1) < 10) near_wall = true;
+                    if (wall.ClosestPoint(line.P1).Distance(line.P1) < 20) near_wall = true;
                 if (near_wall)
                 {
                     var end= res.P1;
@@ -161,8 +161,34 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var vec = Vector(line).GetPerpendicularVector().Normalize();
             var a = TranslateReservedConnection(line, vec * dis);
             var b = TranslateReservedConnection(line, -vec * dis);
+
+            //把buffer后的端点以最近点对齐
+            var ap0 = a.P0;
+            var ap1 = a.P1;
+            var bp0 = b.P0;
+            var bp1 = b.P1;
+            var linMid = line.MidPoint;
+            if (line.ClosestPoint(ap0, true).Distance(linMid) > line.ClosestPoint(bp0, true).Distance(linMid))
+            {
+                ap0 = a.ClosestPoint(bp0);
+            }
+            else if (line.ClosestPoint(ap0, true).Distance(linMid) < line.ClosestPoint(bp0, true).Distance(linMid))
+            {
+                bp0 = b.ClosestPoint(ap0);
+            }
+            if (line.ClosestPoint(ap1, true).Distance(linMid) > line.ClosestPoint(bp1, true).Distance(linMid))
+            {
+                ap1 = a.ClosestPoint(bp1);
+            }
+            else if (line.ClosestPoint(ap1, true).Distance(linMid) < line.ClosestPoint(bp1, true).Distance(linMid))
+            {
+                bp1 = b.ClosestPoint(ap1);
+            }
+
+
+
             var poly = new Polygon(new LinearRing(new Coordinate[] {
-                a.P0,a.P1,b.P1,b.P0,a.P0}));
+                ap0,ap1,bp1,bp0,ap0}));
             return poly;
         }
         private bool CloseToWall(Coordinate point, LineSegment line)
@@ -243,11 +269,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     {
                         var vec_a = Vector(a.Line);
                         var vec_b = Vector(b.Line);
-                        if (IsPerpVector(vec_a, ParentDir) && !IsPerpVector(vec_b, ParentDir))
+                        if (IsPerpOrParallelVector(vec_a, ParentDir) && !IsPerpOrParallelVector(vec_b, ParentDir))
                         {
                             return -1;
                         }
-                        else if (!IsPerpVector(vec_a, ParentDir) && IsPerpVector(vec_b, ParentDir))
+                        else if (!IsPerpOrParallelVector(vec_a, ParentDir) && IsPerpOrParallelVector(vec_b, ParentDir))
                         {
                             return 1;
                         }

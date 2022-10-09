@@ -153,17 +153,24 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             }
             //计算每根车道线可移动距离
             CarSpatialIndex = new MNTSSpatialIndex(Cars.Select(e => e.Polyline));
-            foreach (var group in compactedLanesgroup)
+            for (int i = 0; i < compactedLanesgroup.Count; i++)
             {
+                double moveableDist = 0;
+                var group = compactedLanesgroup[i];
                 foreach (var lane in group.CompactedLanes)
                 {
                     var isRestrictLane = false;
-                    var dist = CalculateMoveableDistance(lane, group.Vector, ref isRestrictLane,Cars,InitialLanes,CarSpatialIndex,ObstaclesSpatialIndex,
-                        IniLanes,Boundary,maxLength);
+                    var dist = CalculateMoveableDistance(lane, group.Vector, ref isRestrictLane, Cars, InitialLanes, CarSpatialIndex, ObstaclesSpatialIndex,
+                        IniLanes, Boundary, maxLength);
                     lane.MoveableDistance = dist;
                     lane.IsRestrictLane = isRestrictLane;
                 }
-                AdjustMoveableDistanceBySonLane(ref group.CompactedLanes);
+                AdjustMoveableDistanceBySonLane(ref group.CompactedLanes, ref moveableDist);
+                if (moveableDist == 0)
+                {
+                    compactedLanesgroup.RemoveAt(i);
+                    i--;
+                }
             }
             //移动目标车道线
             var addlanes = new List<Lane>();
@@ -462,7 +469,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         //}
         private static bool IsConnectToBoundaryLanes(Lane lane,Polygon Boundary,List<Lane> IniLanes)
         {
-            if (Boundary.ClosestPoint(lane.Line.P0).Distance(lane.Line.P0) < 1 && IsConnectedToLane(lane.Line,IniLanes))
+            if (Boundary.ClosestPoint(lane.Line.P0).Distance(lane.Line.P0) < 1 && IsConnectedToLane(lane.Line,true,IniLanes))
                 return true;
             else if (Boundary.ClosestPoint(lane.Line.P1).Distance(lane.Line.P1) < 1 && IsConnectedToLane(lane.Line, false, IniLanes))
                 return true;
@@ -474,20 +481,21 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         {
             var result = new List<Lane>();
             GetParentLanesConnectToBoundaryCount++;
-            if (GetParentLanesConnectToBoundaryCount > 20)
+            if (GetParentLanesConnectToBoundaryCount > 50)
                 return result;
             if (IsConnectToBoundaryLanes(lane,Boundary, IniLanes))
-                return result;
+                return new List<Lane> { new Lane(new LineSegment(),Vector2D.Zero) };
             else
             {
                 var lanesLists = new List<List<Lane>>();
-                foreach (var connectedLane in GetConnectedLanes(lane,IniLanes))
+                var connecteds = GetConnectedLanes(lane, IniLanes);
+                foreach (var connectedLane in connecteds)
                 {
                     lanesLists.Add(new List<Lane>());
                     lanesLists[lanesLists.Count - 1].Add(connectedLane);
                     lanesLists[lanesLists.Count - 1].AddRange(GetParentLanesConnectToBoundary(connectedLane,Boundary,IniLanes));
                 }
-                lanesLists = lanesLists.OrderBy(e => e.Count).ToList();
+                lanesLists = lanesLists.Where(e => e.Count > 0 && e[e.Count - 1].Line.Length == 0 && e[e.Count - 1].Vec == Vector2D.Zero).OrderBy(e => e.Count).ToList();
                 if (lanesLists.Count > 0)
                     return lanesLists.First();
                 else return result;
@@ -722,8 +730,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             return res;
         }
 
-        private static void AdjustMoveableDistanceBySonLane(ref List<CompactedLane> compactedLanes)
+        private static void AdjustMoveableDistanceBySonLane(ref List<CompactedLane> compactedLanes,ref double moveableDist)
         {
+            moveableDist = 0;
+            if (compactedLanes.Count > 0)
+                moveableDist = compactedLanes[0].MoveableDistance;
             if (compactedLanes.Count > 1)
             {
                 for (int i = compactedLanes.Count - 2; i > -1; i--)
@@ -733,6 +744,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         if (compactedLanes[i].MoveableDistance > compactedLanes[i + 1].MoveableDistance)
                         {
                             compactedLanes[i].MoveableDistance = compactedLanes[i + 1].MoveableDistance;
+                            moveableDist= compactedLanes[i + 1].MoveableDistance;
                         }
                     }
                 }

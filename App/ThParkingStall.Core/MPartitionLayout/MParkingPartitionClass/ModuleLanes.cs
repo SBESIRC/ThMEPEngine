@@ -814,15 +814,18 @@ namespace ThParkingStall.Core.MPartitionLayout
                                     var perpVec = -Vector(split).Normalize();
                                     if (cond_end_disconnected)
                                         perpVec = Vector(split).Normalize();
+
                                     split = new LineSegment(generateLanePt, split.P1);
                                     if (cond_end_disconnected)
                                         split = new LineSegment(split_un_loopthrough_cut.P0, generateLanePt);
+
                                     var split_length = split.Length;
                                     var rest= CalRestLength(split_length);
                                     generateLane = generateLane.Translation(-perpVec * rest);
                                     split = new LineSegment(generateLanePt.Translation(-perpVec * rest), split.P1);
                                     if (cond_end_disconnected)
                                         split = new LineSegment(split_un_loopthrough_cut.P0, generateLanePt.Translation(-perpVec * rest));
+
                                     Lane endthrough_lane = new Lane(generateLane, perpVec);
                                     endthrough_lane.IsGeneratedForLoopThrough = true;
                                     endthrough_lane.NOTJUDGELAYOUTBYPARENT = true;

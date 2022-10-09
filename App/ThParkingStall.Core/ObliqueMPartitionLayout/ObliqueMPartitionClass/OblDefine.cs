@@ -80,6 +80,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
                 DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
             }
+            //AllowCompactedLane = false;
         }
         public List<LineString> Walls;
         public List<Polygon> Obstacles;
@@ -160,8 +161,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public static double LayoutScareFactor_betweenBuilds = 0.7;
         public static double LayoutScareFactor_SingleVert = 0.7;
 
-        public static bool AllowProcessEndLanes = false;//尽端停车
-        public static bool LoopThroughEnd = false;//尽端环通
+        public static bool AllowProcessEndLanes = true;//尽端停车
+        public static bool LoopThroughEnd = true;//尽端环通
         public double DisAllowMaxLaneLength = 50000;//允许生成车道最大长度
         public double DisConsideringLoopThroughEnd = 50000;//尽端环通车道条件判断长度
         public bool AllowCompactedLane = false;
@@ -209,7 +210,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             //ProcessLanes(ref IniLanes);
             GenerateCarsOnRestLanes();
             PostProcess();
-            if (!hasCompactedLane && AllowCompactedLane)
+            if (!hasCompactedLane && AllowCompactedLane && !QuickCalculate)
                 CompactLane();
         }
 
