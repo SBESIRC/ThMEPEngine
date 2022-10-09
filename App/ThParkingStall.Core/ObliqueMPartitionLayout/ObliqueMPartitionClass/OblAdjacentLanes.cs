@@ -21,6 +21,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var isCurDirection = false;
             for (int i = 0; i < IniLanes.Count; i++)
             {
+
                 var _paras = new GenerateLaneParas();
                 var length = GenerateAdjacentLanesForUniqueLaneOptimizedByRealLength(ref _paras, i);
                 switch (LayoutMode)

@@ -30,10 +30,6 @@ namespace ThParkingStall.Core.OTools
                 List<int> item1 = null;
                 List<int> item2 = null;
                 var segLine = segLines[i];
-                if(segLine.Distance(new Coordinate(3338684.1858759141, 10522765.62606502)) < 100)
-                {
-                    ;
-                }
                 //筛选有效范围内的交点
                 var coors = segLines.GetIntersections(i).Where(pt => wallLine.Contains(pt.ToPoint())).ToList();
                 //var coors = segLines.GetIntersections(i).ToList();//获取关系即可，不需要管是否在边界内
@@ -65,7 +61,7 @@ namespace ThParkingStall.Core.OTools
                 {
                     var ept = coors.Last();
                     item2 = Enumerable.Range(0, segLines.Count).
-                        Where(j => segLines[j].Distance(ept) < ExtendTol && segLines[j].DirVector().Distance(segLine.DirVector()) > 0.01).ToList();
+                        Where(j => segLines[j].Distance(ept) < ExtendTol && !segLines[j].ParallelTo(segLine)).ToList();
                 }
                 seglineIndex.Add((item1,item2));
             }

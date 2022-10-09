@@ -42,9 +42,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public HashSet<BisectionPlan> AllSegPlans = new HashSet<BisectionPlan>();
         private bool ShowSegLineOnly = true;
         public AutoSegGenerator(LayoutData layoutData, Serilog.Core.Logger logger,int cutol =1000)
+            : this(layoutData.WallLine, layoutData.Buildings, logger, cutol)
         {
-            WallLine = layoutData.WallLine.Shell.ToDbPolyline();//初始墙线
-            Buildings = layoutData.Buildings.Select(b=>b.Shell.ToDbPolyline()).ToList();
+            
+        }
+        public AutoSegGenerator(OLayoutData oLayoutData, Serilog.Core.Logger logger, int cutol = 1000)
+            : this(oLayoutData.WallLine, oLayoutData.Buildings, logger, cutol)
+        {
+
+        }
+        public AutoSegGenerator(Polygon wallLine,List<Polygon> buildings, Serilog.Core.Logger logger, int cutol = 1000)
+        {
+            WallLine = wallLine.Shell.ToDbPolyline();//初始墙线
+            Buildings = buildings.Select(b => b.Shell.ToDbPolyline()).ToList();
             BuildingSpatialIndex = new ThCADCoreNTSSpatialIndex(Buildings.ToCollection());//建筑物pline索引
             Logger = logger;
             RoadWidth = ParameterStock.RoadWidth;
@@ -57,6 +67,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             BisectAreaDic = new Dictionary<Tuple<int?, int?, int?, int?>, BisectionArea>();
             BisectSegLineDic = new Dictionary<Tuple<int, int, int, bool>, BisectionSegLine>();
         }
+
         private void GetBuildings(Entity entity)
         {
             var dbObjs = new DBObjectCollection();

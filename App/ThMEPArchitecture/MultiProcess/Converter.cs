@@ -47,7 +47,7 @@ namespace ThMEPArchitecture.MultiProcess
             InterParameter.Init(dataWraper);
             if (AddSegLines)
             {
-                var newSegs = InterParameterEx.AddSegLines();
+                var newSegs = InterParameter.InitSegLines.AddSegLines();
                 using (AcadDatabase acad = AcadDatabase.Active())
                 {
                     if (acad.Layers.Contains("添加分区线"))

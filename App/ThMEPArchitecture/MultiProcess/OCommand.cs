@@ -116,7 +116,7 @@ namespace ThMEPArchitecture.MultiProcess
                         
                         else if(ParameterViewModel.CommandType == CommandTypeEnum.RunWithIterationAutomatically)
                         {
-                            //RunWithAutoSegLine(currentDb);
+                            Run(currentDb,true);
                         }
                         else if(ParameterViewModel.CommandType == CommandTypeEnum.BuildingAnalysis)
                         {
@@ -195,7 +195,7 @@ namespace ThMEPArchitecture.MultiProcess
                 }
             }
         }
-        public void Run(AcadDatabase acadDatabase)
+        public void Run(AcadDatabase acadDatabase,bool autoMode = false)
         {
             var blks = InputData.SelectBlocks(acadDatabase);
             var displayPro = ProcessForDisplay.CreateSubProcess();
@@ -209,7 +209,7 @@ namespace ThMEPArchitecture.MultiProcess
             DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
             foreach (var blk in blks)
             {
-                ProcessTheBlock(blk);
+                ProcessTheBlock(blk, autoMode);
             }
             ShowDisplayInfo(blks.Count());
         }
@@ -283,7 +283,7 @@ namespace ThMEPArchitecture.MultiProcess
                 entities.ShowBlock("障碍物移位结果", "障碍物移位结果");
             }
         }
-        private void ProcessTheBlock(BlockReference block)
+        private void ProcessTheBlock(BlockReference block,bool autoMode = false, bool definePriority = true)
         {
             int fileSize = 64; // 64Mb
             var nbytes = fileSize * 1024 * 1024;
@@ -298,7 +298,41 @@ namespace ThMEPArchitecture.MultiProcess
             displayInfos.Add(new DisplayInfo(blkName));
             var layoutData = new OLayoutData(block, Logger, out bool succeed);
             if (!succeed) return;
-            layoutData.ProcessSegLines();
+            List<LineSegment> autoSegLines = null;
+            InterParameter.Init(layoutData.WallLine, layoutData.Buildings);
+            if (autoMode)//生成正交全自动分区线
+            {
+                var cutTol = 1000;
+                var HorizontalFirst = true;
+                var autogen = new AutoSegGenerator(layoutData, Logger, cutTol);
+                autogen.Run(false);
+                var girdLines = autogen.GetGrid().Select(l => l.SegLine.ToNTSLineSegment()).ToList();
+                if (girdLines.Count < 2)
+                {
+                    DisplayLogger.Information("块名为：" + blkName + "的地库暂不支持自动分区线！\n");
+                    Active.Editor.WriteMessage("块名为：" + blkName + "的地库暂不支持自动分区线！\n");
+                    Logger?.Information("块名为：" + blkName + "的地库暂不支持自动分区线！\n");
+                    return;
+                }
+                girdLines = girdLines.RemoveDuplicated(5);
+                girdLines.SeglinePrecut(layoutData.WallLine);
+                var grouped = girdLines.GroupSegLines().OrderBy(g => g.Count).Last();
+                autoSegLines = grouped;
+                autoSegLines = autoSegLines.GridLinesRemoveEmptyAreas(HorizontalFirst);
+                if (definePriority) autoSegLines = autoSegLines.DefineSegLinePriority();
+                if (ParameterViewModel.JustCreateSplittersChecked)
+                {
+                    var layer = "AI自动分区线";
+                    using (AcadDatabase acad = AcadDatabase.Active())
+                    {
+                        if (!acad.Layers.Contains(layer))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+                    }
+                    autoSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+                    return;
+                }
+            }
+            layoutData.ProcessSegLines(autoSegLines,ParameterViewModel.AddBoundSegLines);
             //layoutData.SetInterParam();
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
@@ -328,14 +362,24 @@ namespace ThMEPArchitecture.MultiProcess
             var moveDistance = SolutionID * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 OInterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = OInterParameter.GetOSubAreas(solution);
-            subAreas.ForEach(s => s.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace()));
             subAreas.ForEach(s => s.UpdateParkingCnts(true));
-            //subAreas.ForEach(s => s.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace()));
-
-            var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
-            //Polygon caledBound = new Polygon(new LinearRing(new Coordinate[0]));
-            CaledBound = ProcessPartitionGlobally(subAreas,disPlayBound);
             
+            var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
+            
+            CaledBound = ProcessPartitionGlobally(subAreas,disPlayBound);
+            if(solution != null)
+            {
+                var finalLayer = "最终分区线";
+                using (AcadDatabase acad = AcadDatabase.Active())
+                {
+                    if (!acad.Layers.Contains(finalLayer))
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, finalLayer, 2);
+                    var outSegLines = OInterParameter.CurrentSegs.Select(l => l.Splitter.ToDbLine(2, finalLayer)).Cast<Entity>().ToList();
+
+                    outSegLines.ShowBlock(finalLayer, finalLayer);
+                    MPEX.HideLayer(finalLayer);
+                }
+            }
 #if DEBUG
             for (int i = 0; i < subAreas.Count; i++)
             {
@@ -377,10 +421,13 @@ namespace ThMEPArchitecture.MultiProcess
         Polygon ProcessPartitionGlobally(List<OSubArea> subAreas, bool disPlayBound = true)
         {
             string Boundlayer = "AI-参考地库轮廓";
+            var laneLayer = "AI-车道中心线";
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 if (!acad.Layers.Contains(Boundlayer))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, Boundlayer, 141);
+                if (!acad.Layers.Contains(laneLayer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, laneLayer, 2);
             }
             GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
             var caledBound = globalBusiness.CalBound();
@@ -389,14 +436,20 @@ namespace ThMEPArchitecture.MultiProcess
             {
                 var integralObliqueMPartition = globalBusiness.ProcessEndLanes();
                 MultiProcessTestCommand.DisplayMParkingPartitionPros(integralObliqueMPartition.ConvertToMParkingPartitionPro());
-                integralObliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                var lines = integralObliqueMPartition.IniLanes.Select(e => e.Line).ToList();
+                MGeoUtilities.RemoveDuplicatedLines(lines);
+                lines.Select(e =>e.ToDbLine(2,laneLayer)).AddToCurrentSpace();
+                //integralObliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
             }
             else
             {
                 foreach (var subArea in subAreas)
                 {
                     MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
-                    subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                    var lines = subArea.obliqueMPartition.IniLanes.Select(e => e.Line).ToList();
+                    MGeoUtilities.RemoveDuplicatedLines(lines);
+                    lines.Select(e => e.ToDbLine(2,laneLayer)).AddToCurrentSpace();
+                    //subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
                 }
             }
             return caledBound;

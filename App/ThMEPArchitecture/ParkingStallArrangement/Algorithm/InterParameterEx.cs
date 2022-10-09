@@ -11,6 +11,9 @@ using ThMEPArchitecture.ViewModel;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using ThMEPArchitecture.MultiProcess;
+using OInterParameter = ThParkingStall.Core.OInterProcess.OInterParameter;
+//using ThParkingStall.Core.OInterProcess;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
     public static class InterParameterEx
@@ -143,6 +146,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var newSegLines = segLines.Select(l => l.Clone()).ToList();
             var SegLineStrings = newSegLines.ToLineStrings();
             var subAreas = SegLineStrings.GetSubAreas();
+            //var subAreas = OInterParameter.GetOSubAreas(null);
             AreaCnt = subAreas.Count;
             var segLineToRemove = new HashSet<LineString>();
             var occupiedDic = new Dictionary<int, bool>();//int代表序号，bool代表纵向合并过还是横向
@@ -365,10 +369,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             if (remainer < tol) return true;
             else return false;
         }
+        //只包含障碍物，车道的分区
         public static List<SubArea> GetSubAreas(this List<LineString> SegLineStrings)
         {
             var subAreas = new List<SubArea>();//分割出的子区域
-            var areas = InterParameter.TotalArea.Shell.GetPolygons(SegLineStrings.Where(lstr => lstr != null));//区域分割
+            Polygon TotalArea = InterParameter.TotalArea;
+            MNTSSpatialIndex BuildingSpatialIndex = InterParameter.BuildingSpatialIndex;
+            var areas = TotalArea.Shell.GetPolygons(SegLineStrings.Where(lstr => lstr != null));//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
             var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
             // 创建子区域列表
@@ -386,18 +393,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                 }
                 var walls = geoWalls.Get<LineString>();
-                var subBuildings = InterParameter.BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
-                var subRamps = InterParameter.Ramps.Where(ramp => area.Contains(ramp.InsertPt)).ToList();
-                var subBoundingBoxes = InterParameter.BoundingBoxSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
+                var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
+                var subRamps = new List<Ramp>();
+                var subBoundingBoxes = new List<Polygon>();
                 var subArea = new SubArea(area, subSegLines, walls, subBuildings, subRamps, subBoundingBoxes);
                 subAreas.Add(subArea);
             }
             return subAreas;
         }
         #region 补充分割线
-        public static List<LineSegment> AddSegLines()
+        public static List<LineSegment> AddSegLines(this List<LineSegment> init_Segs)
         {
-            var SegLineStrings = InterParameter.InitSegLines.Select(l => l.Clone()).ToList().ToLineStrings();
+            var SegLineStrings = init_Segs.Select(l => l.Clone()).ToList().ToLineStrings();
             var result = new List<LineSegment>();
             for (int i = 0; i < 3; i++)
             {
@@ -522,6 +529,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         
         public static bool SegLineIsVaild(List<LineSegment> SegLines,List<int> idxs)
         {
+            if (!InterParameter.Initialized) return true;//斜交模式，直接添加
             foreach(var idx in idxs)
             {
                 var validLane = SegLineEx.GetVaildLane(idx, SegLines, InterParameter.TotalArea, InterParameter.BoundaryObjectsSPIDX);

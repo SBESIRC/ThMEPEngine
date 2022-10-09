@@ -28,6 +28,7 @@ using SegLineEx = ThParkingStall.Core.OTools.SegLineEx;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using NetTopologySuite.Mathematics;
 using System.Diagnostics;
+using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 {
@@ -45,6 +46,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         // NTS 数据结构
         //public Polygon Basement;//地库，面域部分为可布置区域
         public Polygon WallLine;//初始边界线(输入边界）,输入用地红线则为最大可建范围
+        private Polygon init_WallLine;
         //public Polygon MaxWallLine;//边界最大范围
         public List<LineSegment> BorderLines;//可动边界线
         public List<SegLine> SegLines = new List<SegLine>();// 初始分区线
@@ -129,20 +131,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 return;
             }
             WallLine = WallLine.RemoveHoles();//初始墙线
+            init_WallLine = WallLine.Clone();
             MaxArea = WallLine.Buffer(ParameterStock.BorderlineMoveRange,MitreParam).Area *0.001 * 0.001;
             ParameterStock.AreaMax = MaxArea;
             UpdateObstacles();//更新障碍物
             UpdateRampPolgons();//更新坡道polygon
-            UpdateRamps();
+            
             
             Buildings = Obstacles.Concat(RampPolygons).ToList();
             //Basement = OverlayNGRobust.Overlay(WallLine, new MultiPolygon(Buildings.ToArray()), SpatialFunction.Difference).
             //    Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             //Basement = WallLine.Difference(new MultiPolygon(Buildings.ToArray())).Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             UpdateSPIndex();//更新空间索引
+            UpdateRamps();
             UpdateMovingBounds();//更新可动建筑框线
             UpdateBoundaries();
-            UpdateBasementInfo();
+            //UpdateBasementInfo();
             WallLine.ToDbMPolygon().AddToCurrentSpace();
             //GetSegLineBoundary();
 
@@ -354,7 +358,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         #endregion
         #region 数据处理
-        private void UpdateBasementInfo()
+        private void UpdateBasementInfo()//弃用
         {
             var distance = ParameterStock.BuildingTolerance;
             var buffered = new MultiPolygon(Buildings.ToArray()).Buffer(distance, MitreParam);
@@ -396,6 +400,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var buildingtol = ParameterStock.BuildingTolerance;
 
             var bufferDistance = (ParameterStock.RoadWidth / 2) - SegLineEx.SegTol;
+            var mmtoM = 0.001 * 0.001;
+
             //var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物c
 
             var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(ParameterStock.BuildingTolerance, MitreParam).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
@@ -403,6 +409,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
             var unbuffered = new MultiPolygon(BuildingBounds.ToArray()).Buffer(-buildingtol, MitreParam).Get<Polygon>(true);
             WallLine = WallLine.Union(new MultiPolygon(unbuffered.ToArray())).Get<Polygon>(true).OrderBy(p => p.Area).Last();
+            ParameterStock.TotalArea = WallLine.Area * mmtoM;
+            ParameterStock.BuildingArea = unbuffered.Sum(p =>p.Area) * mmtoM;
+            Logger?.Information($"地库总面积:" + string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2));
+            Logger?.Information($"建筑物投影总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2));
+
             //#################用建筑物外包框和边界求新地库边界#############
             //var newWallLines =  WallLine.Union(new MultiPolygon( BuildingBounds.ToArray()).Buffer(-ParameterStock.BuildingTolerance,MitreParam)).Get<Polygon>(true);
             //var newWallLine = newWallLines.OrderBy(x => x.Area).Last();
@@ -690,17 +701,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 
         #endregion
         #region 分割线输入预处理,以及检查
-        public bool ProcessSegLines()
+        public bool ProcessSegLines(List<LineSegment> autoLines = null,bool AddBoundSegs = false)
         {
             bool isVaild = true;
             // 标记圆半径5000
             //源数据
-            var init_segs = CAD_SegLines.Select(l =>ToSegLine(l)).ToList();
-            //1.判断是否有平行且距离小于1的线，若有则合并(需要连续合并）
-            var idToMerge = init_segs.GroupSegLines(1);
-            var merged = init_segs.MergeSegs(idToMerge);
+            List<LineSegment> init_segs = autoLines;
+            if (autoLines == null) init_segs = CAD_SegLines.Select(l =>l.ToNTSLineSegment()).ToList();
+            if (AddBoundSegs)//添加分区线
+            {
+                var newSegs = init_segs.AddSegLines();
+                using (AcadDatabase acad = AcadDatabase.Active())
+                {
+                    if (acad.Layers.Contains("添加分区线"))
+                        newSegs.ForEach(l => l.ToDbLine(2, "添加分区线").AddToCurrentSpace());
+                }
+                init_segs.AddRange(newSegs);
+            }
+
+            //1.判断是否有平行且距离小于1的线，若有则合并(需要连续合并）(弃用逻辑，不进行合并）
+            //var idToMerge = init_segs.GroupSegLines(1);
+            //var merged = init_segs.MergeSegs(idToMerge);
             //2.获取基线 + 延长1（确保分割线在边界内 且保持连接关系）
-            SegLines = merged.Select(l => l.GetBaseLine(WallLine)).Where(l =>l!=null).ToList();
+            SegLines = init_segs.Select(l => ToSegLine(l).GetBaseLine(WallLine)).Where(l =>l!=null).ToList();
             SegLines.ForEach(l => { l.Splitter = l.Splitter.OExtend(1);l.IsInitLine = true; });
             //3,处理坡道(逻辑更新，使用特殊的坡道线作为出入口标记)
             //UpdateRamps();
@@ -713,10 +736,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     isVaild = false;
                     //提示该分割线在满足车道宽内不与其他分割线连接
                     //警告存在无效连接，将抛弃部分分割线
-                    Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
-                    Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
+                    Logger?.Information("警告:未连接最大连接组，将抛弃部分分区线 ！\n");
+                    Active.Editor.WriteMessage("警告:未连接最大连接组，将抛弃部分分区线！\n");
                 }
-                SegLines.Slice(groups[i]).ForEach(l => l.Splitter?.MidPoint.MarkPoint());
+                SegLines.Slice(groups[i]).ForEach(l => l.Splitter?.MidPoint.MarkPoint(5000,"AI-提示：未连接"));
             }
             SegLines = SegLines.Slice(groups.Last());
 
@@ -739,13 +762,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var segLine = new SegLine(line.ToNTSLineSegment().OExtend(extendTol),line.Layer.Contains("固定"), -1);
             return segLine;
         }
+        public SegLine ToSegLine(LineSegment lineSegment,double extendTol = 1)
+        {
+            return new SegLine(lineSegment.OExtend(extendTol));
+        }
         public bool FilteringSegLines(List<SegLine> segLines)
         {
             bool Isvaild = true;
             for(int j = 0; j < 50;j++)
             {
                 var stop = true;
-                SeglineIndex = segLines.GetSegLineIndex(WallLine);
+                SeglineIndex = segLines.GetSegLineIndex(init_WallLine);
                 for (int i = segLines.Count - 1; i >= 0; i--)
                 {
                     if(SeglineIndex[i].Item1 == null || SeglineIndex[i].Item2 == null)
@@ -754,10 +781,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                         {
                             //提示该分割线在满足车道宽内不与其他分割线连接
                             //警告存在无效连接，将抛弃部分分割线
-                            segLines[i].Splitter.MidPoint.MarkPoint();
-                            Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
-                            Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
+                            Logger?.Information("警告:存在无效连接，将抛弃部分分区线 ！\n");
+                            Active.Editor.WriteMessage("警告:存在无效连接，将抛弃部分分区线！\n");
                         }
+                        segLines[i].Splitter.MidPoint.MarkPoint();
                         segLines.RemoveAt(i);
                         Isvaild = false;
                         stop = false;
@@ -771,10 +798,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                         {
                             //提示该分割线在满足车道宽内不与其他分割线连接
                             //警告存在无效连接，将抛弃部分分割线
-                            segLines[i].Splitter.MidPoint.MarkPoint();
-                            Logger?.Information("警告存在无效连接，将抛弃部分分割线 ！\n");
-                            Active.Editor.WriteMessage("警告存在无效连接，将抛弃部分分割线！\n");
+                            
+                            Logger?.Information("警告:存在无效连接，将抛弃部分分区线 ！\n");
+                            Active.Editor.WriteMessage("警告:存在无效连接，将抛弃部分分区线！\n");
                         }
+                        segLines[i].Splitter.MidPoint.MarkPoint();
                         segLines.RemoveAt(i);
                         Isvaild = false;
                         stop = false;

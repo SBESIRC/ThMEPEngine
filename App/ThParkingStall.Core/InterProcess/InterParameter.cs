@@ -52,6 +52,8 @@ namespace ThParkingStall.Core.InterProcess
         public static List<(double, double)> LowerUpperBound { get { return _LowerUpperBound; } } // 基因的上下边界，绝对值
 
         public static bool MultiThread = false;//是否使用进程内多线程
+
+        public static bool Initialized = false;
         public static void Init(DataWraper dataWraper)
         {
             var interParamWraper = dataWraper.interParamWraper;
@@ -86,6 +88,13 @@ namespace ThParkingStall.Core.InterProcess
             //{
             //    NewIdxToOrg.Add(new HashSet<int> { i });
             //}
+            Initialized = true;
+        }
+        public static void Init(Polygon TotalArea, List<Polygon> buildings)
+        {
+            _TotalArea = TotalArea;
+            _Buildings = buildings;
+            _BuildingSpatialIndex = new MNTSSpatialIndex(buildings);
         }
         //返回长度为0则为不合理解
         public static List<SubArea> GetSubAreas(Chromosome chromosome)

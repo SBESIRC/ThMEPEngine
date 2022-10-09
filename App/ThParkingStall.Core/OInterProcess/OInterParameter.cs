@@ -63,6 +63,8 @@ namespace ThParkingStall.Core.OInterProcess
         public static List<Polygon> MovingBounds { get { return _MovingBounds; } }//可动建筑框线
 
         public static List<OSubArea> dynamicSubAreas;//用于障碍物移位的子区域列表
+
+        public static List<SegLine> CurrentSegs;//记录刚刚计算的新分区线，用于输出
         public static void Init(DataWraper dataWraper)
         {
             var oWarper = dataWraper.oParamWraper;
@@ -76,7 +78,7 @@ namespace ThParkingStall.Core.OInterProcess
             //var bufferDistance = (VMStock.RoadWidth / 2) - OTools.SegLineEx.SegTol;
             _BuildingBounds = new MultiPolygon(new MultiPolygon(Buildings.ToArray()).Buffer(buildingtol, MitreParam).
                 Union().Get<Polygon>(true).ToArray()).Buffer(-buildingtol, MitreParam).Get<Polygon>(true);//每一个polygong内部为一个建筑物
-            _TotalArea = _TotalArea.Union(new MultiPolygon(BuildingBounds.ToArray())).Get<Polygon>(true).OrderBy(p=>p.Area).Last();
+            //_TotalArea = _TotalArea.Union(new MultiPolygon(BuildingBounds.ToArray())).Get<Polygon>(true).OrderBy(p=>p.Area).Last();
 
             //var bufferedWallLine = TotalArea.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
             //_BaseLineBoundary = bufferedWallLine.Difference(new MultiPolygon(BuildingBounds.ToArray())).
@@ -99,7 +101,6 @@ namespace ThParkingStall.Core.OInterProcess
             _Buildings = buildings;
             _BuildingSpatialIndex = new MNTSSpatialIndex(buildings);
             _Ramps = ramps;
-
             var bufferDistance = (VMStock.RoadWidth / 2) - OTools.SegLineEx.SegTol;
             var BuildingBounds = new MultiPolygon(Buildings.ToArray()).Buffer(bufferDistance).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
             var bufferedWallLine = totalArea.Buffer(-bufferDistance).Get<Polygon>(true).OrderBy(p => p.Area).Last();//边界内缩
@@ -184,6 +185,7 @@ namespace ThParkingStall.Core.OInterProcess
                 genome.Area = newWallLine.Area * 0.001 * 0.001;
             else if(genome!=null) genome.Area = TotalArea.Area * 0.001 * 0.001;
             var newSegs = ProcessToSegLines(genome, newWallLine);
+            CurrentSegs = newSegs;
             var SegLineStrings = newSegs.Select(l =>l.Splitter).ToList().ToLineStrings();
             var vaildLanes = newSegs.Select(l => l.VaildLane).ToList().ToLineStrings();
             List<Polygon> areas;

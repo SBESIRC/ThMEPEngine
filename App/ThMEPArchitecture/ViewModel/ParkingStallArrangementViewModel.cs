@@ -56,7 +56,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //斜交模式
-        private bool _ObliqueMode = false;
+        private bool _ObliqueMode = true;
         public bool ObliqueMode
         {
             get { return _ObliqueMode; }

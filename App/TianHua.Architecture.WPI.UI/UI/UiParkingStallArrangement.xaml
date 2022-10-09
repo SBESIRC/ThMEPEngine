@@ -33,7 +33,7 @@
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" IsEnabled="{Binding NormalMode}" >
+                <StackPanel Orientation="Horizontal" >
                     <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动生成分区线，自动迭代排布</RadioButton>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=2}" Width="210">
                         <CheckBox Margin="5,5,5,5" Height="15" IsChecked="{Binding JustCreateSplittersChecked}">仅生成分区线</CheckBox>
