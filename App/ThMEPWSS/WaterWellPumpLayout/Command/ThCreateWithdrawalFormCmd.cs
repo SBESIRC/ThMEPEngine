@@ -136,11 +136,16 @@ namespace ThMEPWSS.Command
                 using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 using (AcadDatabase acadDb = AcadDatabase.Active())
                 {
+                    var vec = Vector3d.XAxis.TransformBy(Active.Editor.UCS2WCS()).GetNormal();
+                    var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+
                     //插入表头
                     Point3d position = point.Value.TransformBy(Active.Editor.UCS2WCS());
-                    acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableHeader, position, new Scale3d(1, 1, 1), 0);
+                    acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableHeader, position, new Scale3d(1, 1, 1), angle);
                     //插入表身
                     Vector3d vector = new Vector3d(0, -1, 0);
+                    vector = vector.TransformBy(Active.Editor.UCS2WCS());
+
                     position += vector * 2000;
                     for (int i = 0; i < formItmes.Count; i++)
                     {
@@ -156,8 +161,27 @@ namespace ThMEPWSS.Command
                         dic.Add("电量", "xx");
                         dic.Add("井内水泵台数", item.StrPumpCount);
                         dic.Add("数量统计", item.StrWellCount);
-                        var bodyId = acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableBody, position, new Scale3d(1, 1, 1), 0, dic);
+                        var bodyId = acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableBody, position, new Scale3d(1, 1, 1), angle, dic);
                         bodyId.SetDynBlockValue("水泵配置", item.StrPumpConfig);
+
+                        //修改attri 角度
+                        BlockReference blk = (BlockReference)bodyId.GetObject(OpenMode.ForRead);
+                        if (blk != null)
+                        {
+                            //若包含属性定义，则遍历属性定义
+                            foreach (ObjectId id in blk.AttributeCollection )
+                            {
+                                //检查是否是属性定义
+                                AttributeReference attRef = id.GetObject(OpenMode.ForRead) as AttributeReference;
+                                if (attRef != null && dic.ContainsKey(attRef.Tag.ToUpper()))
+                                {
+                                    attRef.UpgradeOpen();//切换属性对象为写的状态
+                                    attRef.Rotation = angle;
+                                    attRef.DowngradeOpen();
+                                }
+                            }
+                        }
+
                         position += vector * 1000;
                     }
                 }
