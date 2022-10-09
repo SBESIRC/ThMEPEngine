@@ -161,7 +161,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                     lineOtherPt = nPipe.StartPoint;
                 }
 
-                if (new Point3d(lineNearPt.X, lineNearPt.Y, 0).DistanceTo(projpt) <= 1)
+                if (new Point3d(lineNearPt.X, lineNearPt.Y, 0).DistanceTo(projpt) <= ThDrainageADCommon.Tol_SamePoint)
                 {
                     nearSameDirPipe.Add(lineNearPt);
                     continue;
@@ -170,8 +170,9 @@ namespace ThMEPWSS.DrainageADPrivate.Data
                 var addDir = new Point3d(lineNearPt.X, lineNearPt.Y, 0) - projpt;
                 var lineDir = nPipe.EndPoint - nPipe.StartPoint;
                 var angle = addDir.GetAngleTo(lineDir);
-                if (Math.Abs(Math.Cos(angle)) > Math.Cos(1 * Math.PI / 180))
+                if (Math.Abs(Math.Cos(angle)) > Math.Cos(5 * Math.PI / 180))
                 {
+                    //移动点的延长方向和原线必须同向。防止误改附近的管线（比如附近热水的立管）
                     nearSameDirPipe.Add(lineNearPt);
                 }
             }

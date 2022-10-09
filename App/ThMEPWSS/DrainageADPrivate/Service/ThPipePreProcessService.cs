@@ -41,7 +41,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             ConnectSingleSystemToNearVerticalPipe(hotPipe, verticalPipe);
 
             DrawUtils.ShowGeometry(coolPipe, "l0adjustCool", 142);
-            DrawUtils.ShowGeometry(hotPipe , "l0adjustHot", 22);
+            DrawUtils.ShowGeometry(hotPipe, "l0adjustHot", 22);
 
             var ptDictCool = ThDrainageADTreeService.GetPtDict(coolPipe);
             var ptDictHot = ThDrainageADTreeService.GetPtDict(hotPipe);
@@ -101,7 +101,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                     lineOtherPt = nPipe.StartPoint;
                 }
 
-                if (lineNearPt.DistanceTo(pt) <= 1)
+                if (lineNearPt.DistanceTo(pt) <= ThDrainageADCommon.Tol_SamePoint)
                 {
                     bIfAddVertical = true;
                     continue;
@@ -110,7 +110,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 var addDir = lineNearPt - pt;
                 var lineDir = nPipe.EndPoint - nPipe.StartPoint;
                 var angle = addDir.GetAngleTo(lineDir);
-                if (Math.Abs(Math.Cos(angle)) > Math.Cos(1 * Math.PI / 180))
+                if (Math.Abs(Math.Cos(angle)) > Math.Cos(5 * Math.PI / 180))
                 {
                     //移动点的延长方向和原线必须同向。防止误改附近的管线（比如附近热水的立管）
                     var newLine = new Line(pt, lineOtherPt);

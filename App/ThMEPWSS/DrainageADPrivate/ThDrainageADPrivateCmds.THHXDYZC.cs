@@ -79,18 +79,35 @@ namespace ThMEPWSS
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //画框，提数据，转数据
-                var selectPtsTop = ThSelectFrameUtil.SelectFramePointCollection("框选俯视", "框选俯视");
+                var hintObject = new Dictionary<string, (string, string)>()
+                        {{"K",("K","框选(K)")},
+                        {"P",("P","点选范围多段线(P)")},
+                        };
+                var selectMode = ThMEPWSSUtils.SettingSelection("\n选择范围方式", hintObject, "K");
+          
+                var selectPtsTop = new Point3dCollection();
+                if (selectMode == "K")
+                {
+                    selectPtsTop = ThSelectFrameUtil.SelectFramePointCollection("框选俯视", "框选俯视");
+                }
+                else if (selectMode == "P")
+                {
+                    selectPtsTop = ThSelectFrameUtil.GetRoomFrame();
+                }
+
                 if (selectPtsTop.Count == 0)
                 {
                     return;
                 }
 
+                var selectPtPrint = ThSelectFrameUtil.SelectPoint("轴侧起点");
+                if (selectPtPrint == Point3d.Origin)
+                {
+                    return;
+                }
 
-                var selectPts = new Point3dCollection();
-                selectPtsTop.Cast<Point3d>().ForEach(x => selectPts.Add(x));
-
-                var transformer = ThMEPWSSUtils.GetTransformer(selectPts);
+                //var selectPts = new Point3dCollection();
+                //selectPtsTop.Cast<Point3d>().ForEach(x => selectPts.Add(x));
 
                 var blkNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve,
                                                         ThDrainageADCommon.BlkName_ShutoffValve, ThDrainageADCommon.BlkName_GateValve,
@@ -111,6 +128,11 @@ namespace ThMEPWSS
 
                 };
 
+                //转换器
+                var transformer = new ThMEPOriginTransformer(selectPtPrint);
+                //transformer = new ThMEPEngineCore.Algorithm.ThMEPOriginTransformer(new Point3d(0, 0, 0));
+                selectPtPrint = transformer.Transform(selectPtPrint);
+
                 var dataFactory = new ThDrainageADPrivateDataFactory()
                 {
                     Transformer = transformer,
@@ -122,7 +144,7 @@ namespace ThMEPWSS
                                                         },
                 };
 
-                dataFactory.GetElements(acadDatabase.Database, selectPts);
+                dataFactory.GetElements(acadDatabase.Database, selectPtsTop);
 
                 var dataQuery = new ThDrainageADDataProcessService()
                 {
