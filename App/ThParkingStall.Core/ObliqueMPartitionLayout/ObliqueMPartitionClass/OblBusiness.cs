@@ -67,6 +67,98 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 PostProcessPillars();
                 ReDefinePillarDimensions();
             }
+            if (!QuickCalculate)
+            {
+                ClassifyLanesForLayoutFurther();
+            }
         }
+        private void ClassifyLanesForLayoutFurther()
+        {
+            ProcessLanes(ref IniLanes);
+            OutEnsuredLanes.AddRange(OriginalLanes);
+
+            var lanes = IniLanes.Select(e => e).ToList();
+            var found = false;
+            while (true)
+            {
+                found = false;
+                //拿双边连接的车道线
+                bool found_connected_double = false;
+                while (true)
+                {
+                    found_connected_double = false;
+                    for (int i = 0; i < lanes.Count; i++)
+                    {
+                        //筛重合
+                        var overlap = false;
+                        foreach (var lane in OutEnsuredLanes)
+                        {
+                            var cond_a = lane.ClosestPoint(lanes[i].Line.P0, false).Distance(lanes[i].Line.P0) < 1;
+                            var cond_b = lane.ClosestPoint(lanes[i].Line.P1, false).Distance(lanes[i].Line.P1) < 1;
+                            if (cond_a && cond_b)
+                            {
+                                overlap = true;
+                                break;
+                            }
+                        }
+                        if (overlap) continue;
+                        if (!IsConnectedToLaneDouble(lanes[i].Line,IniLanes)) continue;
+                        if (!IsConnectedToLane(lanes[i].Line, true, OutEnsuredLanes)) continue;
+                        if (!IsConnectedToLane(lanes[i].Line, false, OutEnsuredLanes)) continue;
+                        found_connected_double = true;
+                        found = true;
+                        OutEnsuredLanes.Add(lanes[i].Line);
+                        lanes.RemoveAt(i);
+                        break;
+                    }
+                    if (!found_connected_double) break;
+                }
+                //拿一端连接墙的车道线
+                for (int i = 0; i < lanes.Count; i++)
+                {
+                    //筛重合
+                    var overlap = false;
+                    foreach (var lane in OutEnsuredLanes)
+                    {
+                        var cond_a = lane.ClosestPoint(lanes[i].Line.P0, false).Distance(lanes[i].Line.P0) < 1;
+                        var cond_b = lane.ClosestPoint(lanes[i].Line.P1, false).Distance(lanes[i].Line.P1) < 1;
+                        if (cond_a && cond_b)
+                        {
+                            overlap = true;
+                            break;
+                        }
+                    }
+                    if (overlap) continue;
+                    if (IsConnectedToLane(lanes[i].Line, false, OutEnsuredLanes))
+                        lanes[i].Line = new LineSegment(lanes[i].Line.P1, lanes[i].Line.P0);
+                    if (!IsConnectedToLane(lanes[i].Line, true, OutEnsuredLanes)) continue;
+                    foreach (var wall in Walls)
+                    {
+                        if (wall.ClosestPoint(lanes[i].Line.P1).Distance(lanes[i].Line.P1) < 1)
+                        {
+                            OutEnsuredLanes.Add(lanes[i].Line);
+                            found = true;
+                            lanes.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        if (OutBoundary.ClosestPoint(lanes[i].Line.P1).Distance(lanes[i].Line.P1) < 1 || !OutBoundary.Contains(lanes[i].Line.P1))
+                        {
+                            OutEnsuredLanes.Add(lanes[i].Line);
+                            found = true;
+                            lanes.RemoveAt(i);
+                            i--;
+                        }
+                    }
+
+                }
+                if (!found) break;
+            }
+            OriginalLanes.ForEach(e => OutEnsuredLanes.Remove(e));
+        }
+
     }
 }

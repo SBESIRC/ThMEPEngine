@@ -375,7 +375,8 @@ namespace ThMEPArchitecture.MultiProcess
                     if (!acad.Layers.Contains(finalLayer))
                         ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, finalLayer, 2);
                     var outSegLines = OInterParameter.CurrentSegs.Select(l => l.Splitter.ToDbLine(2, finalLayer)).Cast<Entity>().ToList();
-
+                    foreach(var subarea in subAreas)
+                        outSegLines.AddRange(subarea.obliqueMPartition.OutEnsuredLanes.Select(e => e.ToDbLine()));
                     outSegLines.ShowBlock(finalLayer, finalLayer);
                     MPEX.HideLayer(finalLayer);
                 }
