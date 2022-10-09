@@ -83,6 +83,7 @@
     <Compile Include="Common\ThPrintService.cs" />
     <Compile Include="Model\Printer\PrintConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ThGridSystemBuilder.cs" />
     <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
     <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
     <Compile Include="StructPlane\Print\ThBeamTextBlkConverter.cs" />
@@ -154,7 +155,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="Service\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
