@@ -809,6 +809,9 @@ namespace ThMEPArchitecture.ViewModel
             if(VerticalSolution) list.Add(2);
             return list;
         }
+        public static bool LogSubProcess=false;
+        public static double AreaMax = 0;
+        public static double TotalArea = 0;
     }
 
     public static class ParameterStock
@@ -984,7 +987,6 @@ namespace ThMEPArchitecture.ViewModel
         public static double LayoutScareFactor_SingleVert = 1.0;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public static double SingleVertModulePlacementFactor = 1.0;
-
         public static void Set(ParkingStallArrangementViewModel vm)
         {
             _RoadWidth = vm.RoadWidth;
@@ -1000,6 +1002,7 @@ namespace ThMEPArchitecture.ViewModel
             BorderlineMoveRange = vm.BorderlineMoveRange;
             _BoundPointCnt = vm.BoundPointCnt;
             var hp = HiddenParameter.ReadOrCreateDefault();
+            ParkingStallArrangementViewModel.LogSubProcess = hp.LogSubProcess;
             if (ReadHiddenParameter)
             {
                 LayoutScareFactor_Intergral = hp.LayoutScareFactor_Intergral;

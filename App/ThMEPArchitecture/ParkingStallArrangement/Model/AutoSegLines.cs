@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
+using ThParkingStall.Core.Tools;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Model
 {
@@ -30,7 +31,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             if (direction)
             {
                 var lastCur = Seglines.StartPoint.X;
-                var randomVal = lastCur + MinValues + General.Utils.RandDouble() * (MaxValues - MinValues);
+                var randomVal = lastCur + MinValues + ThParkingStallCoreTools.RandDouble() * (MaxValues - MinValues);
                 var spt = Seglines.StartPoint;
                 var ept = Seglines.EndPoint;
                 var line = new Line(new Point3d(randomVal, spt.Y, 0), new Point3d(randomVal, ept.Y, 0));
@@ -41,7 +42,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             else
             {
                 var lastCur = Seglines.StartPoint.Y;
-                var randomVal = lastCur + MinValues + General.Utils.RandDouble() * (MaxValues - MinValues);
+                var randomVal = lastCur + MinValues + ThParkingStallCoreTools.RandDouble() * (MaxValues - MinValues);
                 var spt = Seglines.StartPoint;
                 var ept = Seglines.EndPoint;
                 var line = new Line(new Point3d(spt.X, randomVal, 0), new Point3d(ept.X, randomVal, 0));

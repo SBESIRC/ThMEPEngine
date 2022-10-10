@@ -56,6 +56,7 @@ namespace ThParkingStall.Core.InterProcess
         public int D2 = 200;
         //迭代次数
         public int IterationCount = -1;
+        public int PopulationCount = 80;
         public int RunMode;
         //横向优先_纵向车道计算长度调整_背靠背模块
         public double LayoutScareFactor_Intergral = 0.7;
@@ -73,6 +74,36 @@ namespace ThParkingStall.Core.InterProcess
         public bool BoundaryShrink = true;
         //最大建筑位移距离
         public int BuildingMoveDistance = 500;
+        //处理器核心数
+        public int ProcessCount = -1;
+        //相同退出次数
+        public int MaxEqualCnt = 10;
+        //最大迭代时间
+        public double MaxTimespan = 30;
+        //变异因子
+        public double MutationRate = 0.382;
+        //特殊基因比例
+        public double SpecialGeneProp = 0.382;
+        //基因变异因子
+        public double GeneMutationRate = 0.382;
+        //保留因子
+        public double SelectionRate = 0.382;
+        //精英比例
+        public double EliteProp = 0.2;
+        //小变异比例
+        public double SMProp = 0.382;
+        public int TargetParkingCntMin = 1;
+        public int TargetParkingCntMax = 1;
+        //最大地库面积
+        public double AreaMax { get; set; }
+        //面积平均缩减比例
+        public double AreaShrinkProp = 0.2;
+        //地库面积
+        public double TotalArea { get; set; }
+        public int BorderlineMoveRange = 0;
+        public bool LogSubProcess = false;
+        public int ThreadCount = 3;
+
         #endregion
         public Chromosome chromosome = null;//正交基因记录
         public Genome genome = null;//斜交基因记录
