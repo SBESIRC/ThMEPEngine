@@ -597,15 +597,15 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 Pillars = Pillars.Select(e =>
                 {
                     var segobjs = e.GetEdges();
-                    if (DisPillarLength < DisPillarDepth)
-                    {
-                        double t = DisPillarDepth;
-                        DisPillarDepth = DisPillarLength;
-                        DisPillarLength = t;
-                        t = PillarNetLength;
-                        PillarNetLength = PillarNetDepth;
-                        PillarNetDepth = t;
-                    }
+                    //if (DisPillarLength < DisPillarDepth)
+                    //{
+                    //    double t = DisPillarDepth;
+                    //    DisPillarDepth = DisPillarLength;
+                    //    DisPillarLength = t;
+                    //    t = PillarNetLength;
+                    //    PillarNetLength = PillarNetDepth;
+                    //    PillarNetDepth = t;
+                    //}
                     var segs = segobjs.OrderByDescending(t => t.Length).ToList();
                     if (DisPillarLength < DisPillarDepth)
                         segs = segobjs.OrderBy(t => t.Length).ToList();
