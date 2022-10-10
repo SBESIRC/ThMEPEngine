@@ -1,4 +1,5 @@
-﻿using Xbim.Ifc;
+﻿using Xbim.IO;
+using Xbim.Ifc;
 using Xbim.Common.Step21;
 using Xbim.Ifc2x3.GeometryResource;
 using Xbim.Ifc2x3.RepresentationResource;
