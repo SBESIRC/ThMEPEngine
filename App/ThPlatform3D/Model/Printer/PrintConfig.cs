@@ -126,4 +126,22 @@ namespace ThPlatform3D.Model.Printer
             }
         }
     }
+    internal class DimensionPrintConfig : PrintConfig
+    {
+        private string _dimStyleName = "";
+        /// <summary>
+        /// 标注样式名
+        /// </summary>
+        public string DimStyleName
+        {
+            get
+            {
+                return _dimStyleName;
+            }
+            set
+            {
+                _dimStyleName = value;
+            }
+        }
+    }
 }

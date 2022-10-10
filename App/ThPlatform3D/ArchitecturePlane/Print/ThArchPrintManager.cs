@@ -18,6 +18,9 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         public readonly static string AESTRUHACH = "AE-STRU-HACH";        
         public readonly static string DEFPOINTS = "DEFPOINTS";
         public readonly static string DEFPOINTS1 = "DEFPOINTS-1";
+        public readonly static string ADAXISAXIS = "AD-AXIS-AXIS";
+        public readonly static string ADAXISDIMS = "AD-AXIS-DIMS";
+
         #region----------建筑门窗填充样式文件------------
         public readonly static string ADDIMSINSD = "AD-DIMS-INSD";
         public readonly static string ADNAMEROOM = "AD-NAME-ROOM";
@@ -48,7 +51,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
             group1s.Add(AEDOORINSD);
             group1s.Add(AESTRUHACH);
             group1s.Add(AEWIND);
-            group1s.Add(DEFPOINTS);
+            group1s.Add(DEFPOINTS);            
             DwgLayerInfos.Add(DoorWindowDwgName, group1s);
 
             var group2s = new HashSet<string>();
@@ -65,6 +68,8 @@ namespace ThPlatform3D.ArchitecturePlane.Print
             group2s.Add(DEFPOINTS1);
             group2s.Add(SDETLHACH);
             group2s.Add(SBEAM);
+            group2s.Add(ADAXISAXIS);
+            group2s.Add(ADAXISDIMS);
             DwgLayerInfos.Add(PlaneTemplateDwgName, group2s);
         }
         public static ThArchPrintLayerManager Instance { get { return instance; } }
@@ -77,7 +82,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         public readonly static string THSTYLE3 = "TH-STYLE3";
         #endregion
         #region----------建筑平、立、剖图示意----------  
-        //
+        public readonly static string TCHAXIS = "_TCH_AXIS";
         #endregion
         public Dictionary<string, HashSet<string>> DwgStyleInfos { get; private set; }        
         private static readonly ThArchPrintStyleManager instance =
@@ -95,6 +100,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
 
             var group2s = new HashSet<string>();
             group2s.Add(THSTYLE1);
+            group2s.Add(TCHAXIS);
             DwgStyleInfos.Add(PlaneTemplateDwgName, group2s);
         }
         public static ThArchPrintStyleManager Instance { get { return instance; } }
@@ -165,5 +171,18 @@ namespace ThPlatform3D.ArchitecturePlane.Print
     internal class ThArchPrintLineTypeManager
     { 
         public readonly static string Hidden = "Hidden";
+    }
+    internal class ThArchPrintDimStyleManager
+    {
+        public readonly static string TCHARCH = "_TCH_ARCH";
+        public readonly static string THDIM100 = "TH-DIM100";
+
+        public static List<string> Styles
+        {
+            get
+            {
+                return new List<string>() { TCHARCH, THDIM100};
+            }
+        }
     }
 }

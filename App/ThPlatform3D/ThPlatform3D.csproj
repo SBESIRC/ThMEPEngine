@@ -46,6 +46,7 @@
     <Compile Include="ArchitecturePlane\Print\ThKanXianPrinter.cs" />
     <Compile Include="ArchitecturePlane\Print\ThPlanMaterialMapConfig.cs" />
     <Compile Include="ArchitecturePlane\Print\ThPrintDrawingHeadService.cs" />
+    <Compile Include="ArchitecturePlane\Print\ThGridPrinter.cs" />
     <Compile Include="ArchitecturePlane\Print\ThRailingPrinter.cs" />
     <Compile Include="ArchitecturePlane\Print\ThSectionMaterialMapConfig.cs" />
     <Compile Include="ArchitecturePlane\Print\ThSlabPrinter.cs" />

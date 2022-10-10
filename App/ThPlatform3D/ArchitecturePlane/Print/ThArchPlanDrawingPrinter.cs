@@ -10,6 +10,10 @@ using ThMEPEngineCore.IO.SVG;
 using ThPlatform3D.ArchitecturePlane.Service;
 using ThPlatform3D.Common;
 using Autodesk.AutoCAD.Geometry;
+using System.IO;
+using ThMEPEngineCore.IO.JSON;
+using ThMEPTCH.CAD;
+using ThPlatform3D.Service;
 
 namespace ThPlatform3D.ArchitecturePlane.Print
 {
@@ -29,6 +33,9 @@ namespace ThPlatform3D.ArchitecturePlane.Print
 
             // 打印对象
             PrintGeos(db, Geos);
+
+            // 打印轴网
+            PrintGrids(db);
 
             //// 获取墙线          
             //var tesslateLength = ThArchitecturePlaneCommon.Instance.WallArcTessellateLength;
@@ -279,6 +286,82 @@ namespace ThPlatform3D.ArchitecturePlane.Print
             {
                 return new ObjectIdCollection();
             }
+        }
+
+        private ObjectIdCollection PrintGrids(Database db)
+        {
+            using (var acadDb =  AcadDatabase.Use(db))
+            {
+                var gridIds = new ObjectIdCollection();
+                if (!System.IO.File.Exists(PrintParameter.GridDataFile))
+                {
+                    return gridIds;
+                }
+                var gridSystemData = Deserialize(PrintParameter.GridDataFile);
+                var builder = new ThGridSystemBuilder(gridSystemData);
+                builder.Build();
+
+                var gridLineConfig = ThGridPrinter.GridLineConfig;
+                builder.GridLines.OfType<Curve>().ForEach(c =>
+                {
+                    var objIds = ThGridPrinter.Print(acadDb, c, gridLineConfig);
+                    gridIds.AddRange(objIds);
+                });
+
+                //var dimensionStyleId = DbHelper.GetDimstyleId(ThArchPrintDimStyleManager.TCHARCH);
+                var dimensionConfig = ThGridPrinter.DimensionConfig;
+                builder.DimensionGroups.ForEach(o =>
+                {
+                    o.OfType<AlignedDimension>().ForEach(a =>
+                    {
+                        var objIds = ThGridPrinter.Print(acadDb,a,dimensionConfig);
+                        gridIds.AddRange(objIds);
+                    });
+                });
+
+                //
+                builder.CircleLabelGroups.ForEach(o =>
+                {
+                    o.ForEach(a =>
+                    {
+                        a.OfType<Entity>().ForEach(e =>
+                        {
+                            if(e is Line || e is Polyline)
+                            {
+                                var objIds = ThGridPrinter.Print(acadDb, e as Curve, ThGridPrinter.CircleLabelLeaderConfig);
+                                gridIds.AddRange(objIds);
+                            }
+                            else if(e is Circle circle)
+                            {
+                                var objIds = ThGridPrinter.Print(acadDb, circle, ThGridPrinter.CircleLabelCircleConfig);
+                                gridIds.AddRange(objIds);
+                            }
+                            else if(e is DBText text)
+                            {
+                                var objIds = ThGridPrinter.Print(acadDb, text, ThGridPrinter.CircleLabelTextConfig);
+                                gridIds.AddRange(objIds);
+                            }
+                        });                        
+                    });
+                });
+
+                return gridIds;
+            }
+        }
+
+        private ThGridLineSyetemData Deserialize(string gridFile)
+        {
+            var gridData = new ThGridLineSyetemData();
+            try
+            {
+                var jsonString = File.ReadAllText(gridFile);
+                gridData = JsonHelper.DeserializeJsonToObject<ThGridLineSyetemData>(jsonString);
+            }
+            catch
+            {
+                //
+            }
+            return gridData;
         }
     }
 }

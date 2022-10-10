@@ -113,7 +113,13 @@ namespace ThPlatform3D.ArchitecturePlane.Print
 
                 // 导入线型
                 acadDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(ThArchPrintLineTypeManager.Hidden,false));
-                
+
+                // 导入标注样式
+                ThArchPrintDimStyleManager.Styles.ForEach(style =>
+                {
+                    acadDb.DimStyles.Import(blockDb.DimStyles.ElementOrDefault(style), true);
+                });
+
                 return true;
             }
         }

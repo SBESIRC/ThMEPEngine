@@ -36,6 +36,8 @@ namespace ThPlatform3D.Common
 
         public Point3d BasePoint { get; set; } = Point3d.Origin;
 
+        public string GridDataFile { get; set; } = "";
+
         public Point3d GetFloorBasePoint(int naturalIndex)
         {
             //naturalIndex从1开始

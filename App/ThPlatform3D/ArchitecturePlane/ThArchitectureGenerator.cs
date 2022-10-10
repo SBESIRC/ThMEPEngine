@@ -60,12 +60,14 @@ namespace ThPlatform3D.ArchitecturePlane
             {
                 svgFiles = Sort(svgFiles);
             }
+            var gridFiles = svgFiles.Select(o => GetGridDataFile(o)).ToList();
 
             // 打印
             Print(svgFiles);
 
             // 删除
             Erase(svgFiles);
+            Erase(gridFiles);
         }
         private void Plot(string exeFilePath, string arguments)
         {
@@ -122,6 +124,7 @@ namespace ThPlatform3D.ArchitecturePlane
                 {
                     singleBuildingStoreys = GetBuildingStoreyInfos(svg.ParseInfo.BuildingName);
                 }
+                PrintParameter.GridDataFile = GetGridDataFile(svgFiles[i]);
                 var printer = PrintToCad(svg.ParseInfo, PrintParameter);
                 if (printer != null)
                 {
@@ -364,6 +367,9 @@ namespace ThPlatform3D.ArchitecturePlane
         {
             var svgFiles = GetGeneratedSvgFiles();
             Erase(svgFiles);
+
+            var gridFiles = svgFiles.Select(o=>GetGridDataFile(o)).ToList();
+            Erase(gridFiles);
         }
 
         private List<string> Sort(List<string> svgFiles)
@@ -372,7 +378,7 @@ namespace ThPlatform3D.ArchitecturePlane
             {
                 return svgFiles;
             }
-            //C: \Users\XXXX\AppData\Local\Temp\6#建筑结构合模-01F.svg
+            //C: \Users\XXXX\AppData\Local\Temp\6#建筑结构合模-01F-GridData.json
             var underGroundFlrs = new List<Tuple<string, float>>(); //B1F,B2F
             var roofFlrs = new List<Tuple<string, float>>(); //R1F,R2F
             var normalFlrs = new List<Tuple<string, float>>(); //1F,2F
@@ -410,6 +416,70 @@ namespace ThPlatform3D.ArchitecturePlane
                 {
                     var flrNoValue = ParseNormalFlrNo(flrNo);
                     if(flrNoValue.HasValue)
+                    {
+                        normalFlrs.Add(Tuple.Create(o, flrNoValue.Value));
+                    }
+                    else
+                    {
+                        invalidFlrs.Add(o);
+                    }
+                }
+            });
+            underGroundFlrs = underGroundFlrs.OrderBy(o => o.Item2).ToList();
+            normalFlrs = normalFlrs.OrderBy(o => o.Item2).ToList();
+            roofFlrs = roofFlrs.OrderBy(o => o.Item2).ToList();
+
+            var results = new List<string>();
+            results.AddRange(underGroundFlrs.Select(o => o.Item1));
+            results.AddRange(normalFlrs.Select(o => o.Item1));
+            results.AddRange(roofFlrs.Select(o => o.Item1));
+            //results.AddRange(invalidFlrs); //不合格的暂时不打印
+            return results;
+        }
+        private List<string> SortGrids(List<string> gridFiles)
+        {
+            if (gridFiles.Count == 1)
+            {
+                return gridFiles;
+            }
+            //C:\Users\XXXX\AppData\Local\Temp\6#建筑结构合模-01F-GridData.json
+            var underGroundFlrs = new List<Tuple<string, float>>(); //B1F,B2F
+            var roofFlrs = new List<Tuple<string, float>>(); //R1F,R2F
+            var normalFlrs = new List<Tuple<string, float>>(); //1F,2F
+            var invalidFlrs = new List<string>(); // 
+            gridFiles.ForEach(o =>
+            {
+                var fileName = Path.GetFileNameWithoutExtension(o);
+                var strs = fileName.Split('-');
+                var flrNo = strs[strs.Length-2];
+                if (IsUnderGroundFloor(flrNo))
+                {
+                    var flrNoValue = ParseUnderFlrNo(flrNo);
+                    if (flrNoValue.HasValue)
+                    {
+                        underGroundFlrs.Add(Tuple.Create(o, flrNoValue.Value));
+                    }
+                    else
+                    {
+                        invalidFlrs.Add(o);
+                    }
+                }
+                else if (IsRoofFloor(flrNo))
+                {
+                    var flrNoValue = ParseNormalFlrNo(flrNo);
+                    if (flrNoValue.HasValue)
+                    {
+                        roofFlrs.Add(Tuple.Create(o, flrNoValue.Value));
+                    }
+                    else
+                    {
+                        invalidFlrs.Add(o);
+                    }
+                }
+                else
+                {
+                    var flrNoValue = ParseNormalFlrNo(flrNo);
+                    if (flrNoValue.HasValue)
                     {
                         normalFlrs.Add(Tuple.Create(o, flrNoValue.Value));
                     }
@@ -508,6 +578,22 @@ namespace ThPlatform3D.ArchitecturePlane
             }
             // 返回以Ifc文件名开始的所有Svg文件
             return results;
+        }
+
+        private string GetGridDataFile(string svgFile)
+        {
+            var fileName = Path.GetFileNameWithoutExtension(svgFile);
+            fileName += "-GridData.json";
+            var fi = new FileInfo(svgFile);
+            var fullPath = Path.Combine(fi.Directory.Name+ fileName);
+            if(File.Exists(fullPath))
+            {
+                return fullPath;
+            }
+            else
+            {
+                return "";
+            }
         }
 
         private ThArchDrawingPrinter PrintToCad(ThSvgParseInfo svgInput, ThPlanePrintParameter printParameter)

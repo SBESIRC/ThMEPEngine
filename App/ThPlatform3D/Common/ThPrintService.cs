@@ -62,6 +62,16 @@ namespace ThPlatform3D.Common
             return objId;
         }
 
+        public static ObjectId Print(this AlignedDimension dimension, AcadDatabase acadDb, DimensionPrintConfig config)
+        {
+            // 事务在外部开启              
+            var objId = acadDb.ModelSpace.Add(dimension);
+            dimension.Layer = config.LayerName;
+            dimension.ColorIndex = config.Color;
+            dimension.DimensionStyleName = config.DimStyleName;
+            return objId;
+        }
+
         public static ObjectId Print(this ObjectIdCollection objIds, Database db,  HatchPrintConfig config)
         {
             using (var acadDb = AcadDatabase.Use(db))
