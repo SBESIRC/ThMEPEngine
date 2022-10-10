@@ -23,6 +23,7 @@ namespace ThParkingStallServer.Core
             var dataWraper = readDataWraperService.Read();
 
             //run GA
+            OInterParameter.Init(dataWraper);
             int fileSize = 64; // 64Mb
             var nbytes = fileSize * 1024 * 1024;
             using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
@@ -38,7 +39,8 @@ namespace ThParkingStallServer.Core
                 //GA_Engine.displayInfo = displayInfos.Last();
                 var Solution = GA_Engine.Run().First();
             }
-
+            Console.WriteLine("success.");
+            Console.ReadKey();
             return;
         }
     }
