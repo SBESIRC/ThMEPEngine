@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
 using Linq2Acad;
@@ -7,13 +8,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO.SVG;
-using ThPlatform3D.ArchitecturePlane.Service;
-using ThPlatform3D.Common;
-using Autodesk.AutoCAD.Geometry;
-using System.IO;
 using ThMEPEngineCore.IO.JSON;
-using ThMEPTCH.CAD;
+using ThPlatform3D.Common;
 using ThPlatform3D.Service;
+using ThPlatform3D.ArchitecturePlane.Service;
 
 namespace ThPlatform3D.ArchitecturePlane.Print
 {
@@ -293,28 +291,27 @@ namespace ThPlatform3D.ArchitecturePlane.Print
             using (var acadDb =  AcadDatabase.Use(db))
             {
                 var gridIds = new ObjectIdCollection();
-                if (!System.IO.File.Exists(PrintParameter.GridDataFile))
+                if (!File.Exists(PrintParameter.GridDataFile))
                 {
                     return gridIds;
                 }
+
                 var gridSystemData = Deserialize(PrintParameter.GridDataFile);
                 var builder = new ThGridSystemBuilder(gridSystemData);
                 builder.Build();
 
-                var gridLineConfig = ThGridPrinter.GridLineConfig;
                 builder.GridLines.OfType<Curve>().ForEach(c =>
                 {
-                    var objIds = ThGridPrinter.Print(acadDb, c, gridLineConfig);
+                    var objIds = ThGridPrinter.Print(acadDb, c, ThGridPrinter.GridLineConfig);
                     gridIds.AddRange(objIds);
                 });
 
                 //var dimensionStyleId = DbHelper.GetDimstyleId(ThArchPrintDimStyleManager.TCHARCH);
-                var dimensionConfig = ThGridPrinter.DimensionConfig;
                 builder.DimensionGroups.ForEach(o =>
                 {
                     o.OfType<AlignedDimension>().ForEach(a =>
                     {
-                        var objIds = ThGridPrinter.Print(acadDb,a,dimensionConfig);
+                        var objIds = ThGridPrinter.Print(acadDb,a, ThGridPrinter.DimensionConfig);
                         gridIds.AddRange(objIds);
                     });
                 });

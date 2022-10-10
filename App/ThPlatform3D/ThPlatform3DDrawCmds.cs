@@ -49,5 +49,15 @@ namespace ThPlatform3D
                 cmd.Execute();
             }
         }
+
+
+        [CommandMethod("TIANHUACAD", "THTestDrawGrid", CommandFlags.Modal)]
+        public void THTestDrawGrid()
+        {
+            using (var cmd = new ThGridDrawCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

@@ -69,6 +69,7 @@ namespace ThPlatform3D.Common
             dimension.Layer = config.LayerName;
             dimension.ColorIndex = config.Color;
             dimension.DimensionStyleName = config.DimStyleName;
+            dimension.Dimtxt = 300.0;
             return objId;
         }
 

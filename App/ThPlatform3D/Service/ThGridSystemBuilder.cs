@@ -139,16 +139,15 @@ namespace ThPlatform3D.Service
             results.Add(circle);
 
             // 文字
-            var text = new DBText()
-            { 
-                Position = circle.Center,
-                AlignmentPoint = circle.Center,
-                HorizontalMode = TextHorizontalMode.TextMid,
-                VerticalMode = TextVerticalMode.TextVerticalMid,
-                TextString = circleLable.Mark,
-            };
+            var text = new DBText();
+            text.Height = circle.Diameter * 0.7;
+            text.WidthFactor = 0.7;
+            text.Position = circle.Center;            
+            text.HorizontalMode = TextHorizontalMode.TextMid;
+            text.VerticalMode = TextVerticalMode.TextVerticalMid;
+            text.TextString = circleLable.Mark;
+            text.AlignmentPoint = text.Position;
             results.Add(text);
-
             return results;
         }
     }

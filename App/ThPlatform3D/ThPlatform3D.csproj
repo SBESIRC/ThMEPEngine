@@ -73,6 +73,7 @@
     <Compile Include="ArchitecturePlane\ThArchitecturePlaneCommon.cs" />
     <Compile Include="Command\ThDropSlabDrawCmd.cs" />
     <Compile Include="Command\ThDrawBaseCmd.cs" />
+    <Compile Include="Command\ThGridDrawCmd.cs" />
     <Compile Include="Command\ThSlabDrawCmd.cs" />
     <Compile Include="Command\ThWallHoleDrawCmd.cs" />
     <Compile Include="Command\ThRailDrawCmd.cs" />

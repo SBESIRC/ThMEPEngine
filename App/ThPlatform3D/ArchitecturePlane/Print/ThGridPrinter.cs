@@ -81,6 +81,7 @@ namespace ThPlatform3D.ArchitecturePlane.Print
                 {
                     Color = 7,
                     Height =500, 
+                    WidthFactor=0.7,
                     LayerName = ThArchPrintLayerManager.ADAXISDIMS,
                     TextStyleName = ThArchPrintStyleManager.TCHAXIS,
                 };

@@ -143,5 +143,15 @@ namespace ThPlatform3D.Model.Printer
                 _dimStyleName = value;
             }
         }
+
+        private double _dimTxt;
+        public double DimTxt
+        {
+            get => _dimTxt;
+            set
+            {
+                _dimTxt = value;
+            }
+        }
     }
 }
