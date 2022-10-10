@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using ThMEPArchitecture.MultiProcess;
 using OInterParameter = ThParkingStall.Core.OInterProcess.OInterParameter;
+using static  ThParkingStall.Core.OTools.LineSegmentEx;
 //using ThParkingStall.Core.OInterProcess;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
@@ -370,27 +371,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             else return false;
         }
         //只包含障碍物，车道的分区
-        public static List<SubArea> GetSubAreas(this List<LineString> SegLineStrings)
+        public static List<SubArea> GetSubAreas(this List<LineString> SegLineStrings,bool acurate = true)
         {
             var subAreas = new List<SubArea>();//分割出的子区域
+            var segLines = SegLineStrings.Where(lstr =>lstr != null).ToList();
+
             Polygon TotalArea = InterParameter.TotalArea;
             MNTSSpatialIndex BuildingSpatialIndex = InterParameter.BuildingSpatialIndex;
-            var areas = TotalArea.Shell.GetPolygons(SegLineStrings.Where(lstr => lstr != null));//区域分割
+            var areas = TotalArea.Shell.GetPolygons(segLines);//区域分割
             areas = areas.Select(a => a.RemoveHoles()).ToList();//去除中空腔体
-            var segLineSpIndex = new MNTSSpatialIndex(SegLineStrings.Where(lstr => lstr != null));
+            //var segLineSpIndex = new MNTSSpatialIndex(segLines);
             // 创建子区域列表
             for (int i = 0; i < areas.Count; i++)
             {
                 var area = areas[i];
-                var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
-                var subSegLines = subSegLineStrings.GetVaildLstrs(area);
+                //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area.Buffer(0.1)).Cast<LineString>();
+                var subSegLines = segLines.GetVaildLstrs(area, acurate);
                 Geometry geoWalls = area.Shell;
-                foreach (var subSegLine in subSegLineStrings)
+                foreach (var subSegLine in subSegLines)
                 {
-                    if (subSegLine.PartInCommon(geoWalls))
-                    {
-                        geoWalls = geoWalls.Difference(subSegLine);
-                    }
+                    //if (subSegLine.PartInCommon(geoWalls))
+                    //{
+                    //    geoWalls = geoWalls.Difference(subSegLine);
+                    //}
+                    geoWalls = geoWalls.Difference(subSegLine.Buffer(0.1));
                 }
                 var walls = geoWalls.Get<LineString>();
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
@@ -418,9 +422,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private static List<LineString> GetSegLinesOnce(this List<LineString> SegLineStrings)
         {
             var newSegs = new List<LineString>();
-            var subAreas = SegLineStrings.GetSubAreas();
+            var subAreas = SegLineStrings.GetSubAreas(false);
             foreach (var area in subAreas)
             {
+                //area.Display("debug");
                 var newSeg = area.GetNewSegLine(SegLineStrings);
                 if(newSeg != null) newSegs.Add(newSeg);
             }
@@ -465,7 +470,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         positiveDir = false;
                     }
                     bool NeedExtraSegLine = segLineSPIndex.SelectCrossingGeometry(Buffer).
-                        Cast<LineString>().Where(l => l.IsVertical() == IsVerticle).Count() == 0;
+                        Cast<LineString>().Select(lstr =>new LineSegment(lstr.Coordinates.First(),lstr.Coordinates.Last())).
+                        Where(l => l.ParallelTo(extended,0.1)).Count() == 0;
                     if (NeedExtraSegLine)//需要补线
                     {
                         newSeg = GetNewSegAtBestPlace(subArea, SegLineStrings, extended,
@@ -529,7 +535,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         
         public static bool SegLineIsVaild(List<LineSegment> SegLines,List<int> idxs)
         {
-            if (!InterParameter.Initialized) return true;//斜交模式，直接添加
+            if (!InterParameter.Initialized) return true;
             foreach(var idx in idxs)
             {
                 var validLane = SegLineEx.GetVaildLane(idx, SegLines, InterParameter.TotalArea, InterParameter.BoundaryObjectsSPIDX);

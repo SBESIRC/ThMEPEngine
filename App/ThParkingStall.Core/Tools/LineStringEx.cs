@@ -107,17 +107,33 @@ namespace ThParkingStall.Core.Tools
             return VaildParts;
         }
 
-        public static List<LineString> GetVaildLstrs(this IEnumerable<LineString> lstrs, Polygon area)
+        public static List<LineString> GetVaildLstrs(this IEnumerable<LineString> lstrs, Polygon area,bool acruate = true,double tol = 0.1)
         {
             var VaildParts = new List<LineString>();
-            foreach (var lstr in lstrs)
+            if (!acruate)
             {
-                var intSection = OverlayNGRobust.Overlay(area.Shell, lstr, SpatialFunction.Intersection);
-                if (intSection.Length > 0)
+                var bound = area.Shell.Buffer(tol);
+                foreach (var segLine in lstrs)
                 {
-                    var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
-                    var coors = new Coordinate[] { pts.First(), pts.Last() };
-                    VaildParts.Add(new LineString(coors));
+                    var commonPart = segLine.Intersection(bound);
+                    if (commonPart.Length < 100) continue;
+                    var coors = new Coordinate[] { commonPart.Coordinates.First(), commonPart.Coordinates.Last() };
+                    var vaildPart = new LineString(coors);
+                    if (vaildPart.Length > 100) VaildParts.Add(vaildPart);
+
+                }
+            }
+            else
+            {
+                foreach (var lstr in lstrs)
+                {
+                    var intSection = OverlayNGRobust.Overlay(area.Shell, lstr, SpatialFunction.Intersection);
+                    if (intSection.Length > 0)
+                    {
+                        var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
+                        var coors = new Coordinate[] { pts.First(), pts.Last() };
+                        VaildParts.Add(new LineString(coors));
+                    }
                 }
             }
             return VaildParts;

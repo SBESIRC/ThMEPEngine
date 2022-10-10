@@ -103,7 +103,10 @@ namespace ThParkingStall.Core.OTools
 
         public static bool ParallelTo(this LineSegment lineSegment, LineSegment other,double tol = 0.01)
         {
-            return lineSegment.DirVector().Distance(other.DirVector()) < tol;
+            var dirThis = lineSegment.DirVector();
+            var dirOther = other.DirVector();
+
+            return dirThis.Distance(dirOther) < tol || dirThis.Distance(dirOther.Negate()) < tol;
         }
 
     }

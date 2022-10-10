@@ -567,7 +567,7 @@ namespace ThParkingStall.Core.OTools
         #endregion
         #region 获取子区域内的车道，以及墙线
         //获取相同部分
-        public static List<LineSegment> GetCommonParts(this List<LineString> lanes,Polygon area,double tol  = 0.01)
+        public static List<LineSegment> GetCommonParts(this IEnumerable<LineString> lanes,Polygon area,double tol  = 0.01)
         {
             var vaildParts = new List<LineSegment>();
             //var bounds = new MNTSSpatialIndex(shell.ToLineStrings());

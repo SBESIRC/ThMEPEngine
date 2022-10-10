@@ -218,7 +218,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //尽端环通
-        private int _AllowLoopThroughEnd = 50000;
+        private int _AllowLoopThroughEnd = 100000;
         public int AllowLoopThroughEnd
         {
             get { return _AllowLoopThroughEnd; }
@@ -229,7 +229,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //背靠背长度限制
-        private int _DisAllowMaxLaneLength = 50000;
+        private int _DisAllowMaxLaneLength = 200000;
         public int DisAllowMaxLaneLength
         {
             get { return _DisAllowMaxLaneLength; }
