@@ -119,6 +119,7 @@ namespace ThMEPTCH.CAD
 
                         tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint());
                         tchSegment.Index.Add(++ptIndex);
+                        tchPolyline.Segments.Add(tchSegment);
                     }
                 }
             }
