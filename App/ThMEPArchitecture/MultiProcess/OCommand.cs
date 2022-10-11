@@ -43,6 +43,7 @@ using ThParkingStall.Core;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
 
 using System.Reflection;
+using System.Net;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -387,34 +388,9 @@ namespace ThMEPArchitecture.MultiProcess
         }
         Genome GetGenomeFromServer(DataWraper dataWraper)
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            FileStream fileStream = new FileStream(path + "\\dataWraper.txt", FileMode.Create);
-            BinaryFormatter binaryFormatter = new BinaryFormatter();
-            binaryFormatter.Serialize(fileStream, dataWraper); //序列化 参数：流 对象
-            fileStream.Close();
-
-            fileStream = new FileStream(path + "\\dataWraper.txt", FileMode.Open);
-            var formatter = new BinaryFormatter
-            {
-                Binder = new UBinder()
-            };
-            var readWraper = (DataWraper)formatter.Deserialize(fileStream);
-            fileStream.Close();
-
-            ;
-            var solution = new Genome();
-            return solution;
-        }
-        public class UBinder : SerializationBinder
-        {
-            public override Type BindToType(string assemblyName, string typeName)
-            {
-                Type typeToDeserialize = null;
-                typeToDeserialize = Type.GetType(String.Format("{0}, {1}",
-                    typeName, assemblyName));
-
-                return typeToDeserialize;
-            }
+            ServerGenerationService serverGenerationService = new ServerGenerationService();
+            var gene = serverGenerationService.GetGenome(dataWraper);
+            return gene;
         }
 
         private Polygon CaledBound;

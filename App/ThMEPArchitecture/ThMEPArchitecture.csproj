@@ -30,6 +30,7 @@
     <Compile Include="MultiProcess\MPCommand.cs" />
     <Compile Include="MultiProcess\Converter.cs" />
     <Compile Include="MultiProcess\OCommand.cs" />
+    <Compile Include="MultiProcess\ServerGenerationService.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\AutoSegGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\BuildingPosAnalysis.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\BuildingPosGA.cs" />

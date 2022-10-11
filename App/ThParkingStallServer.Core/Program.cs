@@ -4,8 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
+using System.Net;
+using System.Net.Security;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
@@ -18,7 +21,7 @@ namespace ThParkingStallServer.Core
         static void Main(string[] args)
         {
             //Read Datawraper
-            var dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var dir = @"C:\webiis\calParkingTest\ParkingTransferedDatas";
             var path = dir + "\\dataWraper.txt";
             ReadDataWraperService readDataWraperService = new ReadDataWraperService(path);
             var dataWraper = new DataWraper();
@@ -56,8 +59,20 @@ namespace ThParkingStallServer.Core
             fileStream.Close();
 
             Console.WriteLine("success.");
-            Console.ReadKey();
+            //Console.ReadKey();
             return;
+        }
+        static void SetCertificatePolicy()
+        {
+            ServicePointManager.ServerCertificateValidationCallback += RemoteCertificateValidate;
+        }
+
+        ///  <summary>
+        ///  远程证书验证
+        ///  </summary>
+        static bool RemoteCertificateValidate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors error)
+        {
+            return true;
         }
     }
 }
