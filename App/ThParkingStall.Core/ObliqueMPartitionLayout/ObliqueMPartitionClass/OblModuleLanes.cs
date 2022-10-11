@@ -52,6 +52,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         }
                     case ((int)LayoutDirection.HORIZONTAL):
                         {
+                            if (ParentDir != Vector2D.Zero && _paras.LanesToAdd.Count > 0 && (IsPerpVector(ParentDir, Vector(_paras.LanesToAdd[0].Line)) || IsParallelVector(ParentDir, Vector(_paras.LanesToAdd[0].Line))))
+                            {
+                                length *= LayoutScareFactor_ParentDir;
+                            }
                             if (length>0 && _paras.LanesToAdd.Count > 0 && !IsHorizontalLine(_paras.LanesToAdd[0].Line,45))
                             {
                                 length *= LayoutScareFactor_Intergral;
@@ -65,6 +69,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         }
                     case ((int)LayoutDirection.VERTICAL):
                         {
+                            if (ParentDir != Vector2D.Zero && _paras.LanesToAdd.Count > 0 && (IsPerpVector(ParentDir, Vector(_paras.LanesToAdd[0].Line)) || IsParallelVector(ParentDir, Vector(_paras.LanesToAdd[0].Line))))
+                            {
+                                length *= LayoutScareFactor_ParentDir;
+                            }
                             if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsVerticalLine(_paras.LanesToAdd[0].Line, 45))
                             {
                                 length *= LayoutScareFactor_Intergral;
@@ -908,6 +916,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         }
                     case ((int)LayoutDirection.HORIZONTAL):
                         {
+                            if (ParentDir != Vector2D.Zero && _paras.LanesToAdd.Count > 0 && IsPerpOrParallelVector(ParentDir, Vector(_paras.LanesToAdd[0].Line)))
+                            {
+                                length *= LayoutScareFactor_ParentDir;
+                            }
                             if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsHorizontalLine(_paras.LanesToAdd[0].Line, 45))
                             {
                                 length *= LayoutScareFactor_SingleVert;
@@ -921,6 +933,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         }
                     case ((int)LayoutDirection.VERTICAL):
                         {
+                            if (ParentDir != Vector2D.Zero && _paras.LanesToAdd.Count > 0 && IsPerpOrParallelVector(ParentDir, Vector(_paras.LanesToAdd[0].Line)))
+                            {
+                                length *= LayoutScareFactor_ParentDir;
+                            }
                             if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsVerticalLine(_paras.LanesToAdd[0].Line, 45))
                             {
                                 length *= LayoutScareFactor_SingleVert;
