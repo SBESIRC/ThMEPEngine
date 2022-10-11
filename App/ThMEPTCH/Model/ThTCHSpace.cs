@@ -1,11 +1,8 @@
 ﻿using System;
-using ProtoBuf;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPTCH.Model
 {
-    [ProtoContract]
     public class ThTCHSpace : ThTCHElement, ICloneable
     {
         private ThTCHSpace()

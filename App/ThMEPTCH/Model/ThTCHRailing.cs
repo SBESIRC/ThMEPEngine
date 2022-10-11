@@ -1,13 +1,11 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using ProtoBuf;
-using System;
+﻿using System;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPTCH.Model
 {
     /// <summary>
     /// 栏杆
     /// </summary>
-    [ProtoContract]
     public class ThTCHRailing : ThTCHElement, ICloneable
     {
         public object Clone()

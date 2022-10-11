@@ -1,15 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using ProtoBuf;
-using System;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPTCH.Model
 {
-    [ProtoContract]
     public class ThTCHWindow : ThTCHElement, ICloneable
     {
         private double Angle { get; }
-        [ProtoMember(21)]
         public uint WindowType { get; set; }
 
         private ThTCHWindow() { }

@@ -1,12 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using ProtoBuf;
-using System;
-using System.Collections.Generic;
 
 namespace ThMEPTCH.Model
 {
-    [ProtoContract]
     public class ThTCHBeam : ThTCHElement, ICloneable
     {
         private ThTCHBeam()

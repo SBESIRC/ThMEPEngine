@@ -1,30 +1,25 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using ProtoBuf;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.PropertyServices.PropertyEnums;
 
 namespace ThMEPTCH.Model
 {
-    [ProtoContract]
     public class ThTCHWall : ThTCHElement, ICloneable
     {
         /// <summary>
         /// 门
         /// </summary>
-        [ProtoMember(21)]
         public List<ThTCHDoor> Doors { get; private set; }
         /// <summary>
         /// 窗
         /// </summary>
-        [ProtoMember(22)]
         public List<ThTCHWindow> Windows { get; private set; }
         /// <summary>
         /// 开洞
         /// </summary>
-        [ProtoMember(23)]
         public List<ThTCHOpening> Openings { get; private set; }
 
         private ThTCHWall()

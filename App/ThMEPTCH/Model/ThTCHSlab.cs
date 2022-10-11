@@ -1,20 +1,17 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using ProtoBuf;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPTCH.PropertyServices.PropertyEnums;
 
 namespace ThMEPTCH.Model
 {
-    [ProtoContract]
     public class ThTCHSlab : ThTCHElement, ICloneable
     {
         /// <summary>
         /// 降板信息
         /// </summary>
-        [ProtoMember(21)]
         public List<ThTCHDescending> Descendings { get; set; }
 
         private ThTCHSlab()
