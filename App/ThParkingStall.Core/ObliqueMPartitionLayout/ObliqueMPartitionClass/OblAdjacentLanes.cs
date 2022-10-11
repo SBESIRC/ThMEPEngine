@@ -48,6 +48,32 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             }
                             break;
                         }
+                    case ((int)LayoutDirection.HORIZONTAL):
+                        {
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsHorizontalLine(_paras.LanesToAdd[0].Line, 45))
+                            {
+                                length *= LayoutScareFactor_Adjacent;
+                            }
+                            if (length > max_length)
+                            {
+                                max_length = length;
+                                paras = _paras;
+                            }
+                            break;
+                        }
+                    case ((int)LayoutDirection.VERTICAL):
+                        {
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsVerticalLine(_paras.LanesToAdd[0].Line, 45))
+                            {
+                                length *= LayoutScareFactor_Adjacent;
+                            }
+                            if (length > max_length)
+                            {
+                                max_length = length;
+                                paras = _paras;
+                            }
+                            break;
+                        }
                 }
             }
             generate_lane_length = max_length;

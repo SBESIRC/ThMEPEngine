@@ -160,6 +160,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public static double LayoutScareFactor_Adjacent = 0.7;
         public static double LayoutScareFactor_betweenBuilds = 0.7;
         public static double LayoutScareFactor_SingleVert = 0.7;
+        public static double LayoutScareFactor_ParentDir = 3;
 
         public static bool AllowProcessEndLanes = true;//尽端停车
         public static bool LoopThroughEnd = true;//尽端环通
@@ -171,7 +172,6 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         /// <summary>
         /// 如果生成车道线与上一根方向一致，则乘以比例权重系数
         /// </summary>
-        public static double LayoutScareFactor_ParentDir = 3;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
         public static double SingleVertModulePlacementFactor = 1.0;
         public bool QuickCalculate = false;//快速计算

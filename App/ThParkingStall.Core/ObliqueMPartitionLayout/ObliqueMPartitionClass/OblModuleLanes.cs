@@ -50,6 +50,32 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             }
                             break;
                         }
+                    case ((int)LayoutDirection.HORIZONTAL):
+                        {
+                            if (length>0 && _paras.LanesToAdd.Count > 0 && !IsHorizontalLine(_paras.LanesToAdd[0].Line,45))
+                            {
+                                length *= LayoutScareFactor_Intergral;
+                            }
+                            if (length > max_length)
+                            {
+                                max_length = length;
+                                paras = _paras;
+                            }
+                            break;
+                        }
+                    case ((int)LayoutDirection.VERTICAL):
+                        {
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsVerticalLine(_paras.LanesToAdd[0].Line, 45))
+                            {
+                                length *= LayoutScareFactor_Intergral;
+                            }
+                            if (length > max_length)
+                            {
+                                max_length = length;
+                                paras = _paras;
+                            }
+                            break;
+                        }
                 }
             }
             generate_lane_length = max_length;
@@ -726,9 +752,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     {
                         paras.CarBoxesToAdd.Add(pl);
                         Lane ln = new Lane(split_un_loopthrough_cut, vec);
-                        paras.LanesToAdd.Add(ln);
+                        paras.LanesToAdd.Insert(0, ln);
                         Lane _ln = new Lane(split, -vec);
-                        paras.LanesToAdd.Add(_ln);
+                        paras.LanesToAdd.Insert(0, _ln);
                     }
                     else
                     {
@@ -737,7 +763,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         module.IsInBackBackModule = true;
                         paras.CarModulesToAdd.Add(module);
                         Lane ln = new Lane(split_un_loopthrough_cut, vec);
-                        paras.LanesToAdd.Add(ln);
+                        paras.LanesToAdd.Insert(0, ln);
                     }
                 }
                 if (paras.CarModulesToAdd.Count - generate_module_count == 1)
@@ -872,6 +898,32 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             if (ParentDir != Vector2D.Zero && _paras.LanesToAdd.Count > 0 && IsPerpOrParallelVector(ParentDir, Vector(_paras.LanesToAdd[0].Line)))
                             {
                                 length *= LayoutScareFactor_ParentDir;
+                            }
+                            if (length > max_length)
+                            {
+                                max_length = length;
+                                paras = _paras;
+                            }
+                            break;
+                        }
+                    case ((int)LayoutDirection.HORIZONTAL):
+                        {
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsHorizontalLine(_paras.LanesToAdd[0].Line, 45))
+                            {
+                                length *= LayoutScareFactor_SingleVert;
+                            }
+                            if (length > max_length)
+                            {
+                                max_length = length;
+                                paras = _paras;
+                            }
+                            break;
+                        }
+                    case ((int)LayoutDirection.VERTICAL):
+                        {
+                            if (length > 0 && _paras.LanesToAdd.Count > 0 && !IsVerticalLine(_paras.LanesToAdd[0].Line, 45))
+                            {
+                                length *= LayoutScareFactor_SingleVert;
                             }
                             if (length > max_length)
                             {

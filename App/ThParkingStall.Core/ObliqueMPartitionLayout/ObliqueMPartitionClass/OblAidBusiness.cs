@@ -283,6 +283,24 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         }
                     }
                 }
+                else if (Mode == ((int)LayoutDirection.HORIZONTAL))
+                {
+                    if (IsHorizontalLine(a.Line, 45) && a.Line.Length > FilterLength && !IsHorizontalLine(b.Line, 45)) return -1;
+                    else if (!IsHorizontalLine(a.Line, 45) && IsHorizontalLine(b.Line, 45) && b.Line.Length > FilterLength) return 1;
+                    else
+                    {
+                        return CompareLength(a.Line, b.Line);
+                    }
+                }
+                else if (Mode == ((int)LayoutDirection.VERTICAL))
+                {
+                    if (IsVerticalLine(a.Line, 45) && a.Line.Length > FilterLength && !IsVerticalLine(b.Line, 45)) return -1;
+                    else if (!IsVerticalLine(a.Line, 45) && IsVerticalLine(b.Line, 45) && b.Line.Length > FilterLength) return 1;
+                    else
+                    {
+                        return CompareLength(a.Line, b.Line);
+                    }
+                }
                 else return 0;
             }
             private int CompareLength(LineSegment a, LineSegment b)
