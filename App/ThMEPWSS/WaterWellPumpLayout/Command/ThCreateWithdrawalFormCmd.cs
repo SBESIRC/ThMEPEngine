@@ -161,25 +161,17 @@ namespace ThMEPWSS.Command
                         dic.Add("电量", "xx");
                         dic.Add("井内水泵台数", item.StrPumpCount);
                         dic.Add("数量统计", item.StrWellCount);
-                        var bodyId = acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableBody, position, new Scale3d(1, 1, 1), angle, dic);
+                        var bodyId = acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableBody, position, new Scale3d(1, 1, 1), 0, dic);
                         bodyId.SetDynBlockValue("水泵配置", item.StrPumpConfig);
 
-                        //修改attri 角度
+                        //旋转图块到当前ucs
                         BlockReference blk = (BlockReference)bodyId.GetObject(OpenMode.ForRead);
                         if (blk != null)
                         {
-                            //若包含属性定义，则遍历属性定义
-                            foreach (ObjectId id in blk.AttributeCollection )
-                            {
-                                //检查是否是属性定义
-                                AttributeReference attRef = id.GetObject(OpenMode.ForRead) as AttributeReference;
-                                if (attRef != null && dic.ContainsKey(attRef.Tag.ToUpper()))
-                                {
-                                    attRef.UpgradeOpen();//切换属性对象为写的状态
-                                    attRef.Rotation = angle;
-                                    attRef.DowngradeOpen();
-                                }
-                            }
+                            var rotaM = Matrix3d.Rotation(angle, Vector3d.ZAxis, blk.Position);
+                            blk.UpgradeOpen();
+                            blk.TransformBy(rotaM);
+                            blk.DowngradeOpen();
                         }
 
                         position += vector * 1000;
