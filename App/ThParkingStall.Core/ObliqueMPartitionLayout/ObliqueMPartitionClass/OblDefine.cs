@@ -36,7 +36,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             ThicknessOfPillarConstruct = VMStock.ColumnAdditionalSize;
             AllowCompactedLane = VMStock.BoundaryShrink;
             //VMStock缺少RunMode参数
-            //LayoutMode = ((int)VMStock.RunMode);
+            LayoutMode = ((int)VMStock.RunMode);
+            if (LayoutMode == 0)
+                LayoutMode = ((int)LayoutDirection.FOLLOWPREVIOUS);
             HasImpactOnDepthForPillarConstruct = VMStock.ColumnAdditionalInfluenceLaneWidth;
             //viewmodel参数赋值完毕
             GeneratePillars = PillarSpacing < DisVertCarWidth ? false : GeneratePillars;
