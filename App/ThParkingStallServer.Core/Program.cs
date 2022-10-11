@@ -20,6 +20,7 @@ namespace ThParkingStallServer.Core
     {
         static void Main(string[] args)
         {
+            SetCertificatePolicy();
             //Read Datawraper
             var dir = @"C:\webiis\calParkingTest\ParkingTransferedDatas";
             var path = dir + "\\dataWraper.txt";
