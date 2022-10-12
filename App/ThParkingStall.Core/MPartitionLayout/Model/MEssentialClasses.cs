@@ -12,6 +12,23 @@ namespace ThParkingStall.Core.MPartitionLayout
     //public class Ramps { }
     public class Lane
     {
+        public Lane(Lane lane)
+        {
+            Line = lane.Line;
+            Vec = lane.Vec;
+            CanBeMoved = lane.CanBeMoved;
+            GStartAdjLine = lane.GStartAdjLine;
+            GEndAdjLine = lane.GEndAdjLine;
+            CanExtend = lane.CanExtend;
+            IsGeneratedForLoopThrough = lane.IsGeneratedForLoopThrough;
+            IsGeneratedForRestrictLength = lane.IsGeneratedForRestrictLength;
+            NOTJUDGELAYOUTBYPARENT = lane.NOTJUDGELAYOUTBYPARENT;
+            IsAdjLaneForProcessLoopThroughEnd = lane.IsAdjLaneForProcessLoopThroughEnd;
+            NotCopyReverseForLaneCompaction = lane.NotCopyReverseForLaneCompaction;
+            ISCopiedFromCarmodelus = lane.ISCopiedFromCarmodelus;
+            AdjustedForCompacted = lane.AdjustedForCompacted;
+            MoveableDistanceForCompacted = lane.MoveableDistanceForCompacted;
+        }
         public Lane(LineSegment line, Vector2D vec, bool canBeMoved = true)
         {
             Line = line;
@@ -30,6 +47,9 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool IsAdjLaneForProcessLoopThroughEnd = false;
         public bool NotCopyReverseForLaneCompaction=false;
         public bool ISCopiedFromCarmodelus = false;
+        public bool AdjustedForCompacted = false;
+        public double MoveableDistanceForCompacted = 0;
+        public Vector2D VecforCompacted { get; set; }
         public void Copy(Lane lane)
         {
             CanBeMoved=lane.CanBeMoved;
@@ -75,6 +95,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool IsInBackBackModule = false;
         public bool IsInVertUnsureModule = false;
         public bool IsSingleModule=false;//针对单box7850与车位5300，在生成新车道有可能碰车位做特殊处理时的标记
+        public bool AdjustedForCompacted = false;
         public void Copy(CarModule module)
         {
             GenerateCars=module.GenerateCars;
