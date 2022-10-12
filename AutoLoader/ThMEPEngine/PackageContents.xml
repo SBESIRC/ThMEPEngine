@@ -526,6 +526,7 @@
                 <Command Local="THSGDX" Global="THSGDX" />
                 <Command Local="THFJXX" Global="THFJXX" />
                 <Command Local="THFYJS" Global="THFYJS" />
+                <Command Local="THFJDW" Global="THFJDW" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
                 <Command Local="THDNPG" Global="THDNPG" />
                 <Command Local="THZYSFJS" Global="THZYSFJS" />
@@ -554,6 +555,7 @@
                 <Command Local="THSGDX" Global="THSGDX" />
                 <Command Local="THFJXX" Global="THFJXX" />
                 <Command Local="THFYJS" Global="THFYJS" />
+                <Command Local="THFJDW" Global="THFJDW" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
                 <Command Local="THDNPG" Global="THDNPG" />
                 <Command Local="THZYSFJS" Global="THZYSFJS" />

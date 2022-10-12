@@ -167,7 +167,6 @@
     </Compile>
     <Compile Include="CAD\CustomCommandMappers.cs" />
     <Compile Include="IO\DataManager.cs" />
-    <Compile Include="CAD\DrawModelsInCAD.cs" />
     <Compile Include="ThFanDataModelExtension.cs" />
     <Compile Include="ThFanSelectionModelFoundationCmds.cs" />
     <Compile Include="ThFanSelectionUIService.cs" />

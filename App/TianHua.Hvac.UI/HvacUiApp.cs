@@ -186,6 +186,14 @@ namespace TianHua.Hvac.UI
             EQPMUIServices.Instance.ShowFanSelectUI("");
             EQPMUIServices.Instance.SelectFanBlock();
         }
+        [CommandMethod("TIANHUACAD", "THFJDW", CommandFlags.Modal)]
+        public void THFJDW()
+        {
+            using (var cmd = new ThHvacDrawFanParameterCmd())
+            {
+                cmd.Execute();
+            }
+        }
 
         SmokeCalculateUI smokeCalculateUI;
         [CommandMethod("TIANHUACAD", "THZYSFJS", CommandFlags.Modal)]
