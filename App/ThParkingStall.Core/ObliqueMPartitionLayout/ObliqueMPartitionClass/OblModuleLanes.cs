@@ -750,6 +750,23 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             break;
                         }
                     }
+                    if (dis_to_move + DisCarAndHalfLaneBackBack >= DisLaneWidth / 2 + DisVertCarWidth * 4)
+                    {
+                        //对面会垂直排，不会有背靠背，这种情况下把carmodule宽度放大为5300
+                        if (paras.CarModulesToAdd.Count > 0)
+                        {
+                            var module=paras.CarModulesToAdd.First();
+                            module.Box = PolyFromLines(module.Line, module.Line.Translation(module.Vec.Normalize() * DisCarAndHalfLane));
+                        }
+                        if (paras.CarBoxesToAdd.Count > 0)
+                        {
+                            paras.CarBoxesToAdd[0] = paras.CarModulesToAdd[0].Box;
+                        }
+                        if (paras.CarBoxPlusToAdd.Count > 0)
+                        {
+                            paras.CarBoxPlusToAdd[0].Box = paras.CarModulesToAdd[0].Box;
+                        }
+                    }
                 }
                 else
                 {
