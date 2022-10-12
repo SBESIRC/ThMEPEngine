@@ -128,14 +128,17 @@ namespace ThMEPElectrical.BlockConvert
         public List<ThBlockReferenceData> TargetBlockExtract(List<string> targetNames)
         {
             // 从图纸中提取目标块
+            var nameFilter = targetNames.Distinct().ToList();
+            nameFilter.Add(ThBConvertCommon.BLOCK_PUMP_LABEL);
+            nameFilter.Add(ThBConvertCommon.BLOCK_LOAD_DIMENSION + "2");
+            nameFilter.Add(ThBConvertCommon.BLOCK_MOTOR_AND_LOAD_DIMENSION + "2");
             var targetEngine = new ThBConvertBlockExtractionEngine()
             {
-                NameFilter = targetNames.Distinct().ToList(),
+                NameFilter = nameFilter,
             };
-            targetEngine.NameFilter.Add(ThBConvertCommon.BLOCK_PUMP_LABEL);
+
             targetEngine.ExtractFromMS(CurrentDb.Database);
-            return targetEngine.Results.Count > 0
-                ? ThBConvertSpatialIndexService.SelectCrossingPolygon(targetEngine.Results, Frame) : new List<ThBlockReferenceData>();
+            return targetEngine.Results.Count > 0 ? ThBConvertSpatialIndexService.SelectCrossingPolygon(targetEngine.Results, Frame) : new List<ThBlockReferenceData>();
         }
 
         public void Convert(ThBConvertManager manager, List<string> srcNames, List<ThBlockReferenceData> targetBlocks, bool setLayer)

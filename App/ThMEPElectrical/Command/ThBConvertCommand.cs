@@ -162,9 +162,14 @@ namespace ThMEPElectrical.Command
                 }
                 else
                 {
+                    var effectiveName = t.EffectiveName;
+                    if (t.EffectiveName.Equals(ThBConvertCommon.BLOCK_MOTOR_AND_LOAD_DIMENSION + "2") || t.EffectiveName.Equals(ThBConvertCommon.BLOCK_LOAD_DIMENSION + "2"))
+                    {
+                        effectiveName = effectiveName.KeepChinese();
+                    }
                     foreach (var rule in manager.Rules)
                     {
-                        if (rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME).Equals(t.EffectiveName))
+                        if (rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME).Equals(effectiveName))
                         {
                             result.Category = rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert();
                             result.EquimentType = rule.Transformation.Item2.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT);

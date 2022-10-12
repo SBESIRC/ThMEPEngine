@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 
 using NFox.Cad;
@@ -54,7 +53,6 @@ namespace ThMEPElectrical.BlockConvert
                     sourceEntitiesMap[i].ForEach(o =>
                     {
                         searchedIds.Add(o.Value.ObjectId);
-                        var searchCircle = new Circle(o.Key.Position, Vector3d.ZAxis, AllowTolence).TessellateCircleWithArc(100.0);
                         // 电动机及负载标注、负载标注
                         if (i == 0 || i == 1)
                         {
@@ -65,7 +63,7 @@ namespace ThMEPElectrical.BlockConvert
                             if (targetLoadList.Count > 0)
                             {
                                 var targetAttributes = targetLoadList[0].Value.ObjectId.GetAttributesInBlockReference();
-                                if (searchCircle.Contains(targetLoadList[0].Key.Position))
+                                if (o.Key.Position.DistanceTo(targetLoadList[0].Key.Position) < 10.0)
                                 {
                                     var result = new ThBConvertCompareModel
                                     {
@@ -136,7 +134,7 @@ namespace ThMEPElectrical.BlockConvert
                             }
                             else
                             {
-                                var result = new ThBConvertCompareModel
+                                var model = new ThBConvertCompareModel
                                 {
                                     Database = currentDb.Database,
                                     SourceId = o.Value.ObjectId,
@@ -144,10 +142,12 @@ namespace ThMEPElectrical.BlockConvert
                                     EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
                                     Type = ThBConvertCompareType.Delete,
                                 };
+                                CompareModels.Add(model);
                             }
                         }
                         else if (i == 2)
                         {
+                            var searchCircle = new Circle(o.Key.Position, Vector3d.ZAxis, AllowTolence).TessellateCircleWithArc(100.0);
                             var sourceAttributes = o.Value.ObjectId.GetAttributesInBlockReference();
                             var filterPoint = targetIndex.SelectCrossingPolygon(searchCircle).OfType<DBPoint>().ToList();
                             if (filterPoint.Count > 0)
@@ -195,6 +195,7 @@ namespace ThMEPElectrical.BlockConvert
                         }
                         else
                         {
+                            var searchCircle = new Circle(o.Key.Position, Vector3d.ZAxis, AllowTolence).TessellateCircleWithArc(100.0);
                             var srcEquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId);
                             var filterPoint = targetIndex.SelectCrossingPolygon(searchCircle).OfType<DBPoint>().ToList();
                             // 匹配设备类型相同的块

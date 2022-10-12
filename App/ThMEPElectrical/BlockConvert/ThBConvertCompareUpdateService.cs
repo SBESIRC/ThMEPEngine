@@ -40,8 +40,8 @@ namespace ThMEPElectrical.BlockConvert
                             case ThBConvertCompareType.Unchanged:
                                 break;
                             case ThBConvertCompareType.Delete:
-                                currentDb.Element<BlockReference>(model.SourceId, true).Erase();
                                 printParameterList.Add(GetParameter(currentDb, model.SourceId, 1, ThBConvertCommon.LINE_TYPE_HIDDEN, scale));
+                                currentDb.Element<BlockReference>(model.SourceId, true).Erase();
                                 break;
                             case ThBConvertCompareType.Add:
                                 ThBConvertDbUtils.UpdateLayerSettings(layer);
@@ -49,11 +49,11 @@ namespace ThMEPElectrical.BlockConvert
                                 printParameterList.Add(GetParameter(currentDb, model.TargetId, 1, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale));
                                 break;
                             case ThBConvertCompareType.Displacement:
-                                currentDb.Element<BlockReference>(model.SourceId, true).Erase();
                                 ThBConvertDbUtils.UpdateLayerSettings(layer);
                                 currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
                                 printParameterList.Add(GetParameter(currentDb, model.SourceId, 2, ThBConvertCommon.LINE_TYPE_HIDDEN, scale));
                                 printParameterList.Add(GetParameter(currentDb, model.TargetId, 2, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale));
+                                currentDb.Element<BlockReference>(model.SourceId, true).Erase();
                                 break;
                             case ThBConvertCompareType.ParameterChange:
                                 var srcBlock = currentDb.Element<BlockReference>(model.SourceId, true);
