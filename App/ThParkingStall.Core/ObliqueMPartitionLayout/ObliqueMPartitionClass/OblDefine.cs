@@ -213,7 +213,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             GenerateCarsOnRestLanes();
             PostProcess();
             if (!hasCompactedLane && AllowCompactedLane && !QuickCalculate)
-                CompactLane();
+            {
+                //CompactLane();
+                CompactPro();
+            }
+
         }
 
         private void InitialzeDatas(List<LineSegment> iniLanes)
