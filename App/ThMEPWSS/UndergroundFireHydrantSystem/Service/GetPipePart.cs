@@ -87,8 +87,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var pt1 = stPt;
                 var pt2 = new Point3d(stPt.X, stPt.Y - pipeGap, 0);
                 var pt4 = new Point3d(stPt.X + pipeLength, stPt.Y, 0);
-
-                var nextType = fireHydrantSysIn.PtTypeDic[rstPath[i + 1]];
+                var nextType = "";
+                if (fireHydrantSysIn.PtTypeDic.ContainsKey(rstPath[i + 1]))
+                    nextType = fireHydrantSysIn.PtTypeDic[rstPath[i + 1]];
                 if (nextType.Contains("Valve") || nextType.Contains("Casing"))
                 {
                     pt4 = new Point3d(stPt.X + pipeLength - 640, stPt.Y, 0);

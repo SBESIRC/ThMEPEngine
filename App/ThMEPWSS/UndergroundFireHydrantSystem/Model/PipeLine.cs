@@ -32,13 +32,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public static void AddPipeLine(DBObjectCollection dbObjs, FireHydrantSystemIn fireHydrantSysIn, 
             List<Point3dEx> pointList, List<Line> lineList)
         {
+            double tolerance = 5.0;
             foreach(var obj in dbObjs)
             {
                 if(obj is Line line)
                 {
                     var pt1 = line.StartPoint.Point3dZ0();
                     var pt2 = line.EndPoint.Point3dZ0();
-                    lineList.Add(new Line(pt1, pt2));
+                    if(pt1.DistanceTo(pt2)>= tolerance)
+                    {
+                        lineList.Add(new Line(pt1, pt2));
+                    }
                 }
                 if(obj is Polyline pline)
                 {
@@ -46,13 +50,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     {
                         var pt1 = pline.GetPoint3dAt(i).Point3dZ0();
                         var pt2 = pline.GetPoint3dAt(i+1).Point3dZ0();
-             
-                        lineList.Add(new Line(pt1, pt2));
+
+                        if (pt1.DistanceTo(pt2) >= tolerance)
+                        {
+                            lineList.Add(new Line(pt1, pt2));
+                        }
                     }
                 }
             }
             lineList = PipeLineList.CleanLaneLines3(lineList);
-            foreach(var line in lineList)
+            foreach (var line in lineList)
             {
                 var pt1 = new Point3dEx(line.StartPoint);
                 var pt2 = new Point3dEx(line.EndPoint);
