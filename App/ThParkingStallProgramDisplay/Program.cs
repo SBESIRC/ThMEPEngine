@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading;
 
 namespace ThParkingStallProgramDisplay
@@ -34,12 +35,115 @@ namespace ThParkingStallProgramDisplay
 
         static void Run(Logger Logger)
         {
-            string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
+            string _LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
             string LogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
-            Logger?.Information(LogFileName);
+            Logger?.Information(_LogFileName);
             var logs = new List<string>();
             bool process = true;
             bool hasBug = false;
+            var LogFileName = _LogFileName;
+
+
+            while (process)
+            {
+                var fs = new FileStream(LogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                try
+                {
+                    using (var sr = new StreamReader(fs))
+                    {
+                        while (!sr.EndOfStream)
+                        {
+                            var line = sr.ReadLine();
+                            Logger?.Information(line);
+                            var val = line.Split('[', ']').Last();
+
+                            //If met end of computation, break;
+                            if (line.Contains("程序出错"))
+                            {
+                                process = false;
+                                hasBug = true;
+                                break;
+                            }
+                            if (!logs.Contains(line))
+                            {
+                                logs.Add(line);
+                                System.Console.WriteLine(val);
+                            }
+                            if (line.Contains("块名"))
+                            {
+                                process = false;
+                                break;
+                            }
+                            Thread.Sleep(100);
+                        }
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                }
+                finally
+                {
+                    fs.Close();
+                }
+            }
+            process = true;
+            LogFileName = "DisplayLog.txt";
+            while (process)
+            {
+                using (WebClient client = new WebClient())
+                {
+                    try
+                    {
+                        client.Credentials = new NetworkCredential("upload", "Thape123123");
+                        client.DownloadFile("http://172.16.1.3/Loggers/DisplayLog.txt", "DisplayLog.txt");
+                    }
+                    catch (Exception ex) { }
+                }
+                var fs = new FileStream(LogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                try
+                {
+                    using (var sr = new StreamReader(fs))
+                    {
+                        while (!sr.EndOfStream)
+                        {
+                            var line = sr.ReadLine();
+                            Logger?.Information(line);
+                            var val = line.Split('[', ']').Last();
+
+                            //If met end of computation, break;
+                            if (line.Contains("程序出错"))
+                            {
+                                process = false;
+                                hasBug = true;
+                                break;
+                            }
+                            if (!logs.Contains(line))
+                            {
+                                logs.Add(line);
+                                System.Console.WriteLine(val);
+                            }
+                            if (line.Contains("收敛情况"))
+                            {
+                                process = false;
+                                break;
+                            }
+                            Thread.Sleep(100);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                }
+                finally
+                {
+                    fs.Close();
+                }
+            }
+
+            process = true;
+            LogFileName = _LogFileName;
             while (process)
             {
                 var fs = new FileStream(LogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -59,7 +163,7 @@ namespace ThParkingStallProgramDisplay
                                 process = false;
                                 break;
                             }
-                            if(line.Contains("程序出错"))
+                            if (line.Contains("程序出错"))
                             {
                                 process = false;
                                 hasBug = true;
@@ -74,7 +178,7 @@ namespace ThParkingStallProgramDisplay
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Logger?.Information(ex.Message);
                 }
@@ -83,6 +187,7 @@ namespace ThParkingStallProgramDisplay
                     fs.Close();
                 }
             }
+
             process = !hasBug;
             while (process)
             {

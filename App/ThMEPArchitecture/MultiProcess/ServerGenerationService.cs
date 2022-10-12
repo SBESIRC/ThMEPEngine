@@ -59,13 +59,13 @@ namespace ThMEPArchitecture.MultiProcess
             var solution = new Genome();
             //序列化dataWraper
             var dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var local_path = dir + "\\dataWraper.txt";
+            var local_path = dir + "\\dataWraper.dat";
             FileStream fileStream = new FileStream(local_path, FileMode.Create);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(fileStream, dataWraper); //序列化 参数：流 对象
             fileStream.Close();
             //发送至服务器
-            string url = "http://172.16.1.3:80/ParkingTransferedDatas/dataWraper.txt";
+            string url = "http://172.16.1.3:80/ParkingTransferedDatas/dataWraper.dat";
             using (WebClient client = new WebClient())
             {
                 client.Credentials = new NetworkCredential("upload", "Thape123123");
@@ -97,10 +97,10 @@ namespace ThMEPArchitecture.MultiProcess
             using (WebClient client = new WebClient())
             {
                 client.Credentials = new NetworkCredential("upload", "Thape123123");
-                client.DownloadFile("http://172.16.1.3:80/ParkingTransferedDatas/genome.txt", "genome.txt");
+                client.DownloadFile("http://172.16.1.3:80/ParkingTransferedDatas/genome.dat", "genome.dat");
             }
             //反序列化
-            fileStream = new FileStream("genome.txt", FileMode.Open);
+            fileStream = new FileStream("genome.dat", FileMode.Open);
             var formatter = new BinaryFormatter
             {
                 Binder = new UBinder()
