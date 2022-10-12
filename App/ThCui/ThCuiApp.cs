@@ -78,6 +78,7 @@ namespace TianHua.AutoCAD.ThCui
         private void RedirectAssemblies()
         {
             ThCuiAssemblyService.RedirectAssembly("System.Buffers", new Version(4, 0, 3, 0));
+            ThCuiAssemblyService.RedirectAssembly("Newtonsoft.Json", new Version(13, 0, 0, 0));
             ThCuiAssemblyService.RedirectAssembly("ICSharpCode.SharpZipLib", new Version(1, 3, 2, 10));
         }
 

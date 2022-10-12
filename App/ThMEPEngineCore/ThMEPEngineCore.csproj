@@ -826,7 +826,7 @@
     <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
     <PackageReference Include="Newtonsoft.Json">
-      <Version>9.0.1</Version>
+      <Version>13.0.1</Version>
     </PackageReference>
     <PackageReference Include="NPOI">
       <Version>2.5.5</Version>
