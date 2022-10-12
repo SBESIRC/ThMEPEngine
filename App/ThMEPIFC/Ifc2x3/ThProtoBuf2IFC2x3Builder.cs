@@ -86,27 +86,6 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public void BuildIfcModel(IfcStore Model, ThSUProjectData project)
-        {
-            if (Model != null)
-            {
-                // 虚拟set
-                var site = ThProtoBuf2IFC2x3Factory.CreateSite(Model);
-                var building = ThProtoBuf2IFC2x3Factory.CreateBuilding(Model, site, project.Root.Name + "Building");
-                var storey = ThProtoBuf2IFC2x3Factory.CreateStorey(Model, building, "1F");
-                var definitions = project.Definitions;
-                var suElements = new List<IfcBuildingElementProxy>();
-                foreach (var element in project.Buildings)
-                {
-                    var def = definitions[element.Component.DefinitionIndex];
-                    var trans = element.Component.Transformations;
-                    var ifcBuildingElement = ThProtoBuf2IFC2x3Factory.CreatedSUElement(Model, def, trans);
-                    suElements.Add(ifcBuildingElement);
-                }
-                ThProtoBuf2IFC2x3Factory.relContainsSUElements2Storey(Model, suElements, storey);
-            }
-        }
-
         static public IfcDoor SetupDoor(IfcStore model, IfcWall ifcWall, ThTCHWallData wall, ThTCHDoorData door, ThTCHPoint3d floor_origin)
         {
             var ifcDoor = ThProtoBuf2IFC2x3Factory.CreateDoor(model, door, floor_origin);

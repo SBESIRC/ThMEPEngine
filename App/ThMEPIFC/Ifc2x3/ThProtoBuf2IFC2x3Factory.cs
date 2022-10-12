@@ -750,27 +750,5 @@ namespace ThMEPIFC.Ifc2x3
 
         }
         #endregion
-
-        #region SU Element
-        public static IfcBuildingElementProxy CreatedSUElement(IfcStore model, ThSUCompDefinitionData def, ThTCHMatrix3d trans)
-        {
-            using (var txn = model.BeginTransaction("Create SU Element"))
-            {
-                var ret = model.Instances.New<IfcBuildingElementProxy>();
-                ret.Name = "SU Element";
-
-                IfcFaceBasedSurfaceModel mesh = model.ToIfcFaceBasedSurface(def);
-                var shape = ThIFC2x3Factory.CreateFaceBasedSurfaceBody(model, mesh);
-                ret.Representation = ThIFC2x3Factory.CreateProductDefinitionShape(model, shape);
-
-                //object placement
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(trans);
-
-                txn.Commit();
-                return ret;
-            }
-
-        }
-        #endregion
     }
 }
