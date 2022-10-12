@@ -1,6 +1,5 @@
 syntax = "proto3";
 import "ThTCHGeometry.proto";
-import "ThSUMaterialData.proto";
 
 message ThSUComponentData {
     int32 definition_index = 1;

@@ -1,5 +1,4 @@
 syntax = "proto3";
-
 import "ThTCHRootData.proto";
 
 message ThTCHPositioningElementData {

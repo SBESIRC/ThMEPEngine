@@ -1,5 +1,5 @@
 syntax = "proto3";
-import "ThTCHPositioningElementData.proto";
+import "ThTCHGridAxisData.proto";
 
 message ThTCHGridData {
     repeated ThTCHGridAxisData u_axes = 1;

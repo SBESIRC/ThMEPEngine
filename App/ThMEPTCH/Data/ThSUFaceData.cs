@@ -22,13 +22,11 @@ public static partial class ThSUFaceDataReflection {
   static ThSUFaceDataReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VHZW9tZXRyeS5wcm90bxoTVGhU",
-          "Q0hHZW9tZXRyeS5wcm90bxoWVGhTVU1hdGVyaWFsRGF0YS5wcm90bxoSVGhT",
-          "VUxvb3BEYXRhLnByb3RvIlUKDFRoU1VGYWNlRGF0YRIhCgpvdXRlcl9sb29w",
-          "GAEgASgLMg0uVGhTVUxvb3BEYXRhEiIKC2lubmVyX2xvb3BzGAIgAygLMg0u",
-          "VGhTVUxvb3BEYXRhYgZwcm90bzM="));
+          "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VMb29wRGF0YS5wcm90byJVCgxU",
+          "aFNVRmFjZURhdGESIQoKb3V0ZXJfbG9vcBgBIAEoCzINLlRoU1VMb29wRGF0",
+          "YRIiCgtpbm5lcl9sb29wcxgCIAMoCzINLlRoU1VMb29wRGF0YWIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThSUGeometryReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, global::ThSULoopDataReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThSULoopDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
           new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "OuterLoop", "InnerLoops" }, null, null, null, null)
         }));
@@ -85,11 +83,6 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   /// <summary>Field number for the "outer_loop" field.</summary>
   public const int OuterLoopFieldNumber = 1;
   private global::ThSULoopData outerLoop_;
-  /// <summary>
-  ///ThSUPolygonMesh mesh = 1;
-  ///ThSUMaterialData material = 2;
-  ///ThTCHVector3d face_normal = 3;
-  /// </summary>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public global::ThSULoopData OuterLoop {
