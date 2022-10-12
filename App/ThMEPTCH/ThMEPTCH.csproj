@@ -93,6 +93,7 @@
     <Compile Include="Data\ThSUComponentData.cs" />
     <Compile Include="Data\ThSUFaceData.cs" />
     <Compile Include="Data\ThSUGeometry.cs" />
+    <Compile Include="Data\ThSULoopData.cs" />
     <Compile Include="Data\ThSUMaterialData.cs" />
     <Compile Include="Data\ThSUProjectData.cs" />
     <Compile Include="Data\ThTCHBuildingData.cs" />

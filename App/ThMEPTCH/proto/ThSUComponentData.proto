@@ -5,5 +5,4 @@ import "ThSUMaterialData.proto";
 message ThSUComponentData {
     int32 definition_index = 1;
     ThTCHMatrix3d transformations = 2;
-    ThSUMaterialData material = 3;
 }
