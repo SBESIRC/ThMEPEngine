@@ -144,7 +144,7 @@ namespace ThMEPWSS.Command
                 {
                     ThMEPEngineCoreLayerUtils.ROOMOUTLINE,
                 };
-                var filter = ThSelectionFilterTool.Build(dxfNames/*, layerNames*/);
+                var filter = ThSelectionFilterTool.Build(dxfNames, layerNames);
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {
