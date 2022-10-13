@@ -195,6 +195,12 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 });
             #endregion
 
+            var _linesplitbounds = new List<LineSegment>();
+            foreach (var linesplitbound in linesplitbounds)
+            {
+                _linesplitbounds.AddRange(SplitBufferLineByPoly(linesplitbound, DisLaneWidth / 2 - 1, Boundary));
+            }
+            _linesplitbounds = _linesplitbounds.Where(e => Boundary.ClosestPoint(e.MidPoint).Distance(e.MidPoint) >= DisLaneWidth / 2 - 1).ToList();
             bool generate = false;
             var quitcycle = false;
             STRtree<Polygon> carBoxesStrTree = new STRtree<Polygon>();
@@ -478,7 +484,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             , ref line_align_backback_rest, true, false, false, false, true, true, false);
                     }
                     var generatecars_count = tmpro.Cars.Count;
-                    generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth));
+                    generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth))-4;
                     #endregion
 
                     #region 估计不生成单排的车位数estimated_cars_count,estimated_this_fullcount

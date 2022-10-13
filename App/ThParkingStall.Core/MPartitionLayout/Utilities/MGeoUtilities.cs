@@ -115,6 +115,35 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             return results;
         }
+        public static LineString[] SplitCurve(LineString curve, List<LineString> splitters)
+        {
+            List<Coordinate> points = new List<Coordinate>();
+            foreach(var splitter in splitters)
+                points.AddRange(curve.IntersectPoint(splitter));
+            points = RemoveDuplicatePts(points, 1);
+            points = SortAlongCurve(points, curve);
+            if (points.Count > 0 && curve.Length > 1)
+            {
+                var ps = points.Select(e => curve.ClosestPoint(e)).ToList();
+                ps = RemoveDuplicatePts(ps, 1);
+                ps = SortAlongCurve(ps, curve);
+                var splited = curve.GetSplitCurves(ps);
+                return splited.Where(e => e.Length > 10).Where(e =>
+                {
+                    var mid = e.GetMidPoint();
+                    foreach (var ls in splitters)
+                    {
+                        if (ls.ClosestPoint(mid).Distance(mid) < 1)
+                            return false;
+                    }
+                    return true;
+                }).ToArray();
+            }
+            else
+            {
+                return new LineString[] { curve };
+            }
+        }
         public static LineString[] SplitCurve(LineString curve, LineString splitter)
         {
             List<Coordinate> points = new List<Coordinate>();
