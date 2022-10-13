@@ -3817,7 +3817,21 @@ namespace ThMEPStructure.Reinforcement.Draw
             {
                 this.Reinforce = thTTypeEdgeComponent.Reinforce;
             }
-            this.Stirrup = thTTypeEdgeComponent.Stirrup;
+            if (component.IsCloseHole)
+            {
+                if (string.IsNullOrEmpty(component.Mark))
+                {
+                    this.Stirrup = thTTypeEdgeComponent.Stirrup;
+                }
+                else
+                {
+                    this.Stirrup = thTTypeEdgeComponent.Stirrup + "(长墙" + thTTypeEdgeComponent.Mark + ")";
+                }
+            }
+            else
+            {
+                this.Stirrup = thTTypeEdgeComponent.Stirrup;
+            }
         }
 
         public override void CalExplo()
