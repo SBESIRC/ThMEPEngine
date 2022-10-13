@@ -14,9 +14,6 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Runtime_Compiler_Services" Guid="{B043D5F5-1BCB-49D5-BA37-75646CDEA441}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Runtime_Compiler_Services" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Collections_Immutable" Guid="{25B28A0A-A0B5-4CCE-92C8-B3EEF6DF58E5}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Collections_Immutable" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Collections.Immutable.dll" />
-            </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common">
@@ -30,9 +27,6 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Runtime_Compiler_Services" Guid="{E88B44B6-CF2C-435B-86E7-9CB38ACF49FC}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Runtime_Compiler_Services" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Runtime.CompilerServices.Unsafe.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Collections_Immutable" Guid="{98B1B98B-5C29-4D17-BC38-A17B4C78E867}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Collections_Immutable" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Collections.Immutable.dll" />
-            </Component>
         </DirectoryRef>
         <?endif?>
     </Fragment>
@@ -41,12 +35,10 @@
             <?if $(var.Configuration) = Debug ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Memory" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Buffers" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Collections_Immutable" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Runtime_Compiler_Services" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Memory" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Buffers" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Collections_Immutable" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Runtime_Compiler_Services" />
             <?endif?>
         </ComponentGroup>
