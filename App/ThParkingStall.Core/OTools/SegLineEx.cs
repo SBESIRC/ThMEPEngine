@@ -19,7 +19,7 @@ namespace ThParkingStall.Core.OTools
         public static readonly double SegTol = 0.1;//分割线容差，距离大于半车道宽 -0.1则判断满足车道宽
         public static readonly double ExtendTol = 1.0;//延长容差，分割线使用的延长或回缩容差
         public static readonly double OutSideTol = 10.0;//迭代范围出边界的范围
-        public static readonly double LengthTol = 100.0;//分割线过滤容差，小于该值自动丢弃
+        public static readonly double LengthTol = 0.0;//分割线过滤容差，小于该值自动丢弃
 
         #region 获取分割线关系
         public static List<(List<int>, List<int>)> GetSegLineIndex(this List<LineSegment>segLines,Polygon wallLine )

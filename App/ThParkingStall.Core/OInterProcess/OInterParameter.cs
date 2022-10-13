@@ -201,7 +201,7 @@ namespace ThParkingStall.Core.OInterProcess
                 if (area.Area < 0.5 * VMStock.RoadWidth * VMStock.RoadWidth) continue;
                 var subLanes = vaildLanes.GetCommonParts(area);
                 //var subSegLineStrings = segLineSpIndex.SelectCrossingGeometry(area).Cast<LineString>();
-                var walls = SegLineStrings.GetWalls(area.Shell);
+                var walls = vaildLanes.GetWalls(area.Shell);
                 var subBuildings = BuildingSpatialIndex.SelectCrossingGeometry(area).Cast<Polygon>().ToList();
                 
                 var subRamps = Ramps.Where(r => area.Contains(r.InsertPt)).ToList();
