@@ -152,7 +152,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public static double DisPillarMoveDeeplySingle = 550;
         public static double LengthCanGIntegralModulesConnectSingle = 3.5 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength;
         public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth + DisPillarLength * 2;
-        public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3.5 + DisPillarLength;
+        public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3.1 + DisPillarLength;
         public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 7 + DisPillarLength * 2;
         public static double STRTreeCount = 10;
         public List<LineSegment> OutEnsuredLanes = new List<LineSegment>();

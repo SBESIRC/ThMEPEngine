@@ -219,48 +219,99 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 if (wall.Coordinates.Count() >= 2)
                 {
                     var found = false;
+                    var wls = new List<LineSegment>();
                     for (int i = 0; i < wall.Coordinates.Count() - 1; i++)
                     {
-                        var wl = new LineSegment(wall.Coordinates[i], wall.Coordinates[i + 1]);
-                        if (wl.ClosestPoint(pt).Distance(pt) < 10)
-                        {
-                            _nearwall_seg = wl;
-                            if (wl.Length < LengthCanGAdjLaneConnectSingle * 0.8) continue;
-                            var angle = Math.Abs(Vector(wl).AngleTo(new Vector2D(pt, ps)) / Math.PI * 180);
-                            angle = Math.Min(angle, 180 - angle);
-                            //如果角度大于135(180-45),不生成
-                            double angletol = 45;
-                            if (wl.P0.Distance(pt) < wl.P1.Distance(pt))
-                            {
-                                if (angle < angletol)
-                                {
-                                    var ptest = ps.Translation(Vector(wl).Normalize() * (ps.Distance(pt)));
-                                    var vec_a = new Vector2D(ps, pt);
-                                    var vec_b = new Vector2D(ps, ptest);
-                                    //判断同向
-                                    if (vec_a.Dot(vec_b) < 0) continue;
-                                }
-                                found = true;
-                                vec = Vector(wl);
-                            }
-                            else
-                            {
-                                if (angle < angletol)
-                                {
-                                    var ptest = ps.Translation(-Vector(wl).Normalize() * (ps.Distance(pt)));
-                                    var vec_a = new Vector2D(ps, pt);
-                                    var vec_b = new Vector2D(ps, ptest);
-                                    if (vec_a.Dot(vec_b) < 0) continue;
-                                }
-                                found = true;
-                                vec = -Vector(wl);
-                            }
-                            break;
-                        }
+                        wls.Add(new LineSegment(wall.Coordinates[i], wall.Coordinates[i + 1]));
                     }
-                    if (found) break;
+                    wls = wls.Where(e => e.ClosestPoint(pt).Distance(pt) <= DisLaneWidth/2).ToList();
+                    wls = wls.Where(e => (Vector(e).Normalize() - Vector(lane.Line).Normalize()).Length()>0.001
+                            && (Vector(e).Normalize() + Vector(lane.Line).Normalize()).Length() > 0.001).ToList();
+                    wls = wls.OrderBy(e => e.ClosestPoint(pt).Distance(pt)).ToList();
+                    if (wls.Count > 0)
+                    {
+                        var wl = wls.First();
+                        _nearwall_seg = wl;
+                        if (wl.Length < LengthCanGAdjLaneConnectSingle * 0.5) continue;
+                        var angle = Math.Abs(Vector(wl).AngleTo(new Vector2D(pt, ps)) / Math.PI * 180);
+                        angle = Math.Min(angle, 180 - angle);
+                        //如果角度大于135(180-45),不生成
+                        double angletol = 45;
+                        if (wl.P0.Distance(pt) < wl.P1.Distance(pt))
+                        {
+                            if (angle < angletol)
+                            {
+                                var ptest = ps.Translation(Vector(wl).Normalize() * (ps.Distance(pt)));
+                                var vec_a = new Vector2D(ps, pt);
+                                var vec_b = new Vector2D(ps, ptest);
+                                //判断同向
+                                if (vec_a.Dot(vec_b) < 0) continue;
+                            }
+                            found = true;
+                            vec = Vector(wl);
+                        }
+                        else
+                        {
+                            if (angle < angletol)
+                            {
+                                var ptest = ps.Translation(-Vector(wl).Normalize() * (ps.Distance(pt)));
+                                var vec_a = new Vector2D(ps, pt);
+                                var vec_b = new Vector2D(ps, ptest);
+                                if (vec_a.Dot(vec_b) < 0) continue;
+                            }
+                            found = true;
+                            vec = -Vector(wl);
+                        }
+                        if (found) break;
+                    }
+                    else
+                        continue;
+
+                    //for (int i = 0; i < wall.Coordinates.Count() - 1; i++)
+                    //{
+                    //    var wl = new LineSegment(wall.Coordinates[i], wall.Coordinates[i + 1]);
+                    //    if (wl.ClosestPoint(pt).Distance(pt) < 10)
+                    //    {
+                    //        _nearwall_seg = wl;
+                    //        if (wl.Length < LengthCanGAdjLaneConnectSingle * 0.5) continue;
+                    //        var angle = Math.Abs(Vector(wl).AngleTo(new Vector2D(pt, ps)) / Math.PI * 180);
+                    //        angle = Math.Min(angle, 180 - angle);
+                    //        //如果角度大于135(180-45),不生成
+                    //        double angletol = 45;
+                    //        if (wl.P0.Distance(pt) < wl.P1.Distance(pt))
+                    //        {
+                    //            if (angle < angletol)
+                    //            {
+                    //                var ptest = ps.Translation(Vector(wl).Normalize() * (ps.Distance(pt)));
+                    //                var vec_a = new Vector2D(ps, pt);
+                    //                var vec_b = new Vector2D(ps, ptest);
+                    //                //判断同向
+                    //                if (vec_a.Dot(vec_b) < 0) continue;
+                    //            }
+                    //            found = true;
+                    //            vec = Vector(wl);
+                    //        }
+                    //        else
+                    //        {
+                    //            if (angle < angletol)
+                    //            {
+                    //                var ptest = ps.Translation(-Vector(wl).Normalize() * (ps.Distance(pt)));
+                    //                var vec_a = new Vector2D(ps, pt);
+                    //                var vec_b = new Vector2D(ps, ptest);
+                    //                if (vec_a.Dot(vec_b) < 0) continue;
+                    //            }
+                    //            found = true;
+                    //            vec = -Vector(wl);
+                    //        }
+                    //        break;
+                    //    }
+                    //}
+
+
                 }
             }
+            if (_nearwall_seg.Length == 0)
+                return generate_lane_length;
 
             //根据墙线与车道线的角度，调整从墙线偏移出的距离（1车位+半车道的三角函数值）——如果墙线与车道线不垂直,多偏移1mm，避免墙线微斜的精度问题
             var pt_closest_onwall = _nearwall_seg.ClosestPoint(ps, true);
@@ -316,7 +367,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var line_to_wall = TranslateReservedConnection(line, -gvec.Normalize() * length);
             var wall_buffer = line_to_wall.Buffer(/*DisLaneWidth / 2 - 1*/DisModulus /*+ DisLaneWidth*/);
             var wall_crossed_lanes_points = new List<Coordinate>();
-            foreach (var lane_to_wall in IniLanes.Where(e => IsParallelLine(e.Line, line)).Select(e => e.Line.Buffer(DisLaneWidth / 2 - 1)))
+            foreach (var lane_to_wall in IniLanes.Where(e => IsParallelLine(e.Line, line)).Where(e => e.Line.Length>10).Select(e => e.Line.Buffer(DisLaneWidth / 2 - 1)))
             {
                 wall_crossed_lanes_points.AddRange(lane_to_wall.IntersectPoint(wall_buffer));
                 wall_crossed_lanes_points.AddRange(lane_to_wall.Coordinates.Where(p => wall_buffer.Contains(p)));
