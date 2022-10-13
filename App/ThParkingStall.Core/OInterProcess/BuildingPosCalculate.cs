@@ -204,7 +204,7 @@ namespace ThParkingStall.Core.OInterProcess
         public BuildingPosCalculate(List<Polygon> movingBounds)
         {
             InitSubAreas = OInterParameter.GetMovingOsubAreas();
-            InitSubAreas.ForEach(s =>s.UpdateParkingCnts(true));
+            //InitSubAreas.ForEach(s =>s.UpdateParkingCnts(true));
             MovingBounds = movingBounds;
             foreach(var bound in MovingBounds)
             {

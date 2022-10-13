@@ -21,7 +21,7 @@ namespace ThParkingStall.Core
 {
     internal class Program
     {
-        static bool IsOblique;
+        static int RunMode;//0:正交多进程，1：斜交多进程，2：障碍物移位多进程
         static int ProcessCount;
         static int ProcessIndex;
         static int IterationCount;
@@ -32,8 +32,9 @@ namespace ThParkingStall.Core
             try
             {
                 UpdateStartInfo(ProcessInfo);
-                if (!IsOblique) Run();
-                else ORun();
+                if (RunMode == 0) Run();
+                else if(RunMode == 1) ORun();
+                else if(RunMode == 2) BRun();
             }
             catch (Exception ex)
             {
@@ -51,7 +52,7 @@ namespace ThParkingStall.Core
             IterationCount = Int32.Parse(ProcessInfo[2]);
             LogAllInfo = ProcessInfo[3] == "1";//是否Log 所有信息
             ThreadCnt = Int32.Parse(ProcessInfo[4]);// 使用的线程数量
-            IsOblique = ProcessInfo[5] == "1";//是否使用斜交框架
+            RunMode =Int32.Parse( ProcessInfo[5]);//是否使用斜交框架
             if (ThreadCnt > 2) InterParameter.MultiThread = true;
             else InterParameter.MultiThread = false;
             string LogFileName;
@@ -63,6 +64,7 @@ namespace ThParkingStall.Core
             MCompute.ThreadCnt = ThreadCnt;
             MPGAData.ProcIndex = ProcessIndex;
         }
+        //正交多进程
         static void Run()
         {
             var stopWatch = new Stopwatch();
@@ -182,7 +184,7 @@ namespace ThParkingStall.Core
             }
             stopWatch.Stop();
         }
-
+        //斜交多进程
         static void ORun()
         {
             var stopWatch = new Stopwatch();
@@ -275,6 +277,124 @@ namespace ThParkingStall.Core
                             BinaryWriter writer = new BinaryWriter(stream);
                             layoutResults.WriteToStream(writer);
                             OCached.NewCachedPartitionCnt.WriteToStream(writer);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Information(ex.Message);
+                    Logger?.Information("----------------------------------");
+                    Logger?.Information(ex.StackTrace);
+                    Logger?.Information("##################################");
+                    MPGAData.Save();
+                }
+                finally
+                {
+                    StartSignal.ReleaseMutex();//发出信号确认完成
+                }
+                if (LogAllInfo)
+                {
+                    Logger?.Information("输出完成");
+                    Logger?.Information($"输出用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒\n");
+                    t_pre = stopWatch.Elapsed.TotalSeconds;
+                }
+                SubAreaParkingCnt.ClearNewAdded();
+                if (iter % 3 == 0)
+                    ReclaimMemory();
+            }
+            if (LogAllInfo)
+            {
+                Logger?.Information("子进程退出");
+                Logger?.Information($"总用时用时: {stopWatch.Elapsed.TotalSeconds}秒\n");
+            }
+            stopWatch.Stop();
+        }
+        //障碍物移位多进程
+        static void BRun()
+        {
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var t_pre = 0.0;
+            if (LogAllInfo)
+            {
+                Logger?.Information("#####################################");
+                Logger?.Information("子进程启动");
+                Logger?.Information("障碍物移位模式");
+                Logger?.Information("线程数量：" + ThreadCnt.ToString());
+            }
+            var initSingal = Mutex.OpenExisting("Mutex" + ProcessIndex.ToString());
+            initSingal.WaitOne();
+            //var inpuSingal = Mutex.OpenExisting("Input");
+            //inpuSingal.WaitOne();
+            DataWraper dataWraper;
+            using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("DataWraper"))
+            {
+                using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
+                {
+                    IFormatter formatter = new BinaryFormatter();
+                    dataWraper = (DataWraper)formatter.Deserialize(stream);
+                }
+            }
+            //inpuSingal.ReleaseMutex();
+            VMStock.Init(dataWraper);
+            OInterParameter.Init(dataWraper);
+            MPGAData.dataWraper = dataWraper;
+            var BPC = new BuildingPosCalculate();
+            initSingal.ReleaseMutex();
+            for (int iter = 0; iter < IterationCount; iter++)
+            {
+                var StartSignal = Mutex.OpenExisting("Mutex" + iter.ToString() + "_" + ProcessIndex.ToString());
+                StartSignal.WaitOne();
+                try
+                {
+                    if (LogAllInfo)
+                    {
+                        Logger?.Information("第" + (iter + 1).ToString() + "代开始：");
+                        t_pre = stopWatch.Elapsed.TotalSeconds;
+                    }
+                    BPGCollection bpgCollection;
+                    using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("BPGCollection", MemoryMappedFileRights.Read))//读取
+                    {
+                        using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
+                        {
+                            BinaryReader reader = new BinaryReader(stream);
+                            bpgCollection = BPGCollection.ReadFromStream(reader);
+                        }
+                    }
+                    if (LogAllInfo)
+                    {
+                        Logger?.Information($"读取用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                        t_pre = stopWatch.Elapsed.TotalSeconds;
+                    }
+                    
+                    var genomes = bpgCollection.Genomes;
+                    var scores = new List<int>();
+                    int calCnts = 0;
+
+                    for (int i = 0; i <= genomes.Count / ProcessCount; i++)
+                    {
+                        int j = i * ProcessCount + ProcessIndex;
+                        if (j >= genomes.Count) break;
+                        var gene = genomes[j];
+                        MPGAData.Set(gene);
+                        var score = BPC.CalculateScore(gene.Index, gene.Vector());
+                        scores.Add(score);
+                        calCnts += 1;
+                    }
+                    
+                    if (LogAllInfo)
+                    {
+                        Logger?.Information($"计算用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+                        Logger?.Information($"计算障碍物个数: {calCnts}");
+                        Logger?.Information($"平均用时: {(stopWatch.Elapsed.TotalSeconds - t_pre)/calCnts}");
+                        t_pre = stopWatch.Elapsed.TotalSeconds;
+                    }
+                    using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("BResults" + ProcessIndex.ToString()))
+                    {
+                        using (MemoryMappedViewStream stream = mmf.CreateViewStream())//结果输出
+                        {
+                            BinaryWriter writer = new BinaryWriter(stream);
+                            scores.WriteToStream(writer);
                         }
                     }
                 }

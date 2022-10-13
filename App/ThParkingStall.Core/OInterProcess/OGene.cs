@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetTopologySuite.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -219,5 +220,65 @@ namespace ThParkingStall.Core.OInterProcess
     }
     #endregion
 
+    //特殊基因(障碍物移位基因）
+    [Serializable]
+    public class BuildingPosGene
+    {
+        public double X;
+        public double Y;
+        public int Index;//建筑编号
+        public int Score = -1;
+        public BuildingPosGene(Vector2D vector,int index)
+        {
+            X = vector.X;
+            Y = vector.Y;
+            Index = index;
+        }
+        public BuildingPosGene(double x,double y ,int index)
+        {
+            X = x; Y = y; Index = index; 
+        }
+        public BuildingPosGene Clone()
+        {
+            return new BuildingPosGene(Vector(),Index);
+        }
+        public Vector2D Vector()
+        {
+            return new Vector2D(X, Y);
+        }
 
+        public void WriteToStream(BinaryWriter writer)
+        {
+            writer.Write(X);
+            writer.Write(Y);
+            writer.Write(Index);
+            writer.Write(Score);
+        }
+        public static BuildingPosGene ReadFromStream(BinaryReader reader)
+        {
+            var x = reader.ReadDouble();
+            var y = reader.ReadDouble();
+            var index = reader.ReadInt32();
+            var score = reader.ReadInt32();
+            var gene = new BuildingPosGene(x, y, index);
+            gene.Score = score;
+            return gene;
+        }
+    }
+    //障碍物基因集合
+    public class BPGCollection
+    {
+        public List<BuildingPosGene> Genomes =new List<BuildingPosGene>();
+
+        public void WriteToStream(BinaryWriter writer)
+        {
+            Genomes.WriteToStream(writer);
+        }
+        public static BPGCollection ReadFromStream(BinaryReader reader)
+        {
+            var result = new BPGCollection();
+            result.Genomes = ReadBPGs(reader);
+            return result;
+        }
+    }
 }

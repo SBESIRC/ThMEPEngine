@@ -106,6 +106,44 @@ namespace ThParkingStall.Core.IO
             }
             return chromosomes;
         }
+        public static void WriteToStream(this Dictionary<int,List<int>> dic, BinaryWriter writer)
+        {
+            var dicCnt = dic.Count;
+            writer.Write(dicCnt);
+            foreach(var kv in dic)
+            {
+                writer.Write(kv.Key);
+                kv.Value.WriteToStream(writer);
+            }
+        }
+        public static Dictionary<int,List<int>> ReadDicListInt(BinaryReader reader)
+        {
+            var result = new Dictionary<int,List<int>>();
+            var dicCnt = reader.ReadInt32();
+            for (int i = 0; i < dicCnt; ++i)
+            {
+                var key = reader.ReadInt32();
+                var value = ReadInts(reader);
+                result.Add(key, value);
+            }
+            return result;
+        }
+        public static void WriteToStream(this List<BuildingPosGene> genomes, BinaryWriter writer)
+        {
+            var Cnts = genomes.Count;
+            writer.Write(Cnts);
+            genomes.ForEach(g => g.WriteToStream(writer));
+        }
+        public static List<BuildingPosGene> ReadBPGs(BinaryReader reader)
+        {
+            List<BuildingPosGene> BPGs = new List<BuildingPosGene>();
+            var Cnts = reader.ReadInt32();
+            for (int i = 0; i < Cnts; ++i)
+            {
+                BPGs.Add(BuildingPosGene.ReadFromStream(reader));
+            }
+            return BPGs;
+        }
         public static void WriteToStream(this List<double> doubles, BinaryWriter writer)
         {
             writer.Write(doubles.Count);

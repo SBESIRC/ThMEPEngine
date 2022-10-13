@@ -168,8 +168,8 @@ namespace ThMEPArchitecture.MultiProcess
         {
             var blks = InputData.SelectBlocks(acadDatabase);
             //var block = InputData.SelectBlock(acadDatabase);//提取地库对象
-            //var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
-            var MultiSolutionList = new List<int> { 0 };
+            var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
+            //var MultiSolutionList = new List<int> { 0 };
             if (blks == null) return;
             foreach (var blk in blks)
             {
@@ -229,7 +229,7 @@ namespace ThMEPArchitecture.MultiProcess
                 if (!succeed) return;
                 layoutData.ProcessSegLines();
                 //layoutData.SetInterParam();
-                Converter.GetDataWraper(layoutData, ParameterViewModel);
+                var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
 
@@ -244,8 +244,23 @@ namespace ThMEPArchitecture.MultiProcess
                 //var BPC = new BuildingPosCalculate();
                 //BPC.CalculateScore(BPA.PotentialMovingVectors);
                 //BPC.CalculateBest(true);
-
-                if(ParameterViewModel.UseGA)BPA.UpdataGA();
+                int fileSize = 64; // 64Mb
+                var nbytes = fileSize * 1024 * 1024;
+                if (ParameterViewModel.UseGA)
+                {
+                    using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
+                    {
+                        using (MemoryMappedViewStream stream = mmf.CreateViewStream())
+                        {
+                            IFormatter formatter = new BinaryFormatter();
+                            formatter.Serialize(stream, dataWraper);
+                        }
+                        BPA.UpdateGAMP();
+                    }
+                        //BPA.UpdataGA();
+                        
+                    //BPA.SpeedTest();
+                }
                 else BPA.UpdateBest();
                 var entities = new List<Entity>();
                 using (AcadDatabase acad = AcadDatabase.Active())
@@ -256,7 +271,6 @@ namespace ThMEPArchitecture.MultiProcess
                         ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "分区线", 0);
                     if (!acad.Layers.Contains("地库边界"))
                         ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "地库边界", 0);
-
                 }
                 foreach (var b in OInterParameter.Buildings)
                 {

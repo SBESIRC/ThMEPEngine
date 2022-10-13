@@ -28,6 +28,7 @@ namespace ThMEPArchitecture.ViewModel
                 _CommandType = value;
                 RaisePropertyChanged("CommandType");
                 RaisePropertyChanged("IsComputationParaSetupEnabled");
+                if (value == CommandTypeEnum.BuildingAnalysis) MaxEqualCnt = 5;
             }
         }
         private bool _UseMultiProcess = true;
@@ -526,7 +527,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //迭代次数
-        private int _IterationCount = 60; //General mode
+        private int _IterationCount = 100; //General mode
         public int IterationCount
         {
             get
@@ -538,7 +539,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //种群数量
-        private int _PopulationCount = 80; //Generalmode
+        private int _PopulationCount = 32; //Generalmode
         public int PopulationCount
         {
             get
@@ -724,7 +725,16 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("SelectionRate");
             }
         }
-
+        private int _FirstPopMagnitude = 2;
+        public int FirstPopMagnitude
+        {
+            get { return _FirstPopMagnitude; }
+            set
+            {
+                _FirstPopMagnitude = value;
+                RaisePropertyChanged("FirstPopMagnitude");
+            }
+        }
         private int _ProcessCount = -1; //自动，设置为核心数量
         public int ProcessCount
         {

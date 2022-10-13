@@ -160,7 +160,7 @@
             </StackPanel>
             <StackPanel >
                 <Label FontSize="16" FontWeight="Bold">多方案：</Label>
-                <StackPanel Orientation="Horizontal" IsEnabled="{Binding NormalMode}">
+                <StackPanel Orientation="Horizontal" >
                     <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding AutoSolution}">自动</CheckBox>
                     <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding HorizontalSolution}">优先横向</CheckBox>
                     <CheckBox Margin="5,5,5,5" Height="15"  IsChecked="{Binding VerticalSolution}">优先纵向</CheckBox>
@@ -205,6 +205,8 @@
                     <TextBox Width="30" Margin="0,5,5,5" Text="{Binding SMProp}"/>
                     <Label Content="选择比例"/>
                     <TextBox Width="30" Margin="0,5,5,5" Text="{Binding SelectionRate}"/>
+                    <Label Content="初代倍率"/>
+                    <TextBox Width="30" Margin="0,5,5,5" Text="{Binding FirstPopMagnitude}"/>
                 </StackPanel>
 
                 <StackPanel IsEnabled="{Binding IsComputationParaSetupEnabled}">

@@ -409,6 +409,10 @@ namespace ThParkingStall.Core.InterProcess
         {
             dataWraper.genome = genome;
         }
+        public static void Set(BuildingPosGene gene)
+        {
+            dataWraper.BPGene = gene;
+        }
         public static void Save(string fileName = "MPGAData")
         {
             lock (lockObj)

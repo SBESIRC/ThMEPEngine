@@ -20,19 +20,19 @@ using ThParkingStall.Core.Tools;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
-    public class BuildingPosGene
-    {
-        public BuildingPosGene(Vector2D vector)
-        {
-            Vector = vector;
-        }
-        public BuildingPosGene Clone()
-        {
-            return new BuildingPosGene(Vector);
-        }
-        public Vector2D Vector { get; set; }
-        public int Score = 0;
-    }
+    //public class BuildingPosGene
+    //{
+    //    public BuildingPosGene(Vector2D vector)
+    //    {
+    //        Vector = vector;
+    //    }
+    //    public BuildingPosGene Clone()
+    //    {
+    //        return new BuildingPosGene(Vector);
+    //    }
+    //    public Vector2D Vector { get; set; }
+    //    public int Score = 0;
+    //}
     public class BuildingPosGAAnalysis
     {
         public BuildingPosGAAnalysis(int index, BuildingPosAnalysis buildingPosAnalysis)
@@ -69,7 +69,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public void Process()
         {
             var gene = Run().First();
-            Best = gene.Vector;
+            Best = gene.Vector();
             BestScore = gene.Score;
         }
         List<BuildingPosGene> Run()
@@ -124,14 +124,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     break;
                 if (count > 20) break;
             }
-            return new BuildingPosGene(vec);
+            return new BuildingPosGene(vec,Index);
         }
         List<BuildingPosGene> Selection(List<BuildingPosGene> inputSolutions, out int maxNums)
         {
             List<BuildingPosGene> sorted = new List<BuildingPosGene>();
             foreach (var solution in inputSolutions)
             {
-                solution.Score = _BuildingPosAnalysis.CalculateScore(Index, solution.Vector);
+                solution.Score = _BuildingPosAnalysis.CalculateScore(Index, solution.Vector());
             }
             sorted = inputSolutions.OrderByDescending(e => e.Score).ToList();
             var numstr = "";
@@ -227,30 +227,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var vec = Vector2D.Zero;
             if (GenerateRandom(0, 1) > 0.5)
             {
-                var t_vec = new Vector2D(s1.Vector.X, s2.Vector.Y);
+                var t_vec = new Vector2D(s1.Vector().X, s2.Vector().Y);
                 if (_BuildingPosAnalysis.IsVaild(Index, t_vec))
                     vec = t_vec;
             }
             else
             {
-                var t_vec = new Vector2D(s2.Vector.X, s1.Vector.Y);
+                var t_vec = new Vector2D(s2.Vector().X, s1.Vector().Y);
                 if (_BuildingPosAnalysis.IsVaild(Index, t_vec))
                     vec = t_vec;
             }
-            var gene = new BuildingPosGene(vec);
+            var gene = new BuildingPosGene(vec,Index);
             return gene;
         }
         void MutationL(ref List<BuildingPosGene> s)
         {
             for (int i = 0; i < s.Count; i++)
             {
-                var vec = s[i].Vector;
+                var vec = s[i].Vector();
                 if (GenerateRandom(0, 1) > 0.5)
                     vec = new Vector2D(GenerateRandom(Min, Max), vec.Y);
                 if (GenerateRandom(0, 1) > 0.5)
                     vec = new Vector2D(vec.X, GenerateRandom(Min, Max));
                 if (_BuildingPosAnalysis.IsVaild(Index, vec))
-                    s[i].Vector = vec;
+                    //s[i].Vector = vec;
+                    s[i] = new BuildingPosGene(vec, Index);
             }
         }
     }

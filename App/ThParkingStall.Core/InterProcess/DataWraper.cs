@@ -76,6 +76,7 @@ namespace ThParkingStall.Core.InterProcess
         #endregion
         public Chromosome chromosome = null;//正交基因记录
         public Genome genome = null;//斜交基因记录
+        public BuildingPosGene BPGene = null;//障碍物移位基因记录
     }
 
     [Serializable]
