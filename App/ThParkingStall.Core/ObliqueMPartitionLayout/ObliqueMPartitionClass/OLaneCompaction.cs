@@ -428,6 +428,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var lanes = IniLanes.Where(e => !HasOverlay(e.Line, lane.Line))
                 .Where(e => e.Line.ClosestPoint(lane.Line.P0).Distance(lane.Line.P0) < 1
                 || e.Line.ClosestPoint(lane.Line.P1).Distance(lane.Line.P1) < 1).ToList();
+            lanes = IniLanes.Where(e => !HasOverlay(e.Line, lane.Line)).ToList();
+            lanes = lanes.Where(e => e.Line.ClosestPoint(lane.Line.P0).Distance(lane.Line.P0) < 10
+                 || e.Line.ClosestPoint(lane.Line.P1).Distance(lane.Line.P1) < 10).ToList();
             return lanes;
         }
         private static double CalculateMoveableDistance(CompactedLane lane, Vector2D vec, ref bool isRestrictLane,
@@ -644,7 +647,14 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             if (min != double.PositiveInfinity && min != double.NegativeInfinity)
                 res = min;
             else if (min == double.PositiveInfinity)
-                res = DisBackBackModulus;
+            {
+                //var testLine = line.Translation(vec.Normalize() * DisBackBackModulus);
+                //if (Boundary.Contains(testLine.MidPoint))
+                //    res = DisBackBackModulus;
+                //else
+                //    res = 0;
+                res = 0;
+            }
             if (res > 0)
             {
                 line = line;
