@@ -45,7 +45,7 @@ namespace ThMEPHVAC
 
                 //var transformer = new ThMEPOriginTransformer(selectFrames[0].GetPoint3dAt(0));
                 //transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
-                var transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames, false);
+                var transformer = ThFloorHeatingCoilUtilServices.GetTransformer(selectFrames, true);
 
                 var dataFactory = new ThFloorHeatingDataFactory()
                 {
@@ -53,7 +53,7 @@ namespace ThMEPHVAC
 
                 };
 
-                var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer,withUI);
+                var dataQuery = ThFloorHeatingCoilUtilServices.GetData(acadDatabase, selectFrames, transformer, withUI);
                 dataQuery.Print();
 
                 var roomPlSuggestDict = new Dictionary<Polyline, BlockReference>();

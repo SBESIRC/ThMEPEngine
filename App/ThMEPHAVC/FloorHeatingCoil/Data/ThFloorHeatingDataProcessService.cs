@@ -310,6 +310,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             FurnitureObstacle.ForEach(x => obj.Add(x));
             RoomSeparateLine.ForEach(x => obj.Add(x));
 
+            //RoomBoundary.ForEach(x => DrawUtils.ShowGeometry(x, "l0RoomBoundary", 1));
+            //FurnitureObstacle.ForEach(x => DrawUtils.ShowGeometry(x, "l0FurnitureObstacle", 1));
+            //RoomSeparateLine.ForEach(x => DrawUtils.ShowGeometry(x, "l0RoomSeparateLine", 1));
+
             var sbService = new ThRoomSuperBoundaryProcessService();
             var separateSpaceObj = sbService.ProcessBoundary(obj, WithUI);
             var separateSpace = separateSpaceObj.OfType<Polyline>().ToList();
@@ -348,15 +352,24 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
             {
                 separateSpaceM[i] = bufferService.Buffer(separateSpaceM[i] as Entity, -bufferValue);
             }
+            var separateRoomTemp = separateSpaceM.OfType<Entity>().ToList();
+            //separateRoomTemp.ForEach(x => DrawUtils.ShowGeometry(x, "l0shrinkRoom", 11));
+
+            var simplifier = new ThPolygonalElementSimplifier()
+            {
+                OFFSETDISTANCE = 10,
+            };
+            separateSpaceM = simplifier.MakeValid(separateSpaceM);
+            separateSpaceM = simplifier.Normalize(separateSpaceM);
+            //separateRoomTemp.ForEach(x => DrawUtils.ShowGeometry(x, "l0shrinkRoom2", 14));
 
             //放大
             for (int i = 0; i < separateSpaceM.Count; i++)
             {
                 separateSpaceM[i] = bufferService.Buffer(separateSpaceM[i] as Entity, bufferValue);
             }
-
             var separateRoom = separateSpaceM.OfType<Entity>().ToList();
-            //separateRoom.ForEach(x => DrawUtils.ShowGeometry(x, "l0enlargeRoom", 6));
+            //separateRoom.ForEach(x => DrawUtils.ShowGeometry(x, "l0enlargeRoom", 171));
 
             return separateRoom;
         }
@@ -431,6 +444,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                     {
                         hasHoles = true;
                     }
+                }
+                if (roomboundary == null)
+                {
+                    continue;
                 }
 
                 var roomModel = new ThFloorHeatingRoom(roomboundary);
@@ -526,16 +543,19 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
                                 if (inter is Polyline interPl)
                                 {
                                     arearadio = interPl.Area / pl.Area;
+                                    //DrawUtils.ShowGeometry(interPl, "l0test");
                                 }
                                 else if (inter is MPolygon interMpl)
                                 {
                                     arearadio = interMpl.Area / pl.Area;
+                                    //DrawUtils.ShowGeometry(interMpl, "l0test");
                                 }
                                 if (arearadio > arearadioMax && arearadio > 0.9)
                                 {
                                     arearadioMax = arearadio;
                                     pairOriPl = oriPl.Shell();
                                 }
+
                             }
                             if (pairOriPl != null)
                             {
@@ -615,7 +635,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
         public void Reset()
         {
-           
+
 
         }
 
