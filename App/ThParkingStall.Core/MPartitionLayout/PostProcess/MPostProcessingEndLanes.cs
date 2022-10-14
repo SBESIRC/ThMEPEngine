@@ -76,6 +76,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                             split_p = lanes[i].ClosestPoint(split_p);
                             var splits = SplitLine(lanes[i], new List<Coordinate>() { split_p }).OrderByDescending(e => e.MidPoint.Distance(point));
                             lanes[i] = splits.First();
+                            if (splits.Count() == 1)
+                            {
+                                lanes.RemoveAt(i);
+                            }
                             //lane = splits.First();
                             int carscount = cars.Count;
                             generate_cars(Walls, lanes, lane, lane.P1, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars, false);
@@ -183,6 +187,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             for (int i = 0; i < removed_cars_group.Count; i++)
             {
                 bool isbackbackmodule = true;
+                if (removed_cars_group[i].Count == 0)
+                    continue;
                 foreach (var pl in removed_cars_group[i])
                 {
                     if (Math.Abs(pl.Area - MParkingPartitionPro.DisVertCarWidth * MParkingPartitionPro.DisVertCarLengthBackBack) > 1)
@@ -292,7 +298,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 tlane_rec = tlane_rec.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck);
                 var prepsplit_lanes=lanes.Where(e => e.IntersectPoint(tlane_rec).Count()>0).Where(e => IsPerpLine(e,lane))
                     .Where(e => e.ToLineString().IntersectPoint(lane.ToLineString()).Count()>0).ToList();
-                var lanes_split=SplitLine(lane, prepsplit_lanes);
+                var lanes_split=SplitLine(lane, prepsplit_lanes).OrderBy(e => e.MidPoint.Distance(carLine.MidPoint)).ToList();
                 if (lanes_split.Count() > 0)
                 {
                     lane=lanes_split[0];
@@ -734,7 +740,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
             }
             var tlanes = JoinCurves(new List<LineString>(), inilanesex).OrderByDescending(e => e.Length);
-            if (tlanes.Count() >= 2)
+            if (tlanes.Count() >= 2 || inilanesex.Count==1)
             {
                 var tlane = new LineSegment(tlanes.First().StartPoint.Coordinate, tlanes.First().EndPoint.Coordinate);
                 var tlane_depth = tlane.Translation(vecmove.Normalize() * (MParkingPartitionPro.DisVertCarLength + MParkingPartitionPro.DisLaneWidth / 2));

@@ -154,6 +154,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                         res.P1 = end;
                 }
             }
+            if (Math.Abs(res.Length - line.Length) > disallow_away_inipoint)
+                return line.Translation(vector);
             return res;
         }
         public Polygon BufferReservedConnection(LineSegment line, double dis)
@@ -222,7 +224,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         }
         public static bool HasOverlay(LineSegment a, LineSegment b)
         {
-            if (Vector(a).Dot(Vector(b).GetPerpendicularVector()) != 0)
+            if (Math.Abs( Vector(a).Normalize().Dot(Vector(b).Normalize().GetPerpendicularVector())) >0.0001)
                 return false;
             var pt_on_b = b.ClosestPoint(a.P0);
             var pt_on_a = a.ClosestPoint(pt_on_b);
@@ -353,6 +355,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         private List<LineSegment> SplitBufferLineByPoly(LineSegment line, double distance, Polygon cutter)
         {
             var pl = BufferReservedConnection(line,distance);
+            pl=line.Buffer(distance);
             var splits = SplitCurve(cutter, pl);
             if (splits.Count() == 1)
             {

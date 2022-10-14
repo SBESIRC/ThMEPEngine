@@ -14,13 +14,13 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
 {
     public partial class ObliqueMPartition
     {
-        private class CompactedLaneGroup
+        public class CompactedLaneGroup
         {
             public List<CompactedLane> CompactedLanes = new List<CompactedLane>();
             public bool IsReversedVector = false;//车道线方向朝外，没有朝内的车道线
             public Vector2D Vector { get; set; }//朝内的移动方向
         }
-        private class CompactedLane
+        public class CompactedLane
         {
             public CompactedLane()
             {
@@ -48,7 +48,130 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 Compact(newlanes,eldlanes);
             }
         }
+        public static List<CompactedLaneGroup> CompactForGenerateLanesPro(List<Lane> IniLanes, Polygon OutBoundary, Polygon Boundary,
+    MNTSSpatialIndex ObstaclesSpatialIndex, MNTSSpatialIndex CarSpatialIndex, List<InfoCar> Cars, List<Lane> InitialLanes, double maxLength)
+        {
+            //找出靠边界的车道线:车道方向与边界相交、不予车道相交
+            var lanespacialindex = new MNTSSpatialIndex(IniLanes.Select(e => e.Line.ToLineString()));
+            RemoveDuplicatedLanes(IniLanes);
+            var adjLanes = new List<Lane>();
+            foreach (var lane in IniLanes.Where(e => !e.ISCopiedFromCarmodelus))
+            {
+                var line = lane.Line;
+                var segs = new List<LineSegment>();
+                DivideCurveByLength(line, line.Length / 10, ref segs);
+                var count_non_intersect_lanes = 0;
+                var count_intersected_bound = 0;
+                foreach (var seg in segs)
+                {
+                    var rec = PolyFromLines(seg, seg.Translation(lane.Vec.Normalize() * DisBackBackModulus));
+                    rec = rec.Scale(ScareFactorForCollisionCheck);
+                    if (rec.IntersectPoint(OutBoundary).Count() > 0)
+                        count_intersected_bound++;
+                    if (lanespacialindex.SelectCrossingGeometry(rec).Count() == 0)
+                        count_non_intersect_lanes++;
 
+                }
+                if (count_intersected_bound > 5 && count_non_intersect_lanes > 5)
+                    adjLanes.Add(lane);
+            }
+            //找出方向朝内，位置相同的边界线
+            var oriLanes = new List<Lane>();
+            var oriLanes_reversedVectorIndexes = new List<int>();
+            foreach (var lane in adjLanes)
+            {
+                var found = false;
+                foreach (var iniLane in IniLanes.Where(e => !e.ISCopiedFromCarmodelus))
+                {
+                    if (HasOverlay(lane.Line, iniLane.Line) && IsAdverseVector(lane.Vec, iniLane.Vec))
+                    {
+                        found = true;
+                        oriLanes.Add(iniLane);
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    //方向朝外的边界线，没有朝内的重叠车道线-如：尽端环通
+                    oriLanes.Add(lane);
+                    oriLanes_reversedVectorIndexes.Add(oriLanes.Count - 1);
+                }
+            }
+            var compactedLanesgroup = new List<CompactedLaneGroup>();
+            for (int i = 0; i < oriLanes.Count; i++)
+            {
+                var lane = oriLanes[i];
+                if (lane.ISCopiedFromCarmodelus) continue;
+                CompactedLaneGroup group = new CompactedLaneGroup();
+                group.CompactedLanes.Add(new CompactedLane(lane));
+                if (oriLanes_reversedVectorIndexes.Contains(i))
+                {
+                    group.Vector = -lane.Vec;
+                    group.IsReversedVector = true;
+                }
+                else
+                    group.Vector = lane.Vec;
+                compactedLanesgroup.Add(group);
+            }
+            //找出关联车道线
+            foreach (var group in compactedLanesgroup)
+            {
+                if (group.IsReversedVector) continue;
+                var group_vec = group.Vector;
+                var oriLane = group.CompactedLanes[0].Lane;
+                var oriLine = oriLane.Line;
+                oriLine = oriLine.Scale(ScareFactorForCollisionCheck);
+                var rec = PolyFromLines(oriLine, oriLine.Translation(group_vec.Normalize() * maxLength));
+                rec = rec.Scale(ScareFactorForCollisionCheck);
+                var intersected_lanes = IniLanes.Where(e => !e.ISCopiedFromCarmodelus).Where(e => e.Line.IntersectPoint(rec).Count() > 0);
+                intersected_lanes = intersected_lanes.Where(e => e.Vec.Normalize() == group_vec.Normalize());
+                intersected_lanes = intersected_lanes.Where(e => Boundary.ClosestPoint(e.Line.MidPoint).Distance(e.Line.MidPoint) > 10);
+                //相连在同一根车道上
+                intersected_lanes = intersected_lanes.Where(e =>
+                {
+                    var connected_e = GetConnectedLanes(e, IniLanes);
+                    var connected_ori = GetConnectedLanes(oriLane, IniLanes);
+                    if (connected_e.Except(connected_ori).Count() == connected_e.Count())
+                        return false;
+                    else return true;
+                });
+                intersected_lanes = intersected_lanes.Where(e =>
+                {
+                    var pl = PolyFromLines(e.Line, new LineSegment(oriLine.ClosestPoint(e.Line.P0), oriLine.ClosestPoint(e.Line.P1)));
+                    var pl_c = PolyFromLines(oriLine, new LineSegment(e.Line.ClosestPoint(oriLine.P0), e.Line.ClosestPoint(oriLine.P1)));
+                    pl = pl.Area <= pl_c.Area ? pl : pl_c;
+                    pl = pl.Scale(ScareFactorForCollisionCheck);
+                    var crossed = ObstaclesSpatialIndex.SelectCrossingGeometry(pl).Count() > 0;
+                    if (crossed) return false;
+                    else return true;
+                });
+
+                group.CompactedLanes.AddRange(intersected_lanes.Select(e => new CompactedLane(e))
+                    .OrderBy(e => e.Lane.Line.ClosestPoint(oriLane.Line.MidPoint, true).Distance(oriLane.Line.MidPoint)));
+            }
+            //计算每根车道线可移动距离
+            CarSpatialIndex = new MNTSSpatialIndex(Cars.Select(e => e.Polyline));
+            for (int i = 0; i < compactedLanesgroup.Count; i++)
+            {
+                double moveableDist = 0;
+                var group = compactedLanesgroup[i];
+                foreach (var lane in group.CompactedLanes)
+                {
+                    var isRestrictLane = false;
+                    var dist = CalculateMoveableDistance(lane, group.Vector, ref isRestrictLane, Cars, InitialLanes, CarSpatialIndex, ObstaclesSpatialIndex,
+                        IniLanes, Boundary, maxLength);
+                    lane.MoveableDistance = dist;
+                    lane.IsRestrictLane = isRestrictLane;
+                }
+                AdjustMoveableDistanceBySonLane(ref group.CompactedLanes, ref moveableDist);
+                if (moveableDist == 0)
+                {
+                    compactedLanesgroup.RemoveAt(i);
+                    i--;
+                }
+            }
+            return compactedLanesgroup;
+        }
         public static void CompactForGenerateLanes(List<Lane> IniLanes,Polygon OutBoundary,Polygon Boundary,
             MNTSSpatialIndex ObstaclesSpatialIndex, MNTSSpatialIndex CarSpatialIndex,List<InfoCar> Cars,List<Lane> InitialLanes,double maxLength,
             ref List<Lane> newlanes, ref List<Lane> eldlanes,ref bool compacted)
@@ -266,207 +389,6 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             GenerateParkingSpaces();
         }
 
-        //void CompactForGenerateLanes()
-        //{
-        //    //找出靠边界的车道线:车道方向与边界相交、不予车道相交
-        //    var lanespacialindex = new MNTSSpatialIndex(IniLanes.Select(e => e.Line.ToLineString()));
-        //    RemoveDuplicatedLanes(IniLanes);
-        //    var adjLanes = new List<Lane>();
-        //    foreach (var lane in IniLanes)
-        //    {
-        //        var line = lane.Line;
-        //        var segs = new List<LineSegment>();
-        //        DivideCurveByLength(line, line.Length / 10, ref segs);
-        //        var count_non_intersect_lanes = 0;
-        //        var count_intersected_bound = 0;
-        //        foreach (var seg in segs)
-        //        {
-        //            var rec = PolyFromLines(seg, seg.Translation(lane.Vec.Normalize() * DisBackBackModulus));
-        //            rec = rec.Scale(ScareFactorForCollisionCheck);
-        //            if (rec.IntersectPoint(OutBoundary).Count() > 0)
-        //                count_intersected_bound++;
-        //            if (lanespacialindex.SelectCrossingGeometry(rec).Count() == 0)
-        //                count_non_intersect_lanes++;
-
-        //        }
-        //        if (count_intersected_bound > 5 && count_non_intersect_lanes > 5)
-        //            adjLanes.Add(lane);
-        //    }
-        //    //找出方向朝内，位置相同的边界线
-        //    var oriLanes = new List<Lane>();
-        //    var oriLanes_reversedVectorIndexes = new List<int>();
-        //    foreach (var lane in adjLanes)
-        //    {
-        //        var found = false;
-        //        foreach (var iniLane in IniLanes)
-        //        {
-        //            if (HasOverlay(lane.Line, iniLane.Line) && IsAdverseVector(lane.Vec, iniLane.Vec))
-        //            {
-        //                found = true;
-        //                oriLanes.Add(iniLane);
-        //                break;
-        //            }
-        //        }
-        //        if (!found)
-        //        {
-        //            //方向朝外的边界线，没有朝内的重叠车道线-如：尽端环通
-        //            oriLanes.Add(lane);
-        //            oriLanes_reversedVectorIndexes.Add(oriLanes.Count - 1);
-        //        }
-        //    }
-        //    var compactedLanesgroup = new List<CompactedLaneGroup>();
-        //    for (int i = 0; i < oriLanes.Count; i++)
-        //    {
-        //        var lane = oriLanes[i];
-        //        CompactedLaneGroup group = new CompactedLaneGroup();
-        //        group.CompactedLanes.Add(new CompactedLane(lane));
-        //        if (oriLanes_reversedVectorIndexes.Contains(i))
-        //        {
-        //            group.Vector = -lane.Vec;
-        //            group.IsReversedVector = true;
-        //        }
-        //        else
-        //            group.Vector = lane.Vec;
-        //        compactedLanesgroup.Add(group);
-        //    }
-        //    //找出关联车道线
-        //    foreach (var group in compactedLanesgroup)
-        //    {
-        //        if (group.IsReversedVector) continue;
-        //        var group_vec = group.Vector;
-        //        var oriLane = group.CompactedLanes[0].Lane;
-        //        var oriLine = oriLane.Line;
-        //        oriLine = oriLine.Scale(ScareFactorForCollisionCheck);
-        //        var rec = PolyFromLines(oriLine, oriLine.Translation(group_vec.Normalize() * MaxLength));
-        //        rec = rec.Scale(ScareFactorForCollisionCheck);
-        //        var intersected_lanes = IniLanes.Where(e => e.Line.IntersectPoint(rec).Count() > 0);
-        //        intersected_lanes = intersected_lanes.Where(e => e.Vec.Normalize() == group_vec.Normalize());
-        //        intersected_lanes = intersected_lanes.Where(e => Boundary.ClosestPoint(e.Line.MidPoint).Distance(e.Line.MidPoint) > 10);
-        //        //相连在同一根车道上
-        //        intersected_lanes = intersected_lanes.Where(e =>
-        //        {
-        //            var connected_e = GetConnectedLanes(e,IniLanes);
-        //            var connected_ori = GetConnectedLanes(oriLane,IniLanes);
-        //            if (connected_e.Except(connected_ori).Count() == connected_e.Count())
-        //                return false;
-        //            else return true;
-        //        });
-        //        intersected_lanes = intersected_lanes.Where(e =>
-        //        {
-        //            var pl = PolyFromLines(e.Line, new LineSegment(oriLine.ClosestPoint(e.Line.P0), oriLine.ClosestPoint(e.Line.P1)));
-        //            var pl_c = PolyFromLines(oriLine, new LineSegment(e.Line.ClosestPoint(oriLine.P0), e.Line.ClosestPoint(oriLine.P1)));
-        //            pl = pl.Area <= pl_c.Area ? pl : pl_c;
-        //            pl = pl.Scale(ScareFactorForCollisionCheck);
-        //            var crossed = ObstaclesSpatialIndex.SelectCrossingGeometry(pl).Count() > 0;
-        //            if (crossed) return false;
-        //            else return true;
-        //        });
-
-        //        group.CompactedLanes.AddRange(intersected_lanes.Select(e => new CompactedLane(e))
-        //            .OrderBy(e => e.Lane.Line.ClosestPoint(oriLane.Line.MidPoint, true).Distance(oriLane.Line.MidPoint)));
-        //    }
-        //    //计算每根车道线可移动距离
-        //    CarSpatialIndex = new MNTSSpatialIndex(Cars.Select(e => e.Polyline));
-        //    foreach (var group in compactedLanesgroup)
-        //    {
-        //        foreach (var lane in group.CompactedLanes)
-        //        {
-        //            var isRestrictLane = false;
-        //            var dist = CalculateMoveableDistance(lane, group.Vector, ref isRestrictLane,Cars);
-        //            lane.MoveableDistance = dist;
-        //            lane.IsRestrictLane = isRestrictLane;
-        //        }
-        //        AdjustMoveableDistanceBySonLane(ref group.CompactedLanes);
-        //    }
-        //    //移动目标车道线
-        //    var addlanes = new List<Lane>();
-        //    var eldlanes = new List<Lane>();
-        //    foreach (var group in compactedLanesgroup)
-        //    {
-        //        foreach (var lane in group.CompactedLanes)
-        //        {
-        //            if (group.IsReversedVector)
-        //                lane.Lane.NotCopyReverseForLaneCompaction = true;
-        //            eldlanes.Add(lane.Lane.Clone());
-        //            lane.Lane.Line = lane.Lane.Line.Translation(group.Vector.Normalize() * lane.MoveableDistance);
-        //            addlanes.Add(lane.Lane);
-        //        }
-        //    }
-        //    //判断每根车道是否连接边界，若不是，找出连接边界的父车道
-        //    var _addlanes = new List<Lane>();
-        //    var _add_eldlanes = new List<Lane>();
-        //    for (int i = 0; i < addlanes.Count; i++)
-        //    {
-        //        var lane = addlanes[i];
-        //        if (!IsConnectedToLane(lane.Line, true))
-        //            lane.Line = new LineSegment(lane.Line.P1, lane.Line.P0);
-        //        //与障碍物做相交判断处理
-        //        var buffer = lane.Line.Buffer(DisLaneWidth / 2);
-        //        var buffer_sc = buffer.Scale(ScareFactorForCollisionCheck);
-        //        var obs_crossed = ObstaclesSpatialIndex.SelectCrossingGeometry(buffer_sc);
-        //        var points = new List<Coordinate>();
-        //        foreach (var obs in obs_crossed)
-        //        {
-        //            points.AddRange(obs.Coordinates);
-        //            points.AddRange(obs.IntersectPoint(buffer_sc));
-        //        }
-        //        points = points.Where(p => buffer.Contains(p)).Select(p => lane.Line.ClosestPoint(p)).ToList();
-        //        var splits = SplitLine(lane.Line, points);
-        //        if (IsConnectedToLaneDouble(lane.Line) && splits.Count > 1)
-        //        {
-        //            var adlane = new Lane(splits.Last(), lane.Vec);
-        //            adlane.Copy(lane);
-        //            addlanes.Add(adlane);
-        //            eldlanes.Add(lane.Clone());
-        //        }
-        //        addlanes[i].Line = splits.First();
-        //        lane = addlanes[i];
-        //        //判断是否直接连接到边界上
-        //        if (!IsConnectToBoundaryLanes(lane))
-        //        {
-        //            GetParentLanesConnectToBoundaryCount = 0;
-        //            var parentLanes = GetParentLanesConnectToBoundary(lane);
-        //            _addlanes.AddRange(parentLanes);
-        //        }
-        //    }
-        //    addlanes.AddRange(_addlanes);
-        //    eldlanes.AddRange(_addlanes);
-        //    _addlanes.Clear();
-        //    foreach (var lane in addlanes)
-        //    {
-        //        if (lane.NotCopyReverseForLaneCompaction)
-        //            continue;
-        //        if (lane.IsGeneratedForLoopThrough) continue;
-        //        var reverse_lane = new Lane(lane.Line, -lane.Vec);
-        //        reverse_lane.Copy(lane);
-        //        _addlanes.Add(reverse_lane);
-        //    }
-        //    foreach (var lane in eldlanes)
-        //    {
-        //        if (lane.NotCopyReverseForLaneCompaction)
-        //            continue;
-        //        if (lane.IsGeneratedForLoopThrough) continue;
-        //        var reverse_lane = new Lane(lane.Line, -lane.Vec);
-        //        reverse_lane.Copy(lane);
-        //        _add_eldlanes.Add(reverse_lane);
-        //    }
-        //    addlanes.AddRange(_addlanes);
-        //    eldlanes.AddRange(_add_eldlanes);
-        //    if (addlanes.Count > 0)
-        //    {
-        //        var newlanes = new List<Lane>();
-        //        newlanes.AddRange(addlanes);
-        //        newlanes.AddRange(InitialLanes);
-        //        eldlanes.AddRange(InitialLanes);
-        //        ClearNecessaryElements();
-        //        Update(newlanes, eldlanes);
-        //        //IniLanes = IniLanes.Where(e => !e.GeneratedForLaneCompactionTestForCaseEndThroughLoop).ToList();
-        //        hasCompactedLane = true;
-        //        GenerateParkingSpaces();
-        //    }
-        //    Display(compactedLanesgroup.Select(e => e.CompactedLanes.FirstOrDefault()).Where(e => e.MoveableDistance > 0)
-        //        .Select(e => e.Lane.Line.Buffer(500)).ToList());
-        //}
         private static bool IsConnectToBoundaryLanes(Lane lane,Polygon Boundary,List<Lane> IniLanes)
         {
             if (Boundary.ClosestPoint(lane.Line.P0).Distance(lane.Line.P0) < 1 && IsConnectedToLane(lane.Line,true,IniLanes))
@@ -506,6 +428,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             var lanes = IniLanes.Where(e => !HasOverlay(e.Line, lane.Line))
                 .Where(e => e.Line.ClosestPoint(lane.Line.P0).Distance(lane.Line.P0) < 1
                 || e.Line.ClosestPoint(lane.Line.P1).Distance(lane.Line.P1) < 1).ToList();
+            lanes = IniLanes.Where(e => !HasOverlay(e.Line, lane.Line)).ToList();
+            lanes = lanes.Where(e => e.Line.ClosestPoint(lane.Line.P0).Distance(lane.Line.P0) < 10
+                 || e.Line.ClosestPoint(lane.Line.P1).Distance(lane.Line.P1) < 10).ToList();
             return lanes;
         }
         private static double CalculateMoveableDistance(CompactedLane lane, Vector2D vec, ref bool isRestrictLane,
@@ -722,7 +647,14 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             if (min != double.PositiveInfinity && min != double.NegativeInfinity)
                 res = min;
             else if (min == double.PositiveInfinity)
-                res = DisBackBackModulus;
+            {
+                //var testLine = line.Translation(vec.Normalize() * DisBackBackModulus);
+                //if (Boundary.Contains(testLine.MidPoint))
+                //    res = DisBackBackModulus;
+                //else
+                //    res = 0;
+                res = 0;
+            }
             if (res > 0)
             {
                 line = line;

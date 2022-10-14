@@ -195,6 +195,12 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 });
             #endregion
 
+            var _linesplitbounds = new List<LineSegment>();
+            foreach (var linesplitbound in linesplitbounds)
+            {
+                _linesplitbounds.AddRange(SplitBufferLineByPoly(linesplitbound, DisLaneWidth / 2 - 1, Boundary));
+            }
+            _linesplitbounds = _linesplitbounds.Where(e => Boundary.ClosestPoint(e.MidPoint).Distance(e.MidPoint) >= DisLaneWidth / 2 - 1).ToList();
             bool generate = false;
             var quitcycle = false;
             STRtree<Polygon> carBoxesStrTree = new STRtree<Polygon>();
@@ -478,7 +484,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             , ref line_align_backback_rest, true, false, false, false, true, true, false);
                     }
                     var generatecars_count = tmpro.Cars.Count;
-                    generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth));
+                    generatecars_count += ((int)Math.Floor(tmpro_lane.Length / DisVertCarWidth))-4;
                     #endregion
 
                     #region 估计不生成单排的车位数estimated_cars_count,estimated_this_fullcount
@@ -748,6 +754,23 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             generate = false;
                             generate_lane_length = -1;
                             break;
+                        }
+                    }
+                    if (dis_to_move + DisCarAndHalfLaneBackBack >= DisLaneWidth / 2 + DisVertCarWidth * 4)
+                    {
+                        //对面会垂直排，不会有背靠背，这种情况下把carmodule宽度放大为5300
+                        if (paras.CarModulesToAdd.Count > 0)
+                        {
+                            var module=paras.CarModulesToAdd.First();
+                            module.Box = PolyFromLines(module.Line, module.Line.Translation(module.Vec.Normalize() * DisCarAndHalfLane));
+                        }
+                        if (paras.CarBoxesToAdd.Count > 0)
+                        {
+                            paras.CarBoxesToAdd[0] = paras.CarModulesToAdd[0].Box;
+                        }
+                        if (paras.CarBoxPlusToAdd.Count > 0)
+                        {
+                            paras.CarBoxPlusToAdd[0].Box = paras.CarModulesToAdd[0].Box;
                         }
                     }
                 }

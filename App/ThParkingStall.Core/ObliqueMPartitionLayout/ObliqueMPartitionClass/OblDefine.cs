@@ -82,6 +82,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 DisCarAndHalfLaneBackBack = DisLaneWidth / 2 + DisVertCarLengthBackBack;
                 DisBackBackModulus = DisVertCarLengthBackBack * 2 + DisLaneWidth;
             }
+            SingleVertModulePlacementFactor = 1.5;
             //AllowCompactedLane = false;
         }
         public List<LineString> Walls;
@@ -151,7 +152,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public static double DisPillarMoveDeeplySingle = 550;
         public static double LengthCanGIntegralModulesConnectSingle = 3.5 * DisVertCarWidth + DisLaneWidth / 2 + DisPillarLength;
         public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth + DisPillarLength * 2;
-        public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3.5 + DisPillarLength;
+        public static double LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3.1 + DisPillarLength;
         public static double LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 7 + DisPillarLength * 2;
         public static double STRTreeCount = 10;
         public List<LineSegment> OutEnsuredLanes = new List<LineSegment>();
@@ -175,7 +176,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         /// 如果生成车道线与上一根方向一致，则乘以比例权重系数
         /// </summary>
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
-        public static double SingleVertModulePlacementFactor = 1.0;
+        public static double SingleVertModulePlacementFactor = 1.5;
         public bool QuickCalculate = false;//快速计算
 
         public enum LayoutDirection : int
@@ -213,7 +214,11 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             GenerateCarsOnRestLanes();
             PostProcess();
             if (!hasCompactedLane && AllowCompactedLane && !QuickCalculate)
-                CompactLane();
+            {
+                //CompactLane();
+                CompactPro();
+            }
+
         }
 
         private void InitialzeDatas(List<LineSegment> iniLanes)
@@ -265,6 +270,19 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             }
             Obstacles.ForEach(e => ObstacleVertexes.AddRange(e.Coordinates));
             IniLaneBoxes.AddRange(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2)));
+            //有的车道线不满足车道宽被剪掉了，但是墙线又没有，把它加到墙线里面去
+            //var laneLines_buffer = IniLanes.Select(e => e.Line.Buffer(1)).ToList();
+            //var splits = SplitCurve(new LineString(Boundary.Coordinates), laneLines_buffer.Select(e => new LineString(e.Coordinates)).ToList()).ToList();
+            //splits = splits.Where(e =>
+            //{
+            //    foreach (var ln in IniLanes.Select(t => t.Line))
+            //    {
+            //        if (ln.ClosestPoint(e.GetMidPoint()).Distance(e.GetMidPoint()) < 1)
+            //            return false;
+            //    }
+            //    return true;
+            //}).ToList();
+            //Walls = JoinCurves(splits, new List<LineSegment>());
         }
         private void ClearNecessaryElements()
         {
