@@ -47,6 +47,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" Guid="{6A25E43F-4001-4EDE-8F4A-C3035CA8B578}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Svg.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" Guid="{F2EBC167-2663-4129-8C49-8789D30D983F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ExCSS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" Guid="{3849A666-1B7B-4AFC-A449-6E6750F6CC19}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Fizzler.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" Guid="{01C2577D-1C09-4E50-94F7-E2EE3931CE6F}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Data.SQLite.dll" />
             </Component>
@@ -117,6 +123,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" Guid="{E2DE622E-9412-4675-A132-3E9306E147D3}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Svg.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" Guid="{CD2D82B6-7DC8-40F9-8E91-5B8A637C336B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ExCSS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" Guid="{986C5BD4-4035-49B9-A267-0150A321B4DD}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Fizzler.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" Guid="{EE1F503C-7D1A-49FE-B045-7B82952082B1}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Data.SQLite.dll" />
             </Component>
@@ -161,6 +173,8 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_HandyControl" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
@@ -183,6 +197,8 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_HandyControl" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
