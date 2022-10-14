@@ -33,6 +33,7 @@
     <Compile Include="Command\ThExtractRoomConfigCmd.cs" />
     <Compile Include="Command\ThExtractRoomDataCmd.cs" />
     <Compile Include="Converter\BeamEngineOpsBooleanConverter.cs" />
+    <Compile Include="Converter\ShearwallLayerConfigOpsBooleanConverter.cs" />
     <Compile Include="Data\ThBlockInnerElementExtractor.cs" />
     <Compile Include="Data\ThConfigDataTool.cs" />
     <Compile Include="Data\ThDoorZoneRecognitionEngine.cs" />

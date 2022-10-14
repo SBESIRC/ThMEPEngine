@@ -59,6 +59,23 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
 
+        private ShearwallLayerConfigOps _shearwallLayerConfigOps;
+        /// <summary>
+        /// 剪力墙图层配置
+        /// </summary>
+        public ShearwallLayerConfigOps ShearwallLayerConfigOption
+        {
+            get
+            {
+                return _shearwallLayerConfigOps;
+            }
+            set
+            {
+                _shearwallLayerConfigOps = value;
+                RaisePropertyChanged("ShearwallLayerConfigOption");
+            }
+        }
+
         private string _id = "";
         public string Id => _id;
         private DBObjectCollection _doorBlkObbs;
@@ -85,6 +102,7 @@ namespace TianHua.Mep.UI.ViewModel
             using (ThExtractRoomDataCmd cmd = new ThExtractRoomDataCmd(GetLayers()))
             {
                 cmd.YnExtractShearWall = YnExtractShearWall;
+                cmd.UseConfigShearWallLayer = _shearwallLayerConfigOps == ShearwallLayerConfigOps.LayerConfig;
                 SetFocusToDwgView();
                 cmd.Execute();
                 _rangePts = cmd.RangePts;
@@ -855,5 +873,10 @@ namespace TianHua.Mep.UI.ViewModel
             return results;
         }
         #endregion
+    }
+    public enum ShearwallLayerConfigOps
+    {
+        Default = 0,
+        LayerConfig = 1,
     }
 }

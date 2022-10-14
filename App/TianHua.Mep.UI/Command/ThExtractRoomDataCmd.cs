@@ -34,6 +34,7 @@ namespace TianHua.Mep.UI.Command
         private List<string> WallLayers { get; set; } = new List<string>();
         public Point3dCollection RangePts => _rangePts;
         public bool YnExtractShearWall { get; set; }
+        public bool UseConfigShearWallLayer { get; set; } = false;
 
         #region ---------- 提取的对象 ----------
         /// <summary>
@@ -501,6 +502,7 @@ namespace TianHua.Mep.UI.Command
             var data = new ThRoomdata(false)
             {
                 YnExtractShearWall = this.YnExtractShearWall,
+                UseConfigShearWallLayer = this.UseConfigShearWallLayer,
             };
             data.Build(database, frame);
             return data;
