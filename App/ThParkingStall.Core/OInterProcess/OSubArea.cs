@@ -60,6 +60,13 @@ namespace ThParkingStall.Core.OInterProcess
             {
                 try
                 {
+                    ObliqueMPartition.ScareEnabledForBackBackModule= VMStock.DoubleRowModularDecrease200;
+                    ObliqueMPartition.LayoutMode = VMStock.RunMode;
+                    ObliqueMPartition.LayoutScareFactor_Adjacent = VMStock.LayoutScareFactor_Adjacent;
+                    ObliqueMPartition.LayoutScareFactor_betweenBuilds = VMStock.LayoutScareFactor_betweenBuilds;
+                    ObliqueMPartition.LayoutScareFactor_Intergral = VMStock.LayoutScareFactor_Intergral;
+                    ObliqueMPartition.LayoutScareFactor_SingleVert = VMStock.LayoutScareFactor_SingleVert;
+                    ObliqueMPartition.SingleVertModulePlacementFactor = VMStock.SingleVertModulePlacementFactor;
                     obliqueMPartition = new ObliqueMPartition(Walls, VaildLanes, Buildings, Region);
                     obliqueMPartition.OutputLanes = new List<LineSegment>();
                     obliqueMPartition.OutBoundary = OutBound;
