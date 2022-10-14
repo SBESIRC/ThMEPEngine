@@ -304,8 +304,20 @@ namespace ThMEPElectrical.BlockConvert
                                     {
                                         if (t.Position.DistanceTo(targetBlockData.Position) < 10.0)
                                         {
-                                            var e = CurrentDb.Element<Entity>(objId, true);
-                                            e.Erase();
+                                            if (targetBlockData.EffectiveName.Contains(ThBConvertCommon.BLOCK_LOAD_DIMENSION) &&
+                                                !t.EffectiveName.Equals(targetBlockData.EffectiveName))
+                                            {
+                                                var e = CurrentDb.Element<Entity>(t.ObjId, true);
+                                                if (!e.IsErased)
+                                                {
+                                                    e.Erase();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var e = CurrentDb.Element<Entity>(objId, true);
+                                                e.Erase();
+                                            }
                                         }
                                     });
                             }
@@ -401,7 +413,6 @@ namespace ThMEPElectrical.BlockConvert
                 avoidService.Avoid();
             }
         }
-
 
         private string BlockDwgPath()
         {

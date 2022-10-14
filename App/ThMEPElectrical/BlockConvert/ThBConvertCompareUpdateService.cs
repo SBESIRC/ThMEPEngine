@@ -38,6 +38,14 @@ namespace ThMEPElectrical.BlockConvert
                         switch (model.Type)
                         {
                             case ThBConvertCompareType.Unchanged:
+                                if (model.DifferentStyleFans)
+                                {
+                                    // 删除源块
+                                    currentDb.Element<BlockReference>(model.SourceId, true).Erase();
+                                    // 添加目标块
+                                    ThBConvertDbUtils.UpdateLayerSettings(layer);
+                                    currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                }
                                 break;
                             case ThBConvertCompareType.Delete:
                                 printParameterList.Add(GetParameter(currentDb, model.SourceId, 1, ThBConvertCommon.LINE_TYPE_HIDDEN, scale));

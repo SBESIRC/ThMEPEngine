@@ -74,6 +74,10 @@ namespace ThMEPElectrical.BlockConvert
                                         EquimentType = GetEquimentType(SrcEntityInfos, o.Value.ObjectId),
                                         Type = ThBConvertCompareType.Unchanged,
                                     };
+                                    if (!o.Value.ObjectId.GetBlockName().Equals(targetLoadList[0].Value.ObjectId.GetBlockName()))
+                                    {
+                                        result.DifferentStyleFans = true;
+                                    }
                                     CompareModels.Add(result);
                                     searchedIds.Add(targetLoadList[0].Value.ObjectId);
 
