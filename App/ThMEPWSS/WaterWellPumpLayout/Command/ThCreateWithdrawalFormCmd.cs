@@ -136,11 +136,16 @@ namespace ThMEPWSS.Command
                 using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 using (AcadDatabase acadDb = AcadDatabase.Active())
                 {
+                    var vec = Vector3d.XAxis.TransformBy(Active.Editor.UCS2WCS()).GetNormal();
+                    var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+
                     //插入表头
                     Point3d position = point.Value.TransformBy(Active.Editor.UCS2WCS());
-                    acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableHeader, position, new Scale3d(1, 1, 1), 0);
+                    acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableHeader, position, new Scale3d(1, 1, 1), angle);
                     //插入表身
                     Vector3d vector = new Vector3d(0, -1, 0);
+                    vector = vector.TransformBy(Active.Editor.UCS2WCS());
+
                     position += vector * 2000;
                     for (int i = 0; i < formItmes.Count; i++)
                     {
@@ -158,6 +163,17 @@ namespace ThMEPWSS.Command
                         dic.Add("数量统计", item.StrWellCount);
                         var bodyId = acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableBody, position, new Scale3d(1, 1, 1), 0, dic);
                         bodyId.SetDynBlockValue("水泵配置", item.StrPumpConfig);
+
+                        //旋转图块到当前ucs
+                        BlockReference blk = (BlockReference)bodyId.GetObject(OpenMode.ForRead);
+                        if (blk != null)
+                        {
+                            var rotaM = Matrix3d.Rotation(angle, Vector3d.ZAxis, blk.Position);
+                            blk.UpgradeOpen();
+                            blk.TransformBy(rotaM);
+                            blk.DowngradeOpen();
+                        }
+
                         position += vector * 1000;
                     }
                 }

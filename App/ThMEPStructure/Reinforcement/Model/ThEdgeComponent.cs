@@ -58,6 +58,12 @@ namespace ThMEPStructure.Reinforcement.Model
         /// </summary>
 
         public double StirrUpRatio { get; set; }
+        /// <summary>
+        /// 是否临洞口
+        /// </summary>
+        public bool IsCloseHole { get; set; }
+
+        public string Mark { get; set; } = "";
 
         public abstract void InitAndCalTableSize(string elevation, double tblRowHeight, double scale,out double firstRowH,out double firstRowW);
         public abstract DBObjectCollection Draw(double firstRowH, double firstRowW, Point3d point);

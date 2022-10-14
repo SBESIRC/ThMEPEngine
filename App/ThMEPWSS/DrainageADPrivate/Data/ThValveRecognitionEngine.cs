@@ -120,6 +120,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
 
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
+            extractor.Extract(database);
             extractor.ExtractFromMS(database);
             Results.AddRange(visitor.Results);
         }

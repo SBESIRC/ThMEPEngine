@@ -1,0 +1,6 @@
+syntax = "proto3";
+import "ThTCHGeometry.proto";
+
+message ThSULoopData {
+    repeated ThTCHPoint3d points = 1;
+}

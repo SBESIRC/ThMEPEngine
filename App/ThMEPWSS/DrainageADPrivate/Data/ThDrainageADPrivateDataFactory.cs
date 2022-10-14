@@ -227,7 +227,7 @@ namespace ThMEPWSS.DrainageADPrivate.Data
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(framePts);
-                OpeningSign.AddRange(dbObjs.OfType<Spline>());
+                OpeningSign.AddRange(dbObjs.OfType<Spline>().Select(x => x.Clone() as Spline));
             }
         }
         private bool CheckLayerFilter(string layerName, List<string> LayerFilter)

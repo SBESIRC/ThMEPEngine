@@ -47,6 +47,11 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         public ThBConvertCompareType Type { get; set; }
 
+        /// <summary>
+        /// 是否为不同样式的风机
+        /// </summary>
+        public bool DifferentStyleFans { get; set; }
+
         public ThBConvertCompareModel()
         {
             Guid = System.Guid.NewGuid().ToString();
@@ -56,6 +61,7 @@ namespace ThMEPElectrical.BlockConvert
             Category = EquimentCategory.暖通;
             EquimentType = "";
             Type = ThBConvertCompareType.Unchanged;
+            DifferentStyleFans = false;
         }
     }
 

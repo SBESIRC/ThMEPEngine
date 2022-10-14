@@ -1,9 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
+
 using Xbim.IO;
 using Xbim.Ifc;
-using ThMEPTCH.CAD;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Xbim.Ifc2x3.ProductExtension;
 using Xbim.Ifc2x3.SharedBldgElements;
 
@@ -27,7 +26,7 @@ namespace ThMEPIFC.Ifc2x3
                     var windows = new List<IfcWindow>();
                     var railings = new List<IfcRailing>();
                     var rooms = new List<IfcSpace>();
-                    var floor_origin = thtchstorey.Origin.ToPoint3d();
+                    var floor_origin = thtchstorey.Origin;
                     var storey = ThProtoBuf2IFC2x3Factory.CreateStorey(Model, building, thtchstorey);
                     foreach (var thtchwall in thtchstorey.Walls)
                     {
@@ -87,28 +86,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public void BuildIfcModel(IfcStore Model, ThSUProjectData project)
-        {
-            if (Model != null)
-            {
-                // 虚拟set
-                var site = ThProtoBuf2IFC2x3Factory.CreateSite(Model);
-                var building = ThProtoBuf2IFC2x3Factory.CreateBuilding(Model, site, project.Root.Name + "Building");
-                var storey = ThProtoBuf2IFC2x3Factory.CreateStorey(Model, building, "1F");
-                var definitions = project.Definitions;
-                var suElements = new List<IfcBuildingElementProxy>();
-                foreach (var element in project.Buildings)
-                {
-                    var def = definitions[element.Component.DefinitionIndex];
-                    var trans = element.Component.Transformations;
-                    var ifcBuildingElement = ThProtoBuf2IFC2x3Factory.CreatedSUElement(Model, def, trans);
-                    suElements.Add(ifcBuildingElement);
-                }
-                ThProtoBuf2IFC2x3Factory.relContainsSUElements2Storey(Model, suElements, storey);
-            }
-        }
-
-        static public IfcDoor SetupDoor(IfcStore model, IfcWall ifcWall, ThTCHWallData wall, ThTCHDoorData door, Point3d floor_origin)
+        static public IfcDoor SetupDoor(IfcStore model, IfcWall ifcWall, ThTCHWallData wall, ThTCHDoorData door, ThTCHPoint3d floor_origin)
         {
             var ifcDoor = ThProtoBuf2IFC2x3Factory.CreateDoor(model, door, floor_origin);
             var ifcHole = ThProtoBuf2IFC2x3Factory.CreateHole(model, wall, door, floor_origin);
@@ -116,7 +94,7 @@ namespace ThMEPIFC.Ifc2x3
             return ifcDoor;
         }
 
-        static public IfcWindow SetupWindow(IfcStore model, IfcWall ifcWall, ThTCHWallData wall, ThTCHWindowData window, Point3d floor_origin)
+        static public IfcWindow SetupWindow(IfcStore model, IfcWall ifcWall, ThTCHWallData wall, ThTCHWindowData window, ThTCHPoint3d floor_origin)
         {
             var ifcWindow = ThProtoBuf2IFC2x3Factory.CreateWindow(model, window, floor_origin);
             var ifcHole = ThProtoBuf2IFC2x3Factory.CreateHole(model, wall, window, floor_origin);
@@ -124,7 +102,7 @@ namespace ThMEPIFC.Ifc2x3
             return ifcWindow;
         }
 
-        static public IfcOpeningElement SetupHole(IfcStore model, IfcWall ifcWall, ThTCHOpeningData hole, Point3d floor_origin)
+        static public IfcOpeningElement SetupHole(IfcStore model, IfcWall ifcWall, ThTCHOpeningData hole, ThTCHPoint3d floor_origin)
         {
             var ifcHole = ThProtoBuf2IFC2x3Factory.CreateHole(model, hole, floor_origin);
             ThProtoBuf2IFC2x3Factory.BuildRelationship(model, ifcWall, ifcHole);

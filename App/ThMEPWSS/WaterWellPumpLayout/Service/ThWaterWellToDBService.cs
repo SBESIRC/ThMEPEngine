@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GeometryExtensions;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.WaterWellPumpLayout.Model;
 
@@ -39,6 +41,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
                 Point3d position = model.GetInstalPosition(edgeIndex, pumpCount, out double space);
                 Dictionary<string, string> attNameValues = new Dictionary<string, string>();
                 attNameValues.Add("编号", pumpName);
+                //文字插入角度ucs
                 var blk = InsertBlockReference("W-EQPM", WaterWellBlockNames.DeepWaterPump, position, new Scale3d(1, 1, 1), angele * Math.PI / 180, attNameValues);
 
                 SetPumpCount(blk, pumpCount);
@@ -54,11 +57,18 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
                 //dump.SetFontHeight(fontHeight);
             }
         }
-        public BlockReference InsertBlockReference(string layer, string blkName, Point3d position, Scale3d scale, double angle, Dictionary<string, string> values)
+
+        private BlockReference InsertBlockReference(string layer, string blkName, Point3d position, Scale3d scale, double angle, Dictionary<string, string> values)
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
                 var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(layer, blkName, position, scale, angle, values);
+
+                var vec = Vector3d.XAxis.TransformBy(Active.Editor.UCS2WCS()).GetNormal();
+                var textAngle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+
+                blkId.SetDynBlockValue("角度2", textAngle);
+
                 var blk = acadDb.Element<BlockReference>(blkId);
                 return blk;
             }

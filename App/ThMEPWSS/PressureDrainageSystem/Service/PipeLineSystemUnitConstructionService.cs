@@ -57,6 +57,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             PostProcessPressureDrainageSystemUnits(_pipeLineSystemUnits);
             ConfirmOneCrossPipePerUnit(_pipeLineSystemUnits);
             _pipeLineSystemUnits = DefineStartPtInSystemUnits(_pipeLineSystemUnits);
+            _pipeLineSystemUnits = _pipeLineSystemUnits.Where(e => e.DrainWell != null).ToList();
             return _pipeLineSystemUnits;
         }
 
@@ -174,7 +175,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             var res = new List<Horizontal>();
             for (int i = 0; i < lines.Count; i++)
             {
-                if (!test.Line.Layer.Equals(lines[i].Line.Layer))
+                if (!test.Line.Layer.Equals(lines[i].Line.Layer) && lines[i].Line.Layer!="")
                     continue;
                 if (IsIntersectedPipeLines(test.Line, lines[i].Line))
                 {
@@ -297,6 +298,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                 }
             }
+
             double tolIsPolyLineSame = 1;
             double disExtendedhorLine = 50;
             for (int i = 0; i < _totalPipeLineUnitsByLayerByUnit[layer].Count; i++)
@@ -334,6 +336,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                 }
             }
+
+            if (verticalPipes.Count > 0)
+            {
+                for (int i = 0; i < verticalPipes.Count; i++)
+                {
+                    _totalPipeLineUnitsByLayerByUnit[layer].Add(new PipeLineUnit());
+                    _totalPipeLineUnitsByLayerByUnit[layer][_totalPipeLineUnitsByLayerByUnit[layer].Count - 1].VerticalPipes.Add(verticalPipes[i]);
+                    verticalPipes.RemoveAt(i);
+                    i--;
+                }
+            }
+
         }
 
         private void CollectWrapPipeIntoEachUnit(List<Polyline> wrappipes, int layer)
@@ -448,6 +462,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             foreach (var unit in _totalPipeLineUnitsByLayerByUnit[layer])
             {
+                if (unit.HorizontalPipes.Count == 0) continue;
                 var objs = new DBObjectCollection();
                 unit.HorizontalPipes.ForEach(o => objs.Add(o.Line));
                 var processedLines = ThLaneLineMergeExtension.Merge(objs).Cast<Line>().ToList();
@@ -457,10 +472,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             }
             foreach (var unit in _totalPipeLineUnitsByLayerByUnit[layer])
             {
+                if (unit.HorizontalPipes.Count == 0) continue;
                 BreakHorizontalLineAtVerticalPipe(unit);
             }
             foreach (var unit in _totalPipeLineUnitsByLayerByUnit[layer])
             {
+                if (unit.HorizontalPipes.Count == 0) continue;
                 if (unit.HorizontalPipes.Count > 1)
                 {
                     ReDrawHorizontalPipeInPipeUnit(unit);
@@ -525,6 +542,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 //系统做个排序，优先找潜水泵与横管对接的系统而非潜水泵穿过横管的系统
                 _totalPipeLineUnitsByLayerByUnit[layer] = _totalPipeLineUnitsByLayerByUnit[layer].OrderBy(e =>
                  {
+                     if ((e.OriginalHorizontalPipes == null || e.OriginalHorizontalPipes.Count == 0) && e.VerticalPipes.Count > 0)
+                         return pump.Extents.GetClosePoint(e.VerticalPipes[0].Circle.Center).DistanceTo(e.VerticalPipes[0].Circle.Center);
                      var lines = e.OriginalHorizontalPipes;
                      var distance = double.PositiveInfinity;
                      if (lines == null) return distance;
@@ -545,9 +564,24 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                  }).ToList();
                 foreach (var unit in _totalPipeLineUnitsByLayerByUnit[layer])
                 {
-                    List<Line> hors = new ();
-                    List<int> indexPipes = new ();
-                    if (unit.OriginalHorizontalPipes == null) continue;
+                    List<Line> hors = new();
+                    List<int> indexPipes = new();
+                    if (unit.OriginalHorizontalPipes == null)
+                    {
+                        if (unit.VerticalPipes.Count == 1)
+                        {
+                            var dis = unit.VerticalPipes[0].Circle.Center.DistanceTo(pump.Extents.GetCenter());
+                            if (dis < 300)
+                            {
+                                unit.VerticalPipes[0].AppendedSubmergedPump = pump;
+                                cond_VertPipeFound = true;
+                                break;
+                            }
+                            else continue;
+                        }
+                        else continue;
+                    }
+                    //if (unit.OriginalHorizontalPipes == null) continue;
                     foreach (var hor in unit.OriginalHorizontalPipes)
                     {
                         var ptscoll = pump.Extents.Vertices();
@@ -693,7 +727,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             horLines.ForEach(o =>
             {
                 var ln = o.Clone() as Line;
-                ln.Scale(ln.GetCenter(), ln.Length + 1000 / ln.Length);
+                ln.Scale(ln.GetCenter(), 1.3);
                 var bf = ln.Buffer(500);
                 objs.Add(bf);
             });
@@ -940,7 +974,21 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         if (originalHors == null)
                         {
                             if (i == layerNumber - 1)
-                                continue;
+                            {
+                                var hassubPump = false;
+                                foreach (var pip in unit.VerticalPipes)
+                                {
+                                    if(pip.AppendedSubmergedPump!=null)
+                                        hassubPump = true;
+                                }
+                                if(!hassubPump)
+                                    continue;
+                                else
+                                {
+                                    unit.OriginalHorizontalPipes = new List<Horizontal>();
+                                    originalHors = new List<Horizontal>();
+                                }
+                            }
                             else
                             {
                                 unit.OriginalHorizontalPipes = new List<Horizontal>();

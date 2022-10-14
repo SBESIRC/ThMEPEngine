@@ -413,7 +413,8 @@ namespace TianHua.Mep.UI.ViewModel
             using (var acadDb =  AcadDatabase.Use(db))
             {
                 var objs  = acadDb.ModelSpace.OfType<Entity>()
-                    .Where(o => o is Polyline || o is MPolygon)
+                    .Where(o => (o is Polyline poly && poly.Closed && poly.Area>1.0)
+                    || (o is MPolygon polygon && polygon.Area>1.0))
                     .Where(o => o.Layer == ThMEPEngineCoreLayerUtils.ROOMOUTLINE)
                     .ToCollection();
                 if (pts.Count > 2)
@@ -666,7 +667,7 @@ namespace TianHua.Mep.UI.ViewModel
             // 把已有的房间框线显示出来
             using (var acadDb = AcadDatabase.Use(database))
             {
-                var results = new ObjectIdCollection();                
+                var results = new ObjectIdCollection();
                 rooms.OfType<Entity>().ForEach(e =>
                 {
                     if (e is Polyline poly)

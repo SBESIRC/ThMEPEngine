@@ -219,6 +219,16 @@ namespace ThMEPStructure.Reinforcement.Service
             var linkSpecs = GetLinkSpecs(values);
             if (IsCloseHoleStirup(values))
             {
+                component.IsCloseHole = true;
+                var stirups = GetAllStirrupSpecs(values);
+                if (stirups.Count == 2)
+                {
+                    if(stirups[0]!= stirups[1])
+                    {
+                        stirups.Remove(component.Stirrup);
+                        component.Mark = stirups[0];
+                    }
+                }
                 if (linkSpecs.Count == 1)
                 {
                     component.Link3 = linkSpecs[0];
@@ -257,10 +267,20 @@ namespace ThMEPStructure.Reinforcement.Service
         private ThTTypeEdgeComponent ParseGBZTType(List<Tuple<string, string>> values)
         {
             var component = new ThTTypeEdgeComponent();
-            component.Stirrup = GetStirrupSpec(values);
+            component.Stirrup = GetStirrupSpec(values); // 优先临洞口的箍筋
             var linkSpecs = GetLinkSpecs(values);
             if(IsCloseHoleStirup(values))
             {
+                component.IsCloseHole = true;
+                var stirups = GetAllStirrupSpecs(values);
+                if(stirups.Count==2)
+                {
+                    if (stirups[0] != stirups[1])
+                    {
+                        stirups.Remove(component.Stirrup);
+                        component.Mark = stirups[0];
+                    }
+                }
                 if (linkSpecs.Count == 1)
                 {
                     component.Link3 = linkSpecs[0];
@@ -270,7 +290,7 @@ namespace ThMEPStructure.Reinforcement.Service
                     // 暂时未出现
                 }
                 else if (linkSpecs.Count == 3)
-                {
+                {                    
                     component.Link3 = linkSpecs[1];
                     component.Link4 = linkSpecs[2];
                 }
@@ -418,7 +438,21 @@ namespace ThMEPStructure.Reinforcement.Service
             {
                 return "";
             }
-        }        
+        }
+
+        private List<string> GetAllStirrupSpecs(List<Tuple<string, string>> values)
+        {
+            var results = new List<string>();
+            for (int i = 0; i < values.Count; i++)
+            {
+                if (values[i].Item1.Contains(StirrupKword))
+                {
+                    results.Add(ReplaceZToC(RemoveEmpty(values[i].Item2)));
+                }
+            }
+            return results;
+        }
+
         private Tuple<int, int, int, int> FindSpeaArea(
             ExcelWorksheet worksheet, string shape, Dictionary<string,int> equations)
         {

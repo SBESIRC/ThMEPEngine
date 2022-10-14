@@ -40,34 +40,6 @@ namespace TianHua.FanSelection.UI
             UnSubscribeToDocumentManagerEvents();
         }
 
-        [CommandMethod("TIANHUACAD", "THFJDW", CommandFlags.Modal)]
-        public void DrawFanModels()
-        {
-            //轴流单速
-            string axialPath = Path.Combine(ThCADCommon.SupportPath(), ThFanSelectionCommon.AXIAL_Parameters);
-            //轴流双速
-            string axialDoublePath = Path.Combine(ThCADCommon.SupportPath(), ThFanSelectionCommon.AXIAL_Parameters_Double);
-            //离心前倾双速
-            string htfcFrontDoublePath = Path.Combine(ThCADCommon.SupportPath(), ThFanSelectionCommon.HTFC_Parameters_Double);
-            //离心前倾单速
-            string htfcFrontSinglePath = Path.Combine(ThCADCommon.SupportPath(), ThFanSelectionCommon.HTFC_Parameters);
-            //离心后倾单速
-            string htfcBackSinglePath = Path.Combine(ThCADCommon.SupportPath(), ThFanSelectionCommon.HTFC_Parameters_Single);
-
-            var axialModel = new DrawAxialModelsInCAD(axialPath);
-            var axialDoubleModel = new DrawAxialModelsInCAD(axialDoublePath);
-            var htfcFrontDouble = new DrawHtfcModelsInCAD(htfcFrontDoublePath);
-            var htfcFrontSingle = new DrawHtfcModelsInCAD(htfcFrontSinglePath);
-            var htfcBackSingle = new DrawHtfcModelsInCAD(htfcBackSinglePath);
-
-            axialModel.DrawInCAD();
-            axialDoubleModel.DrawInCAD();
-            htfcFrontDouble.DrawInCAD();
-            htfcFrontSingle.DrawInCAD();
-            htfcBackSingle.DrawInCAD();
-
-        }
-
         [CommandMethod("TIANHUACAD", "THFJ", CommandFlags.Modal)]
         public void ThEquipmentSelection()
         {

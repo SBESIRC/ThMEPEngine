@@ -22,15 +22,13 @@ public static partial class ThSUFaceDataReflection {
   static ThSUFaceDataReflection() {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
-          "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VHZW9tZXRyeS5wcm90bxoTVGhU",
-          "Q0hHZW9tZXRyeS5wcm90bxoWVGhTVU1hdGVyaWFsRGF0YS5wcm90byJ4CgxU",
-          "aFNVRmFjZURhdGESHgoEbWVzaBgBIAEoCzIQLlRoU1VQb2x5Z29uTWVzaBIj",
-          "CghtYXRlcmlhbBgCIAEoCzIRLlRoU1VNYXRlcmlhbERhdGESIwoLZmFjZV9u",
-          "b3JtYWwYAyABKAsyDi5UaFRDSFZlY3RvcjNkYgZwcm90bzM="));
+          "ChJUaFNVRmFjZURhdGEucHJvdG8aElRoU1VMb29wRGF0YS5wcm90byJVCgxU",
+          "aFNVRmFjZURhdGESIQoKb3V0ZXJfbG9vcBgBIAEoCzINLlRoU1VMb29wRGF0",
+          "YRIiCgtpbm5lcl9sb29wcxgCIAMoCzINLlRoU1VMb29wRGF0YWIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-        new pbr::FileDescriptor[] { global::ThSUGeometryReflection.Descriptor, global::ThTCHGeometryReflection.Descriptor, global::ThSUMaterialDataReflection.Descriptor, },
+        new pbr::FileDescriptor[] { global::ThSULoopDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "Mesh", "Material", "FaceNormal" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUFaceData), global::ThSUFaceData.Parser, new[]{ "OuterLoop", "InnerLoops" }, null, null, null, null)
         }));
   }
   #endregion
@@ -71,9 +69,8 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThSUFaceData(ThSUFaceData other) : this() {
-    mesh_ = other.mesh_ != null ? other.mesh_.Clone() : null;
-    material_ = other.material_ != null ? other.material_.Clone() : null;
-    faceNormal_ = other.faceNormal_ != null ? other.faceNormal_.Clone() : null;
+    outerLoop_ = other.outerLoop_ != null ? other.outerLoop_.Clone() : null;
+    innerLoops_ = other.innerLoops_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -83,40 +80,27 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     return new ThSUFaceData(this);
   }
 
-  /// <summary>Field number for the "mesh" field.</summary>
-  public const int MeshFieldNumber = 1;
-  private global::ThSUPolygonMesh mesh_;
+  /// <summary>Field number for the "outer_loop" field.</summary>
+  public const int OuterLoopFieldNumber = 1;
+  private global::ThSULoopData outerLoop_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThSUPolygonMesh Mesh {
-    get { return mesh_; }
+  public global::ThSULoopData OuterLoop {
+    get { return outerLoop_; }
     set {
-      mesh_ = value;
+      outerLoop_ = value;
     }
   }
 
-  /// <summary>Field number for the "material" field.</summary>
-  public const int MaterialFieldNumber = 2;
-  private global::ThSUMaterialData material_;
+  /// <summary>Field number for the "inner_loops" field.</summary>
+  public const int InnerLoopsFieldNumber = 2;
+  private static readonly pb::FieldCodec<global::ThSULoopData> _repeated_innerLoops_codec
+      = pb::FieldCodec.ForMessage(18, global::ThSULoopData.Parser);
+  private readonly pbc::RepeatedField<global::ThSULoopData> innerLoops_ = new pbc::RepeatedField<global::ThSULoopData>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThSUMaterialData Material {
-    get { return material_; }
-    set {
-      material_ = value;
-    }
-  }
-
-  /// <summary>Field number for the "face_normal" field.</summary>
-  public const int FaceNormalFieldNumber = 3;
-  private global::ThTCHVector3d faceNormal_;
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThTCHVector3d FaceNormal {
-    get { return faceNormal_; }
-    set {
-      faceNormal_ = value;
-    }
+  public pbc::RepeatedField<global::ThSULoopData> InnerLoops {
+    get { return innerLoops_; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -134,9 +118,8 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     if (ReferenceEquals(other, this)) {
       return true;
     }
-    if (!object.Equals(Mesh, other.Mesh)) return false;
-    if (!object.Equals(Material, other.Material)) return false;
-    if (!object.Equals(FaceNormal, other.FaceNormal)) return false;
+    if (!object.Equals(OuterLoop, other.OuterLoop)) return false;
+    if(!innerLoops_.Equals(other.innerLoops_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -144,9 +127,8 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override int GetHashCode() {
     int hash = 1;
-    if (mesh_ != null) hash ^= Mesh.GetHashCode();
-    if (material_ != null) hash ^= Material.GetHashCode();
-    if (faceNormal_ != null) hash ^= FaceNormal.GetHashCode();
+    if (outerLoop_ != null) hash ^= OuterLoop.GetHashCode();
+    hash ^= innerLoops_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -165,18 +147,11 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
     output.WriteRawMessage(this);
   #else
-    if (mesh_ != null) {
+    if (outerLoop_ != null) {
       output.WriteRawTag(10);
-      output.WriteMessage(Mesh);
+      output.WriteMessage(OuterLoop);
     }
-    if (material_ != null) {
-      output.WriteRawTag(18);
-      output.WriteMessage(Material);
-    }
-    if (faceNormal_ != null) {
-      output.WriteRawTag(26);
-      output.WriteMessage(FaceNormal);
-    }
+    innerLoops_.WriteTo(output, _repeated_innerLoops_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -187,18 +162,11 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-    if (mesh_ != null) {
+    if (outerLoop_ != null) {
       output.WriteRawTag(10);
-      output.WriteMessage(Mesh);
+      output.WriteMessage(OuterLoop);
     }
-    if (material_ != null) {
-      output.WriteRawTag(18);
-      output.WriteMessage(Material);
-    }
-    if (faceNormal_ != null) {
-      output.WriteRawTag(26);
-      output.WriteMessage(FaceNormal);
-    }
+    innerLoops_.WriteTo(ref output, _repeated_innerLoops_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -209,15 +177,10 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public int CalculateSize() {
     int size = 0;
-    if (mesh_ != null) {
-      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Mesh);
+    if (outerLoop_ != null) {
+      size += 1 + pb::CodedOutputStream.ComputeMessageSize(OuterLoop);
     }
-    if (material_ != null) {
-      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Material);
-    }
-    if (faceNormal_ != null) {
-      size += 1 + pb::CodedOutputStream.ComputeMessageSize(FaceNormal);
-    }
+    size += innerLoops_.CalculateSize(_repeated_innerLoops_codec);
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -230,24 +193,13 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
     if (other == null) {
       return;
     }
-    if (other.mesh_ != null) {
-      if (mesh_ == null) {
-        Mesh = new global::ThSUPolygonMesh();
+    if (other.outerLoop_ != null) {
+      if (outerLoop_ == null) {
+        OuterLoop = new global::ThSULoopData();
       }
-      Mesh.MergeFrom(other.Mesh);
+      OuterLoop.MergeFrom(other.OuterLoop);
     }
-    if (other.material_ != null) {
-      if (material_ == null) {
-        Material = new global::ThSUMaterialData();
-      }
-      Material.MergeFrom(other.Material);
-    }
-    if (other.faceNormal_ != null) {
-      if (faceNormal_ == null) {
-        FaceNormal = new global::ThTCHVector3d();
-      }
-      FaceNormal.MergeFrom(other.FaceNormal);
-    }
+    innerLoops_.Add(other.innerLoops_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -264,24 +216,14 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
           break;
         case 10: {
-          if (mesh_ == null) {
-            Mesh = new global::ThSUPolygonMesh();
+          if (outerLoop_ == null) {
+            OuterLoop = new global::ThSULoopData();
           }
-          input.ReadMessage(Mesh);
+          input.ReadMessage(OuterLoop);
           break;
         }
         case 18: {
-          if (material_ == null) {
-            Material = new global::ThSUMaterialData();
-          }
-          input.ReadMessage(Material);
-          break;
-        }
-        case 26: {
-          if (faceNormal_ == null) {
-            FaceNormal = new global::ThTCHVector3d();
-          }
-          input.ReadMessage(FaceNormal);
+          innerLoops_.AddEntriesFrom(input, _repeated_innerLoops_codec);
           break;
         }
       }
@@ -300,24 +242,14 @@ public sealed partial class ThSUFaceData : pb::IMessage<ThSUFaceData>
           _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
           break;
         case 10: {
-          if (mesh_ == null) {
-            Mesh = new global::ThSUPolygonMesh();
+          if (outerLoop_ == null) {
+            OuterLoop = new global::ThSULoopData();
           }
-          input.ReadMessage(Mesh);
+          input.ReadMessage(OuterLoop);
           break;
         }
         case 18: {
-          if (material_ == null) {
-            Material = new global::ThSUMaterialData();
-          }
-          input.ReadMessage(Material);
-          break;
-        }
-        case 26: {
-          if (faceNormal_ == null) {
-            FaceNormal = new global::ThTCHVector3d();
-          }
-          input.ReadMessage(FaceNormal);
+          innerLoops_.AddEntriesFrom(ref input, _repeated_innerLoops_codec);
           break;
         }
       }

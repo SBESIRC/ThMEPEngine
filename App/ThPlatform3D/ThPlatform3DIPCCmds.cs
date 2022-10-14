@@ -23,7 +23,7 @@ namespace ThPlatform3D
             Stopwatch sw = new Stopwatch();
             sw.Start();
             var service = new ThDWGToIFCService("");
-            var project = service.DWGToProjectData(true, true);
+            var project = service.DWGToProjectData(false, false);
             if (project != null)
             {
                 sw.Stop();

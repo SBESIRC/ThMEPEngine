@@ -27,20 +27,20 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 {
     internal class ThCreateLineService
     {
-        public static List<Line> TurnNodeToTransLine(List<ThDrainageTreeNode> allNode)
-        {
-            var allLine = new List<Line>();
+        //public static List<Line> TurnNodeToTransLine(List<ThDrainageTreeNode> allNode)
+        //{
+        //    var allLine = new List<Line>();
 
-            foreach (var node in allNode)
-            {
-                if (node.Parent != null)
-                {
-                    var line = new Line(node.Parent.TransPt, node.TransPt);
-                    allLine.Add(line);
-                }
-            }
-            return allLine;
-        }
+        //    foreach (var node in allNode)
+        //    {
+        //        if (node.Parent != null)
+        //        {
+        //            var line = new Line(node.Parent.TransPt, node.TransPt);
+        //            allLine.Add(line);
+        //        }
+        //    }
+        //    return allLine;
+        //}
 
         public static Dictionary<Line, ThDrainageTreeNode> TurnNodeToTransLineDict(List<ThDrainageTreeNode> allNode)
         {

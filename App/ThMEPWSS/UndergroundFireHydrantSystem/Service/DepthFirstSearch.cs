@@ -77,12 +77,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 if (isOmit) continue;
                 tempPath.Add(p);
                 visited.Add(p);
-#if DEBUG
+
+
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    currentDb.CurrentSpace.Add(new Line(p._pt,cur._pt));
+                    var line = new Line(p._pt, cur._pt);
+                    line.Layer = "W-辅助";
+                    currentDb.CurrentSpace.Add(line);
                 }
-#endif
+
                 //递归搜索
                 var flag = dfsMainLoop(p, target, tempPath, visited, ref rstPaths, fireHydrantSysIn, ref extraNodes);
                 //if (flag) return true;

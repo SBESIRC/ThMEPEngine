@@ -25,15 +25,93 @@ namespace ThMEPWSS.DrainageADPrivate.Service
         public static List<ThDrainageBlkOutput> LayoutDim(List<ThDrainageTreeNode> rootList)
         {
             var allNode = rootList.SelectMany(x => x.GetDescendant()).ToList();
-            var allLine = ThCreateLineService.TurnNodeToTransLine(allNode);
+            var allLineDict = ThCreateLineService.TurnNodeToTransLineDict(allNode);
+            var allLine = allLineDict.Select(x => x.Key).ToList();
             var allIsolateLine = new List<Line>();
             allIsolateLine.AddRange(allLine);
             //之后要加上阀门???
 
-            var nodeDiaDimOutput = ThLayoutDimService.CalculatePositionDim(allNode, allIsolateLine);
+            var markNode = CheckNodeNeedDim(allNode);
+            var nodeDiaDimOutput = CalculatePositionDim(markNode, allIsolateLine);
 
             return nodeDiaDimOutput;
 
+        }
+
+        /// <summary>
+        /// 末端立管必须标，末端立管到上一个三通找最长，两个三通之间找最长，第一个三通到根节点找最长
+        /// </summary>
+        private static List<ThDrainageTreeNode> CheckNodeNeedDim(List<ThDrainageTreeNode> allNode)
+        {
+            var markNode = new List<ThDrainageTreeNode>();
+
+            foreach (var node in allNode)
+            {
+
+                if (node.Child.Count == 0 && node.Parent != null && ThDrainageADTreeService.IsVertical(node))
+                {
+                    //立管末端
+                    markNode.Add(node);
+                    var longNode = FindLongPartMarkNode(node.Parent);
+                    markNode.Add(longNode);
+                }
+                else if (node.Child.Count == 0 && node.Parent != null && ThDrainageADTreeService.IsVertical(node) == false)
+                {
+                    //非立管末端
+                    var longNode = FindLongPartMarkNode(node);
+                    markNode.Add(longNode);
+                }
+                else if (node.Child.Count >= 2)
+                {
+                    //三通
+                    var longNode = FindLongPartMarkNode(node);
+                    markNode.Add(longNode);
+                }
+            }
+
+            markNode = markNode.Distinct().ToList();
+
+            return markNode;
+
+
+        }
+
+        private static ThDrainageTreeNode FindLongPartMarkNode(ThDrainageTreeNode thisNode)
+        {
+            var toParentEnd = false;
+            var markNode = thisNode;
+            var maxLength = 0.0;
+
+            var tempNode = thisNode;
+            while (toParentEnd == false)
+            {
+                if (tempNode.Parent != null)
+                {
+                    var dist = tempNode.TransPt.DistanceTo(tempNode.Parent.TransPt);
+                    if (dist >= maxLength)
+                    {
+                        maxLength = dist;
+                        markNode = tempNode;
+                    }
+                    if (tempNode.Parent.Child.Count >= 2)
+                    {
+                        //下一个三通
+                        toParentEnd = true;
+                    }
+                    else
+                    {
+                        tempNode = tempNode.Parent;
+                    }
+                }
+                else
+                {
+                    toParentEnd = true;
+                }
+
+            }
+
+
+            return markNode;
         }
 
         private static List<ThDrainageBlkOutput> CalculatePositionDim(List<ThDrainageTreeNode> allNode, List<Line> allIsolateLine)

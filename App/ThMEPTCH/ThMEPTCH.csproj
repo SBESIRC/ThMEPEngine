@@ -93,6 +93,7 @@
     <Compile Include="Data\ThSUComponentData.cs" />
     <Compile Include="Data\ThSUFaceData.cs" />
     <Compile Include="Data\ThSUGeometry.cs" />
+    <Compile Include="Data\ThSULoopData.cs" />
     <Compile Include="Data\ThSUMaterialData.cs" />
     <Compile Include="Data\ThSUProjectData.cs" />
     <Compile Include="Data\ThTCHBuildingData.cs" />
@@ -101,7 +102,10 @@
     <Compile Include="Data\ThTCHDescendingData.cs" />
     <Compile Include="Data\ThTCHDoorData.cs" />
     <Compile Include="Data\ThTCHGeometry.cs" />
+    <Compile Include="Data\ThTCHGridAxisData.cs" />
+    <Compile Include="Data\ThTCHGridData.cs" />
     <Compile Include="Data\ThTCHOpeningData.cs" />
+    <Compile Include="Data\ThTCHPositioningElementData.cs" />
     <Compile Include="Data\ThTCHProjectData.cs" />
     <Compile Include="Data\ThTCHProperty.cs" />
     <Compile Include="Data\ThTCHRailingData.cs" />
@@ -181,11 +185,6 @@
     <Compile Include="CAD\ThProtoBufExtension.cs" />
     <Compile Include="CAD\ThTCHWindowExtractionVisitor.cs" />
     <Compile Include="Data\ThSQLHelper.cs" />
-    <Compile Include="Model\SurrogateModel\Matrix3DSurrogate.cs" />
-    <Compile Include="Model\SurrogateModel\Point3DCollectionSurrogate.cs" />
-    <Compile Include="Model\SurrogateModel\Point3DSurrogate.cs" />
-    <Compile Include="Model\SurrogateModel\PolylineSurrogate.cs" />
-    <Compile Include="Model\SurrogateModel\Vector3DSurrogate.cs" />
     <Compile Include="Model\ThTCHBeam.cs" />
     <Compile Include="Model\ThTCHBuilding.cs" />
     <Compile Include="Model\ThTCHCableTray.cs" />
@@ -292,6 +291,7 @@
     <None Include="proto\ThSUComponentData.proto" />
     <None Include="proto\ThSUFaceData.proto" />
     <None Include="proto\ThSUGeometry.proto" />
+    <None Include="proto\ThSULoopData.proto" />
     <None Include="proto\ThSUMaterialData.proto" />
     <None Include="proto\ThSUProjectData.proto" />
     <None Include="proto\ThTCHBuildingData.proto" />
@@ -300,7 +300,10 @@
     <None Include="proto\ThTCHDescendingData.proto" />
     <None Include="proto\ThTCHDoorData.proto" />
     <None Include="proto\ThTCHGeometry.proto" />
+    <None Include="proto\ThTCHGridAxisData.proto" />
+    <None Include="proto\ThTCHGridData.proto" />
     <None Include="proto\ThTCHOpeningData.proto" />
+    <None Include="proto\ThTCHPositioningElementData.proto" />
     <None Include="proto\ThTCHProjectData.proto" />
     <None Include="proto\ThTCHProperty.proto" />
     <None Include="proto\ThTCHRailingData.proto" />
@@ -347,9 +350,6 @@
     </PackageReference>
     <PackageReference Include="HandyControl">
       <Version>3.3.0</Version>
-    </PackageReference>
-    <PackageReference Include="protobuf-net">
-      <Version>3.1.17</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

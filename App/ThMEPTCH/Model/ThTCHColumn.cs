@@ -1,12 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using ProtoBuf;
-using System;
-using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPTCH.Model
 {
-    [ProtoContract]
     public class ThTCHColumn : ThTCHElement, ICloneable
     {
         private ThTCHColumn()
@@ -50,7 +47,7 @@ namespace ThMEPTCH.Model
             else
             {
                 var sp = this.Origin - this.XVector.MultiplyBy(Length / 2);
-                var ep = this.Origin + this.XVector.MultiplyBy(Length/2);
+                var ep = this.Origin + this.XVector.MultiplyBy(Length / 2);
                 cloneColumn = new ThTCHColumn(sp, ep, this.Width, this.Height);
             }
             if (cloneColumn != null)

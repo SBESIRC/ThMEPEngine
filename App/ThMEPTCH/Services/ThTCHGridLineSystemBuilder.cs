@@ -255,8 +255,8 @@ namespace ThMEPTCH.Services
             alignedDimension.DimLines.Add(xLine2);
             var dimLine = new ThTCHLine()
             {
-                StartPt = xLine1Point.ToTCHPoint(),
-                EndPt = xLine2Point.ToTCHPoint(),
+                StartPt = xLine1PointExtend.ToTCHPoint(),
+                EndPt = xLine2PointExtend.ToTCHPoint(),
             };
             alignedDimension.DimLines.Add(dimLine);
             return alignedDimension;

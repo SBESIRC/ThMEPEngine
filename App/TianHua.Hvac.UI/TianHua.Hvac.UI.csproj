@@ -37,7 +37,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CAD\DrawModelsInCAD.cs" />
     <Compile Include="Command\ThHvacCmdService.cs" />
+    <Compile Include="Command\ThHvacDrawFanParameterCmd.cs" />
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />

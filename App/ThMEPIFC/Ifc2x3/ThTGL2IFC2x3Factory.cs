@@ -12,14 +12,15 @@ using Xbim.Ifc2x3.MeasureResource;
 using Xbim.Ifc2x3.PropertyResource;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.RepresentationResource;
+using Xbim.Ifc2x3.GeometryResource;
 
 namespace ThMEPIFC.Ifc2x3
 {
     public partial class ThTGL2IFC2x3Factory
     {
-        static public IfcStore CreateAndInitModel(string projectName, string projectId = "")
+        public static IfcStore CreateAndInitModel(string projectName, string projectId = "")
         {
-            var model = ThIFC2x3Factory.CreateModel();
+            var model = ThIFC2x3Factory.CreateMemoryModel();
             using (var txn = model.BeginTransaction("Initialize Model"))
             {
                 //there should always be one project in the model
@@ -27,11 +28,21 @@ namespace ThMEPIFC.Ifc2x3
                 //set the units to SI (mm and metres)
                 project.Initialize(ProjectUnits.SIUnitsUK);
                 //set GeometricRepresentationContext
-                project.RepresentationContexts.Add(ThIFC2x3Factory.CreateGeometricRepresentationContext(model));
+                project.RepresentationContexts.Add(CreateGeometricRepresentationContext(model));
                 //now commit the changes, else they will be rolled back at the end of the scope of the using statement
                 txn.Commit();
             }
             return model;
+        }
+
+        private static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
+        {
+            return model.Instances.New<IfcGeometricRepresentationContext>(c =>
+            {
+                c.Precision = ThTGL2IFCCommon.PRECISION;
+                c.CoordinateSpaceDimension = new IfcDimensionCount(3);
+                c.WorldCoordinateSystem = model.ToIfcAxis2Placement3D(Point3d.Origin);
+            });
         }
 
         public static IfcSite CreateSite(IfcStore model, ThTCHSite site)

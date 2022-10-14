@@ -25,6 +25,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public List<SingleDoor> DoorList = ProcessedData.DoorList;
         public List<SinglePipe> SinglePipeList = ProcessedData.PipeList;
         public Dictionary<Tuple<int, int>, PipePoint> DoorPipeToPointMap = ProcessedData.DoorPipeToPointMap;
+        public Dictionary<int, int> MainPipeLeftRight = ProcessedData.MainPipeLeftRight;
+
         public Dictionary<int, Dictionary<int, List<Polyline>>> PipePolyListMap = new Dictionary<int, Dictionary<int, List<Polyline>>>();
         public Dictionary<int, Dictionary<int, List<Polyline>>> PipeCenterLineListMap = new Dictionary<int, Dictionary<int, List<Polyline>>>();
         public Dictionary<int, List<Polyline>> RegionPipePolyMap = new Dictionary<int, List<Polyline>>();
@@ -136,7 +138,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             for (int i = 0; i < RegionList.Count; i++)
             {
-                if (i == 1)
+                if (i == 2)
                 {
                     int stop = 5;
                 }
@@ -426,7 +428,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     //绘制
                     //PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pins, pouts, pins_buffer, pouts_buffer, main_index);
 
-                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index,nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall,mode);
+                    PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index,nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall,mode, MainPipeLeftRight[i]);
                     passagePipeGenerator.CalculatePipeline();
                     List<PipeOutput> nowOutputList = passagePipeGenerator.outputs;
                     nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, string.Format("{0}l4PassingPipe", PublicValue.Turning), x.pipe_id % 7 + 1, 30));
@@ -441,7 +443,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                         DrawPipeData vOut = DrawPipeData.CreateVOut(ProcessedData.VirtualPlNow, mainPipeId);
                         pipeOutList.Insert(main_index, vOut);
-                        passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall, mode);
+                        passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList, main_index, nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall, mode, MainPipeLeftRight[i]);
                         passagePipeGenerator.CalculatePipeline();
                         nowOutputList = passagePipeGenerator.outputs;
                         nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l8NewPassingPipe", x.pipe_id % 7 + 1, 30));

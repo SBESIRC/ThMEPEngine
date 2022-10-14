@@ -28,16 +28,5 @@ namespace ThMEPIFC
                 Model.Dispose();
             }
         }
-        
-        public void GenerateIfcModelAndSave(ThSUProjectData project, string file)
-        {
-            Model = ThTGL2IFC2x3Factory.CreateAndInitModel("ThTGL2IFCProject", project.Root.GlobalId);
-            if (Model != null)
-            {
-                ThProtoBuf2IFC2x3Builder.BuildIfcModel(Model, project);
-                ThTGL2IFC2x3Builder.SaveIfcModel(Model, file);
-                Model.Dispose();
-            }
-        }
     }
 }

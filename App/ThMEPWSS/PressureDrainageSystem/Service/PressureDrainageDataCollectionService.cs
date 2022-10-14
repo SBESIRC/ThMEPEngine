@@ -583,7 +583,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                 ptlocPipe = lins_b.EndPoint;
                             Circle ci = new Circle(ptlocPipe, Vector3d.ZAxis, 50);
                             ci.Layer = "W-DRAI-EQPM";
-                            double mindis = 3000;
+                            double mindis = 2000;
                             int index = -1;
                             for (int i = 0; i < this.CollectedData.HorizontalPipes.Count; i++)
                             {

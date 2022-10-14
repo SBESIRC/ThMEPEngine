@@ -158,7 +158,8 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
                     if (node != null)
                     {
-                        while (node.Parent != null && Math.Abs(node.Pt.Z - node.Parent.Pt.Z) > 1)
+                        //while (node.Parent != null && Math.Abs(node.Pt.Z - node.Parent.Pt.Z) > 1)
+                        while (ThDrainageADTreeService.IsVertical(node))
                         {
                             //立管
                             node = node.Parent;

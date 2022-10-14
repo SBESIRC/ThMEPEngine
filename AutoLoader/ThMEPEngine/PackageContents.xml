@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{FF62B0F0-1BF3-44E8-911A-9C905A57CAB3}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA AI Design Toolset" NameChs="天华AI工具集" Description="TIANHUA AI Design Toolset for AutoCAD" DescriptionChs="为设计师提供高效出图的软件解决方案" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{7300890A-BD75-4453-8345-C4CA2B3D5D66}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2016 version-->
@@ -526,6 +526,7 @@
                 <Command Local="THSGDX" Global="THSGDX" />
                 <Command Local="THFJXX" Global="THFJXX" />
                 <Command Local="THFYJS" Global="THFYJS" />
+                <Command Local="THFJDW" Global="THFJDW" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
                 <Command Local="THDNPG" Global="THDNPG" />
                 <Command Local="THZYSFJS" Global="THZYSFJS" />
@@ -554,6 +555,7 @@
                 <Command Local="THSGDX" Global="THSGDX" />
                 <Command Local="THFJXX" Global="THFJXX" />
                 <Command Local="THFYJS" Global="THFYJS" />
+                <Command Local="THFJDW" Global="THFJDW" />
                 <Command Local="THFJEDITEX" Global="THFJEDITEX" />
                 <Command Local="THDNPG" Global="THDNPG" />
                 <Command Local="THZYSFJS" Global="THZYSFJS" />

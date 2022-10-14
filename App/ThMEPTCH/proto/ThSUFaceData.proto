@@ -1,10 +1,7 @@
 syntax = "proto3";
-import "ThSUGeometry.proto";
-import "ThTCHGeometry.proto";
-import "ThSUMaterialData.proto";
+import "ThSULoopData.proto";
 
 message ThSUFaceData {
-    ThSUPolygonMesh mesh = 1;
-    ThSUMaterialData material = 2;
-    ThTCHVector3d face_normal = 3;
+    ThSULoopData outer_loop = 1;
+    repeated ThSULoopData inner_loops = 2;
 }

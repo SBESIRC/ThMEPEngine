@@ -47,6 +47,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" Guid="{6A25E43F-4001-4EDE-8F4A-C3035CA8B578}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Svg.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" Guid="{F2EBC167-2663-4129-8C49-8789D30D983F}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ExCSS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" Guid="{3849A666-1B7B-4AFC-A449-6E6750F6CC19}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Fizzler.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" Guid="{01C2577D-1C09-4E50-94F7-E2EE3931CE6F}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Data.SQLite.dll" />
             </Component>
@@ -55,12 +61,6 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" Guid="{3834D299-4DC9-41A1-90E9-FD551F150744}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Data.SQLite.Linq.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" Guid="{930D0C04-E01B-4418-A046-A4E3BEB54938}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\protobuf-net.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" Guid="{C045E474-EFEC-4944-81F4-2A579DC8C55F}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\protobuf-net.Core.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{73447F36-3568-443F-8668-67185F7BF5A9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Google.Protobuf.dll" />
@@ -123,6 +123,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" Guid="{E2DE622E-9412-4675-A132-3E9306E147D3}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Svg.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" Guid="{CD2D82B6-7DC8-40F9-8E91-5B8A637C336B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ExCSS.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" Guid="{986C5BD4-4035-49B9-A267-0150A321B4DD}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Fizzler.dll" />
+            </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" Guid="{EE1F503C-7D1A-49FE-B045-7B82952082B1}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Data.SQLite.dll" />
             </Component>
@@ -131,12 +137,6 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" Guid="{E9E52840-90BF-4772-A660-9D4005559495}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Data.SQLite.Linq.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" Guid="{1BEE96BB-4898-403A-8AAD-1FFAECE0BC30}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\protobuf-net.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" Guid="{E166DBB6-B5AB-4C46-A6EF-BDE78DF2B897}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\protobuf-net.Core.dll" />
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{0C814A86-4D61-4D76-9194-C79341F83A2A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Google.Protobuf.dll" />
@@ -173,12 +173,12 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_HandyControl" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Spatial" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" />
@@ -197,12 +197,12 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NPOI_BouncyCastle" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_HandyControl" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_ExCSS" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Svg_Fizzler" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_EF6" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Protobuf_Net_Core" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Spatial" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" />

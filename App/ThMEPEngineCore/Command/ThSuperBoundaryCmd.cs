@@ -25,21 +25,23 @@ namespace ThMEPEngineCore.Command
         private DBObjectCollection _modelSpaceEnties;
         private ThCADCoreNTSSpatialIndex _roomTextSpatialIndex;
         private DBObjectCollection _roomBoundaries; // 已提交到Db中
+        private bool _keepHole;
 
         public DBObjectCollection RoomBoundaries => _roomBoundaries;
 
-        public ThSuperBoundaryCmd(DBObjectCollection modelSpaceEnties, SBND_Mode mode = SBND_Mode.SBND_PICK)
+        public ThSuperBoundaryCmd(DBObjectCollection modelSpaceEnties, SBND_Mode mode = SBND_Mode.SBND_PICK,bool keepHole = false)
         {
             ActionName = "提取房间框线";
             CommandName = "THEROC";
             _mode = mode;
+            _keepHole = keepHole;
             _modelSpaceEnties = modelSpaceEnties;            
             _collectObjs = new DBObjectCollection();
             _roomTextSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         }
 
         public ThSuperBoundaryCmd(DBObjectCollection modelSpaceEnties, DBObjectCollection roomNameTexts, 
-            SBND_Mode mode = SBND_Mode.SBND_ALL) :this(modelSpaceEnties, mode)
+            SBND_Mode mode = SBND_Mode.SBND_ALL, bool keepHole = false) :this(modelSpaceEnties, mode, keepHole)
         {
             _roomTextSpatialIndex = new ThCADCoreNTSSpatialIndex(roomNameTexts);
         }
@@ -74,11 +76,11 @@ namespace ThMEPEngineCore.Command
             _roomBoundaries = new DBObjectCollection();
             if(_mode == SBND_Mode.SBND_PICK)
             {
-                _roomBoundaries = GetRoomBoundaries(_collectObjs);
+                _roomBoundaries = GetRoomBoundaries(_collectObjs,_keepHole);
             }
             else
             {
-                _roomBoundaries = GetRoomBoundariesByName(_collectObjs);
+                _roomBoundaries = GetRoomBoundariesByName(_collectObjs, _keepHole);
             }
 
             if(_roomBoundaries.Count>0)
@@ -131,7 +133,7 @@ namespace ThMEPEngineCore.Command
             }
         }
 
-        private DBObjectCollection GetRoomBoundaries(DBObjectCollection objs)
+        private DBObjectCollection GetRoomBoundaries(DBObjectCollection objs,bool keepHole)
         {
             var results = new DBObjectCollection();
             objs.OfType<Entity>().ForEach(e =>
@@ -149,16 +151,17 @@ namespace ThMEPEngineCore.Command
                     {
                         if(o is MPolygon polygon)
                         {
-                            var holes = polygon.Holes();
-                            if (holes.Count > 0)
+                            if(keepHole)
                             {
                                 results.Add(polygon);
-                                holes.ForEach(h => h.Dispose());
                             }
                             else
                             {
-                                results.Add(polygon.Shell());
-                            }
+                                var shell = polygon.Shell();
+                                var holes = polygon.Holes();
+                                results.Add(shell);
+                                holes.ForEach(h => results.Add(h));
+                            }                           
                         }
                         else
                         {
@@ -174,7 +177,7 @@ namespace ThMEPEngineCore.Command
             return results;
         }
 
-        private DBObjectCollection GetRoomBoundariesByName(DBObjectCollection objs)
+        private DBObjectCollection GetRoomBoundariesByName(DBObjectCollection objs,bool keepHole)
         {
             var results = new DBObjectCollection();            
             objs.OfType<Entity>().ForEach(e =>
@@ -205,15 +208,16 @@ namespace ThMEPEngineCore.Command
                         {
                             if (HasRoomName(polygon))
                             {
-                                var holes = polygon.Holes();
-                                if (holes.Count > 0)
+                                if(keepHole)
                                 {
                                     results.Add(polygon);
-                                    holes.ForEach(h => h.Dispose());
                                 }
                                 else
                                 {
-                                    results.Add(polygon.Shell());
+                                    var shell = polygon.Shell();
+                                    var holes = polygon.Holes();
+                                    results.Add(shell);
+                                    holes.ForEach(h => results.Add(h));
                                 }
                             }
                         }

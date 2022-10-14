@@ -138,6 +138,7 @@ namespace ThMEPWSS.Command
                 var dxfNames = new string[]
                 {
                     RXClass.GetClass(typeof(Polyline)).DxfName,
+                    RXClass.GetClass(typeof(MPolygon)).DxfName,
                 };
                 var layerNames = new string[]
                 {
@@ -151,17 +152,27 @@ namespace ThMEPWSS.Command
                 }
 
                 List<Polyline> polylines = new List<Polyline>();
+                List<Polyline> mpolyHoles = new List<Polyline>();
                 foreach (ObjectId frame in result.Value.GetObjectIds())
                 {
-                    var plBack = acdb.Element<Polyline>(frame);
-                    var plFrame = ThMEPFrameService.Normalize(plBack);
-                    polylines.Add(plFrame);
+                    var ent = acdb.Element<Entity>(frame);
+                    if (ent is Polyline plBack)
+                    {
+                        var plFrame = ThMEPFrameService.Normalize(plBack);
+                        polylines.Add(plFrame);
+                    }
+                    else if (ent is MPolygon mPl)
+                    {
+                        polylines.Add(mPl.Shell());
+                        mpolyHoles.AddRange(mPl.Holes());
+                    }
                 }
 
                 CalHolesService calHolesService = new CalHolesService();
                 polylines = calHolesService.RemoveHoles(polylines);
 
                 resPolys.AddRange(GetAllFramePolys(polylines));
+                resPolys.AddRange(mpolyHoles);
                 return resPolys;
             }
         }

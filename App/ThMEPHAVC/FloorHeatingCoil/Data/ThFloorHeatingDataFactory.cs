@@ -82,8 +82,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Data
 
             foreach (var poly in extractService.Polys)
             {
-                poly.Closed = true;
-                ObstacleObb.Add(poly);
+                var polyc = ThHVACHandleNonClosedPolylineService.Handle(poly);
+                ObstacleObb.Add(polyc);
             }
         }
 

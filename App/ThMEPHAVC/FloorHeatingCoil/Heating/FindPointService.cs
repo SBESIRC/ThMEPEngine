@@ -26,11 +26,13 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         public Dictionary<Tuple<int, int>, PipePoint> DoorPipeToPointMap = new Dictionary<Tuple<int, int>, PipePoint>();
         public Dictionary<int, List<int>> RegionToDoorLineIndex = new Dictionary<int, List<int>>();
         public Dictionary<SingleDoor, Tuple<int, int>> DoorLeftRightPipe = new Dictionary<SingleDoor, Tuple<int, int>>();
-        
+        public Dictionary<int, int> DoorOffsetType = new Dictionary<int, int>();  // 0:偏移, 1:仅左偏移 , 2:仅右偏移, 3:不偏移
+        public Dictionary<int,int> MainPipeLeftRight = new Dictionary<int, int>();
+
         //内部变量
         List<int> IfSet;
         Dictionary<int, DoorPoinType> DoorPointTypeMap = new Dictionary<int, DoorPoinType>();  //0：均匀，1：推荐，2：自由
-       
+        
 
         public FindPointService()
         {
@@ -39,6 +41,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         public void Pipeline()
         {
+            DataInit();
+
             GetDoorLineIndex();
 
             FindStartRoomPoint();
@@ -51,6 +55,19 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             SaveResult();
 
             Draw();
+        }
+
+        public void DataInit() 
+        {
+            for (int i = 0; i < DoorList.Count; i++)
+            {
+                DoorOffsetType.Add(i, 0);  
+            }
+
+            for (int i = 0; i < RegionList.Count; i++) 
+            {
+                MainPipeLeftRight.Add(i,0);
+            }
         }
 
         public void GetDoorLineIndex()
@@ -72,7 +89,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             SingleDoor nowDoor = DoorList[0];
 
            
-            Vector3d downDoor = nowDoor.DownFirst - nowDoor.DownSecond;  //从左到右
+            Vector3d downDoor = nowDoor.DownFirst - nowDoor.DownSecond;  //这里的downDoor稳定是顺时针方向
             Polyline UpPl = nowDoor.UpstreamRegion.ClearedPl;
 
 
@@ -83,15 +100,21 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             if (downDoor.Length < pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1)-5)
             {
                 Point3d newEnd = new Point3d();
-                if (!ProcessedData.LeftToRight) newEnd = nowDoor.DownSecond + pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1) * downDoor.GetNormal();
+                if (ProcessedData.LeftToRight) newEnd = nowDoor.DownSecond + pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1) * downDoor.GetNormal();
                 else newEnd = nowDoor.DownFirst - pipeSpaceing * (nowDoor.PipeIdList.Count * 2 - 1) * downDoor.GetNormal();
 
                 Polyline boundary = RegionList[0].ClearedPl.Buffer(20).OfType<Polyline>().ToList().First(); 
                 if (boundary.Contains(newEnd))
                 {
                     tmpDis = pipeSpaceing;
-                    if (!ProcessedData.LeftToRight) nowDoor.DownFirst = newEnd;
+                    if (ProcessedData.LeftToRight) nowDoor.DownFirst = newEnd;
                     else nowDoor.DownSecond = newEnd;
+
+                    Polyline differArea = PolylineProcessService.CreateRectangle2(nowDoor.DownSecond, nowDoor.DownFirst, 5000);
+                    Polyline tmpPl = RegionList[0].ClearedPl;
+                    tmpPl = tmpPl.Difference(differArea).OfType<Polyline>().ToList().FindByMax(x => x.Area);
+                    PolylineProcessService.ClearPolyline(ref tmpPl);
+                    RegionList[0].ClearedPl = tmpPl;
                 }
                 else 
                 {
@@ -104,7 +127,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 tmpDis = pipeSpaceing;
             }
 
-            if (!ProcessedData.LeftToRight)
+            if (ProcessedData.LeftToRight)
             {
                 for (int j = 0; j < nowDoor.PipeIdList.Count; j++)
                 {
@@ -328,6 +351,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                             //int freedom = GetFreedom(nowDoor);
                             int freedom = GetFreedom(nowDoor);
                             int left = -1;
+
+                            int downRegionId = nowDoor.DownstreamRegion.RegionId;
                             for (int b = 0; b < nowDoor.PipeIdList.Count; b++)
                             {
                                 int isRight = 0; 
@@ -336,6 +361,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
                                 List<SingleRegion> downChildRegionList = downRegion.ChildRegion;
 
+                                //对于每一根Pipe来说
                                 //寻找最近的出口
                                 //哪个出口近就会从靠近哪个出口的那一侧出去，而不会绕一大圈
                                 int downDownDoorId = -1;
@@ -376,6 +402,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                                         {
                                             isRight = 1;
                                             left = b - 1;
+                                            MainPipeLeftRight[downRegionId] = 1;
                                             break;
                                         }
                                         else
@@ -389,6 +416,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                                             {
                                                 isRight = 1;
                                                 left = b - 1;
+                                                MainPipeLeftRight[downRegionId] = 1;
                                                 break;
                                             }
                                         }
@@ -404,6 +432,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                                     else if (tend == 1) 
                                     {
                                         left = b - 1;
+                                        MainPipeLeftRight[downRegionId] = 1;
                                         break;
                                     }
                                 }
@@ -420,6 +449,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                         }
                     }
                 }
+
+
 
                 //进行 OffSet
                 for (int a = 0; a < childRegionList.Count; a++)
@@ -937,23 +968,29 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 {
                     if (sd.UpLineIndex == (doorLineIndex + 1) % clearedPl.NumberOfVertices && sd.PipeIdList.Count > 0)
                     {
-                        //如果是同一根管道则偏移减1
-                        int reduce = 0;
-                        if (nowDoor.PipeIdList.Count > 0 && sd.PipeIdList.Contains(nowDoor.PipeIdList.Last())) 
-                            reduce = 1;
-
-                        double ld = DoorPointTypeMap[sd.DoorId].LeftDis;
-                        double totalLength = ld + (pt1 - sd.UpFirst).Length;
-
-                        double nowDoorRight = (nowDoor.UpSecond - pt1).Length;
-                        if (totalLength < 700 && nowDoorRight < 500)
+                        if (OffsetHelperRight(nowDoor,sd) == 1) 
                         {
-                            rightNum += sd.PipeIdList.Count() - reduce;
+                            //如果是同一根管道则偏移减1
+                            int reduce = 0;
+                            if (nowDoor.PipeIdList.Count > 0 && sd.PipeIdList.Contains(nowDoor.PipeIdList.Last()))
+                                reduce = 1;
+
+                            double ld = DoorPointTypeMap[sd.DoorId].LeftDis;
+                            double totalLength = ld + (pt1 - sd.UpFirst).Length;
+
+                            double nowDoorRight = (nowDoor.UpSecond - pt1).Length;
+                            if (totalLength < 700 && nowDoorRight < 500)
+                            {
+                                rightNum += sd.PipeIdList.Count() - reduce;
+                            }
                         }
                     }
                 }
             }
         }
+
+
+
 
         public void FixPointNew(SingleDoor nowDoor, int mode, int index, double offset, int freedom)
         {
@@ -1066,9 +1103,25 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
         }
 
+
+        //offsetHelper
+
+        public int OffsetHelperRight(SingleDoor nowDoor,SingleDoor sd) 
+        {
+            Vector3d doorLine0 = nowDoor.UpFirst - nowDoor.UpSecond;
+            Vector3d doorLine1 = sd.UpFirst - sd.UpSecond;
+            if (doorLine1.Length - doorLine0.Length > sd.PipeIdList.Count * sd.DownstreamRegion.SuggestDist * 2) 
+            {
+                return 0;
+            }
+
+            return 1;
+        }
+
         public void SaveResult() 
         {
             ProcessedData.DoorPipeToPointMap = DoorPipeToPointMap;
+            ProcessedData.MainPipeLeftRight = MainPipeLeftRight;
         }
 
         public void Draw()

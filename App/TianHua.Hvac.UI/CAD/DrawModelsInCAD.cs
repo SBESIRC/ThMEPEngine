@@ -9,26 +9,30 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using ThCADCore.NTS;
-using TianHua.FanSelection.Function;
 using TianHua.Publics.BaseCode;
 using NetTopologySuite.Geometries;
+using ThMEPHVAC.EQPMFanModelEnums;
+using ThMEPHVAC.EQPMFanSelect;
 
-namespace TianHua.FanSelection.UI.CAD
+namespace TianHua.Hvac.UI.CAD
 {
     public class DrawHtfcModelsInCAD : DrawModels
     {
+        private readonly string HTFC_Parameters_Single = "离心-后倾-单速.json";
+        private readonly string HTFC_Parameters_Double = "离心-前倾-双速.json";
+
         public DrawHtfcModelsInCAD(string jsonpath)
         {
             var JsonFanParameters = ReadTxt(jsonpath);
             var ListFanParameters = FuncJson.Deserialize<List<FanParameters>>(JsonFanParameters);
 
             IEqualityComparer<FanParameters> comparer = new CCCFComparer();
-            if (jsonpath.Contains(ThFanSelectionCommon.HTFC_Parameters_Single))
+            if (jsonpath.Contains(HTFC_Parameters_Single))
             {
                 comparer = new CCCFRpmComparer();
             }
             HighModels = ListFanParameters.ToGeometries(comparer, "低").Cast<LineString>().ToList();
-            if (jsonpath.Contains(ThFanSelectionCommon.HTFC_Parameters_Double))
+            if (jsonpath.Contains(HTFC_Parameters_Double))
             {
                 LowModels = ListFanParameters.ToGeometries(comparer, "高").Cast<LineString>().ToList();
             }
@@ -56,6 +60,8 @@ namespace TianHua.FanSelection.UI.CAD
 
     public class DrawAxialModelsInCAD : DrawModels
     {
+        private readonly string AXIAL_Parameters_Double = "轴流-双速.json";
+
         public DrawAxialModelsInCAD(string jsonpath)
         {
             var JsonAxialFanParameters = ReadTxt(jsonpath);
@@ -63,7 +69,7 @@ namespace TianHua.FanSelection.UI.CAD
 
             IEqualityComparer<AxialFanParameters> comparer = new AxialModelNumberComparer();
             HighModels = ListAxialFanParameters.ToGeometries(comparer, "低").Cast<LineString>().ToList();
-            if (jsonpath.Contains(ThFanSelectionCommon.AXIAL_Parameters_Double))
+            if (jsonpath.Contains(AXIAL_Parameters_Double))
             {
                 LowModels = ListAxialFanParameters.ToGeometries(comparer, "高").Cast<LineString>().ToList();
             }

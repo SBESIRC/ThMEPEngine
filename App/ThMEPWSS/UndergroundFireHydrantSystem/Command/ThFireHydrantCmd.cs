@@ -14,6 +14,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundFireHydrantSystem.Command;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.Command
 {
@@ -94,7 +95,7 @@ namespace ThMEPWSS.Command
             }
 
             var inputFlag = GetInput.GetFireHydrantSysInput(curDb, fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
-
+            DbHelper.EnsureLayerOn("W-辅助");
             if (!inputFlag)
             {
                 return null;

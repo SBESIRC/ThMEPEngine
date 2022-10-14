@@ -14,6 +14,7 @@ using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.General;
+using ThMEPWSS.UndergroundFireHydrantSystem;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -23,6 +24,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
             PtDic.CreatePtDic(fireHydrantSysIn, lineList);//字典对更新  
             foreach (var l in lineList)
             {
@@ -30,9 +32,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 GLineSegList.Add(GLineSeg);
             }
 
-            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 880, 1);//打断部分 自动连接
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 880, 1).ToList();//打断部分 自动连接
+            for(int i =GLineConnectList.Count()-1;i>=0;i--)
+            {
+                var gl = GLineConnectList[i];
+                var pt1 = new Point3d(gl.StartPoint.X, gl.StartPoint.Y, 0);
+                var pt2 = new Point3d(gl.EndPoint.X, gl.EndPoint.Y, 0);
+                var rect1 = pt1.GetRect(20);
+                var rect2 = pt2.GetRect(20);
+                var rst1 = lineSpatialIndex.SelectCrossingPolygon(rect1);
+                var rst2 = lineSpatialIndex.SelectCrossingPolygon(rect2);
+                if (rst1.Count >= 2 || rst2.Count >= 2)
+                    GLineConnectList.RemoveAt(i);
+            }
 
-            var GLineConnectList2 = GeoFac.AutoConn(GLineSegList, 20, 30);//打断部分 自动连接
+            //var GLineConnectList2 = GeoFac.AutoConn(GLineSegList, 20, 30);//打断部分 自动连接
             foreach (var gl in GLineConnectList)
             {
                 try
@@ -60,34 +74,34 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
                 
             }
-            foreach (var gl in GLineConnectList2)
-            {
-                try
-                {
-                    var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
-                    var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+            //foreach (var gl in GLineConnectList2)
+            //{
+            //    try
+            //    {
+            //        var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
+            //        var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
                     
-                    if (pt1.DistanceToEx(pt2) > 20 || pt1.DistanceToEx(pt2) < 1)
-                    {
-                        continue;
-                    }
-                    if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
-                    {
-                        if (fireHydrantSysIn.PtDic[pt1].Count >= 2 || fireHydrantSysIn.PtDic[pt2].Count >= 2)
-                        {
-                            continue;
-                        }
-                    }
+            //        if (pt1.DistanceToEx(pt2) > 20 || pt1.DistanceToEx(pt2) < 1)
+            //        {
+            //            continue;
+            //        }
+            //        if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
+            //        {
+            //            if (fireHydrantSysIn.PtDic[pt1].Count >= 2 || fireHydrantSysIn.PtDic[pt2].Count >= 2)
+            //            {
+            //                continue;
+            //            }
+            //        }
 
-                    var line = new Line(pt1._pt, pt2._pt);
-                    lineList.Add(line);
-                }
-                catch
-                {
-                    ;
-                }
+            //        var line = new Line(pt1._pt, pt2._pt);
+            //        lineList.Add(line);
+            //    }
+            //    catch
+            //    {
+            //        ;
+            //    }
 
-            }
+            //}
             //lineList = CleanLaneLines3(lineList);
         }
 

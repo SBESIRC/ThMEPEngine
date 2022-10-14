@@ -136,61 +136,6 @@ namespace ThMEPIFC
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THBIM2IFC", CommandFlags.Modal)]
-        public void THBIM2IFC()
-        {
-            //选择thbim文件
-            var filePath = OpenTHBIMFile("请选择需要导出IFC的thbim文件:");
-            if (string.IsNullOrEmpty(filePath))
-            {
-                return;
-            }
-
-            //选择保存路径
-            var ifcFilePath = SaveFilePath("ifc");
-            if (string.IsNullOrEmpty(ifcFilePath))
-            {
-                return;
-            }
-            FileStream fsRead = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            BinaryReader r = new BinaryReader(fsRead);
-            byte[] fileArray = r.ReadBytes((int)fsRead.Length);
-            fsRead.Dispose();
-            try
-            {
-                var DataHead = fileArray.Take(10).ToArray();
-                //84 = 'T' 72 = 'H' 
-                if (DataHead[0] == 84 && DataHead[1] == 72 && DataHead[2] == 3 && DataHead[3] == 2)
-                {
-                    //SU THBim 文件
-                    var DataBody = fileArray.Skip(10).ToArray();
-                    var su_Project = new ThSUProjectData();
-                    Google.Protobuf.MessageExtensions.MergeFrom(su_Project, DataBody);
-                    ThTGL2IFCService Tgl2IfcService = new ThTGL2IFCService();
-                    Tgl2IfcService.GenerateIfcModelAndSave(su_Project, ifcFilePath);
-                    var isFile = System.IO.File.Exists(ifcFilePath);
-                    if (isFile)
-                    {
-                        Active.Editor.WriteLine($"IFC文件路径：[{ifcFilePath}]");
-                    }
-                }
-                else
-                {
-                    Active.Editor.WriteLine($"该文件不符合SU导出的thbim标准，请检查文件。");
-                    return;
-                }
-
-            }
-            catch (System.Exception ex)
-            {
-                Active.Editor.WriteLine($"thbim文件解析失败。");
-            }
-            finally
-            {
-                r.Dispose();
-            }
-        }
-
         private string SaveFilePath(string fileExt)
         {
             var time = DateTime.Now.ToString("HHmmss");

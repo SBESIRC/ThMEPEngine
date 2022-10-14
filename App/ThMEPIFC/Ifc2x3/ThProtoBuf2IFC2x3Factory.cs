@@ -1,29 +1,29 @@
-﻿using Xbim.Ifc;
-using System.Linq;
+﻿using System.Linq;
+using System.Collections.Generic;
+using Xbim.Ifc;
 using Xbim.Common;
 using Xbim.Ifc2x3.Kernel;
+using Xbim.Common.Geometry;
 using Xbim.Ifc2x3.Interfaces;
 using Xbim.Ifc2x3.ProfileResource;
 using Xbim.Ifc2x3.ProductExtension;
-using Xbim.Ifc2x3.SharedBldgElements;
 using Xbim.Ifc2x3.MeasureResource;
 using Xbim.Ifc2x3.PropertyResource;
+using Xbim.Ifc2x3.SharedBldgElements;
 using Xbim.Ifc2x3.GeometricModelResource;
 using Xbim.Ifc2x3.RepresentationResource;
-using ThMEPTCH.CAD;
-using ThCADCore.NTS;
-using ThCADExtension;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using Xbim.Ifc2x3.GeometryResource;
+using ThMEPIFC.Geometry;
 
 namespace ThMEPIFC.Ifc2x3
 {
     public partial class ThProtoBuf2IFC2x3Factory
     {
+        private static XbimVector3D ZAxis => new XbimVector3D(0, 0, 1);
+
         static public IfcStore CreateAndInitModel(string projectName, string projectId = "")
         {
-            var model = ThIFC2x3Factory.CreateModel();
+            var model = ThIFC2x3Factory.CreateMemoryModel();
             using (var txn = model.BeginTransaction("Initialize Model"))
             {
                 //there should always be one project in the model
@@ -31,11 +31,21 @@ namespace ThMEPIFC.Ifc2x3
                 //set the units to SI (mm and metres)
                 project.Initialize(ProjectUnits.SIUnitsUK);
                 //set GeometricRepresentationContext
-                project.RepresentationContexts.Add(ThIFC2x3Factory.CreateGeometricRepresentationContext(model));
+                project.RepresentationContexts.Add(CreateGeometricRepresentationContext(model));
                 //now commit the changes, else they will be rolled back at the end of the scope of the using statement
                 txn.Commit();
             }
             return model;
+        }
+
+        private static IfcGeometricRepresentationContext CreateGeometricRepresentationContext(IfcStore model)
+        {
+            return model.Instances.New<IfcGeometricRepresentationContext>(c =>
+            {
+                c.Precision = ThTGL2IFCCommon.PRECISION;
+                c.CoordinateSpaceDimension = new IfcDimensionCount(3);
+                c.WorldCoordinateSystem = model.ToIfcAxis2Placement3D(XbimPoint3D.Zero);
+            });
         }
 
         public static IfcSite CreateSite(IfcStore model)
@@ -352,7 +362,7 @@ namespace ThMEPIFC.Ifc2x3
         }
 
         #region Wall
-        public static IfcWall CreateWall(IfcStore model, ThTCHWallData wall, Point3d floor_origin)
+        public static IfcWall CreateWall(IfcStore model, ThTCHWallData wall, ThTCHPoint3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Wall"))
             {
@@ -361,12 +371,12 @@ namespace ThMEPIFC.Ifc2x3
 
                 //create representation
                 var profile = GetProfile(model, wall);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, wall.BuildElement.Height);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, ZAxis, wall.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement
                 var transform = GetTransfrom(wall, floor_origin);
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform);
 
                 // add properties
                 model.Instances.New<IfcRelDefinesByProperties>(rel =>
@@ -392,19 +402,21 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        private static Matrix3d GetTransfrom(ThTCHWallData wall, Point3d floor_origin)
+        private static ThTCHMatrix3d GetTransfrom(ThTCHWallData wall, ThTCHPoint3d floor_origin)
         {
-            var offset = floor_origin.GetAsVector();
-            offset += new Vector3d(0, 0, wall.BuildElement.Outline.Shell.Points[0].Z);//IFC创建的平面初始化是在XY平面的。所以需要增加一个Z值
-            return ThMatrix3dExtension.MultipleTransformFroms(1.0, wall.BuildElement.XVector.ToVector(), wall.BuildElement.Origin.ToPoint3d() + offset);
+            //IFC创建的平面初始化是在XY平面的。所以需要增加一个Z值
+            var offset = new XbimVector3D(
+                floor_origin.X + wall.BuildElement.Origin.X,
+                floor_origin.Y + wall.BuildElement.Origin.Y,
+                floor_origin.Z + wall.BuildElement.Outline.Shell.Points[0].Z + wall.BuildElement.Origin.Z);
+            return ThXbimExtension.MultipleTransformFroms(1.0, wall.BuildElement.XVector.ToXbimVector3D(), offset).ToTCHMatrix3d();
         }
 
         private static IfcProfileDef GetProfile(IfcStore model, ThTCHWallData wall)
         {
             if (wall.BuildElement.Outline.Shell.Points.Count > 0)
             {
-                var pline = wall.BuildElement.Outline.ToPolyline();
-                return model.ToIfcArbitraryClosedProfileDef(pline);
+                return model.ToIfcArbitraryClosedProfileDef(wall.BuildElement.Outline);
             }
             else
             {
@@ -414,7 +426,7 @@ namespace ThMEPIFC.Ifc2x3
         #endregion
 
         #region Door
-        public static IfcDoor CreateDoor(IfcStore model, ThTCHDoorData door, Point3d floor_origin)
+        public static IfcDoor CreateDoor(IfcStore model, ThTCHDoorData door, ThTCHPoint3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Door"))
             {
@@ -423,12 +435,12 @@ namespace ThMEPIFC.Ifc2x3
 
                 //create representation
                 var profile = model.ToIfcRectangleProfileDef(door.BuildElement.Length, door.BuildElement.Width);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, door.BuildElement.Height);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, ZAxis, door.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement
                 var transform = GetTransfrom(door, floor_origin);
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform);
 
                 // add properties
                 //model.Instances.New<IfcRelDefinesByProperties>(rel =>
@@ -452,18 +464,20 @@ namespace ThMEPIFC.Ifc2x3
                 txn.Commit();
                 return ret;
             }
-
         }
 
-        private static Matrix3d GetTransfrom(ThTCHDoorData door, Point3d floor_origin)
+        private static ThTCHMatrix3d GetTransfrom(ThTCHDoorData door, ThTCHPoint3d floor_origin)
         {
-            var offset = floor_origin.GetAsVector();
-            return ThMatrix3dExtension.MultipleTransformFroms(1.0, door.BuildElement.XVector.ToVector(), door.BuildElement.Origin.ToPoint3d() + offset);
+            var offset = new XbimVector3D(
+                floor_origin.X + door.BuildElement.Origin.X,
+                floor_origin.Y + door.BuildElement.Origin.Y,
+                floor_origin.Z + door.BuildElement.Origin.Z);
+            return ThXbimExtension.MultipleTransformFroms(1.0, door.BuildElement.XVector.ToXbimVector3D(), offset).ToTCHMatrix3d();
         }
         #endregion
 
         #region Hole
-        public static IfcOpeningElement CreateHole(IfcStore model, ThTCHWallData wall, ThTCHDoorData door, Point3d floor_origin)
+        public static IfcOpeningElement CreateHole(IfcStore model, ThTCHWallData wall, ThTCHDoorData door, ThTCHPoint3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Hole"))
             {
@@ -472,19 +486,19 @@ namespace ThMEPIFC.Ifc2x3
 
                 //create representation
                 var profile = GetProfile(model, wall, door);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, door.BuildElement.Height);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, ZAxis, door.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement
                 var transform = GetTransfrom(door, floor_origin);
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform);
 
                 txn.Commit();
                 return ret;
             }
         }
 
-        public static IfcOpeningElement CreateHole(IfcStore model, ThTCHWallData wall, ThTCHWindowData window, Point3d floor_origin)
+        public static IfcOpeningElement CreateHole(IfcStore model, ThTCHWallData wall, ThTCHWindowData window, ThTCHPoint3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Hole"))
             {
@@ -493,19 +507,19 @@ namespace ThMEPIFC.Ifc2x3
 
                 //create representation
                 var profile = GetProfile(model, wall, window);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, window.BuildElement.Height);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, ZAxis, window.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement
                 var transform = GetTransfrom(window, floor_origin);
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform);
 
                 txn.Commit();
                 return ret;
             }
         }
 
-        public static IfcOpeningElement CreateHole(IfcStore model, ThTCHOpeningData hole, Point3d floor_origin)
+        public static IfcOpeningElement CreateHole(IfcStore model, ThTCHOpeningData hole, ThTCHPoint3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Hole"))
             {
@@ -514,21 +528,24 @@ namespace ThMEPIFC.Ifc2x3
 
                 //create representation
                 var profile = GetProfile(model, hole);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, hole.BuildElement.Height);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, ZAxis, hole.BuildElement.Height);
 
                 //object placement
                 var transform = GetTransfrom(hole, floor_origin);
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform);
 
                 txn.Commit();
                 return ret;
             }
         }
 
-        private static Matrix3d GetTransfrom(ThTCHOpeningData hole, Point3d floor_origin)
+        private static ThTCHMatrix3d GetTransfrom(ThTCHOpeningData hole, ThTCHPoint3d floor_origin)
         {
-            var offset = floor_origin.GetAsVector();
-            return ThMatrix3dExtension.MultipleTransformFroms(1.0, hole.BuildElement.XVector.ToVector(), hole.BuildElement.Origin.ToPoint3d() + offset);
+            var offset = new XbimVector3D(
+                floor_origin.X + hole.BuildElement.Origin.X,
+                floor_origin.Y + hole.BuildElement.Origin.Y,
+                floor_origin.Z + hole.BuildElement.Origin.Z);
+            return ThXbimExtension.MultipleTransformFroms(1.0, hole.BuildElement.XVector.ToXbimVector3D(), offset).ToTCHMatrix3d();
         }
 
         private static IfcProfileDef GetProfile(IfcStore model, ThTCHOpeningData hole)
@@ -559,7 +576,7 @@ namespace ThMEPIFC.Ifc2x3
         #endregion
 
         #region Window
-        public static IfcWindow CreateWindow(IfcStore model, ThTCHWindowData window, Point3d floor_origin)
+        public static IfcWindow CreateWindow(IfcStore model, ThTCHWindowData window, ThTCHPoint3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Window"))
             {
@@ -568,12 +585,12 @@ namespace ThMEPIFC.Ifc2x3
 
                 //create representation
                 var profile = model.ToIfcRectangleProfileDef(window.BuildElement.Length, window.BuildElement.Width);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, window.BuildElement.Height);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, ZAxis, window.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement
                 var transform = GetTransfrom(window, floor_origin);
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform.CoordinateSystem3d);
+                ret.ObjectPlacement = model.ToIfcLocalPlacement(transform);
 
                 // add properties
                 //model.Instances.New<IfcRelDefinesByProperties>(rel =>
@@ -599,10 +616,13 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        private static Matrix3d GetTransfrom(ThTCHWindowData window, Point3d floor_origin)
+        private static ThTCHMatrix3d GetTransfrom(ThTCHWindowData window, ThTCHPoint3d floor_origin)
         {
-            var offset = floor_origin.GetAsVector();
-            return ThMatrix3dExtension.MultipleTransformFroms(1.0, window.BuildElement.XVector.ToVector(), window.BuildElement.Origin.ToPoint3d() + offset);
+            var offset = new XbimVector3D(
+                floor_origin.X + window.BuildElement.Origin.X,
+                floor_origin.Y + window.BuildElement.Origin.Y,
+                floor_origin.Z + window.BuildElement.Origin.Z);
+            return ThXbimExtension.MultipleTransformFroms(1.0, window.BuildElement.XVector.ToXbimVector3D(), offset).ToTCHMatrix3d();
         }
         #endregion
 
@@ -640,7 +660,7 @@ namespace ThMEPIFC.Ifc2x3
         #endregion
 
         #region Slab
-        public static IfcSlab CreateBrepSlab(IfcStore model, ThTCHSlabData slab, Point3d floor_origin, ThXbimSlabEngine slabxbimEngine)
+        public static IfcSlab CreateBrepSlab(IfcStore model, ThTCHSlabData slab, ThTCHPoint3d floor_origin, ThXbimSlabEngine slabxbimEngine)
         {
             using (var txn = model.BeginTransaction("Create Slab"))
             {
@@ -682,21 +702,26 @@ namespace ThMEPIFC.Ifc2x3
         #endregion
 
         #region Railing
-        public static IfcRailing CreateRailing(IfcStore model, ThTCHRailingData railing, Point3d floor_origin)
+        public static IfcRailing CreateRailing(IfcStore model, ThTCHRailingData railing, ThTCHPoint3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Railing"))
             {
                 var ret = model.Instances.New<IfcRailing>();
                 ret.Name = "TH Railing";
                 //create representation
-                var centerline = railing.BuildElement.Outline.ToPolyline();
-                var outlines = centerline.BufferFlatPL(railing.BuildElement.Width / 2.0);
-                var profile = model.ToIfcArbitraryClosedProfileDef(outlines[0] as Entity);
-                var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, railing.BuildElement.Height);
+                var centerline = railing.BuildElement.Outline;
+                //var outlines = centerline.Shell.ToPolyline().BufferFlatPL(railing.BuildElement.Width / 2.0);
+                var profile = model.ToIfcArbitraryClosedProfileDef(railing.BuildElement.Outline);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, ZAxis, railing.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
 
                 //object placement
-                var planeOrigin = floor_origin + Vector3d.ZAxis.MultiplyBy(centerline.Elevation);
+                var planeOrigin = new ThTCHPoint3d
+                {
+                    X = floor_origin.X,
+                    Y = floor_origin.Y,
+                    Z = floor_origin.Z + centerline.Shell.Points[0].Z
+                };
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(planeOrigin);
 
                 txn.Commit();
@@ -706,7 +731,7 @@ namespace ThMEPIFC.Ifc2x3
         #endregion
 
         #region Room
-        public static IfcSpace CreateRoom(IfcStore model, ThTCHRoomData space, Point3d floor_origin)
+        public static IfcSpace CreateRoom(IfcStore model, ThTCHRoomData space, ThTCHPoint3d floor_origin)
         {
             using (var txn = model.BeginTransaction("Create Room"))
             {
@@ -715,32 +740,10 @@ namespace ThMEPIFC.Ifc2x3
                 ret.Description = space.BuildElement.Root.Name;
 
                 //create representation
-                var profile = model.ToIfcArbitraryProfileDefWithVoids(space.BuildElement.Outline.ToPolygon());
-                var solid = model.ToIfcExtrudedAreaSolid(profile, Vector3d.ZAxis, space.BuildElement.Height);
+                var profile = model.ToIfcArbitraryProfileDefWithVoids(space.BuildElement.Outline);
+                var solid = model.ToIfcExtrudedAreaSolid(profile, ZAxis, space.BuildElement.Height);
                 ret.Representation = CreateProductDefinitionShape(model, solid);
                 ret.ObjectPlacement = model.ToIfcLocalPlacement(floor_origin);
-                txn.Commit();
-                return ret;
-            }
-
-        }
-        #endregion
-
-        #region SU Element
-        public static IfcBuildingElementProxy CreatedSUElement(IfcStore model, ThSUCompDefinitionData def, ThTCHMatrix3d trans)
-        {
-            using (var txn = model.BeginTransaction("Create SU Element"))
-            {
-                var ret = model.Instances.New<IfcBuildingElementProxy>();
-                ret.Name = "SU Element";
-
-                IfcFaceBasedSurfaceModel mesh = model.ToIfcFaceBasedSurface(def);
-                var shape = ThIFC2x3Factory.CreateFaceBasedSurfaceBody(model, mesh);
-                ret.Representation = ThIFC2x3Factory.CreateProductDefinitionShape(model, shape);
-
-                //object placement
-                ret.ObjectPlacement = model.ToIfcLocalPlacement(trans);
-
                 txn.Commit();
                 return ret;
             }

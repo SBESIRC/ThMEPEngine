@@ -68,8 +68,22 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //画框，提数据，转数据
-                var selectPtsTop = ThSelectFrameUtil.SelectFramePointCollection("框选俯视", "框选俯视");
+                var hintObject = new Dictionary<string, (string, string)>()
+                        {{"K",("K","框选(K)")},
+                        {"P",("P","点选范围多段线(P)")},
+                        };
+                var selectMode = ThMEPWSSUtils.SettingSelection("\n选择范围方式", hintObject, "K");
+
+                var selectPtsTop = new Point3dCollection();
+                if (selectMode == "K")
+                {
+                    selectPtsTop = ThSelectFrameUtil.SelectFramePointCollection("框选俯视", "框选俯视");
+                }
+                else if (selectMode == "P")
+                {
+                    selectPtsTop = ThSelectFrameUtil.GetRoomFrame();
+                }
+
                 if (selectPtsTop.Count == 0)
                 {
                     return;
@@ -81,8 +95,8 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                     return;
                 }
 
-                var selectPts = new Point3dCollection();
-                selectPtsTop.Cast<Point3d>().ForEach(x => selectPts.Add(x));
+                //var selectPts = new Point3dCollection();
+                //selectPtsTop.Cast<Point3d>().ForEach(x => selectPts.Add(x));
 
                 //插入图层
                 var blkNameValve = new List<string> { ThDrainageADCommon.BlkName_WaterHeater, ThDrainageADCommon.BlkName_AngleValve,
@@ -118,7 +132,7 @@ namespace ThMEPWSS.DrainageADPrivate.Cmd
                                                         },
                 };
 
-                dataFactory.GetElements(acadDatabase.Database, selectPts);
+                dataFactory.GetElements(acadDatabase.Database, selectPtsTop);
 
                 //处理数据
                 var dataQuery = new ThDrainageADDataProcessService()

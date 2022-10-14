@@ -736,8 +736,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     var edLayer = curLayer;
                     var edIndex = curIndex;
                     RecursivelyPlot(pipeLineSystemUnit, floorLines, ids, ref curLayer, curIndex, curPoint, parLayers, parIndexes, parPoints);
-                    curLayer = edLayer;
-                    curIndex = edIndex;
+                    //curLayer = edLayer;
+                    //curIndex = edIndex;
                     var pipe = pipeLineSystemUnit.PipeLineUnits[layer].VerticalPipes[ind];
                     if (pipe.AppendedSubmergedPump != null)
                     {

@@ -172,40 +172,18 @@ namespace ThMEPHVAC.EQPMFanSelect
                         case 6:
                             try 
                             {
-                                retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
+                                if (string.IsNullOrEmpty(strData) || !strData.EndsWith("}"))
+                                {
+                                    retModel = ReadStringDataToModel(strData);
+                                }
+                                else 
+                                {
+                                    retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
+                                }
                             }
                             catch
                             {
-                                var tempModel = new FanBlockXDataModel();
-                                //历史数据中有丢数据的问题，如果数据有丢失，进行将错误数据移除，再进行获取数据
-                                foreach (var item in tempModel.GetType().GetProperties(System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.Public)) 
-                                {
-                                    var index =strData.IndexOf(item.Name);
-                                    if (index < 0)
-                                        continue;
-                                    var tempStr = strData.Substring(index);
-                                    index = tempStr.IndexOf(":");
-                                    if (index < 0)
-                                        continue;
-                                    tempStr = tempStr.Substring(index+1);
-                                    var endIndex = tempStr.IndexOf(",");
-                                    var value = "";
-                                    if (endIndex < 0)
-                                    {
-                                        value = tempStr;
-                                    }
-                                    else 
-                                    {
-                                        value = tempStr.Substring(0, endIndex);
-                                    }
-                                    value = value.Replace("\"", "");
-                                    item.SetValue(tempModel, value);
-                                }
-                                if (!string.IsNullOrEmpty(tempModel.AirCalcFactor))
-                                    retModel = tempModel;
-                                //strData = strData.Substring(0, strData.LastIndexOf(","));
-                                //strData += "}";
-                                //retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
+                                retModel = ReadStringDataToModel(strData);
                             }
                             break;
                         case 7:
@@ -235,6 +213,10 @@ namespace ThMEPHVAC.EQPMFanSelect
                         name = name.Substring(0, name.IndexOf("（"));
                     retModel.FanModelCCCF = name;
                 }
+            }
+            if (string.IsNullOrEmpty(retModel.AirCalcValue)) 
+            {
+                retModel.AirCalcValue = blockId.GetDynBlockValue(ThHvacCommon.BLOCK_ATTRIBUTE_FAN_VOLUME);
             }
             if (string.IsNullOrEmpty(retModel.VibrationMode)) 
             {
@@ -477,6 +459,36 @@ namespace ThMEPHVAC.EQPMFanSelect
             }
             pModel.FanModelCCCF = xData.FanModelCCCF;
             return pModel;
+        }
+
+        private static FanBlockXDataModel ReadStringDataToModel(string strData)
+        {
+            var tempModel = new FanBlockXDataModel();
+            //历史数据中有丢数据的问题，如果数据有丢失，进行将错误数据移除，再进行获取数据
+            foreach (var item in tempModel.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+            {
+                var index = strData.IndexOf(item.Name);
+                if (index < 0)
+                    continue;
+                var tempStr = strData.Substring(index);
+                index = tempStr.IndexOf(":");
+                if (index < 0)
+                    continue;
+                tempStr = tempStr.Substring(index + 1);
+                var endIndex = tempStr.IndexOf(",");
+                var value = "";
+                if (endIndex < 0)
+                {
+                    value = tempStr;
+                }
+                else
+                {
+                    value = tempStr.Substring(0, endIndex);
+                }
+                value = value.Replace("\"", "");
+                item.SetValue(tempModel, value);
+            }
+            return tempModel;
         }
     }
     public class FanBlockXDataBase 

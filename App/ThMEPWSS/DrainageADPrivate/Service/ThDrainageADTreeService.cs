@@ -108,7 +108,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
                 }
                 else
                 {
-                    if (isVertical == true && hasAngleValve ==false)
+                    if (isVertical == true && hasAngleValve == false)
                     {
                         ptStart.Add(endPt.Key);
                         continue;
@@ -141,7 +141,7 @@ namespace ThMEPWSS.DrainageADPrivate.Service
 
 
         /// <summary>
-        /// 是否立管。管线长度小于1的水平管也会被判定为true
+        /// 是否立管。管线长度小于Tol_SamePoint的水平管也会被判定为true
         /// </summary>
         /// <param name="l"></param>
         /// <returns></returns>
@@ -160,6 +160,26 @@ namespace ThMEPWSS.DrainageADPrivate.Service
             return bReturn;
 
         }
+
+        /// <summary>
+        /// 是否立管
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public static bool IsVertical(ThDrainageTreeNode node)
+        {
+            var bReturn = false;
+            var tol = ThDrainageADCommon.Tol_SamePoint;
+
+            if (node.Parent != null && Math.Abs(node.Pt.Z - node.Parent.Pt.Z) > tol)
+            {
+                bReturn = true;
+            }
+
+            return bReturn;
+
+        }
+
 
         private static bool HasAngleValve(Point3d pt, List<ThValve> angleValveList, out ThValve valve)
         {

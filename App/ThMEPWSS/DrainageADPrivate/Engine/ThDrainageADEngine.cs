@@ -90,7 +90,6 @@ namespace ThMEPWSS.DrainageADPrivate.Engine
             //    }
             //});
 
-
             //--摆放管径--
             var dim = ThLayoutDimService.LayoutDim(dimEngine.RootList);
             //dim.ForEach(x => DrawUtils.ShowGeometry(x.Position, x.Dir, "l1Dim", 191, lineWeightNum: 30, l: 150));
