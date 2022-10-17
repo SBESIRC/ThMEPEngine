@@ -301,8 +301,8 @@ namespace ThMEPArchitecture.MultiProcess
         {
             int fileSize = 64; // 64Mb
             var nbytes = fileSize * 1024 * 1024;
-            //var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
-            var MultiSolutionList = new List<int> { 0 };
+            var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
+            //var MultiSolutionList = new List<int> { 0 };
             var blkName = block.GetEffectiveName();
             UpdateLogger(blkName);
             Logger?.Information("块名：" + blkName);
@@ -393,6 +393,20 @@ namespace ThMEPArchitecture.MultiProcess
                         outSegLines.AddRange(subarea.obliqueMPartition.OutEnsuredLanes.Select(e => e.ToDbLine()));
                     outSegLines.ShowBlock(finalLayer, finalLayer);
                     MPEX.HideLayer(finalLayer);
+                }
+            }
+            if(SolutionID != 0)
+            {
+                using (AcadDatabase acad = AcadDatabase.Active())
+                {
+                    if (!acad.Layers.Contains("障碍物"))
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "障碍物", 0);
+                }
+                foreach (var b in OInterParameter.Buildings)
+                {
+                    var pl = b.Shell.ToDbPolyline(5, "障碍物");
+                    pl.AddToCurrentSpace();
+                    DisplayParkingStall.Add(pl);
                 }
             }
 #if DEBUG
@@ -496,7 +510,9 @@ namespace ThMEPArchitecture.MultiProcess
             string CommandType_Str;
             if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration) CommandType_Str = "模式:手动分区线，无迭代速排";
             else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration) CommandType_Str = "模式:手动分区线，迭代排布";
-            else CommandType_Str = "模式:  自动分区线，迭代排布";
+            else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIterationAutomatically) CommandType_Str = "模式:  自动分区线，迭代排布";
+            else if (ParameterViewModel.CommandType == CommandTypeEnum.BuildingAnalysis) CommandType_Str = "模式:障碍物最佳位置分析";
+            else throw new NotImplementedException();
             curr_Y += 2450 + 2000;
             textList.Add(ArrangementInfo.GetText(CommandType_Str, MidX - xshift, curr_Y, 2450, layer));
 
