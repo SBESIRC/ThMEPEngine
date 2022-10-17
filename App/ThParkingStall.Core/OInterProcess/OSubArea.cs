@@ -78,10 +78,15 @@ namespace ThParkingStall.Core.OInterProcess
                           var ramp = new OblRamp(new Polygon(new LinearRing(new Coordinate[0])), new List<Coordinate>() { e.InsertPt }, new List<Vector2D>() { new Vector2D(e.Vector.Item1, e.Vector.Item2) });
                           return ramp;
                       }).ToList();
-                    if (VMStock.AllowLoopThroughEnd > 20000)
+                    if (VMStock.AllowLoopThroughEnd > 20000 || VMStock.AllowLoopThroughEnd == 0)
                     {
                         ObliqueMPartition.LoopThroughEnd = true;
                         obliqueMPartition.DisConsideringLoopThroughEnd = VMStock.AllowLoopThroughEnd;
+                    }
+                    else if (VMStock.AllowLoopThroughEnd > 0)
+                    {
+                        ObliqueMPartition.LoopThroughEnd = true;
+                        obliqueMPartition.DisConsideringLoopThroughEnd = 20000;
                     }
                     else
                         ObliqueMPartition.LoopThroughEnd = false;
