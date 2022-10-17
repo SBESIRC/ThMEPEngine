@@ -181,6 +181,7 @@ namespace ThMEPArchitecture.MultiProcess
                 var layoutData = new OLayoutData(blk, Logger, out bool succeed);
                 if (!succeed) return;
                 layoutData.ProcessSegLines();
+                if(layoutData.SegLines.Count == 0) return;
                 //layoutData.SetInterParam();
                 Converter.GetDataWraper(layoutData, ParameterViewModel);
                 for (int i = 0; i < MultiSolutionList.Count; i++)
@@ -228,6 +229,12 @@ namespace ThMEPArchitecture.MultiProcess
                 var layoutData = new OLayoutData(blk, Logger, out bool succeed);
                 if (!succeed) return;
                 layoutData.ProcessSegLines();
+                if(layoutData.SegLines.Count == 0) return;
+                if(layoutData.MovingBounds.Count == 0)
+                {
+                    Active.Editor.WriteMessage("未检测到楼栋微调框线，请确保图层正确且闭合!");
+                    return;
+                }
                 //layoutData.SetInterParam();
                 var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
                 var stopWatch = new Stopwatch();
@@ -238,12 +245,6 @@ namespace ThMEPArchitecture.MultiProcess
                 //var lanes = OInterParameter.GetBoundLanes();
                 var BPA = new BuildingPosAnalysis(ParameterViewModel);
                 BPA.Logger = Logger;
-                //BPA.UpdateParkingCntSP();
-                //BPA.UpdateSolution();
-
-                //var BPC = new BuildingPosCalculate();
-                //BPC.CalculateScore(BPA.PotentialMovingVectors);
-                //BPC.CalculateBest(true);
                 int fileSize = 64; // 64Mb
                 var nbytes = fileSize * 1024 * 1024;
                 if (ParameterViewModel.UseGA)
@@ -312,6 +313,7 @@ namespace ThMEPArchitecture.MultiProcess
             displayInfos.Add(new DisplayInfo(blkName));
             var layoutData = new OLayoutData(block, Logger, out bool succeed);
             if (!succeed) return;
+            if(layoutData.Obstacles.Count == 0) return;
             List<LineSegment> autoSegLines = null;
             InterParameter.Init(layoutData.WallLine, layoutData.Buildings);
             if (autoMode)//生成正交全自动分区线
@@ -347,6 +349,7 @@ namespace ThMEPArchitecture.MultiProcess
                 }
             }
             layoutData.ProcessSegLines(autoSegLines,ParameterViewModel.AddBoundSegLines);
+            if(layoutData.SegLines.Count == 0) return;
             //layoutData.SetInterParam();
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
@@ -511,8 +514,10 @@ namespace ThMEPArchitecture.MultiProcess
             if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration) CommandType_Str = "模式:手动分区线，无迭代速排";
             else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration) CommandType_Str = "模式:手动分区线，迭代排布";
             else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIterationAutomatically) CommandType_Str = "模式:  自动分区线，迭代排布";
-            else if (ParameterViewModel.CommandType == CommandTypeEnum.BuildingAnalysis) CommandType_Str = "模式:障碍物最佳位置分析";
+            else if (ParameterViewModel.CommandType == CommandTypeEnum.BuildingAnalysis) CommandType_Str = "模式:楼栋微调模式";
             else throw new NotImplementedException();
+            Logger?.Information(CommandType_Str);
+            Logger?.Information(Dir_str);
             curr_Y += 2450 + 2000;
             textList.Add(ArrangementInfo.GetText(CommandType_Str, MidX - xshift, curr_Y, 2450, layer));
 

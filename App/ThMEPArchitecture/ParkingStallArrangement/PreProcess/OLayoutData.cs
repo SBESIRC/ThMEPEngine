@@ -126,7 +126,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             else
             {
                 //ThMPArrangementCmd.DisplayLogger.Information("地库边界不存在或者不闭合！");
-                Active.Editor.WriteMessage("地库边界不存在或者不闭合！");
+                Active.Editor.WriteMessage("未检测到地库边界，请确保图层正确且闭合，不要使用块中块！");
                 succeed = false;
                 return;
             }
@@ -135,10 +135,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             MaxArea = WallLine.Buffer(ParameterStock.BorderlineMoveRange,MitreParam).Area *0.001 * 0.001;
             ParameterStock.AreaMax = MaxArea;
             UpdateObstacles();//更新障碍物
+            if(Obstacles.Count == 0)
+            {
+                Active.Editor.WriteMessage("未检测到障碍物，请确保图层正确且闭合，不要使用块中块");
+                //succeed = false;
+            }
             UpdateRampPolgons();//更新坡道polygon
             
             
             Buildings = Obstacles.Concat(RampPolygons).ToList();
+            
             //Basement = OverlayNGRobust.Overlay(WallLine, new MultiPolygon(Buildings.ToArray()), SpatialFunction.Difference).
             //    Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
             //Basement = WallLine.Difference(new MultiPolygon(Buildings.ToArray())).Get<Polygon>(false).OrderBy(plgn => plgn.Area).Last();
@@ -215,7 +221,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 }
             }
 
-            if (layerName.Contains("可动建筑框线"))
+            if (layerName.Contains("可动建筑框线") || layerName.Contains("楼栋微调框线"))
             {
                 if (ent is BlockReference br)
                 {
@@ -324,6 +330,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var minLength = 4000;
             var maxLength = 9000;
             var rampLines = CAD_RampLines.Select(l => l.ToNTSLineSegment()).ToList();
+            if(rampLines.Count == 0 && RampPolygons.Count != 0)
+            {
+                Active.Editor.WriteMessage("未检测到坡道出口标记，坡道将被视作障碍物处理!");
+            }
             foreach (var rampLine in rampLines)
             {
                 var rampPolys = RampSpatialIndex.SelectCrossingGeometry(rampLine.ToLineString()).Cast<Polygon>();
@@ -707,7 +717,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             // 标记圆半径5000
             //源数据
             List<LineSegment> init_segs = autoLines;
-            if (autoLines == null) init_segs = CAD_SegLines.Select(l =>l.ToNTSLineSegment()).ToList();
+            if (autoLines == null)
+            {
+                init_segs = CAD_SegLines.Select(l => l.ToNTSLineSegment()).ToList();
+                if (init_segs.Count == 0)
+                {
+                    Active.Editor.WriteMessage("未检测到分区线，请确保图层正确且为直线（不是多段线）");
+                    return false;
+                }
+                    
+            }
             if (AddBoundSegs)//添加分区线
             {
                 var newSegs = init_segs.AddSegLines();
