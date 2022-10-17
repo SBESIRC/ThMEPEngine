@@ -42,7 +42,7 @@
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" >
-                    <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=3}">障碍物最佳位置分析</RadioButton>
+                    <RadioButton GroupName="ModeGroup" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,5,5,5"  IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=3}">楼栋微调模式</RadioButton>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center"  IsEnabled="{Binding CommandType, Mode=OneWay,Converter={StaticResource RadioValueConverter}, ConverterParameter=3}" >
                         <Label Margin="15,0,0,0">移动距离：</Label>
                         <TextBox Width="45" Margin="0,5,5,5" Text="{Binding BuildingMoveDistance}"></TextBox>
