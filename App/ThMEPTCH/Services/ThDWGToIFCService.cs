@@ -659,6 +659,7 @@ namespace ThMEPTCH.Services
                     foreach (var item in levelEntitys.FloorEntitys.OfType<ThTCHWallData>().ToList())
                     {
                         var copyItem = item.Clone();
+                        copyItem.BuildElement.Root.GlobalId += buildingStorey.Number;
                         copyItem.BuildElement.Properties.Add(new ThTCHProperty { Key = "材料", Value = "TH-加气混凝土" });
                         if (Math.Abs(copyItem.BuildElement.Height) < 10)
                             copyItem.BuildElement.Height = floor.LevelHeight;
