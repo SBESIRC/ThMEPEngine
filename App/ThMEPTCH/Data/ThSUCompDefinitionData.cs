@@ -23,13 +23,13 @@ public static partial class ThSUCompDefinitionDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChxUaFNVQ29tcERlZmluaXRpb25EYXRhLnByb3RvGhJUaFNVRmFjZURhdGEu",
-          "cHJvdG8iTwoWVGhTVUNvbXBEZWZpbml0aW9uRGF0YRIXCg9kZWZpbml0aW9u",
-          "X25hbWUYASABKAkSHAoFZmFjZXMYAiADKAsyDS5UaFNVRmFjZURhdGFiBnBy",
-          "b3RvMw=="));
+          "cHJvdG8iawoWVGhTVUNvbXBEZWZpbml0aW9uRGF0YRIXCg9kZWZpbml0aW9u",
+          "X25hbWUYASABKAkSGgoSaWZjX2NsYXNzaWZpY2F0aW9uGAIgASgJEhwKBWZh",
+          "Y2VzGAMgAygLMg0uVGhTVUZhY2VEYXRhYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThSUFaceDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUCompDefinitionData), global::ThSUCompDefinitionData.Parser, new[]{ "DefinitionName", "Faces" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUCompDefinitionData), global::ThSUCompDefinitionData.Parser, new[]{ "DefinitionName", "IfcClassification", "Faces" }, null, null, null, null)
         }));
   }
   #endregion
@@ -71,6 +71,7 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThSUCompDefinitionData(ThSUCompDefinitionData other) : this() {
     definitionName_ = other.definitionName_;
+    ifcClassification_ = other.ifcClassification_;
     faces_ = other.faces_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
@@ -93,10 +94,22 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
     }
   }
 
+  /// <summary>Field number for the "ifc_classification" field.</summary>
+  public const int IfcClassificationFieldNumber = 2;
+  private string ifcClassification_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string IfcClassification {
+    get { return ifcClassification_; }
+    set {
+      ifcClassification_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
   /// <summary>Field number for the "faces" field.</summary>
-  public const int FacesFieldNumber = 2;
+  public const int FacesFieldNumber = 3;
   private static readonly pb::FieldCodec<global::ThSUFaceData> _repeated_faces_codec
-      = pb::FieldCodec.ForMessage(18, global::ThSUFaceData.Parser);
+      = pb::FieldCodec.ForMessage(26, global::ThSUFaceData.Parser);
   private readonly pbc::RepeatedField<global::ThSUFaceData> faces_ = new pbc::RepeatedField<global::ThSUFaceData>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -120,6 +133,7 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
       return true;
     }
     if (DefinitionName != other.DefinitionName) return false;
+    if (IfcClassification != other.IfcClassification) return false;
     if(!faces_.Equals(other.faces_)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
@@ -129,6 +143,7 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
   public override int GetHashCode() {
     int hash = 1;
     if (DefinitionName.Length != 0) hash ^= DefinitionName.GetHashCode();
+    if (IfcClassification.Length != 0) hash ^= IfcClassification.GetHashCode();
     hash ^= faces_.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
@@ -152,6 +167,10 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
       output.WriteRawTag(10);
       output.WriteString(DefinitionName);
     }
+    if (IfcClassification.Length != 0) {
+      output.WriteRawTag(18);
+      output.WriteString(IfcClassification);
+    }
     faces_.WriteTo(output, _repeated_faces_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -167,6 +186,10 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
       output.WriteRawTag(10);
       output.WriteString(DefinitionName);
     }
+    if (IfcClassification.Length != 0) {
+      output.WriteRawTag(18);
+      output.WriteString(IfcClassification);
+    }
     faces_.WriteTo(ref output, _repeated_faces_codec);
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -180,6 +203,9 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
     int size = 0;
     if (DefinitionName.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(DefinitionName);
+    }
+    if (IfcClassification.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(IfcClassification);
     }
     size += faces_.CalculateSize(_repeated_faces_codec);
     if (_unknownFields != null) {
@@ -196,6 +222,9 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
     }
     if (other.DefinitionName.Length != 0) {
       DefinitionName = other.DefinitionName;
+    }
+    if (other.IfcClassification.Length != 0) {
+      IfcClassification = other.IfcClassification;
     }
     faces_.Add(other.faces_);
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
@@ -218,6 +247,10 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
           break;
         }
         case 18: {
+          IfcClassification = input.ReadString();
+          break;
+        }
+        case 26: {
           faces_.AddEntriesFrom(input, _repeated_faces_codec);
           break;
         }
@@ -241,6 +274,10 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
           break;
         }
         case 18: {
+          IfcClassification = input.ReadString();
+          break;
+        }
+        case 26: {
           faces_.AddEntriesFrom(ref input, _repeated_faces_codec);
           break;
         }
