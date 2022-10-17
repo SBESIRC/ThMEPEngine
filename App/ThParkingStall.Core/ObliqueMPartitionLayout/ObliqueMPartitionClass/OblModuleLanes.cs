@@ -122,6 +122,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             offsetlane = offsetlane.Scale(20);
             //var _splits = SplitLine(offsetlane, Boundary);
             var _splits = SplitBufferLineByPoly(offsetlane, DisLaneWidth / 2, Boundary);
+
             var splits = new List<LineSegment>();
             if (!isBackBackModule)
             {
@@ -139,7 +140,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 }
             }
             //splits位置：背靠背1模块+1半车道，单模块：1模块
-
+            ExtendEffectiveLineSplitByBoundaryBuffer(splits, Boundary);
             //与边界分割处理后的车道线Buffer与边界判断，如果是背靠背模块，判断完的车道线由1模块+1半车道位置返回1模块的位置
             var linesplitbounds = splits
                 .Where(e =>
@@ -340,6 +341,23 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 if (quitcycle) break;
             }
             return generate_lane_length;
+        }
+        void ExtendEffectiveLineSplitByBoundaryBuffer(List<LineSegment> lines, Polygon boundary)
+        {
+            double tol = 3000;
+            for (int i=0;i< lines.Count;i++)
+            {
+                var line = lines[i];
+                if (boundary.Contains(line.MidPoint) && boundary.Contains(line.P0) && boundary.Contains(line.P1))
+                {
+                    if (boundary.ClosestPoint(line.P0).Distance(line.P0) < tol && boundary.ClosestPoint(line.P1).Distance(line.P1) < tol)
+                    {
+                        line = new LineSegment(line.P0.Translation(-Vector(line).Normalize() * 3000), line.P1.Translation(Vector(line).Normalize() * 3000));
+                        line = SplitLine(line, boundary).Where(e => boundary.Contains(e.MidPoint)).OrderByDescending(e => e.Length).First();
+                        lines[i] = line;
+                    }
+                }
+            }
         }
 
         private bool CalculateSingleVertModule(IEnumerable<LineSegment> obsplits, LineSegment lane, LineSegment linesplit, Vector2D vec
