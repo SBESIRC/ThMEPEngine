@@ -69,25 +69,25 @@ namespace ThMEPWSS.Command
         public static List<Polyline> GetFrames()
         {
             var resPolys = new List<Polyline>();
-            var options = new PromptKeywordOptions("\n选择处理方式");
-            options.Keywords.Add("框选范围", "K", "框选范围(K)");
-            options.Keywords.Add("选择多段线", "P", "选择多段线(P)");
-            options.Keywords.Default = "框选范围";
-            var result = Active.Editor.GetKeywords(options);
-            if (result.Status != PromptStatus.OK)
-            {
-                return resPolys;
-            }
+            //var options = new PromptKeywordOptions("\n选择处理方式");
+            //options.Keywords.Add("框选范围", "K", "框选范围(K)");
+            //options.Keywords.Add("选择多段线", "P", "选择多段线(P)");
+            //options.Keywords.Default = "框选范围";
+            //var result = Active.Editor.GetKeywords(options);
+            //if (result.Status != PromptStatus.OK)
+            //{
+            //    return resPolys;
+            //}
 
-            if (result.StringResult == "框选范围")
-            {
-                resPolys = GetFrameByCrosing();
-            }
-            else if (result.StringResult == "选择多段线")
-            {
-                resPolys = GetFrameBySelectPolyline();
-            }
-
+            //if (result.StringResult == "框选范围")
+            //{
+            //    resPolys = GetFrameByCrosing();
+            //}
+            //else if (result.StringResult == "选择多段线")
+            //{
+            //    resPolys = GetFrameBySelectPolyline();
+            //}
+            resPolys = GetFrameBySelectPolyline();
             var clonePoly = resPolys.Select(x => x.Clone() as Polyline).ToList();
             return clonePoly;
         }

@@ -75,7 +75,7 @@ namespace ThMEPWSS.Bussiness
             {
                 //保护类型
                 var sprayRadii = spray.Radii as Polyline;
-                sprayRadii = spray.ArcRadii.TessellateCircleWithArc(ThCADCoreNTSService.Instance.ArcTessellationLength);
+                //sprayRadii = spray.ArcRadii.TessellateCircleWithArc(ThCADCoreNTSService.Instance.ArcTessellationLength);
                 var intersectPolys = holes.Where(x => sprayRadii.Intersects(x)).ToList();
 
                 //计算真实的保护区域

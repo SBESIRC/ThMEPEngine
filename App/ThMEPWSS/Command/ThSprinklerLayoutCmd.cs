@@ -64,7 +64,10 @@ namespace ThMEPWSS.Command
                     var sprayPts = layoutDemo.LayoutSpray(plFrame, columns, beams, walls, holes, matrix, false);
 
                     //放置喷头
-                    //InsertSprinklerService.Insert(sprayPts.Select(o => o.Position).ToList());
+                    if (!ThWSSUIService.Instance.Parameter.ConsiderTCH)
+                    {
+                        InsertSprinklerService.Insert(sprayPts.Select(o => o.Position).ToList());
+                    }
                     layoutPts.AddRange(sprayPts.Select(o => o.Position));
 
                     //打印喷头变化轨迹
@@ -75,7 +78,10 @@ namespace ThMEPWSS.Command
                     calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);
                 }
             }
-            InsertSprinklerService.InsertTCHSprinkler(layoutPts, ThWSSUIService.Instance.Parameter.layoutType == Model.LayoutType.DownSpray ? 0 : 1);
+            if (ThWSSUIService.Instance.Parameter.ConsiderTCH)
+            {
+                InsertSprinklerService.InsertTCHSprinkler(layoutPts, ThWSSUIService.Instance.Parameter.layoutType == Model.LayoutType.DownSpray ? 0 : 1);
+            }
         }
     }
 }
