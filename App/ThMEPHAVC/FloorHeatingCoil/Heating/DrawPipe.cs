@@ -103,21 +103,41 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             DrawUtils.ShowGeometry(drawLine, "l1Input1Line", 200, lineWeightNum: 30);
 
             int pipeId2 = nowRegion.MainEntrance.PipeIdList[0];
-            DrawPipeData drawPipeData1 = new DrawPipeData(ProcessedData.RadiatorPointList[1], ProcessedData.RadiatorPointList[0], ProcessedData.RadiatorPointList[1], ProcessedData.RadiatorPointList[0], 0, pipeId2, -1);
+            ProcessedData.RadiatorPipeId = pipeId2;
+            
+            DrawPipeData drawPipeData1 = new DrawPipeData(ProcessedData.RadiatorPointList[0], ProcessedData.RadiatorPointList[1], ProcessedData.RadiatorPointList[0], ProcessedData.RadiatorPointList[1], 0, pipeId2, -1);
             pipeOutList.Add(drawPipeData1);
-            //////if (i == 16)
-            //////{
-            //////    DrawUtils.ShowGeometry(nowRegion.ClearedPl, "l1testPl", 10, 30);
-            //////    DrawUtils.ShowGeometry(circleCenter, "l1testPoints", 5, lineWeightNum: 30, (int)radius, "C");
-            //////}
+
+            DrawUtils.ShowGeometry(nowRegion.ClearedPl, string.Format("{0}t0Region", PublicValue.Turning), 0, lineWeightNum: 30);
+
+            for (int a = 0; a < pipeInList.Count; a++)
+            {
+                DrawUtils.ShowGeometry(pipeInList[a].CenterPoint, string.Format("{0}t0Input2", PublicValue.Turning), 10, lineWeightNum: 30, (int)pipeInList[a].HalfPipeWidth, "C");
+                //DrawUtils.ShowGeometry(drawLine, "l1Inpu21Line", 200, lineWeightNum: 30);
+                if (pipeInList[a].Freedom != 0)
+                {
+                    DrawUtils.ShowGeometry(pipeInList[a].CenterPoint, string.Format("{0}t0Freedom", PublicValue.Turning), 0, lineWeightNum: 30, (int)pipeInList[a].HalfPipeWidth, "C");
+                }
+            }
+
+            for (int a = 0; a < pipeOutList.Count; a++)
+            {
+                DrawUtils.ShowGeometry(pipeOutList[a].CenterPoint, string.Format("{0}t0Out2", PublicValue.Turning), 8, lineWeightNum: 30, (int)pipeOutList[a].HalfPipeWidth, "C");
+                if (pipeOutList[a].Freedom != 0)
+                {
+                    Line doorLine = new Line(pipeOutList[a].DoorLeft, pipeOutList[a].DoorRight);
+                    DrawUtils.ShowGeometry(pipeOutList[a].CenterPoint, string.Format("{0}t0Freedom", PublicValue.Turning), 0, lineWeightNum: 30, (int)pipeOutList[a].HalfPipeWidth, "C");
+                    DrawUtils.ShowGeometry(doorLine, string.Format("{0}t0DoorLine", PublicValue.Turning), 5, lineWeightNum: 30);
+                }
+            }
 
             //// calculate pipeline
 
             PassagePipeGenerator passagePipeGenerator = new PassagePipeGenerator(nowRegion.ClearedPl, pipeInList, pipeOutList,0, nowRegion.SuggestDist * 2, Parameter.SuggestDistanceWall, 2);
             passagePipeGenerator.CalculatePipeline();
             List<PipeOutput> nowOutputList = passagePipeGenerator.outputs;
-            nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l4PassingPipe", x.pipe_id % 7 + 1, 30));
-            nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.skeleton, "l4PassingSkeleton", x.pipe_id % 7 + 1, 30));
+            nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.shape, "l3PassingPipe", x.pipe_id % 7 + 1, 30));
+            nowOutputList.ForEach(x => DrawUtils.ShowGeometry(x.skeleton, "l3PassingSkeleton", x.pipe_id % 7 + 1, 30));
 
             //局部保存结果
             //List<int> list = passagePipeGenerator.pipe_id;
@@ -478,6 +498,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             for (int n = 0; n < changePointDatas.Count; n++)
             {
                 ChangePointData changePointData = changePointDatas[n];
+                if (changePointData.DoorId == -1) continue;
 
                 PipePoint nowPipeData = DoorPipeToPointMap[new Tuple<int, int>(changePointData.DoorId, changePointData.PipeId)];
 
@@ -670,6 +691,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                     tmpPolyList.AddRange(plList.Value);
                 }
 
+                if (i == ProcessedData.RadiatorPipeId) 
+                {
+                    tmpPolyList.Add(ProcessedData.RadiatorAddArea);
+                }
+
                 for (int j = tmpPolyList.Count-1; j >= 0 ; j--)
                 {
                     if (tmpPolyList[j] == new Polyline()) tmpPolyList.RemoveAt(j);
@@ -741,7 +767,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 fixList.Add(pt0);
                 fixList.Add(pt1);
                 fixList.AddRange(PipeFixPointList[i]);
-                
+                if (i == ProcessedData.RadiatorPipeId) 
+                {
+                    fixList.AddRange(ProcessedData.RadiatorPointList);
+                }
                 //修正入口点位
 
 

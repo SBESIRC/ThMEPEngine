@@ -320,25 +320,24 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 ret[0].start = pipe.start_dir <= 1 ? ret[1].min : ret[1].max;
                 ret[0].end = pipe.start_dir <= 1 ? ret[1].max : ret[1].min;
             }
-            //// update end segment
-            //if (ret.Count == 1 && (pipe.start_dir - pipe.end_dir) % 2 == 0) 
-            //{
-            //    ret.Add(new PipeSegment());
-            //    if (pipe.start_dir % 2 == 0)
-            //    {
-            //        if (pipe.pout.Y == pipe.pin.Y)
-            //            ret.RemoveAt(1);
-            //        else
-            //            ret[1].dir = pipe.pout.Y > pipe.pin.Y ? 1 : 3;
-            //    }
-            //    else
-            //    {
-            //        if (pipe.pout.X == pipe.pin.Y)
-            //            ret.RemoveAt(1);
-            //        else
-            //            ret[1].dir = pipe.pout.X > pipe.pin.X ? 0 : 2;
-            //    }
-            //}
+            // update end segment(only for U-shape pipe)
+            if (ret.Count == 1 && pipe.start_dir != pipe.end_dir && (pipe.start_dir - pipe.end_dir) % 2 == 0) 
+            {
+                ret.Add(new PipeSegment());
+                if (pipe.start_dir % 2 == 0)
+                {
+                    ret[1].dir = pipe.pout.Y > pipe.pin.Y ? 1 : 3;
+                    ret[1].start = pipe.pin.Y;
+                    ret[1].end = pipe.pout.Y;
+                }
+                else
+                {
+                    ret[1].dir = pipe.pout.X > pipe.pin.X ? 0 : 2;
+                    ret[1].start = pipe.pin.X;
+                    ret[1].end = pipe.pout.X;
+                }
+                
+            }
             return ret;
         }
         void ShowBoxWay(List<int> box_path, int color_index = 4)

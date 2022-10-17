@@ -172,7 +172,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             WaterDir = rawData1.WaterSeparator.DirLine.GetNormal();
             Vector3d testVec = new Vector3d(-WaterDir.Y, WaterDir.X, 0);
 
-            //从房间视角看入口的左右关系   左 - 右 == 排线方向为顺时针
+            //从房间视角看入口的左右关系   左 -> 右 == 排线方向为顺时针
             if (testVec.DotProduct(rawData1.WaterSeparator.DirStartPt.GetNormal()) > 0.95)
             {
                 WaterLine = new Line(rawData1.WaterSeparator.StartPts[0], rawData1.WaterSeparator.StartPts.Last());
@@ -250,19 +250,26 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             else
             {
                 ProcessedData.RadiatorPointList = rawData1.BathRadiators[0].StartPts;
+                Polyline nowPl = RegionList[ProcessedData.RadiatorRegion].ClearedPl;
+                Polyline oldPl = RegionList[ProcessedData.RadiatorRegion].OldPl;
 
-                Point3d center = startPt0 + (startPt1 - startPt0) * 0.5;
-                Point3d close = RegionList[ProcessedData.RadiatorRegion].OldPl.GetClosestPointTo(center, false);
-                //Vector3d nowDir = rawData1.BathRadiators[0].DirLine.GetNormal();
-                Vector3d dir = (close - center).GetNormal();
-                //if (dir.DotProduct(nowDir) > 0.8)
-                //{
-                //    ProcessedData.RadiatorDir = -nowDir;
-                //}
-                //else ProcessedData.RadiatorDir = nowDir;
-                ProcessedData.RadiatorDir = -dir;
-
+                RadiatorModel radiatorModel = new RadiatorModel(oldPl,nowPl, ProcessedData.RadiatorPointList);
+                radiatorModel.Pipeline();
+                RegionList[ProcessedData.RadiatorRegion].ClearedPl = radiatorModel.nowPl;
             }
+
+
+            //Line downLine = new Line();
+
+            //if (nowPl.Contains(start) && nowPl.Contains(end))
+            //{
+            //    downLine = WaterSeparatorToDoorLineBeside(ref sd.DownstreamRegion.ClearedPl);
+            //}
+            //else
+            //{
+            //    downLine = WaterSeparatorToDoorLine(ref sd.DownstreamRegion.ClearedPl);
+            //}
+
         }
 
         public void RemoveObstacles()
@@ -404,6 +411,12 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                                 {
                                     RegionConnection[region0].Add(new Connection(newDoorPl, region1,0));
                                     RegionConnection[region1].Add(new Connection(newDoorPl, region0,0));
+
+                                    if (newDoorPl.Area == 0) 
+                                    {
+                                        int stop = 0;
+                                    }
+
                                     DrawUtils.ShowGeometry(newDoorPl, "l1newDoorPl", 8, lineWeightNum: 30);
                                 }
                             } 
@@ -509,6 +522,15 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             double shortSide = 0;
             PolylineProcessService.ClearPolyline(ref originalDoorPl);
 
+            //获取短边
+            Point3d tmpPt = new Point3d();
+            Vector3d tmpVec0 = new Vector3d();
+            Vector3d tmpVec1 = new Vector3d();
+            Vector3d shortSideV = new Vector3d();
+            PolylineProcessService.GetRecInfo(originalDoorPl, ref tmpPt, ref tmpVec0, ref tmpVec1, ref shortSideV);
+
+            shortSide = shortSideV.Length;
+
             int num = originalDoorPl.NumberOfVertices;
             for (int i = 0; i < num; i++)
             {
@@ -517,9 +539,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 Line nowLine = new Line(pt1, pt2);
                 Vector3d dir = pt2 - pt1;
                 
-                if (nowLine.Length < Parameter.ConnectionThresholdLength) 
+                //跳过短边
+                if (nowLine.Length < shortSide + 20) 
                 {
-                    shortSide = nowLine.Length;
                     continue;
                 }
 
@@ -1051,8 +1073,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         {
             //
             Line doorLine = new Line(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
-            Point3d start = WaterLine.StartPoint;
-            Point3d end = WaterLine.EndPoint;
+            Point3d start = WaterLine.StartPoint;    //这里固定顺时针
+            Point3d end = WaterLine.EndPoint;        //这里固定顺时针
             Vector3d waterDir = WaterDir;
             //waterDir = new Vector3d(-waterDir.Y, waterDir.X, waterDir.Z);
             Vector3d offset = waterDir.GetNormal() * Parameter.WaterSeparatorDis;
@@ -1173,8 +1195,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             //FindPosition(downLine, sd.DownstreamRegion.ClearedPl, ref index, ref reverse);
             sd.DownLineIndex = index;
 
-            //原start-end是顺时针
-            //而在DoorLine视角里面的first-second是逆时针， 对应 end - start，看看这里有没有对应
+            //原start->end是顺时针
+            //而在DoorLine视角里面的 first -> second是逆时针， 对应 end -> start，看看这里有没有对应
 
             //如果在函数WaterSeparatorToDoorLine内部没有反，那么后面反，如果反了，就不用再反了。
             if ((downLine.EndPoint - downLine.StartPoint).GetNormal().DotProduct((end - start).GetNormal()) > 0.95) 
