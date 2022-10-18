@@ -90,7 +90,7 @@ namespace ThMEPIFC
                 {
                     var path = Path.GetDirectoryName(filePath1);
                     var fileName = "合模文件";// Path.GetFileNameWithoutExtension(filePath);
-                    var NewFilePath = Path.Combine(path, fileName + DateTime.Now.ToString() + "-100%.ifc");
+                    var NewFilePath = Path.Combine(path, fileName + DateTime.Now.ToString("yyyyMMddHHmmss") + "-100%.ifc");
                     Ifc2x3.ThTGL2IFC2x3Builder.SaveIfcModel(MergeModel, NewFilePath);
                     MergeModel.Dispose();
                     Active.Database.GetEditor().WriteMessage($"合模成功：已更新IFC文件.[{NewFilePath}]");
