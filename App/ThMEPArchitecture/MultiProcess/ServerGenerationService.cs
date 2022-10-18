@@ -57,9 +57,10 @@ namespace ThMEPArchitecture.MultiProcess
         public Genome GetGenome(DataWraper dataWraper)
         {
             var solution = new Genome();
+            var guid = (Guid.NewGuid()).ToString();
             //序列化dataWraper
             var dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            var local_path = dir + "\\dataWraper.dat";
+            var local_path = dir + $"\\dataWraper_{guid}.dat";
             FileStream fileStream = new FileStream(local_path, FileMode.Create);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(fileStream, dataWraper); //序列化 参数：流 对象
