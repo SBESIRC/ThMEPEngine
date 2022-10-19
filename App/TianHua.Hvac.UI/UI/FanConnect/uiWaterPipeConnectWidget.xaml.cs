@@ -48,6 +48,8 @@ namespace TianHua.Hvac.UI.UI.FanConnect
             createSpm.Execute();
         }
 
+
+
         private void btnUpdateSPM_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             FocusMainWindow();
@@ -79,9 +81,9 @@ namespace TianHua.Hvac.UI.UI.FanConnect
 
         private void SuppAddBtn_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            if(SuppLeftListBox.SelectedItem != null)
+            if (SuppLeftListBox.SelectedItem != null)
             {
-                
+
                 var selectedItem = (ListBoxItem)SuppLeftListBox.SelectedItem;
                 string selectedValve = (string)selectedItem.Content;
                 SuppRightListBox.Items.Add(selectedValve);
@@ -125,6 +127,23 @@ namespace TianHua.Hvac.UI.UI.FanConnect
         private void btnHelpSPM_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             System.Diagnostics.Process.Start(@"http://thlearning.thape.com.cn/kng/course/package/video/3dc53d1443b04cda822db7046da629ac_6ae06ebd6c8f42178b0023d6095de1f6.html");
+        }
+
+        private void rbSystemType_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (ViewModel.SystemType == 0)
+            {
+                ViewModel.IsACPipeDim = false;
+                cbACPipe.IsEnabled = false;
+                cbACPipeConfigFile.IsEnabled = false;
+                btnACPipeOpenFile.IsEnabled = false;
+            }
+            else
+            {
+                cbACPipe.IsEnabled = true;
+                cbACPipeConfigFile.IsEnabled = true;
+                btnACPipeOpenFile.IsEnabled = true;
+            }    
         }
     }
 }

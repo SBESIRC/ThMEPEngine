@@ -67,7 +67,9 @@
     <Compile Include="EQPMFanSelect\VentSNCalculator.cs" />
     <Compile Include="FanConnect\Command\ThFanPipeConnectExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThPickRoomExtractCmd.cs" />
+    <Compile Include="FanConnect\Service\ThFanConnectDataUtil.cs" />
     <Compile Include="FanConnect\Service\ThAddValveService.cs" />
+    <Compile Include="FanConnect\Service\ThCheckUpdateEndBlkDir.cs" />
     <Compile Include="FanConnect\Service\ThCreateDuctService.cs" />
     <Compile Include="FanConnect\Service\ThHandleFanPipeService.cs" />
     <Compile Include="FanConnect\ThFanConnectCommon.cs" />

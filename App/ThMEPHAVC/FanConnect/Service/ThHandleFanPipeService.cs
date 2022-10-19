@@ -158,7 +158,7 @@ namespace ThMEPHVAC.FanConnect.Service
         public void RemoveDbPipe(ThFanTreeModel treeModel, List<Entity> dbObjs, Matrix3d mt)
         {
             //找到图纸上对应的线，进行删除
-            foreach(var obj in dbObjs)
+            foreach (var obj in dbObjs)
             {
                 obj.UpgradeOpen();
                 obj.TransformBy(mt);
@@ -187,17 +187,17 @@ namespace ThMEPHVAC.FanConnect.Service
 
             var box = node.Item.PLine.Buffer(10);
             var dbObjs = spatialIndex.SelectCrossingPolygon(box);
-            foreach(var obj in dbObjs)
+            foreach (var obj in dbObjs)
             {
-                if(obj is Entity ent)
+                if (obj is Entity ent)
                 {
                     retEntity.Add(ent);
                 }
             }
             objs = objs.Except(retEntity).ToList();
-            foreach(var child in node.Children)
+            foreach (var child in node.Children)
             {
-                retEntity.AddRange(FindDbPipe(child,ref objs));
+                retEntity.AddRange(FindDbPipe(child, ref objs));
             }
             return retEntity;
         }
@@ -256,5 +256,6 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             return retLine;
         }
+
     }
 }

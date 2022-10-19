@@ -720,17 +720,18 @@ namespace ThMEPHVAC.FanConnect.Model
             }
         }
 
-        public static void CalNodeDimValue(ThFanTreeNode<ThFanPointModelNew> node, string coeff)
+        public static void CalNodeDimValue(ThFanTreeNode<ThFanPointModelNew> node, string coeff, List<Tuple<double, double>> gasDNList, List<Tuple<double, double>> liquidDNList)
         {
             //优先计算子结点的值
             foreach (var child in node.Children)
             {
-                CalNodeDimValue(child, coeff);
+                CalNodeDimValue(child, coeff, gasDNList, liquidDNList);
             }
 
             node.Item.CoolCapaDim = ThQueryDNService.QueryCondPipeDNInt(node.Item.CoolCapa);
             node.Item.CoolDim = ThQueryDNService.QuerySupplyPipeDNInt(coeff, node.Item.CoolFlow);
             node.Item.HotDim = ThQueryDNService.QuerySupplyPipeDNInt(coeff, node.Item.HotFlow);
+            node.Item.ACPipeDim = ThQueryDNService.QueryACPipeDNInt(node.Item.CoolCapa, gasDNList, liquidDNList);
         }
 
         /// <summary>
@@ -744,8 +745,8 @@ namespace ThMEPHVAC.FanConnect.Model
                 CalNodeLevel(c);
             }
 
-            //孩子node最大level数>1，本node.level+1
-            //孩子node最大level《=1，本node.level == child最大level
+            //子node最大level数>1，本node.level+1
+            //子node最大level数《=1，本node.level == child最大level
             var maxChildLevel = 0;
             var maxChildLevelCount = 0;
             foreach (var c in node.Children)
@@ -783,6 +784,10 @@ namespace ThMEPHVAC.FanConnect.Model
                 //第一段
                 var markNode = FindLongPartMarkNode(node);
                 markNode.Item.IsLevelChangeMark = true;
+                if(node.Parent == null)
+                {
+                    markNode.Item.IsFirstPart = true;
+                }
             }
 
             if (node.Children.Count != 0)
@@ -837,6 +842,15 @@ namespace ThMEPHVAC.FanConnect.Model
                     nodeThisMark.Item.IsCapaChangeMarked = true;
                     var nodeMark = FindLongPartMarkNode(node.Parent);
                     nodeMark.Item.IsCapaChangeMarked = true;
+                }
+
+                //冷媒
+                if ((node.Item.Level == node.Parent.Item.Level) && (node.Item.ACPipeDim.Equals(node.Parent.Item.ACPipeDim) == false))
+                {
+                    var nodeThisMark = FindLongPartMarkNode(node);
+                    nodeThisMark.Item.IsACChangeMarked = true;
+                    var nodeMark = FindLongPartMarkNode(node.Parent);
+                    nodeMark.Item.IsACChangeMarked = true;
                 }
             }
         }

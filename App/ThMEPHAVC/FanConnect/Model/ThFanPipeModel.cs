@@ -44,6 +44,8 @@ namespace ThMEPHVAC.FanConnect.Model
         public List<Line> ExPline { set; get; }//扩展线
         public List<Point3d> ExPoint { set; get; }//扩展线的连接点
         public ThFanPipeModel BrotherItem { set; get; }//共结点
+
+        public ThFanCUModel ConnectFan { get; set; }
         public ThFanPipeModel(Line line, PIPELEVEL level = PIPELEVEL.LEVEL1, double width = 200)
         {
             WayCount = 2;
@@ -94,14 +96,16 @@ namespace ThMEPHVAC.FanConnect.Model
         public double CoolFlow { set; get; }//制冷流量值
         public double HotFlow { set; get; }//制热流量值
         public int CoolCapaDim { get; set; }//冷凝管径
+        public Tuple<double, double> ACPipeDim { get; set; }//冷媒管径
         public int CoolDim { get; set; }//冷管径
         public int HotDim { get; set; }//热管径
         public bool IsLevelChangeMark { get; set; }//层级管径标注位
         public bool IsCoolHotChangeMark { get; set; }//四管制，冷or热变化管径标注位
         public bool IsCoolHotMaxChangeMark { get; set; }//两管制，冷热取大变化管径标注位
         public bool IsCapaChangeMarked { get; set; }//冷凝变化管径标注位
+        public bool IsACChangeMarked { get; set; }//冷媒变化管径标注位
         public int IsFlag { get; set; }//标识位，表示是否反向ExPline顺序 : -1没匹配过，0/1 ：匹配ThFanPipeModel
-
+        public bool IsFirstPart { get; set; }//是否是第一段
         public ThFanPointModelNew(Point3d pt)
         {
             CoolCapa = 0.0;
@@ -112,7 +116,9 @@ namespace ThMEPHVAC.FanConnect.Model
             IsCoolHotChangeMark = false;
             IsCoolHotMaxChangeMark = false;
             IsCapaChangeMarked = false;
+            IsACChangeMarked = false;
             IsFlag = -1;
+            IsFirstPart = false;
 
             BasePt = pt;
         }

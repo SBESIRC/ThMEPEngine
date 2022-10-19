@@ -208,7 +208,7 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return false;
         }
-        public static List<Polyline> SelelctCrossing(List<Polyline> polylines, Polyline polyline)
+        private static List<Polyline> SelelctCrossing(List<Polyline> polylines, Polyline polyline)
         {
             var objs = polylines.ToCollection();
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
@@ -340,7 +340,7 @@ namespace ThMEPHVAC.FanConnect.Command
             var pairPt = pts.GetCollinearMaxPts();
             return new LineSegment2d(pairPt.Item1.ToPoint2d(), pairPt.Item2.ToPoint2d());
         }
-        public static double GetDoubleFromString(string power)
+        private static double GetDoubleFromString(string power)
         {
             double resDouble = 0;
             var reg = new Regex(@"[0-9]*[.]?[0-9]+");
@@ -352,13 +352,13 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return resDouble;
         }
-        public static void GetCoolAndHotCapacity(string capacity, out double cool, out double hot)
+        private static void GetCoolAndHotCapacity(string capacity, out double cool, out double hot)
         {
             var str = capacity.Split('/');
             cool = GetDoubleFromString(str[0]);
             hot = GetDoubleFromString(str[1]);
         }
-        public static void GetCoolAndHotTempDiff(string tempDiff, out double cool, out double hot)
+        private static void GetCoolAndHotTempDiff(string tempDiff, out double cool, out double hot)
         {
             var str = tempDiff.Split('/');
             cool = GetDoubleFromString(str[0]);
@@ -371,7 +371,7 @@ namespace ThMEPHVAC.FanConnect.Command
             double retAngle = basVector.GetAngleTo(vector, refVector);
             return retAngle;
         }
-        public static void EnsureLayerOn(AcadDatabase acadDb, string layer)
+        private static void EnsureLayerOn(AcadDatabase acadDb, string layer)
         {
             acadDb.Database.UnFrozenLayer(layer);
             acadDb.Database.UnLockLayer(layer);
@@ -445,6 +445,8 @@ namespace ThMEPHVAC.FanConnect.Command
                 var closetPt = fan.FanObb.GetClosestPointTo(node.Item.PLine.EndPoint, false);
                 if (fan.FanPoint.DistanceTo(node.Item.PLine.EndPoint) < 400.0)
                 {
+                    node.Item.ConnectFan = fan;
+
                     if (fan.CoolFlow != 0 || fan.HotFlow != 0 || fan.CoolCapa != 0)
                     {
                         fan.IsConnected = true;
@@ -490,7 +492,7 @@ namespace ThMEPHVAC.FanConnect.Command
 
             return;
         }
-        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, double width)
+        private static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, double width)
         {
             node.Item.PipeWidth = width;
             node.Item.PipeLevel = PIPELEVEL.LEVEL3;
@@ -502,7 +504,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
             }
         }
-        public static bool IsCollinear(Line firstLine, Line secondLine)
+        private static bool IsCollinear(Line firstLine, Line secondLine)
         {
             var centerPt = firstLine.GetCenter();
             var mt = Matrix3d.Displacement(centerPt.GetVectorTo(Point3d.Origin));
@@ -583,7 +585,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     if (attrib.ContainsKey("冷/热水量"))
                     {
                         var strTempDiff = attrib["冷/热水量"];
-                        strTempDiff = strTempDiff.Replace("(m3/h)","");
+                        strTempDiff = strTempDiff.Replace("(m3/h)", "");
                         GetCoolAndHotTempDiff(strTempDiff, out double coolFlow, out double hotFlow);
                         tmpFan.CoolFlow = coolFlow;
                         tmpFan.HotFlow = hotFlow;
@@ -603,7 +605,7 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return tmpFan;
         }
-        public static Polyline GetBlockReferenceAABB(BlockReference blk)
+        private static Polyline GetBlockReferenceAABB(BlockReference blk)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
@@ -625,6 +627,14 @@ namespace ThMEPHVAC.FanConnect.Command
                 if (blockDb.Blocks.Contains("AI-水管多排标注(2排)"))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水管多排标注(2排)"), true);
+                }
+                if (blockDb.Blocks.Contains(ThFanConnectCommon.BlkName_PipeDim2_NoH))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThFanConnectCommon.BlkName_PipeDim2_NoH), true);
+                }
+                if (blockDb.Blocks.Contains(ThFanConnectCommon.BlkName_PipeDim4_NoH))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThFanConnectCommon.BlkName_PipeDim4_NoH), true);
                 }
                 if (blockDb.Blocks.Contains("AI-水阀"))
                 {
@@ -724,11 +734,11 @@ namespace ThMEPHVAC.FanConnect.Command
             double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
             return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
         }
-        public static Vector3d CreateVector(Line line)
+        private static Vector3d CreateVector(Line line)
         {
             return CreateVector(line.StartPoint, line.EndPoint);
         }
-        public static Vector3d CreateVector(Point3d ps, Point3d pe)
+        private static Vector3d CreateVector(Point3d ps, Point3d pe)
         {
             return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
         }

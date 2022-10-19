@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 using ThControlLibraryWPF.ControlUtils;
+using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Win32;
 
 namespace ThMEPHVAC.FanConnect.ViewModel
 {
@@ -90,6 +94,34 @@ namespace ThMEPHVAC.FanConnect.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        public bool IsACPipeDim
+        {
+            get { return WaterPipeConfigInfo.WaterSystemConfigInfo.IsACPipeDim; }
+            set
+            {
+                WaterPipeConfigInfo.WaterSystemConfigInfo.IsACPipeDim = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        public ObservableCollection<ThACPipeDimConfigFile> ACPipeDimConfigFileList
+        {
+            get { return WaterPipeConfigInfo.WaterSystemConfigInfo.ACPipeDimConfigFileList; }
+            set
+            {
+                WaterPipeConfigInfo.WaterSystemConfigInfo.ACPipeDimConfigFileList = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        public ThACPipeDimConfigFile ACPipeDimConfigFile
+        {
+            get { return WaterPipeConfigInfo.WaterSystemConfigInfo.ACPipeDimConfigFile; }
+            set
+            {
+                WaterPipeConfigInfo.WaterSystemConfigInfo.ACPipeDimConfigFile = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
         public double MarkHeigth
         {
             get { return WaterPipeConfigInfo.WaterSystemConfigInfo.MarkHeigth; }
@@ -110,13 +142,33 @@ namespace ThMEPHVAC.FanConnect.ViewModel
         }
         public string RoomCount
         {
-            get 
+            get
             {
                 return WaterPipeConfigInfo.WaterValveConfigInfo.RoomObb.Count.ToString();
             }
             set
             {
                 this.RaisePropertyChanged();
+            }
+        }
+
+        public ICommand ACConfigFileCmd => new RelayCommand(ACConfigFile);
+        private void ACConfigFile()
+        {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Multiselect = false;
+            dialog.Title = "请选择冷媒管管径数据文件";
+            dialog.Filter = string.Format("冷媒管管径数据文件(*.{0})|*.{0}", "xlsx");
+           
+            if (dialog.ShowDialog() == true)
+            {
+                string fullPath = dialog.FileName;
+                if (ACPipeDimConfigFileList.Where(x => x.FullPath == fullPath).Any() == false)
+                {
+                    var newFile = new ThACPipeDimConfigFile(fullPath);
+                    ACPipeDimConfigFileList.Add(newFile);
+                    ACPipeDimConfigFile = ACPipeDimConfigFileList.Last();
+                }
             }
         }
     }

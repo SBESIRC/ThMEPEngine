@@ -185,6 +185,9 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         toDbServiece.InsertEntity(path, layer, colorIndex);
                     }
+
+                    ThCheckUpdateEndBlkDir.UpdateEndBlkDir(rightLines, tmpFcus);
+
                     return;
                 }
             }

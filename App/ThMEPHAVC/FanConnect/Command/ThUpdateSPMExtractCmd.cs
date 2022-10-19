@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -44,6 +45,21 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
+
+                    //读取冷媒管径配置表
+                    var gasDNList = new List<Tuple<double, double>>();
+                    var liquidDNList = new List<Tuple<double, double>>();
+                    if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1 && ConfigInfo.WaterSystemConfigInfo.IsACPipeDim)
+                    {
+                        var file = ConfigInfo.WaterSystemConfigInfo.ACPipeDimConfigFile.FullPath;
+                        var bRead = ThFanConnectDataUtil.ReadCoolACPipeDNConfig(file, ref gasDNList, ref liquidDNList);
+                        if (bRead == false)
+                        {
+                            Active.Editor.WriteMessage("冷媒管管径配置有误，请检查修改\n");
+                            return;
+                        }
+                    }
+
                     //提取水管路由
                     var pipes = ThEquipElementExtractService.GetFanPipes(startPt, ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe, ConfigInfo.WaterSystemConfigInfo.IsCWPipe);
                     if (pipes.Count == 0)
@@ -90,6 +106,9 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu);
                     }
+                    //检查末端断管图块方向
+                    ThCheckUpdateEndBlkDir.UpdateEndBlkDir(treeModel.RootNode);
+
                     if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                     {
                         double fanWidth = 600;
@@ -170,7 +189,7 @@ namespace ThMEPHVAC.FanConnect.Command
                         ThPointTreeModelService.CalNodeLevel(flowCalTree);
                         ThPointTreeModelService.CheckMarkForLevel(flowCalTree);
                         ThPointTreeModelService.CalNodeFlowValue(flowCalTree, fcus);
-                        ThPointTreeModelService.CalNodeDimValue(flowCalTree, ConfigInfo.WaterSystemConfigInfo.FrictionCoeff);
+                        ThPointTreeModelService.CalNodeDimValue(flowCalTree, ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, gasDNList, liquidDNList);
                         ThPointTreeModelService.CheckDimChange(flowCalTree);
 
                         ThPointTreeModelService.PrintTree(flowCalTree, "l0node");
@@ -181,9 +200,6 @@ namespace ThMEPHVAC.FanConnect.Command
                         //pipeMarkServiece.PipeMark(pointTreeModel);
                         pipeMarkServiece.UpdateMark(flowCalTree, pipeTreeNodes, markes);
                     }
-
-
-
                 }
             }
             catch (Exception ex)
