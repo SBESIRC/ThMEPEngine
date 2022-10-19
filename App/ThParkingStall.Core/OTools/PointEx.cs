@@ -11,7 +11,7 @@ namespace ThParkingStall.Core.OTools
 {
     public static class PointEx
     {
-        public static double EqualTol = 0.001;
+        public static double EqualTol = 0.01;
         public static LineSegment LineBuffer(this Coordinate point, double Halfdistance, Vector2D vec)
         {
             var Vec = vec.Normalize();

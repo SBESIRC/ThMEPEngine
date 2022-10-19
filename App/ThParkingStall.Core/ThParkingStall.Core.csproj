@@ -69,6 +69,7 @@
     <Compile Include="InterProcess\Gene.cs" />
     <Compile Include="IO\GetPath.cs" />
     <Compile Include="IO\ReadWriteEx.cs" />
+    <Compile Include="LineCleaner\LineService.cs" />
     <Compile Include="MPartitionLayout\Command\MCompute.cs" />
     <Compile Include="MPartitionLayout\Model\MEssentialClasses.cs" />
     <Compile Include="MPartitionLayout\Model\MNTSSpatialIndex.cs" />

@@ -11,6 +11,8 @@ using ThParkingStall.Core.OInterProcess;
 using ThParkingStall.Core.Tools;
 using static ThParkingStall.Core.Tools.ListEx;
 using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Algorithm;
+
 namespace ThParkingStall.Core.OTools
 {
     public static class SegLineEx
@@ -545,17 +547,21 @@ namespace ThParkingStall.Core.OTools
             }
             return newsegs;
         }
-        public static LineSegment Merge(this List<LineSegment> lineSegments)
+        public static LineSegment Merge(this List<LineSegment> lineSegments)//找到输入线中最远两点作为输出线
         {
             if (lineSegments.Count == 0) return null;
+            if(lineSegments.Count == 1) return lineSegments.First();
             var coors = new List<Coordinate>();
             foreach (var l in lineSegments)
             {
                 coors.Add(l.P0);
                 coors.Add(l.P1);
             }
-            var ordered = coors.PositiveOrder();
-            return new LineSegment(coors.First(),coors.Last());
+            var mbc = new MinimumBoundingCircle(new MultiPoint(coors.Select(c => c.ToPoint()).ToArray()));
+            var diameter = mbc.GetMaximumDiameter();
+            if (diameter.IsEmpty) return lineSegments.First();
+            //var ordered = coors.PositiveOrder();
+            return new LineSegment(diameter.Coordinates.First(), diameter.Coordinates.Last());
         }
         public static SegLine Merge(this List<SegLine> segLines)
         {

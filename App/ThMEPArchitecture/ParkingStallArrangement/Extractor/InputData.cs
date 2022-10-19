@@ -35,7 +35,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
         }
         public static DBObjectCollection SelectObstacles(AcadDatabase acadDatabase,out string layerKeyWord)
         {
-            layerKeyWord = "AI描边";
+            //layerKeyWord = "AI描边";
+            layerKeyWord = "WALL";
             //var msg = Active.Editor.GetString("\n 请输入目标图层关键字:");
             //if (msg.Status == PromptStatus.OK )
             //{ 
