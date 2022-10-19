@@ -66,6 +66,61 @@ namespace ThMEPArchitecture.MultiProcess
             binaryFormatter.Serialize(fileStream, dataWraper); //序列化 参数：流 对象
             fileStream.Close();
             //发送至服务器
+            string url = $"http://172.16.1.84:8089/dataWraper_{guid}.dat";
+            using (WebClient client = new WebClient())
+            {
+                client.Credentials = new NetworkCredential("upload", "Thape123123");
+                //client.UploadProgressChanged += Client_UploadProgressChanged;
+                //client.UploadFileCompleted += Client_UploadFileCompleted;
+                byte[] data = client.UploadFile(new Uri(url), "PUT", local_path);
+                //byte[] data = client.UploadFile(new Uri(url), path);
+                string reply = Encoding.UTF8.GetString(data);
+            }
+            //启动服务器应用程序
+            var appHttp = $"http://172.16.1.84:8088/Cal/GetGenome?filename=dataWraper_{guid}.dat&guid={guid}";
+            SetCertificatePolicy();
+            List<Byte> pageData = new List<byte>();
+            string pageHtml = "";
+            WebClientEx MyWebClient = new WebClientEx();
+            MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
+            MyWebClient.Timeout = 10 * 60 * 1000;
+            Task.Factory.StartNew(() =>
+            {
+                pageData = MyWebClient.DownloadData(appHttp).ToList();
+            }).Wait(-1);
+            pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
+            if (!pageHtml.Contains("success"))
+                return solution;
+            //返回数据
+            using (WebClient client = new WebClient())
+            {
+                client.Credentials = new NetworkCredential("upload", "Thape123123");
+                client.DownloadFile($"http://172.16.1.84:8089/genome_{guid}.dat", $"genome_{guid}.dat");
+            }
+            //反序列化
+            fileStream = new FileStream($"genome_{guid}.dat", FileMode.Open);
+            var formatter = new BinaryFormatter
+            {
+                Binder = new UBinder()
+            };
+            var readSolution = (Genome)formatter.Deserialize(fileStream);
+            fileStream.Close();
+
+            solution = readSolution;
+            return solution;
+        }
+        public Genome GetGenomeOld(DataWraper dataWraper)
+        {
+            var solution = new Genome();
+            var guid = (Guid.NewGuid()).ToString();
+            //序列化dataWraper
+            var dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var local_path = dir + $"\\dataWraper_{guid}.dat";
+            FileStream fileStream = new FileStream(local_path, FileMode.Create);
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            binaryFormatter.Serialize(fileStream, dataWraper); //序列化 参数：流 对象
+            fileStream.Close();
+            //发送至服务器
             string url = "http://172.16.1.3:80/ParkingTransferedDatas/dataWraper.dat";
             using (WebClient client = new WebClient())
             {

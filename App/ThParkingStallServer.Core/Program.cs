@@ -22,11 +22,17 @@ namespace ThParkingStallServer.Core
     {
         static void Main(string[] args)
         {
+            if (args.Count() != 2)
+            {
+                return;
+            }
+            var filename=args[0];
+            var guid=args[1];
             SetCertificatePolicy();
             //Read Datawraper
-            var dir = @"C:\webiis\calParkingTest\ParkingTransferedDatas";
-            var LogDir = @"C:\webiis\calParkingTest\Loggers";
-            var path = dir + "\\dataWraper.dat";
+            var dir = @"C:\AIIIS\DATAIIS";
+            //var LogDir = @"C:\webiis\calParkingTest\Loggers";
+            var path = dir + $"\\{filename}";
             ReadDataWraperService readDataWraperService = new ReadDataWraperService(path);
             var dataWraper = new DataWraper();
             try
@@ -51,21 +57,21 @@ namespace ThParkingStallServer.Core
                 }
                 var GA_Engine = new ServerGAGenerator(dataWraper);
                 //logger
-                var LogFileName = Path.Combine(GetPath.GetAppDataPath(), "MPLog.txt");
-                var DisplayLogFileName = Path.Combine(LogDir, "DisplayLog.txt");
-                File.Delete(DisplayLogFileName);
-                var Logger = new Serilog.LoggerConfiguration().WriteTo
-                                    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
-                var DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
-                            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
-                //
-                GA_Engine.Logger = Logger;
-                GA_Engine.DisplayLogger = DisplayLogger;
+                //var LogFileName = Path.Combine(GetPath.GetAppDataPath(), "MPLog.txt");
+                //var DisplayLogFileName = Path.Combine(LogDir, "DisplayLog.txt");
+                //File.Delete(DisplayLogFileName);
+                //var Logger = new Serilog.LoggerConfiguration().WriteTo
+                //                    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                //var DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
+                //            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
+                ////
+                //GA_Engine.Logger = Logger;
+                //GA_Engine.DisplayLogger = DisplayLogger;
                 //GA_Engine.displayInfo = displayInfos.Last();
                 Solution = GA_Engine.Run().First();
             }
             //Serialize Genome
-            path = dir + "\\genome.dat";
+            path = dir + $"\\genome_{guid}.dat";
             FileStream fileStream = new FileStream(path, FileMode.Create);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(fileStream, Solution); //序列化 参数：流 对象
