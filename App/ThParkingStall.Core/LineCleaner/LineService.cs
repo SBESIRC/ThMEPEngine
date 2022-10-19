@@ -331,9 +331,4 @@ namespace ThParkingStall.Core.LineCleaner
             LineIdxs.Add((idx,isP0));
         }
     }
-    public class MagneticLine//磁力线，延长至其他磁力线
-    {
-        public LineSegment Line;
-
-    }
 }
