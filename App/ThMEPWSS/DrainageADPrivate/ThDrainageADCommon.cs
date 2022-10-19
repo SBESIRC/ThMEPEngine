@@ -18,7 +18,7 @@ namespace ThMEPWSS.DrainageADPrivate
         public static string Layer_Bush = "W-BUSH";
         public static string Layer_HotPipe = "W-WSUP-HOT-PIPE";
         public static string Layer_CoolPipe = "W-WSUP-COOL-PIPE";
-        public static string Layer_CoolPipe_v = "W-WSUP-COOL-VPIPE";
+        public static string Layer_CoolPipe_v = "W-WSUP";
         public static string Layer_HotIPipe = "W-WSUP-HOTI-PIPE";
         public static string Layer_HotRPipe = "W-WSUP-HOTR-PIPE";
 

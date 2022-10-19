@@ -82,16 +82,29 @@ namespace ThMEPWSS.DrainageADPrivate.Data
         /// <param name="framePts"></param>
         private void ExtractVerticalPipe(Database database, Point3dCollection framePts)
         {
-            var layer = new List<string> { ThDrainageADCommon.Layer_EQPM, ThDrainageADCommon.Layer_EQPM_D, ThDrainageADCommon.Layer_CoolPipe_v };
-            var vertical = new ThMEPWSS.Service.ThVerticalPipeExtractService()
+            // var layer = new List<string> { ThDrainageADCommon.Layer_EQPM, ThDrainageADCommon.Layer_EQPM_D, ThDrainageADCommon.Layer_CoolPipe_v };
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                LayerFilterTch = layer,
-                LayerFilterBlk = layer,
-                LayerFilterCircle = layer,
-                Radius = ThDrainageADCommon.Radius_Vertical,
-            };
-            vertical.Extract(database, framePts);
-            VerticalPipe = vertical.VerticalPipe;
+                var layer = new List<string>();
+                var layers = acadDatabase.Layers;
+                foreach (var l in layers)
+                {
+                    if (l.Name.ToUpper().Contains(ThDrainageADCommon.Layer_CoolPipe_v))
+                    {
+                        layer.Add(l.Name);
+                    }
+                }
+
+                var vertical = new ThMEPWSS.Service.ThVerticalPipeExtractService()
+                {
+                    LayerFilterTch = layer,
+                    LayerFilterBlk = layer,
+                    LayerFilterCircle = layer,
+                    Radius = ThDrainageADCommon.Radius_Vertical,
+                };
+                vertical.Extract(database, framePts);
+                VerticalPipe = vertical.VerticalPipe;
+            }
         }
 
 
