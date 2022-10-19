@@ -15,7 +15,7 @@ namespace ThParkingStall.Host.Controllers
         public static void InitSERVERS()
         {
             SERVERS = new Queue<string>();
-            SERVERS.Enqueue("http://172.15.3.134/");
+            SERVERS.Enqueue("http://172.15.3.134:8088/");
         }
     }
 
@@ -34,7 +34,7 @@ namespace ThParkingStall.Host.Controllers
             //
             var server = "";
             var file = "";
-            var waitServerTime = 0.5 * 60;//unit:s
+            var waitServerTime = 0.1 * 60;//unit:s
             var curWaitServerTime = 0;
             lock (obj)
             {
@@ -55,7 +55,7 @@ namespace ThParkingStall.Host.Controllers
                             curWaitServerTime = -1;
                             break;
                         }
-                        Thread.Sleep(10 * 1000);
+                        Thread.Sleep(2 * 1000);
                         curWaitServerTime += 10;
                     }
                 }
@@ -96,7 +96,7 @@ namespace ThParkingStall.Host.Controllers
         [HttpGet]
         public string Run(string filename = "")
         {
-            Thread.Sleep (60 * 1000);
+            Thread.Sleep (10 * 1000);
             return "RunParkingStall" + filename;
             try
             {
