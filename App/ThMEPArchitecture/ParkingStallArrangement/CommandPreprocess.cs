@@ -98,7 +98,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 Active.Editor.WriteMessage("\n块名为" + block.Name + "的块未提取到障碍物");
                 return;// 没有拿到线
             }
-            Active.Editor.WriteMessage($"炸块用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
+            //Active.Editor.WriteMessage($"炸块用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
 #if (DEBUG)
             foreach (Line l in lines) l.AddToCurrentSpace();// 测试用，把所有拿到的线打出来
 #endif
@@ -106,7 +106,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             t_pre = stopwatch.Elapsed.TotalSeconds;
             var cleaner = new LineService(lsegs,tol);
             var polygons = cleaner.GetPolygons(true, false, true);
-            Active.Editor.WriteMessage($"描边用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
+            //Active.Editor.WriteMessage($"描边用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
             var objs = polygons.Select(p =>p.Shell.ToDbPolyline()).ToList();
             if (objs.Count == 0)
             {
@@ -132,7 +132,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             // 创建块，并且插入到原位
             Point3d InsertPoint = acadDatabase.Database.AddBlockTableRecord(blockName, walls);
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference(LayerName, blockName, InsertPoint, new Scale3d(1), 0);
-            Active.Editor.WriteMessage($"输出用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
+            //Active.Editor.WriteMessage($"输出用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
         }
         private DBObjectCollection ExplodeToLines(DBObjectCollection input_blocks, out DBObjectCollection outwalls)
         {
