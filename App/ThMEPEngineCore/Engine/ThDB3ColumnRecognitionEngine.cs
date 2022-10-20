@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.Engine
         {
             return new ThDB3ColumnExtractionVisitor()
             {
-                LayerFilter = ThDbLayerManager.Layers(database),
+                LayerFilter = ThDbLayerManager.Layers(database).ToHashSet(),
             };
         }
 

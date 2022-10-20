@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Common;
 
 namespace TianHua.Mep.UI.Data
 {
@@ -16,17 +17,13 @@ namespace TianHua.Mep.UI.Data
         private const double ArcTessellationLength = 100.0;
         public List<ThBuildingElementExtractionVisitor> BlackVisitors { get; set; }
 
-        private List<ContainerInfo> _containers;
-        public List<ContainerInfo> Containers => _containers;
+        private List<ThContainerInfo> _containers;
+        public List<ThContainerInfo> Containers => _containers;
 
         public ThOtherShearWallExtractionVisitor()
         {
+            _containers = new List<ThContainerInfo>();
             BlackVisitors = new List<ThBuildingElementExtractionVisitor>();
-        }
-
-        public override bool IsBuildElementBlockReference(BlockReference blockReference)
-        {
-            return blockReference.ObjectId.IsValid;
         }
 
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -65,7 +62,7 @@ namespace TianHua.Mep.UI.Data
             }
         }
 
-        public void SetContainers(List<ContainerInfo> containers)
+        public void SetContainers(List<ThContainerInfo> containers)
         {
             _containers = containers;
         }

@@ -155,7 +155,7 @@ namespace ThMEPEngineCore.Engine
 
             if(UseConfigShearWallLayer)
             {
-                vm.ShearWallVisitor.LayerFilter = ThExtractShearWallConfig.Instance.LayerInfos.Select(o => o.Layer).ToList();
+                vm.ShearWallVisitor.LayerFilter = ThExtractShearWallConfig.Instance.LayerInfos.Select(o => o.Layer).ToHashSet();
             }
 
             if(YnExtractShearWall)

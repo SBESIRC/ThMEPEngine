@@ -854,19 +854,19 @@ namespace ThMEPTCH.Services
                 {
                     new THDBFFLExtractionVisitor()
                     {
-                        LayerFilter = new List<string> { "TH-楼板", "TH-降板" },
+                        LayerFilter = new List<string> { "TH-楼板", "TH-降板" }.ToHashSet(),
                     },
                     new THDBRailingExtractionVisitor()
                     {
-                        LayerFilter = new List<string> { "TH-栏杆" },
+                        LayerFilter = new List<string> { "TH-栏杆" }.ToHashSet(),
                     },
                     new THDBHoleExtractionVisitor()
                     {
-                        LayerFilter = new List<string> { "TH-墙洞" },
+                        LayerFilter = new List<string> { "TH-墙洞" }.ToHashSet(),
                     },
                     new THDBRoomExtractionVisitor()
                     {
-                        LayerFilter= new List<string> {ThMEPEngineCore.ThMEPEngineCoreLayerUtils.ROOMOUTLINE },
+                        LayerFilter= new List<string> {ThMEPEngineCore.ThMEPEngineCoreLayerUtils.ROOMOUTLINE }.ToHashSet(),
                     },
                 };
                 var extractor = new ThBuildingElementExtractor();

@@ -117,7 +117,7 @@ namespace ThMEPWSS.SprinklerDim.Data
         private ThBuildingElementVisitorManager Extract(Database database)
         {
             var visitors = new ThBuildingElementVisitorManager(database);
-            visitors.ShearWallVisitor.LayerFilter = ThExtractShearWallConfig.Instance.LayerInfos.Select(x => x.Layer).ToList();
+            visitors.ShearWallVisitor.LayerFilter = ThExtractShearWallConfig.Instance.LayerInfos.Select(x => x.Layer).ToHashSet();
 
             var extractor = new ThBuildingElementExtractorEx();
             extractor.Accept(visitors.DB3ArchWallVisitor);

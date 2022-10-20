@@ -7,12 +7,12 @@ namespace ThMEPEngineCore.Engine
 {
     public abstract class ThBuildingElementExtractionVisitor
     {
-        public List<string> LayerFilter { get; set; }
+        public HashSet<string> LayerFilter { get; set; }
         public List<ThRawIfcBuildingElementData> Results { get; set; }
 
         public ThBuildingElementExtractionVisitor()
         {
-            LayerFilter = new List<string>();
+            LayerFilter = new HashSet<string>();
             Results = new List<ThRawIfcBuildingElementData>();
         }
 
@@ -26,7 +26,7 @@ namespace ThMEPEngineCore.Engine
         }
         public virtual bool CheckLayerValid(Entity curve)
         {
-            return LayerFilter.Where(o => string.Compare(curve.Layer, o, true) == 0).Any();
+            return LayerFilter.Contains(curve.Layer);
         }
         public virtual bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {

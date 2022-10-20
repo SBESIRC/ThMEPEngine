@@ -25,14 +25,14 @@ namespace TianHua.Mep.UI.Data
             var visitor = new ThOtherShearWallExtractionVisitor()
             {
                 BlackVisitors = CreateBlacks(database),
-                LayerFilter = ThDbLayerManager.Layers(database),
+                LayerFilter = ThDbLayerManager.Layers(database).ToHashSet(),
             };
             var extractor = new ThBlockInnerElementExtractor(visitor);
             extractor.Extract(database);
             Results = visitor.Results;
         }
 
-        private List<ThBuildingElementExtractionVisitor> CreateBlacks(Database database)
+        public static List<ThBuildingElementExtractionVisitor> CreateBlacks(Database database)
         {
             var results = new List<ThBuildingElementExtractionVisitor>();
             results.Add(ThShearWallExtractionEngine.Create(database));

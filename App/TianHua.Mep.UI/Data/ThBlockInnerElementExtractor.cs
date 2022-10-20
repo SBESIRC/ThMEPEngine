@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Common;
 
 namespace TianHua.Mep.UI.Data
 {
@@ -30,13 +31,13 @@ namespace TianHua.Mep.UI.Data
                     .ForEach(o =>
                     {
                         var mcs2wcs = o.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        var containers = new List<ContainerInfo>();
+                        var containers = new List<ThContainerInfo>();
                         _visitor.Results.AddRange(DoExtract(o, mcs2wcs, containers));
                     });
             }
         }
 
-        private List<ThRawIfcBuildingElementData> DoExtract(BlockReference blockReference,Matrix3d matrix,List<ContainerInfo> containers)
+        private List<ThRawIfcBuildingElementData> DoExtract(BlockReference blockReference,Matrix3d matrix, List<ThContainerInfo> containers)
         {
             using (var acadDb = AcadDatabase.Use(blockReference.Database))
             {
@@ -48,7 +49,7 @@ namespace TianHua.Mep.UI.Data
                     {
                         // 提取图元信息
                         var newContainers = containers.Select(o => o).ToList();
-                        newContainers.Add(new ContainerInfo(blockReference.GetEffectiveName(), blockReference.Layer));
+                        newContainers.Add(new ThContainerInfo(blockReference.GetEffectiveName(), blockReference.Layer));
                         var objIds = new ObjectIdCollection();
                         if (blockTableRecord.IsDynamicBlock)
                         {
@@ -117,55 +118,5 @@ namespace TianHua.Mep.UI.Data
                 return results;
             }
         }
-    }
-    internal class ContainerInfo
-    {
-        private string _name = "";
-        public string Name
-        {
-            get => _name;
-            set
-            {
-                _name = value;
-            }
-        }
-        private string _layer = "";
-        public string Layer 
-        {
-            get => _layer;
-            set
-            {
-                _layer = value;
-            }
-        }
-        public string ShortName
-        {
-            get
-            {
-                return ThMEPXRefService.OriginalFromXref(Name);
-            }
-        }
-        public string ShortLayer
-        {
-            get
-            {
-                return ThMEPXRefService.OriginalFromXref(Layer);
-            }
-        }
-        public ContainerInfo()
-        {
-            Name = "";
-            Layer = "";
-        }
-        public ContainerInfo(string name, string layer)
-        {
-            _name = name;
-            _layer = layer;
-        }
-    }
-    internal interface ISetContainer
-    {
-        List<ContainerInfo> Containers { get; }
-        void SetContainers(List<ContainerInfo> containers);
     }
 }

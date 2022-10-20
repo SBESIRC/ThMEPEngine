@@ -29,14 +29,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Geometry\ThXbimCoordinateSystem3D.cs" />
-    <Compile Include="Geometry\ThXbimProtoBufExtension.cs" />
-    <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3BrepExtension.cs" />
-    <Compile Include="Ifc2x3\ThXbimSlabEngine.cs" />
-    <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3Builder.cs" />
-    <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3Factory.cs" />
-    <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3GeExtension.cs" />
-    <Compile Include="Ifc2x3\ThProtoBuf2IFC2x3MeshExtension.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3BeamFactory.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3CloneExtension.cs" />
     <Compile Include="Ifc2x3\ThTGL2IFC2x3ColumnFactory.cs" />
@@ -60,27 +52,9 @@
     <Compile Include="ThMEPIFCExportCmds.cs" />
     <Compile Include="ThMEPIFCInternalCmds.cs" />
     <Compile Include="THModelMergeService.cs" />
-    <Compile Include="Ifc2x3\ThProtoBuf2IFCSolid3dExtension.cs" />
     <Compile Include="ThTGL2IFCCommon.cs" />
     <Compile Include="ThTGL2IFCService.cs" />
     <Compile Include="ThTGL2IFCSolid3dExtension.cs" />
-    <Compile Include="Geometry\ThXbimCircle3D.cs" />
-    <Compile Include="Geometry\ThXbimCommon.cs" />
-    <Compile Include="Geometry\ThXbimExtension.cs" />
-    <Compile Include="Geometry\ThXbimPlane3D.cs" />
-    <Compile Include="Geometry\ThXbimRay3D.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="log4net">
-      <Version>2.0.15</Version>
-    </PackageReference>
-    <PackageReference Include="MathNet.Spatial">
-      <Version>0.6.0</Version>
-    </PackageReference>
-    <PackageReference Include="SharpZipLib" Version="1.3.3" />
-    <PackageReference Include="ManagedEsent" Version="1.9.4" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -109,6 +83,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.15" />
+    <PackageReference Include="SharpZipLib" Version="1.3.3" />
+    <PackageReference Include="ManagedEsent" Version="1.9.4" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="Xbim.CobieExpress, Version=4.0.0.0, Culture=neutral, PublicKeyToken=11e3655e576ec5a9, processorArchitecture=MSIL">
       <HintPath>..\..\Externals\Xbim.Essentials\4.x\Xbim.CobieExpress.dll</HintPath>

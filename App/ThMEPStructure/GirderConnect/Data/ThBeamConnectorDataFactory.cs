@@ -101,7 +101,7 @@ namespace ThMEPStructure.GirderConnect.Data
                 var coluLayers = allLayers.Where(o => o.ToUpper().EndsWith("S_COLU")).ToList();
                 var columnVisitor = new ThCurveExtractionVisitor()
                 {
-                    LayerFilter = coluLayers,
+                    LayerFilter = coluLayers.ToHashSet(),
                 };
                 var extractor = new ThBuildingElementExtractor();
                 extractor.Accept(columnVisitor);
@@ -148,7 +148,7 @@ namespace ThMEPStructure.GirderConnect.Data
             var wallLayers = allLayers.Where(o => o.ToUpper().EndsWith("S_WALL")).ToList();
             var visitor = new ThCurveExtractionVisitor()
             {
-                LayerFilter = wallLayers,
+                LayerFilter = wallLayers.ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

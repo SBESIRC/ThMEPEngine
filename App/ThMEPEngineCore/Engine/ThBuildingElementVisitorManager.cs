@@ -1,4 +1,5 @@
-﻿using ThMEPEngineCore.Service;
+﻿using System.Linq;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -28,67 +29,67 @@ namespace ThMEPEngineCore.Engine
             #region ----------非DB3-----------
             ColumnVisitor = new ThColumnExtractionVisitor()
             {
-                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database),
+                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database).ToHashSet(),
             };
             ShearWallVisitor = new ThShearWallExtractionVisitor()
             {
-                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
+                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database).ToHashSet(),
             };            
             AXISLineVisitor = new ThAXISLineExtractionVisitor();
             DrainageWellVisitor = new ThDrainageWellExtractionVisitor()
             {
-                LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             VStructuralElementVisitor = new ThVStructuralElementExtractionVisitor();
             #endregion
             #region ----------DB3-----------
             DB3ArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
             {
-                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             DB3PcArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
             {
-                LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             DB3BeamVisitor = new ThDB3BeamExtractionVisitor()
             {
-                LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database),
+                LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database).ToHashSet(),
             };
             DB3ShearWallVisitor = new ThDB3ShearWallExtractionVisitor()
             {
-                LayerFilter = ThDbLayerManager.Layers(database),
+                LayerFilter = ThDbLayerManager.Layers(database).ToHashSet(),
             };
             DB3ColumnVisitor = new ThDB3ColumnExtractionVisitor()
             {
-                LayerFilter = ThDbLayerManager.Layers(database),
+                LayerFilter = ThDbLayerManager.Layers(database).ToHashSet(),
             };
             DB3WindowVisitor = new ThDB3WindowExtractionVisitor()
             {
-                LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThWindowLayerManager.CurveXrefLayers(database).ToHashSet(),
             };            
             DB3DoorMarkVisitor = new ThDB3DoorMarkExtractionVisitor()
             {
-                LayerFilter = ThDoorMarkLayerManager.XrefLayers(database),
+                LayerFilter = ThDoorMarkLayerManager.XrefLayers(database).ToHashSet(),
             };
             DB3DoorStoneVisitor = new ThDB3DoorStoneExtractionVisitor()
             {
-                LayerFilter = ThDoorStoneLayerManager.XrefLayers(database),
+                LayerFilter = ThDoorStoneLayerManager.XrefLayers(database).ToHashSet(),
             };
             DB3RailingVisitor = new ThDB3RailingExtractionVisitor()
             {
-                LayerFilter = ThRailingLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThRailingLayerManager.CurveXrefLayers(database).ToHashSet(),
             };           
             DB3CorniceVisitor = new ThDB3CorniceExtractionVisitor()
             {
-                LayerFilter = ThCorniceLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThCorniceLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             DB3CurtainWallVisitor = new ThDB3CurtainWallExtractionVisitor()
             {
-                LayerFilter = ThCurtainWallLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThCurtainWallLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             DB3SlabVisitor = new ThDB3SlabExtractionVisitor()
             {
-                LayerFilter = ThSlabLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThSlabLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             DB3StairVisitor = new ThDB3StairExtractionVisitor();
             #endregion

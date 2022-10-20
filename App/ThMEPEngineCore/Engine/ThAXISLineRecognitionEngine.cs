@@ -25,7 +25,7 @@ namespace ThMEPEngineCore.Engine
                     .Select(o => o.Name)
                     .ToList();
             };
-            visitor.LayerFilter = layerNames;
+            visitor.LayerFilter = layerNames.ToHashSet();
             extractor.Accept(visitor);
             extractor.Extract(database);
             Results = visitor.Results;

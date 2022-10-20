@@ -24,7 +24,7 @@ namespace ThMEPEngineCore.Engine
         {
             return new ThShearWallExtractionVisitor()
             {
-                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
+                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database).ToHashSet(),
             };
         }
 

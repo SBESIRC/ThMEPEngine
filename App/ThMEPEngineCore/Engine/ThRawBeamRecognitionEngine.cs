@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThRawBeamExtractionVisitor()
             {
-                LayerFilter = ThBeamLayerManager.GeometryXrefLayers(database),
+                LayerFilter = ThBeamLayerManager.GeometryXrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

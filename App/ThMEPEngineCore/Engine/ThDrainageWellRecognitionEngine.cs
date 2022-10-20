@@ -19,7 +19,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThDrainageWellExtractionVisitor()
             {
-                LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

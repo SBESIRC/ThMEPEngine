@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThDB3BeamExtractionVisitor()
             {
-                LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database),
+                LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

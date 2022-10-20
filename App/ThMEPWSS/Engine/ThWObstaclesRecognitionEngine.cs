@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -15,19 +16,19 @@ namespace ThMEPWSS.Engine
             var extractor = new ThBuildingElementExtractor();
             var windowVisitor = new ThDB3WindowExtractionVisitor()
             {
-                LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThWindowLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var columnVisitor = new ThColumnExtractionVisitor()
             {
-                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database),
+                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database).ToHashSet(),
             };
             var archWallVisitor = new ThDB3ArchWallExtractionVisitor()
             {
-                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var shearWallVisitor = new ThShearWallExtractionVisitor()
             {
-                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
+                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database).ToHashSet(),
             };
 
             extractor.Accept(windowVisitor);

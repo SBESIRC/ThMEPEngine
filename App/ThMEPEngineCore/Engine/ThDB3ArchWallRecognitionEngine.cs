@@ -16,11 +16,11 @@ namespace ThMEPEngineCore.Engine
         {
             var archWallVisitor = new ThDB3ArchWallExtractionVisitor()
             {
-                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var pcArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
             {
-                LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(archWallVisitor);

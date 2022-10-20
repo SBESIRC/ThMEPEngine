@@ -17,7 +17,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThDB3WindowExtractionVisitor()
             {
-                LayerFilter = ThDbLayerManager.Layers(database),
+                LayerFilter = ThDbLayerManager.Layers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

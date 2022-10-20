@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThDB3RailingExtractionVisitor()
             {
-                LayerFilter = ThRailingLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThRailingLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

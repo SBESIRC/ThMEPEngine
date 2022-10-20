@@ -24,6 +24,7 @@ using TianHua.Mep.UI.Data;
 using TianHua.Mep.UI.Command;
 using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Diagnostics;
 
 namespace TianHua.Mep.UI.ViewModel
 {
@@ -99,33 +100,48 @@ namespace TianHua.Mep.UI.ViewModel
         public void ExtractRoomDatas()
         {
             using (var lockDoc = Active.Document.LockDocument())
-            using (ThExtractRoomDataCmd cmd = new ThExtractRoomDataCmd(GetLayers()))
             {
-                cmd.YnExtractShearWall = YnExtractShearWall;
-                cmd.UseConfigShearWallLayer = _shearwallLayerConfigOps == ShearwallLayerConfigOps.LayerConfig;
                 SetFocusToDwgView();
-                cmd.Execute();
-                _rangePts = cmd.RangePts;
-                if (cmd.RangePts.Count >= 3)
+                var rangePts = ThAuxiliaryUtils.GetRange(); //获取布置范围
+                if (rangePts.Count < 3)
                 {
-                    Active.Database.CreateAILayer(AIWallLayer, 7);
-                    EraseEntities(cmd.RangePts, AIWallLayer);
-                    PrintEntities(cmd.Walls, AIWallLayer);
-
-                    Active.Database.CreateAIColumnLayer();
-                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.COLUMN);
-                    PrintEntities(cmd.Columns, ThMEPEngineCoreLayerUtils.COLUMN);
-
-                    Active.Database.CreateAIDoorLayer();
-                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.DOOR);
-                    PrintEntities(cmd.Doors, ThMEPEngineCoreLayerUtils.DOOR);
-
-                    Active.Database.CreateAIShearWallLayer();
-                    EraseEntities(cmd.RangePts, ThMEPEngineCoreLayerUtils.SHEARWALL);
-                    PrintEntities(cmd.ShearWalls, ThMEPEngineCoreLayerUtils.SHEARWALL);
-
-                    SetCurrentLayer(AIWallLayer);
+                    return;
                 }
+                else
+                {
+                    this._rangePts = rangePts;
+                    var config = new ThRoomDataSetConfig()
+                    {
+                        WallLayers = GetLayers(),
+                        YnExtractShearWall = this.YnExtractShearWall,
+                        NeibourRangeDistance = 200.0,
+                        UseConfigShearWallLayer = _shearwallLayerConfigOps == ShearwallLayerConfigOps.LayerConfig,
+                    };
+                    using (var datasetFactory = new ThRoomDataSetFactory(config))
+                    {
+                        ThStopWatchService.Start();
+                        datasetFactory.Create(Active.Database, rangePts);
+                        ThStopWatchService.Stop();
+                        ThStopWatchService.Print("提取墙线耗时：");
+                        Active.Database.CreateAILayer(AIWallLayer, 7);
+                        EraseEntities(rangePts, AIWallLayer);
+                        PrintEntities(datasetFactory.Walls, AIWallLayer);
+
+                        Active.Database.CreateAIColumnLayer();
+                        EraseEntities(rangePts, ThMEPEngineCoreLayerUtils.COLUMN);
+                        PrintEntities(datasetFactory.Columns, ThMEPEngineCoreLayerUtils.COLUMN);
+
+                        Active.Database.CreateAIDoorLayer();
+                        EraseEntities(rangePts, ThMEPEngineCoreLayerUtils.DOOR);
+                        PrintEntities(datasetFactory.Doors, ThMEPEngineCoreLayerUtils.DOOR);
+
+                        Active.Database.CreateAIShearWallLayer();
+                        EraseEntities(rangePts, ThMEPEngineCoreLayerUtils.SHEARWALL);
+                        PrintEntities(datasetFactory.ShearWalls, ThMEPEngineCoreLayerUtils.SHEARWALL);
+                        PrintEntities(datasetFactory.OtherShearWalls, ThMEPEngineCoreLayerUtils.SHEARWALL);
+                        SetCurrentLayer(AIWallLayer);
+                    }
+                }                
             }
         }
         public void BuildRoomOutline()
@@ -533,11 +549,14 @@ namespace TianHua.Mep.UI.ViewModel
             {
                 walls.OfType<Entity>().ForEach(e =>
                 {
-                    acadDb.ModelSpace.Add(e);
-                    e.Layer = layer;
-                    e.ColorIndex = (int)ColorIndex.BYLAYER;
-                    e.LineWeight = LineWeight.ByLayer;
-                    e.Linetype = "ByLayer";
+                    if (e.ObjectId==ObjectId.Null && !e.IsDisposed && !e.IsErased)
+                    {
+                        acadDb.ModelSpace.Add(e);
+                        e.Layer = layer;
+                        e.ColorIndex = (int)ColorIndex.BYLAYER;
+                        e.LineWeight = LineWeight.ByLayer;
+                        e.Linetype = "ByLayer";
+                    }
                 });
             }
         }
