@@ -31,7 +31,7 @@ namespace ThParkingStallServer.Core
             SetCertificatePolicy();
             //Read Datawraper
             var dir = @"C:\AIIIS\DATAIIS";
-            //var LogDir = @"C:\webiis\calParkingTest\Loggers";
+            var LogDir = @"C:\AIIIS\DATAIIS\log";
             var path = dir + $"\\{filename}";
             ReadDataWraperService readDataWraperService = new ReadDataWraperService(path);
             var dataWraper = new DataWraper();
@@ -57,16 +57,15 @@ namespace ThParkingStallServer.Core
                 }
                 var GA_Engine = new ServerGAGenerator(dataWraper);
                 //logger
-                //var LogFileName = Path.Combine(GetPath.GetAppDataPath(), "MPLog.txt");
-                //var DisplayLogFileName = Path.Combine(LogDir, "DisplayLog.txt");
-                //File.Delete(DisplayLogFileName);
-                //var Logger = new Serilog.LoggerConfiguration().WriteTo
-                //                    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
-                //var DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
-                //            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
-                ////
-                //GA_Engine.Logger = Logger;
-                //GA_Engine.DisplayLogger = DisplayLogger;
+                var LogFileName = Path.Combine(LogDir, $"MPLog_{guid}.txt");
+                var DisplayLogFileName = Path.Combine(LogDir, $"DisplayLog_{guid}.txt");
+                var Logger = new Serilog.LoggerConfiguration().WriteTo
+                                    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+                var DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
+                            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
+                //
+                GA_Engine.Logger = Logger;
+                GA_Engine.DisplayLogger = DisplayLogger;
                 //GA_Engine.displayInfo = displayInfos.Last();
                 Solution = GA_Engine.Run().First();
             }
