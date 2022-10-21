@@ -24,14 +24,15 @@ public static partial class ThSUProjectDataReflection {
         string.Concat(
           "ChVUaFNVUHJvamVjdERhdGEucHJvdG8aE1RoVENIUm9vdERhdGEucHJvdG8a",
           "HVRoU1VCdWlsZGluZ0VsZW1lbnREYXRhLnByb3RvGhxUaFNVQ29tcERlZmlu",
-          "aXRpb25EYXRhLnByb3RvIooBCg9UaFNVUHJvamVjdERhdGESHAoEcm9vdBgB",
+          "aXRpb25EYXRhLnByb3RvIqABCg9UaFNVUHJvamVjdERhdGESHAoEcm9vdBgB",
           "IAEoCzIOLlRoVENIUm9vdERhdGESKwoJYnVpbGRpbmdzGAIgAygLMhguVGhT",
           "VUJ1aWxkaW5nRWxlbWVudERhdGESLAoLZGVmaW5pdGlvbnMYAyADKAsyFy5U",
-          "aFNVQ29tcERlZmluaXRpb25EYXRhYgZwcm90bzM="));
+          "aFNVQ29tcERlZmluaXRpb25EYXRhEhQKDGlzX2ZhY2VfbWVzaBgEIAEoCGIG",
+          "cHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThSUBuildingElementDataReflection.Descriptor, global::ThSUCompDefinitionDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUProjectData), global::ThSUProjectData.Parser, new[]{ "Root", "Buildings", "Definitions" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUProjectData), global::ThSUProjectData.Parser, new[]{ "Root", "Buildings", "Definitions", "IsFaceMesh" }, null, null, null, null)
         }));
   }
   #endregion
@@ -75,6 +76,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     root_ = other.root_ != null ? other.root_.Clone() : null;
     buildings_ = other.buildings_.Clone();
     definitions_ = other.definitions_.Clone();
+    isFaceMesh_ = other.isFaceMesh_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -118,6 +120,18 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     get { return definitions_; }
   }
 
+  /// <summary>Field number for the "is_face_mesh" field.</summary>
+  public const int IsFaceMeshFieldNumber = 4;
+  private bool isFaceMesh_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public bool IsFaceMesh {
+    get { return isFaceMesh_; }
+    set {
+      isFaceMesh_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -136,6 +150,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     if (!object.Equals(Root, other.Root)) return false;
     if(!buildings_.Equals(other.buildings_)) return false;
     if(!definitions_.Equals(other.definitions_)) return false;
+    if (IsFaceMesh != other.IsFaceMesh) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -146,6 +161,7 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     if (root_ != null) hash ^= Root.GetHashCode();
     hash ^= buildings_.GetHashCode();
     hash ^= definitions_.GetHashCode();
+    if (IsFaceMesh != false) hash ^= IsFaceMesh.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -170,6 +186,10 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     }
     buildings_.WriteTo(output, _repeated_buildings_codec);
     definitions_.WriteTo(output, _repeated_definitions_codec);
+    if (IsFaceMesh != false) {
+      output.WriteRawTag(32);
+      output.WriteBool(IsFaceMesh);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -186,6 +206,10 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     }
     buildings_.WriteTo(ref output, _repeated_buildings_codec);
     definitions_.WriteTo(ref output, _repeated_definitions_codec);
+    if (IsFaceMesh != false) {
+      output.WriteRawTag(32);
+      output.WriteBool(IsFaceMesh);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -201,6 +225,9 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     }
     size += buildings_.CalculateSize(_repeated_buildings_codec);
     size += definitions_.CalculateSize(_repeated_definitions_codec);
+    if (IsFaceMesh != false) {
+      size += 1 + 1;
+    }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
     }
@@ -221,6 +248,9 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     }
     buildings_.Add(other.buildings_);
     definitions_.Add(other.definitions_);
+    if (other.IsFaceMesh != false) {
+      IsFaceMesh = other.IsFaceMesh;
+    }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
 
@@ -251,6 +281,10 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
           definitions_.AddEntriesFrom(input, _repeated_definitions_codec);
           break;
         }
+        case 32: {
+          IsFaceMesh = input.ReadBool();
+          break;
+        }
       }
     }
   #endif
@@ -279,6 +313,10 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
         }
         case 26: {
           definitions_.AddEntriesFrom(ref input, _repeated_definitions_codec);
+          break;
+        }
+        case 32: {
+          IsFaceMesh = input.ReadBool();
           break;
         }
       }

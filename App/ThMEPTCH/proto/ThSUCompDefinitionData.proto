@@ -1,8 +1,11 @@
 syntax = "proto3";
-import "ThSUFaceData.proto";
+import "ThSUFaceBrepData.proto";
+import "ThSUFaceMeshData.proto";
 
 message ThSUCompDefinitionData {
     string definition_name = 1;
     string ifc_classification = 2;
-    repeated ThSUFaceData faces = 3;
+    string instance_name = 3;
+    repeated ThSUFaceBrepData brep_faces = 4;
+    repeated ThSUFaceMeshData mesh_faces = 5;
 }
