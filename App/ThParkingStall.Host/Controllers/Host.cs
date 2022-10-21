@@ -89,8 +89,8 @@ namespace ThParkingStall.Host.Controllers
             var data_dir = @"C:\AIIIS\DATAIIS";
             if (!IsHost(server))
             {
-                var local_path = data_dir + $"\\{file}";
-                string url = $"{server}:{GlobalParas.tcp_data}/{file}";
+                var local_path = data_dir + $"\\dataWraper\\{file}";
+                string url = $"{server}:{GlobalParas.tcp_data}/dataWraper/{file}";
                 using (WebClient client = new WebClient())
                 {
                     client.Credentials = new NetworkCredential("upload", "Thape123123");
@@ -112,7 +112,9 @@ namespace ThParkingStall.Host.Controllers
             //    }
             //    httpWebResponse.Close();
             //}
-            var appHttp = $"{server}:{GlobalParas.tcp_app}/Cal/RunParkingStall?filename={file}&guid={guid}";
+            var isinhost = IsHost(server);
+            var isinhost_str = isinhost ? "1" : "0";
+            var appHttp = $"{server}:{GlobalParas.tcp_app}/Cal/RunParkingStall?filename={file}&guid={guid}&isinHost={isinhost_str}";
             SetCertificatePolicy();
             List<Byte> pageData = new List<byte>();
             string pageHtml = "";
@@ -124,13 +126,15 @@ namespace ThParkingStall.Host.Controllers
                 pageData = MyWebClient.DownloadData(appHttp).ToList();
             }).Wait(-1);
             pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
+
             //结果从对应服务器返回host服务器
             if (pageHtml.Contains("success") && !IsHost(server))
             {
                 using (WebClient client = new WebClient())
                 {
                     client.Credentials = new NetworkCredential("upload", "Thape123123");
-                    client.DownloadFile($"{server}:{GlobalParas.tcp_data}/genome_{guid}.dat", data_dir + $"\\genome_{guid}.dat");
+                    client.DownloadFile($"{server}:{GlobalParas.tcp_data}/genome/genome_{guid}.dat", data_dir + $"\\genome\\genome_{guid}.dat");
+                    client.DownloadFile($"{server}:{GlobalParas.tcp_data}/log/MPLog_{guid}.txt", data_dir + $"\\log\\MPLog_{guid}.txt");
                 }
             }
             //释放服务器资源
@@ -178,7 +182,7 @@ namespace ThParkingStall.Host.Controllers
     public class RunParkingStall : ControllerBase
     {
         [HttpGet]
-        public string Run(string filename = "",string guid="")
+        public string Run(string filename = "",string guid="",string isinHost="")
         {
             try
             {
@@ -187,7 +191,7 @@ namespace ThParkingStall.Host.Controllers
                 pro.StartInfo.CreateNoWindow = false;
                 pro.StartInfo.UseShellExecute = false;
                 pro.StartInfo.RedirectStandardOutput = true;
-                pro.StartInfo.Arguments = $"{filename} {guid}";
+                pro.StartInfo.Arguments = $"{filename} {guid} {isinHost}";
                 var started = pro.Start();
                 pro.WaitForExit();
                 var rst = pro.StandardOutput.ReadToEnd();

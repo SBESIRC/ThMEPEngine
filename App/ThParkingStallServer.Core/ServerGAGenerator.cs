@@ -52,6 +52,7 @@ namespace ThParkingStallServer.Core
         public Serilog.Core.Logger Logger = null;
         public Serilog.Core.Logger DisplayLogger = null;
         public DisplayInfo displayInfo = null;
+        public bool isNotInHost { get; set; }
         public int ProcessCount;
         //public List<Process> ProcList;//进程列表
         public List<List<Mutex>> MutexLists;//进程锁列表的列表
@@ -285,7 +286,10 @@ namespace ThParkingStallServer.Core
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");
             Logger?.Information($"CPU数量：" + Environment.ProcessorCount.ToString());
-            DisplayLogger?.Information($"预计代数: {IterationCount}\t");
+            //DisplayLogger?.Information($"预计代数: {IterationCount}\t");
+            DisplayLogFilePut.LogDisplayLog($"预计代数: {IterationCount}");
+            if (isNotInHost)
+                DisplayLogFilePut.PutDisplayLogFileToHost();
             //DisplayLogger?.Information($"种群数量: {PopulationSize}\t");
             MCompute.Logger = Logger;
             var stopWatch = new Stopwatch();
@@ -329,7 +333,10 @@ namespace ThParkingStallServer.Core
                 {
                     var strCurIterIndex = $"迭代次数：{CurIteration}";
                     Logger?.Information(strCurIterIndex);
-                    DisplayLogger?.Information(strCurIterIndex + "\t");
+                    //DisplayLogger?.Information(strCurIterIndex + "\t");
+                    DisplayLogFilePut.LogDisplayLog(strCurIterIndex);
+                    if (isNotInHost)
+                        DisplayLogFilePut.PutDisplayLogFileToHost();
                     System.Diagnostics.Debug.WriteLine(strCurIterIndex);
                     System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
                     selected = Selection(pop, out int CurNums);
@@ -364,8 +371,12 @@ namespace ThParkingStallServer.Core
                 //Active.Editor.WriteMessage(strConverged);
                 Logger?.Information(strConverged);
                 if (displayInfo != null) displayInfo.FinalIterations = "最终代数: " + (CurIteration - 1).ToString() + "(" + strConverged + ")";
-                DisplayLogger?.Information("最终代数: " + (CurIteration - 1).ToString() + "\t");
-                DisplayLogger?.Information("收敛情况: " + strConverged + "\t");
+                //DisplayLogger?.Information("最终代数: " + (CurIteration - 1).ToString() + "\t");
+                DisplayLogFilePut.LogDisplayLog("最终代数: " + (CurIteration - 1).ToString());
+                //DisplayLogger?.Information("收敛情况: " + strConverged + "\t");
+                DisplayLogFilePut.LogDisplayLog("收敛情况: " + strConverged);
+                if (isNotInHost)
+                    DisplayLogFilePut.PutDisplayLogFileToHost();
                 stopWatch.Stop();
                 var strTotalMins = $"迭代时间: {stopWatch.Elapsed.TotalMinutes} 分";
                 Logger?.Information(strTotalMins);
@@ -437,9 +448,13 @@ namespace ThParkingStallServer.Core
             }
             Logger?.Information(strCnt);
             var maxCnt = sorted[0].ParkingStallCount;
-            DisplayLogger?.Information("当前车位: " + maxCnt.ToString() + "\t");
+            //DisplayLogger?.Information("当前车位: " + maxCnt.ToString() + "\t");
+            DisplayLogFilePut.LogDisplayLog("当前车位: " + maxCnt.ToString());
             var areaPerStall = sorted[0].Area / maxCnt;
-            DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
+            //DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
+            DisplayLogFilePut.LogDisplayLog("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆");
+            if (isNotInHost)
+                DisplayLogFilePut.PutDisplayLogFileToHost();
             //System.Diagnostics.Debug.WriteLine(strCnt);
             var rst = new List<Genome>();
             // SelectionSize 直接保留

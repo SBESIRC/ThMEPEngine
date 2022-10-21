@@ -66,7 +66,7 @@ namespace ThMEPArchitecture.MultiProcess
             binaryFormatter.Serialize(fileStream, dataWraper); //序列化 参数：流 对象
             fileStream.Close();
             //发送至服务器
-            string url = $"http://172.16.1.84:8089/dataWraper_{guid}.dat";
+            string url = $"http://172.16.1.84:8089/dataWraper/dataWraper_{guid}.dat";
             using (WebClient client = new WebClient())
             {
                 client.Credentials = new NetworkCredential("upload", "Thape123123");
@@ -95,7 +95,7 @@ namespace ThMEPArchitecture.MultiProcess
             using (WebClient client = new WebClient())
             {
                 client.Credentials = new NetworkCredential("upload", "Thape123123");
-                client.DownloadFile($"http://172.16.1.84:8089/genome_{guid}.dat", $"genome_{guid}.dat");
+                client.DownloadFile($"http://172.16.1.84:8089/genome/genome_{guid}.dat", $"genome_{guid}.dat");
             }
             //反序列化
             fileStream = new FileStream($"genome_{guid}.dat", FileMode.Open);

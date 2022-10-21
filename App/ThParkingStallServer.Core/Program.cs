@@ -22,17 +22,19 @@ namespace ThParkingStallServer.Core
     {
         static void Main(string[] args)
         {
-            if (args.Count() != 2)
+            if (args.Count() != 3)
             {
                 return;
             }
             var filename=args[0];
-            var guid=args[1];
+            var guid = args[1];
+            var isNotInHost = args[2] == "0" ? true : false;
             SetCertificatePolicy();
             //Read Datawraper
             var dir = @"C:\AIIIS\DATAIIS";
             var LogDir = @"C:\AIIIS\DATAIIS\log";
-            var path = dir + $"\\{filename}";
+            var path = dir + $"\\dataWraper\\{filename}";
+            DisplayLogFilePut.guid = guid;
             ReadDataWraperService readDataWraperService = new ReadDataWraperService(path);
             var dataWraper = new DataWraper();
             try
@@ -60,17 +62,18 @@ namespace ThParkingStallServer.Core
                 var LogFileName = Path.Combine(LogDir, $"MPLog_{guid}.txt");
                 var DisplayLogFileName = Path.Combine(LogDir, $"DisplayLog_{guid}.txt");
                 var Logger = new Serilog.LoggerConfiguration().WriteTo
-                                    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
-                var DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
-                            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
+                                    .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
+                //var DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
+                //            .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
                 //
+                GA_Engine.isNotInHost = isNotInHost;
                 GA_Engine.Logger = Logger;
-                GA_Engine.DisplayLogger = DisplayLogger;
+                //GA_Engine.DisplayLogger = DisplayLogger;
                 //GA_Engine.displayInfo = displayInfos.Last();
                 Solution = GA_Engine.Run().First();
             }
             //Serialize Genome
-            path = dir + $"\\genome_{guid}.dat";
+            path = dir + $"\\genome\\genome_{guid}.dat";
             FileStream fileStream = new FileStream(path, FileMode.Create);
             BinaryFormatter binaryFormatter = new BinaryFormatter();
             binaryFormatter.Serialize(fileStream, Solution); //序列化 参数：流 对象
@@ -91,6 +94,44 @@ namespace ThParkingStallServer.Core
         static bool RemoteCertificateValidate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors error)
         {
             return true;
+        }
+    }
+
+    public static class DisplayLogFilePut
+    {
+        private static string _guid = null;
+        public static string guid
+        {
+            get { return _guid; }
+            set
+            {
+                _guid = value;
+                DisplayLogFileName= Path.Combine(LogDir, $"DisplayLog_{guid}.txt");
+            }
+        }
+        public static string LogDir = @"C:\AIIIS\DATAIIS\log";
+        public static string DisplayLogFileName = Path.Combine(LogDir, $"DisplayLog_{guid}.txt");
+        public static void LogDisplayLog(string info)
+        {
+            FileStream fs = new FileStream(DisplayLogFileName, FileMode.Append);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine(System.DateTime.Now.ToString() + info);
+            sw.Close();
+            fs.Close();
+        }
+        public static void PutDisplayLogFileToHost()
+        {
+            string url = $"http://172.16.1.84:8089/log/DisplayLog_{guid}.txt";
+            //发送至Host服务器
+            using (WebClient client = new WebClient())
+            {
+                client.Credentials = new NetworkCredential("upload", "Thape123123");
+                //client.UploadProgressChanged += Client_UploadProgressChanged;
+                //client.UploadFileCompleted += Client_UploadFileCompleted;
+                byte[] data = client.UploadFile(new Uri(url), "PUT", DisplayLogFileName);
+                //byte[] data = client.UploadFile(new Uri(url), path);
+                string reply = Encoding.UTF8.GetString(data);
+            }
         }
     }
 }
