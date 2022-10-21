@@ -152,9 +152,15 @@ namespace ThMEPHVAC.FanConnect.Command
                     if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
                     {
                         //提取各种线
-                        var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
-                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
-                        RemoveSPMLine(badLines, ref pipeDims, ref cPipes);
+                        //var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
+                        //RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
+                        //RemoveSPMLine(badLines, ref pipeDims, ref cPipes);
+
+                        var cPipes = ThEquipElementExtractService.GetWaterSpmNew("H-PIPE-C");
+                        RemoveSPMLineNew(treeModel.RootNode, ref pipeDims, ref cPipes);
+                        RemoveSPMLineNew(badLines, ref pipeDims, ref cPipes);
+
+
                     }
 
                     //扩展管路
@@ -214,7 +220,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 RemoveSPMLine(l, ref dims, ref lines);
             }
         }
-        public void RemoveSPMLine(Line baseLine, ref List<Entity> dims, ref List<Line> lines)
+        private void RemoveSPMLine(Line baseLine, ref List<Entity> dims, ref List<Line> lines)
         {
             var box = baseLine.Buffer(440);
             var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection())
@@ -245,7 +251,94 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             RemoveSPMLine(node.Item.PLine, ref dims, ref lines);
         }
-        public void RemoveDims(Line line, ref List<Entity> dims)
+
+
+        public void RemoveSPMLineNew(ThFanTreeNode<ThFanPipeModel> node, ref List<Entity> dims, ref Dictionary<Line, Entity> lines)
+        {
+            foreach (var child in node.Children)
+            {
+                RemoveSPMLineNew(child, ref dims, ref lines);
+            }
+            RemoveSPMLineNew(node.Item.PLine, ref dims, ref lines);
+        }
+
+        public void RemoveSPMLineNew(List<Line> baseLines, ref List<Entity> dims, ref Dictionary<Line, Entity> lines)
+        {
+            foreach (var l in baseLines)
+            {
+                RemoveSPMLineNew(l, ref dims, ref lines);
+            }
+        }
+        private void RemoveSPMLineNew(Line baseLine, ref List<Entity> dims, ref Dictionary<Line, Entity> lines)
+        {
+            var box = baseLine.Buffer(440);
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.Select(x => x.Key).ToCollection())
+            {
+                AllowDuplicate = true,
+            };
+            var dbObjs = spatialIndex.SelectCrossingPolygon(box);
+            var remLines = new List<Line>();
+            foreach (var obj in dbObjs)
+            {
+                if (obj is Line)
+                {
+                    var line = obj as Line;
+                    if (ThFanConnectUtils.IsParallelLine(baseLine, line))
+                    {
+                        remLines.Add(line);
+                        RemoveDimsNew(line, ref dims, ref lines);
+                    }
+                }
+            }
+            foreach (var l in remLines)
+            {
+                lines.Remove(l);
+            }
+        }
+
+        private void RemoveDimsNew(Line line, ref List<Entity> dims, ref Dictionary<Line, Entity> lines)
+        {
+            var box = line.ExtendLine(10).Buffer(10);
+            var remEntity = new List<Entity>();
+            foreach (var e in dims)
+            {
+                if (e is Circle)
+                {
+                    var circle = e as Circle;
+                    if (box.Contains(circle.Center))
+                    {
+                        circle.UpgradeOpen();
+                        circle.Erase();
+                        circle.DowngradeOpen();
+                        remEntity.Add(e);
+                    }
+                }
+                else if (e is BlockReference)
+                {
+                    var blk = e as BlockReference;
+                    if (blk.GetEffectiveName().Contains("AI-分歧管"))
+                    {
+                        if (box.Contains(blk.Position))
+                        {
+                            blk.UpgradeOpen();
+                            blk.Erase();
+                            blk.DowngradeOpen();
+                            remEntity.Add(e);
+                        }
+                    }
+                }
+            }
+            dims = dims.Except(remEntity).ToList();
+
+            lines.TryGetValue(line, out var item);
+            item.UpgradeOpen();
+            item.Erase();
+            item.DowngradeOpen();
+
+        }
+
+
+        private void RemoveDims(Line line, ref List<Entity> dims)
         {
             var box = line.ExtendLine(10).Buffer(10);
             var remEntity = new List<Entity>();

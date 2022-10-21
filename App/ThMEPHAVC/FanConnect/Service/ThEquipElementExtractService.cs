@@ -152,6 +152,41 @@ namespace ThMEPHVAC.FanConnect.Service
                 return retLine;
             }
         }
+        public static Dictionary<Line, Entity > GetWaterSpmNew(string layer)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                var retLine = new Dictionary<Line, Entity>();
+                var tmpLines = database.ModelSpace.OfType<Entity>();
+                foreach (var line in tmpLines)
+                {
+                    if (line.Layer == layer)
+                    {
+                        if (line is Line)
+                        {
+                            retLine.Add(line as Line, line);
+                        }
+                        else if (line is Polyline)
+                        {
+                            var pline = line as Polyline;
+                            var dbObjs = new DBObjectCollection();
+                            pline.Explode(dbObjs);
+                            foreach (var obj in dbObjs)
+                            {
+                                if (obj is Line)
+                                {
+                                    retLine.Add(obj as Line, pline);
+                                }
+                            }
+                        }
+                    }
+
+                }
+                return retLine;
+            }
+        }
+
+
         public static List<Entity> GetPipeDims(string layer)
         {
             using (var database = AcadDatabase.Active())
