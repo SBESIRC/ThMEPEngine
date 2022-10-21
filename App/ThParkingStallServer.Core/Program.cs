@@ -70,7 +70,9 @@ namespace ThParkingStallServer.Core
                 GA_Engine.Logger = Logger;
                 //GA_Engine.DisplayLogger = DisplayLogger;
                 //GA_Engine.displayInfo = displayInfos.Last();
+                DisplayLogFilePut.LogDisplayLog($"开始服务器计算;");
                 Solution = GA_Engine.Run().First();
+                DisplayLogFilePut.LogDisplayLog($"服务器计算结束;");
             }
             //Serialize Genome
             path = dir + $"\\genome\\genome_{guid}.dat";

@@ -51,11 +51,9 @@ namespace ThMEPArchitecture.MultiProcess
     {
         public static string LogFileName = Path.Combine(GetPath.GetAppDataPath(), "MPLog.txt");
         public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
-        public static string DisplayLogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
         public Serilog.Core.Logger Logger = null;
         List<DisplayInfo> displayInfos;
         public static Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
-        public Serilog.Core.Logger DisplayLogger2 = null;//用于记录信息日志
 
         public string DrawingName;
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
@@ -81,8 +79,6 @@ namespace ThMEPArchitecture.MultiProcess
 
             System.IO.FileStream emptyStream = new System.IO.FileStream(DisplayLogFileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
             emptyStream.Close();
-            System.IO.FileStream emptyStream2 = new System.IO.FileStream(DisplayLogFileName2, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-            emptyStream2.Close();
             ParameterStock.Set(ParameterViewModel);
             if (ParameterStock.LogMainProcess)
             {
@@ -90,8 +86,6 @@ namespace ThMEPArchitecture.MultiProcess
                             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
                 DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
                             .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
-                DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
-            .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
             ThParkingStallCoreTools.SetSeed();
             try
@@ -137,8 +131,8 @@ namespace ThMEPArchitecture.MultiProcess
             }
             catch (Exception ex)
             {
-                DisplayLogger2?.Information(ex.Message);
-                DisplayLogger2?.Information("程序出错！");
+                DisplayLogger?.Information(ex.Message);
+                DisplayLogger?.Information("程序出错！");
                 Logger?.Information(ex.Message);
                 Logger?.Information("##################################");
                 Logger?.Information(ex.StackTrace);
@@ -146,10 +140,8 @@ namespace ThMEPArchitecture.MultiProcess
             }
             finally
             {
-                DisplayLogger?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分\n");
-                DisplayLogger?.Information($"地库程序运行结束 \n");
+                DisplayLogger?.Information($"地库程序运行结束,总用时: {_stopwatch.Elapsed.TotalMinutes} 分\n");
                 DisplayLogger?.Dispose();
-                DisplayLogger2?.Dispose();
             }
         }
 
@@ -363,7 +355,9 @@ namespace ThMEPArchitecture.MultiProcess
                 var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
                 Genome Solution;
                 //Solution = GetGenomeInitially(dataWraper);
+                DisplayLogger.Information("发送至服务器计算;");
                 Solution = GetGenomeFromServer(dataWraper);
+                DisplayLogger.Information("接受到服务器计算结果;");
                 ProcessAndDisplay(Solution, i, stopWatch);
             }
         }
@@ -557,24 +551,24 @@ namespace ThMEPArchitecture.MultiProcess
         }
         private void ShowDisplayInfo(int blkCnt)
         {
-            DisplayLogger2?.Information("----------------------------------------------");
-            DisplayLogger2?.Information("----------------------------------------------");
-            DisplayLogger2?.Information("----------------------");
-            DisplayLogger2?.Information("地库总数：" + blkCnt);
-            DisplayLogger2?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分");
-            DisplayLogger2?.Information("----------------------");
+            DisplayLogger?.Information("----------------------------------------------");
+            DisplayLogger?.Information("----------------------------------------------");
+            DisplayLogger?.Information("----------------------");
+            DisplayLogger?.Information("地库总数：" + blkCnt);
+            DisplayLogger?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分");
+            DisplayLogger?.Information("----------------------");
             foreach (var displayInfo in displayInfos)
             {
-                DisplayLogger2?.Information(displayInfo.BlockName);
-                DisplayLogger2?.Information(displayInfo.FinalIterations);
-                DisplayLogger2?.Information(displayInfo.FinalStalls);
-                DisplayLogger2?.Information(displayInfo.FinalAveAreas);
-                DisplayLogger2?.Information(displayInfo.CostTime);
-                DisplayLogger2?.Information("----------------------");
+                DisplayLogger?.Information(displayInfo.BlockName);
+                DisplayLogger?.Information(displayInfo.FinalIterations);
+                DisplayLogger?.Information(displayInfo.FinalStalls);
+                DisplayLogger?.Information(displayInfo.FinalAveAreas);
+                DisplayLogger?.Information(displayInfo.CostTime);
+                DisplayLogger?.Information("----------------------");
             }
-            DisplayLogger2?.Information("----------------------------------------------");
-            DisplayLogger2?.Information("----------------------------------------------");
-            DisplayLogger2?.Information("地库程序运行结束");
+            DisplayLogger?.Information("----------------------------------------------");
+            DisplayLogger?.Information("----------------------------------------------");
+            DisplayLogger?.Information("地库程序运行结束");
         }
         private void ReclaimMemory()
         {
