@@ -9,6 +9,19 @@ namespace ThMEPTCH.Engine
 {
     public class ThTCHCableCarrierFittingExtractionVisitor : ThFlowFittingExtractionVisitor
     {
+        public override bool IsFlowFittingBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         public override void DoExtract(List<ThRawIfcFlowFittingData> elements, Entity dbObj, Matrix3d matrix)
         {
             elements.AddRange(HandleTCHCableCarrierFitting(dbObj, matrix));
@@ -21,7 +34,12 @@ namespace ThMEPTCH.Engine
 
         public override void DoXClip(List<ThRawIfcFlowFittingData> elements, BlockReference blockReference, Matrix3d matrix)
         {
-            //
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid)
+            {
+                xclip.TransformBy(matrix);
+                elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
+            }
         }
 
         public override bool IsFlowFitting(Entity e)
@@ -29,17 +47,20 @@ namespace ThMEPTCH.Engine
             return e.IsTCHCableCarrierFitting();
         }
 
-        public override bool CheckLayerValid(Entity entity)
-        {
-            return true;
-        }
-
         private List<ThRawIfcFlowFittingData> HandleTCHCableCarrierFitting(Entity dbObj, Matrix3d matrix)
         {
-            return new List<ThRawIfcFlowFittingData>()
+            var results = new List<ThRawIfcFlowFittingData>();
+            if(IsFlowFitting(dbObj) && CheckLayerValid(dbObj))
             {
-                dbObj.Database.LoadTCHCableCarrierFitting(dbObj.ObjectId, matrix),
-            };
+                if(dbObj is Curve curve)
+                {
+                    results.Add(new ThRawIfcFlowFittingData()
+                    {
+                        Geometry = curve.GetTCHCableCarrierFittingOutline(matrix)
+                    });
+                }
+            }
+            return results;
         }
     }
 }
