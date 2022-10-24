@@ -254,7 +254,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     if (j == 0)
                                     {
                                         brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(-326, 1300)) { ScaleEx = new Scale3d(-1, 1, 1) });
-                                        brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(-626, 1297)) { Rotate = Math.PI, DynaDict = new() { { "可见性", "平面" }, }, });
+                                        brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(-626, 1297)) { Rotate = Math.PI, DynaDict = new() { { "可见性", "平面" }, }, ScaleEx = new(1, -1, 1), });
                                         if (count >= 1) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-1325, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
                                         if (count >= 2) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-1765, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
                                         if (count >= 3) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(-2214, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
@@ -267,7 +267,7 @@ namespace ThMEPWSS.FireProtectionSystemNs
                                     else
                                     {
                                         brInfos.Add(new BlockInfo("闸阀", "W-FRPT-HYDT-EQPM", px.OffsetXY(326, 1300)));
-                                        brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(626, 1297)) { Rotate = Math.PI, ScaleEx = new Scale3d(-1, 1, 1), DynaDict = new() { { "可见性", "平面" }, }, });
+                                        brInfos.Add(new BlockInfo("Y型过滤器", "W-FRPT-HYDT-EQPM", px.OffsetXY(626, 1297)) { Rotate = Math.PI, ScaleEx = new(-1, -1, 1), DynaDict = new() { { "可见性", "平面" }, } });
                                         if (count >= 1) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(1325, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
                                         if (count >= 2) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(1765, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
                                         if (count >= 3) brInfos.Add(new BlockInfo("喷头系统", "W-FRPT-SPRL-EQPM", px.OffsetXY(2214, 1297)) { Scale = .7, Rotate = Math.PI, DynaDict = new() { { "可见性", "下喷闭式" }, }, });
