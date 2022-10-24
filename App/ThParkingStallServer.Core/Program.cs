@@ -1,7 +1,5 @@
-﻿using NetTopologySuite.Geometries;
-using Serilog;
+﻿using Serilog;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
@@ -11,9 +9,7 @@ using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
-using ThParkingStall.Core.IO;
 using ThParkingStall.Core.OInterProcess;
 
 namespace ThParkingStallServer.Core
@@ -26,7 +22,7 @@ namespace ThParkingStallServer.Core
             {
                 return;
             }
-            var filename=args[0];
+            var filename = args[0];
             var guid = args[1];
             var isNotInHost = args[2] == "0" ? true : false;
             SetCertificatePolicy();
@@ -73,6 +69,8 @@ namespace ThParkingStallServer.Core
                 DisplayLogFilePut.LogDisplayLog($"开始服务器计算;");
                 Solution = GA_Engine.Run().First();
                 DisplayLogFilePut.LogDisplayLog($"服务器计算结束;");
+                if (isNotInHost)
+                    DisplayLogFilePut.PutDisplayLogFileToHost();
             }
             //Serialize Genome
             path = dir + $"\\genome\\genome_{guid}.dat";
@@ -108,7 +106,7 @@ namespace ThParkingStallServer.Core
             set
             {
                 _guid = value;
-                DisplayLogFileName= Path.Combine(LogDir, $"DisplayLog_{guid}.txt");
+                DisplayLogFileName = Path.Combine(LogDir, $"DisplayLog_{guid}.txt");
             }
         }
         public static string LogDir = @"C:\AIIIS\DATAIIS\log";

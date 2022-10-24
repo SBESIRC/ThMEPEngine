@@ -349,6 +349,8 @@ namespace ThMEPArchitecture.MultiProcess
             //layoutData.SetInterParam();
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
+                var guid = (Guid.NewGuid()).ToString();
+                WriteGuidToMemoryFile(guid);
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
                 ParameterStock.RunMode = MultiSolutionList[i];
@@ -356,10 +358,27 @@ namespace ThMEPArchitecture.MultiProcess
                 Genome Solution;
                 //Solution = GetGenomeInitially(dataWraper);
                 DisplayLogger.Information("发送至服务器计算;");
-                Solution = GetGenomeFromServer(dataWraper);
+                Solution = GetGenomeFromServer(dataWraper,guid);
                 DisplayLogger.Information("接受到服务器计算结果;");
                 ProcessAndDisplay(Solution, i, stopWatch);
             }
+        }
+        void WriteGuidToMemoryFile(string data)
+        {
+            //byte[] B = Encoding.UTF8.GetBytes(data);
+            //MemoryMappedFile memory = MemoryMappedFile.CreateOrOpen("AI-guid", B.Length);    // 创建指定大小的内存文件，会在应用程序退出时自动释放
+            //MemoryMappedViewAccessor accessor1 = memory.CreateViewAccessor();               // 访问内存文件对象
+            //accessor1.Flush();
+            //accessor1.WriteArray<byte>(0, B, 0, B.Length);
+            //accessor1.Dispose();
+            //return;
+            string file = Path.Combine(System.IO.Path.GetTempPath(), "AICal_File_id.txt");
+            FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine(data);
+            sw.Close();
+            fs.Close();
+            return;
         }
         Genome GetGenomeInitially(DataWraper dataWraper)
         {
@@ -380,10 +399,10 @@ namespace ThMEPArchitecture.MultiProcess
                 return Solution;
             }
         }
-        Genome GetGenomeFromServer(DataWraper dataWraper)
+        Genome GetGenomeFromServer(DataWraper dataWraper,string guid)
         {
             ServerGenerationService serverGenerationService = new ServerGenerationService();
-            var gene = serverGenerationService.GetGenome(dataWraper);
+            var gene = serverGenerationService.GetGenome(dataWraper,guid);
             return gene;
         }
 

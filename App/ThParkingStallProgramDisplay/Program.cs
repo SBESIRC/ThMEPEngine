@@ -20,7 +20,7 @@ namespace ThParkingStallProgramDisplay
             string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog_process.txt");
 
             var Logger = new Serilog.LoggerConfiguration().WriteTo.File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5),
-            rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
+            rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             try
             {
                 Logger?.Information("创建显示UI进程成功");
@@ -37,14 +37,27 @@ namespace ThParkingStallProgramDisplay
         static void Run(Logger Logger)
         {
             var contents = new List<string>();
-            readLocal(contents, "发送至服务器计算", Logger);
-            //readfromserver(contents, "服务器计算结束", Logger);
-            //readLocal(contents, "地库程序运行结束,总用时", Logger);
+            var endprocess = false;
+            while (true)
+            {
+                readLocal(contents, "发送至服务器计算", Logger,ref endprocess);
+                readfromserver(contents, "服务器计算结束", Logger);
+                endprocess = false;
+                readLocal(contents, "地库程序运行结束,总用时", Logger,ref endprocess, "单地库用时");
+                if (endprocess)
+                    break;
+            }
             Console.ReadKey();
         }
         static void readfromserver(List<string> contents, string end, Logger Logger)
         {
-            var guid = readGuidFromMemory();
+            var guid = readGuidFromMemory(Logger);
+            if (guid == "")
+            {
+                Console.WriteLine("未读取到fileID，接受服务器数据失败");
+                return;
+            }
+            Logger.Information($"guid:{guid}");
             var filename = $"DisplayLog_{guid}.txt";
             Logger.Information(guid);
             var quit = false;
@@ -77,30 +90,50 @@ namespace ThParkingStallProgramDisplay
                                 Console.WriteLine(line);
                                 if (line.Contains(end))
                                 {
+                                    Logger.Information("end:______"+end);
                                     quit = true;
                                     break;
                                 }
                             }
                         }
                     }
+                    fs.Close();
                 }
                 if (quit)
                     break;
                 Thread.Sleep(1 * 1000);
             }
         }
-        static string readGuidFromMemory()
+        static string readGuidFromMemory(Logger Logger)
         {
-            MemoryMappedFile memory = MemoryMappedFile.CreateOrOpen("AI-guid", 36);  // 创建指定大小的内存文件，会在应用程序退出时自动释放
-            MemoryMappedViewAccessor accessor1 = memory.CreateViewAccessor();           // 访问内存文件对象
-            var bytes = new byte[36];
-            accessor1.ReadArray<byte>(0, bytes, 0, bytes.Length);
-            accessor1.Dispose();
-            string str = Encoding.UTF8.GetString(bytes);
-            return str;
+            //MemoryMappedFile memory = MemoryMappedFile.CreateOrOpen("AI-guid", 36);  // 创建指定大小的内存文件，会在应用程序退出时自动释放
+            //MemoryMappedViewAccessor accessor1 = memory.CreateViewAccessor();           // 访问内存文件对象
+            //var bytes = new byte[36];
+            //accessor1.ReadArray<byte>(0, bytes, 0, bytes.Length);
+            //accessor1.Dispose();
+            //string str = Encoding.UTF8.GetString(bytes);
+            //return str;
+
+            string content = "";
+            try
+            {
+                string filepath = Path.Combine(System.IO.Path.GetTempPath(), "AICal_File_id.txt");
+                System.IO.StreamReader file = new System.IO.StreamReader(filepath);
+                while ((content = file.ReadLine()) != null)
+                {
+                    break;
+                }
+                file.Close();
+            }
+            catch(Exception ex)
+            {
+                Logger.Information(ex.ToString());
+                Logger.Information(ex.StackTrace);
+            }
+            return content;
         }
 
-        static void readLocal(List<string> contents,string end, Logger Logger)
+        static void readLocal(List<string> contents, string end, Logger Logger,ref bool endprocess, string continueCycleStr = "")
         {
             string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
             var fs = new FileStream(LogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
@@ -109,6 +142,7 @@ namespace ThParkingStallProgramDisplay
             {
                 try
                 {
+                    fs = new FileStream(LogFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     using (var sr = new StreamReader(fs))
                     {
                         while (!sr.EndOfStream)
@@ -119,6 +153,12 @@ namespace ThParkingStallProgramDisplay
                                 contents.Add(line);
                                 Console.WriteLine(line);
                                 if (line.Contains(end))
+                                {
+                                    quit = true;
+                                    endprocess=true;
+                                    break;
+                                }
+                                else if (continueCycleStr != "" && line.Contains(continueCycleStr))
                                 {
                                     quit = true;
                                     break;
@@ -136,6 +176,7 @@ namespace ThParkingStallProgramDisplay
                     Logger.Information(ex.StackTrace);
                 }
             }
+            fs.Close();
         }
 
         static void _Run(Logger Logger)

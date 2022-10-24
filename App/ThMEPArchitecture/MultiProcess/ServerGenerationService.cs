@@ -54,11 +54,10 @@ namespace ThMEPArchitecture.MultiProcess
         {
 
         }
-        public Genome GetGenome(DataWraper dataWraper)
+        public Genome GetGenome(DataWraper dataWraper, string guid)
         {
             var solution = new Genome();
-            var guid = (Guid.NewGuid()).ToString();
-            WriteGuidToMemoryFile(guid);
+
             //序列化dataWraper
             var dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
             var local_path = dir + $"\\dataWraper_{guid}.dat";
@@ -110,16 +109,7 @@ namespace ThMEPArchitecture.MultiProcess
             solution = readSolution;
             return solution;
         }
-        void WriteGuidToMemoryFile(string data)
-        {
-            byte[] B = Encoding.UTF8.GetBytes(data);
-            MemoryMappedFile memory = MemoryMappedFile.CreateOrOpen("AI-guid", B.Length);    // 创建指定大小的内存文件，会在应用程序退出时自动释放
-            MemoryMappedViewAccessor accessor1 = memory.CreateViewAccessor();               // 访问内存文件对象
-            accessor1.Flush();
-            accessor1.WriteArray<byte>(0, B, 0, B.Length);
-            accessor1.Dispose();
-            return;
-        }
+
         public Genome GetGenomeOld(DataWraper dataWraper)
         {
             var solution = new Genome();
