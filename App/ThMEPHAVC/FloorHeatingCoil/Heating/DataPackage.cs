@@ -75,9 +75,9 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
 
         //散热器
         public static int RadiatorRegion = -1;
-        public static int RadiatorPipeId = -1;
-        public static List<Point3d> RadiatorPointList = new List<Point3d>();
-        public static List<Point3d> OriginalPointList = new List<Point3d>();
+        public static List<int> RadiatorPipeIdList = new List<int>();
+        public static List<Point3d> RadiatorPointList = new List<Point3d>();    
+        public static List<Point3d> RadiatorOriginalPointList = new List<Point3d>();
         public static Vector3d RadiatorDir = new Vector3d();
         public static Polyline RadiatorAddArea = new Polyline();
         static public Vector3d RadiatorOffset = new Vector3d(0, 0, 0);

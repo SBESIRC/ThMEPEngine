@@ -51,6 +51,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             }
             OriginalFirstPoint = FirstPoint;
             OriginalSecondPoint = SecondPoint;
+            ProcessedData.RadiatorOriginalPointList.Add(OriginalFirstPoint);
+            ProcessedData.RadiatorOriginalPointList.Add(OriginalSecondPoint);
             ProcessedData.RadiatorDir = dirReal;
         }
 
@@ -124,7 +126,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             Vector3d radiatorDir = ProcessedData.RadiatorDir;
 
             //waterDir = new Vector3d(-waterDir.Y, waterDir.X, waterDir.Z);
-            Vector3d offset = radiatorDir.GetNormal() * Parameter.WaterSeparatorDis;
+            Vector3d offset = radiatorDir.GetNormal() * Parameter.WaterSeparatorDis*5;
 
             //做矩形，寻找最近点
             Line line0 = new Line(start - offset, start + offset);
@@ -164,8 +166,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             {
                 doorLine = new Line(doorSecond + (start - end), doorSecond);
             }
-            Vector3d waterOffset = start - doorLine.StartPoint;
-            ProcessedData.WaterOffset = waterOffset;
+            //Vector3d waterOffset = start - doorLine.StartPoint;
+            //ProcessedData.WaterOffset = waterOffset;
 
             Polyline differArea = PolylineProcessService.CreateRectangle2(SecondPoint, FirstPoint, 5000);
             DrawUtils.ShowGeometry(differArea, "l3RadiatorDiff", 3, lineWeightNum: 30);
