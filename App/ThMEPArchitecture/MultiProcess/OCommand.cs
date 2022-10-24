@@ -452,6 +452,9 @@ namespace ThMEPArchitecture.MultiProcess
         }
         Polygon ProcessPartitionGlobally(List<OSubArea> subAreas, bool disPlayBound = true)
         {
+            DataToDeformationService dataToDeformationService = new DataToDeformationService(subAreas);
+            var parkingPlaceBlocks = dataToDeformationService.GetParkingPlaceBlocks();
+            //`
             string Boundlayer = "AI-参考地库轮廓";
             var laneLayer = "AI-车道中心线";
             using (AcadDatabase acad = AcadDatabase.Active())

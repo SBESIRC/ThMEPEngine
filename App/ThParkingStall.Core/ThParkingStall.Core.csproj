@@ -69,6 +69,7 @@
     <Compile Include="InterProcess\Gene.cs" />
     <Compile Include="IO\GetPath.cs" />
     <Compile Include="IO\ReadWriteEx.cs" />
+    <Compile Include="LaneDeformation\DataConversion.cs" />
     <Compile Include="LineCleaner\LineService.cs" />
     <Compile Include="MPartitionLayout\Command\MCompute.cs" />
     <Compile Include="MPartitionLayout\Model\MEssentialClasses.cs" />
@@ -93,6 +94,7 @@
     <Compile Include="MPartitionLayout\Utilities\MDebugTools.cs" />
     <Compile Include="MPartitionLayout\Utilities\MGeoUtilities.cs" />
     <Compile Include="MPartitionLayout\Utilities\MNTSExtensions.cs" />
+    <Compile Include="ObliqueMPartitionLayout\DataToDeformationService.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblRamp.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblAdjacentLanes.cs" />
     <Compile Include="ObliqueMPartitionLayout\ObliqueMPartitionClass\OblBusiness.cs" />
