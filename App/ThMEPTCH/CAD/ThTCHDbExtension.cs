@@ -150,6 +150,10 @@ namespace ThMEPTCH.CAD
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var curve = GetCurve(tch);
+                if(curve ==null)
+                {
+                    return null;
+                }
                 dynamic acadObj = curve.AcadObject;
                 bool IsArc()
                 {
