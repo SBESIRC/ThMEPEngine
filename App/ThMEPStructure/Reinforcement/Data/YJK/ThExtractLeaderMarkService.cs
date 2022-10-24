@@ -69,7 +69,7 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
         {
             var visitor = new ThLeaderMarkExtractionVisitor()
             {
-                LayerFilter = layerFilter,
+                LayerFilter = layerFilter.ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

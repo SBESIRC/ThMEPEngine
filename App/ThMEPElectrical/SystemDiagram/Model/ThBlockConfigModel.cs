@@ -91,7 +91,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(1850, 1150, 0),
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "F", new List<string>() { "I/O"} } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "F", new List<string>() { "I/O" } }, { "BOX", new List<string>() { "M" } } },
                 StatisticMode = StatisticType.NoStatisticsRequired,
                 DefaultQuantity = 1
             });
@@ -435,7 +435,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FXDY", "ST" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "FXDY", "ST" } }, { "F", new List<string>() { "ST" } } },
                 CanHidden = true,
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0)
@@ -456,7 +456,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "MJ" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "MJ" } }, { "F", new List<string>() { "MJ" } } },
                 CanHidden = true,
                 ShowText = true,
                 TextPosition = new Point3d(1500, 450, 0)
@@ -493,7 +493,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 ShowAtt = true,
                 attNameValues = new Dictionary<string, string>() { { "F", "I/O" } },
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "DT", "L" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "BOX", new List<string>() { "DT", "L" } }, { "F", new List<string>() { "DT" } } },
                 CanHidden = true,
                 ShowText = true,
                 TextPosition = new Point3d(2250, 450, 0),

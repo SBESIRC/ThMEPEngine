@@ -16,11 +16,11 @@ namespace ThMEPEngineCore.Engine
         {
             var doorMarkVisitor = new ThDB3DoorMarkExtractionVisitor()
             {
-                LayerFilter = ThDoorMarkLayerManager.XrefLayers(database),
+                LayerFilter = ThDoorMarkLayerManager.XrefLayers(database).ToHashSet(),
             };
             var doorStoneVisitor = new ThDB3DoorStoneExtractionVisitor()
             {
-                LayerFilter = ThDoorStoneLayerManager.XrefLayers(database),
+                LayerFilter = ThDoorStoneLayerManager.XrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(doorMarkVisitor);

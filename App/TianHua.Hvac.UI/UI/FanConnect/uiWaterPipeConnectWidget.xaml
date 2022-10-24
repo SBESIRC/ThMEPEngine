@@ -8,7 +8,7 @@
              xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
              mc:Ignorable="d" 
              Closing="ThCustomWindow_Closing"
-             Title="水管连接" Width="415.198" Height="430" >
+             Title="水管连接" Width="415.198" Height="437" >
     <Window.Resources>
         <ResourceDictionary>
             <local1:FanLayoutIntToBool x:Key="layoutTypeConverter"/>
@@ -19,10 +19,11 @@
             </x:Array>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Height="412" VerticalAlignment="Top" Margin="0,0,0,-2">
-        <GroupBox x:Name="groupBox" Header="系统配置" HorizontalAlignment="Left" Height="360" VerticalAlignment="Top" Width="200">
+    <Grid VerticalAlignment="Top" Margin="0,0,0,-2">
+        <GroupBox x:Name="groupBox" Header="系统配置" HorizontalAlignment="Left" Height="402" VerticalAlignment="Top" Width="200">
             <Grid>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -36,9 +37,11 @@
                     <WrapPanel Orientation="Horizontal"  Margin="20,0,00,00">
                         <RadioButton x:Name="radioButton" Content="水系统" Margin="0,0,20,0"
                          IsChecked="{Binding SystemType,Converter={StaticResource layoutTypeConverter},ConverterParameter=0}"
+                         Click="rbSystemType_Click"
                         />
                         <RadioButton x:Name="radioButton1" Content="冷媒系统"
                          IsChecked="{Binding SystemType,Converter={StaticResource layoutTypeConverter},ConverterParameter=1}"
+                         Click="rbSystemType_Click"
                          />
                     </WrapPanel>
                 </StackPanel>
@@ -80,6 +83,15 @@
                     </WrapPanel>
                 </StackPanel>
                 <StackPanel Orientation="Vertical" Grid.Row="5">
+                    <CheckBox x:Name="cbACPipe" IsEnabled="False"  Content="冷媒管径标注：" Margin="0 5 0 0" IsChecked="{Binding IsACPipeDim}"/>
+                    <WrapPanel Orientation="Horizontal" Margin="5 3 0 0" >
+                        <ComboBox  IsEnabled="False" x:Name="cbACPipeConfigFile" Width="150"  ItemsSource="{Binding ACPipeDimConfigFileList,Mode=TwoWay}" 
+                                   SelectedIndex="1" SelectedValue="{Binding ACPipeDimConfigFile,Mode=TwoWay}"
+                                   DisplayMemberPath="FileName" />
+                        <cus:ImageButton  IsEnabled="False" x:Name="btnACPipeOpenFile" Content="..." Width="25"  Margin="3,0,0,0" Command="{Binding ACConfigFileCmd}" />
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Row="6">
                     <Label x:Name="label6" Content="水管起点中心标高："/>
                     <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
                         <Label x:Name="label7" Content="h+"/>
@@ -87,7 +99,7 @@
                         <Label x:Name="label8" Content="m"/>
                     </WrapPanel>
                 </StackPanel>
-                <StackPanel Orientation="Vertical" Grid.Row="6">
+                <StackPanel Orientation="Vertical" Grid.Row="7">
                     <CheckBox x:Name="checkBox3" Content="穿框线处生成阀门" IsChecked="{Binding IsGenerValve}"/>
                     <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
                         <Label x:Name="label9" Content="已选："/>

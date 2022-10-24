@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThDB3CorniceExtractionVisitor()
             {
-                LayerFilter = ThCorniceLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThCorniceLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

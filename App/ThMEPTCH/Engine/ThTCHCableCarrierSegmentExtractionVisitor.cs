@@ -4,11 +4,26 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPTCH.CAD;
+using System.Linq;
+using ThCADExtension;
 
 namespace ThMEPTCH.Engine
 {
     public class ThTCHCableCarrierSegmentExtractionVisitor : ThFlowSegmentExtractionVisitor
     {
+        public override bool IsFlowSegmentBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
         public override void DoExtract(List<ThRawIfcFlowSegmentData> elements, Entity dbObj, Matrix3d matrix)
         {
             elements.AddRange(HandleTCHCableCarrierSegment(dbObj, matrix));
@@ -21,7 +36,12 @@ namespace ThMEPTCH.Engine
 
         public override void DoXClip(List<ThRawIfcFlowSegmentData> elements, BlockReference blockReference, Matrix3d matrix)
         {
-            //
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid)
+            {
+                xclip.TransformBy(matrix);
+                elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
+            }
         }
 
         public override bool IsFlowSegment(Entity e)
@@ -29,17 +49,20 @@ namespace ThMEPTCH.Engine
             return e.IsTCHCableCarrierSegment();
         }
 
-        public override bool CheckLayerValid(Entity curve)
-        {
-            return true;
-        }
-
         private List<ThRawIfcFlowSegmentData> HandleTCHCableCarrierSegment(Entity dbObj, Matrix3d matrix)
         {
-            return new List<ThRawIfcFlowSegmentData>()
+            var results = new List<ThRawIfcFlowSegmentData>();
+            if (IsFlowSegment(dbObj) && CheckLayerValid(dbObj))
             {
-                dbObj.Database.LoadCableCarrierSegmentFromDb(dbObj.ObjectId, matrix),
-            };
+                if (dbObj is Curve curve)
+                {  
+                    results.Add(new ThRawIfcFlowSegmentData()
+                    {
+                        Geometry = curve.GetTCHCableCarrierSegmentOutLine(matrix)
+                    });
+                }
+            }
+            return results;
         }
     }
 }

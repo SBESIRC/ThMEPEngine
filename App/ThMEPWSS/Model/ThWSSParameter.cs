@@ -53,6 +53,8 @@ namespace ThMEPWSS.Model
         public LayoutType layoutType = LayoutType.UpSpray;
         //是否考虑梁
         public bool ConsiderBeam = true;
+        //是否考虑使用天正喷头布置
+        public bool ConsiderTCH = true;
         //盲区表达方式
         public BlindAreaType blindAreaType = BlindAreaType.MedianCircle;
         //喷头间距
@@ -112,13 +114,14 @@ namespace ThMEPWSS.Model
         }
 
         public ThWSSParameter(LayoutSpace space = LayoutSpace.OtherSpace, HazardLevel level = HazardLevel.ThirdLevel, LayoutRange range = LayoutRange.StandardRange,
-            LayoutType type = LayoutType.UpSpray, bool hasBeam = true, BlindAreaType blindArea = BlindAreaType.MedianCircle)
+            LayoutType type = LayoutType.UpSpray, bool hasBeam = true, bool hasTCH = true, BlindAreaType blindArea = BlindAreaType.MedianCircle)
         {
             applicationSite = space;
             hazardLevel = level;
             layoutRange = range;
             layoutType = type;
             ConsiderBeam = hasBeam;
+            ConsiderTCH = hasTCH;
             blindAreaType = blindArea;
         }
     }

@@ -154,7 +154,10 @@ namespace ThMEPWSS.Engine
                     || !block.Bounds.HasValue
                     || !(block.Name.Contains("$TwtSys$00000131")
                         || block.Name.Contains("$ATTACHMENT$00000094")
-                        || block.Name.Contains("$TwtSys$00000125")))
+                        || block.Name.Contains("$TwtSys$00000125")
+                        || block.Name.Contains("$TwtSys$00000128")
+                        || block.Name.Contains("$TwtSys$00000541")
+                        || block.Name.Contains("$TwtSys$00000540")))
                 {
                     continue;
                 }
@@ -196,7 +199,10 @@ namespace ThMEPWSS.Engine
                                      Vector3d.ZAxis, Point3d.Origin));
                     }
                 }
-                else if (block.Name.Contains("$TwtSys$00000125"))
+                else if (block.Name.Contains("$TwtSys$00000125")
+                        || block.Name.Contains("$TwtSys$00000128")
+                        || block.Name.Contains("$TwtSys$00000541")
+                        || block.Name.Contains("$TwtSys$00000540"))
                 {
                     if (dictionary["遮挡管线"] as string == "是")
                     {

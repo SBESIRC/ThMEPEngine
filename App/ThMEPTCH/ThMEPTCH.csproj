@@ -91,7 +91,8 @@
     <Compile Include="Data\ThSUBuildingElementData.cs" />
     <Compile Include="Data\ThSUCompDefinitionData.cs" />
     <Compile Include="Data\ThSUComponentData.cs" />
-    <Compile Include="Data\ThSUFaceData.cs" />
+    <Compile Include="Data\ThSUFaceBrepData.cs" />
+    <Compile Include="Data\ThSUFaceMeshData.cs" />
     <Compile Include="Data\ThSUGeometry.cs" />
     <Compile Include="Data\ThSULoopData.cs" />
     <Compile Include="Data\ThSUMaterialData.cs" />
@@ -218,6 +219,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyServices\THNumPropertyEditor.cs" />
     <Compile Include="PropertyServices\THTextPropertyEditor.cs" />
+    <Compile Include="Services\ThTCHCableTrayOutlineBuilder.cs" />
     <Compile Include="Services\ThArchitectureDescendingService.cs" />
     <Compile Include="Services\ThArchWallFixer.cs" />
     <Compile Include="Services\ThCircleLableGrouper.cs" />

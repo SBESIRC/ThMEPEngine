@@ -8,7 +8,6 @@ namespace ThMEPHVAC.FanConnect.Service
 {
     public class ThQueryDNService
     {
-
         public string QuerySupplyPipeDN(string coeff, double flow)
         {
             string strDN = "DN100";
@@ -23,7 +22,6 @@ namespace ThMEPHVAC.FanConnect.Service
 
             return strDN;
         }
-
         public string QueryCondPipeDN(double flow)//查询冷凝水管 管径
         {
             string strDN = "DN25";
@@ -251,7 +249,6 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             return strDN;
         }
-
         public static int QuerySupplyPipeDNInt(string coeff, double flow)
         {
             int dn = 100;
@@ -494,7 +491,50 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             return dn;
         }
+        public static Tuple<double, double> QueryACPipeDNInt(double flow, List<Tuple<double, double>> gasDNList, List<Tuple<double, double>> liquidDNList)
+        {
+            //气
+            var dnGas = GetDN(flow, gasDNList);
 
+            //液
+            var dnLiquid = GetDN(flow, liquidDNList);
+
+            var dn = new Tuple<double, double>(dnGas, dnLiquid);
+            return dn;
+
+        }
+
+        private static double GetDN(double flow, List<Tuple<double, double>> dnList)
+        {
+            double dn = 25;
+            if (dnList.Count > 0)
+            {
+                dn = dnList.First().Item2;
+
+                for (int i = 0; i < dnList.Count; i++)
+                {
+                    var rangeDown = 0.0;
+                    if (i != 0)
+                    {
+                        rangeDown = dnList[i - 1].Item1;
+                    }
+                    var rangeUp = dnList[i].Item1;
+                    if (rangeDown <= flow && flow < rangeUp)
+                    {
+                        dn = dnList[i].Item2;
+                        break;
+                    }
+                }
+
+                if (dnList.Last().Item1 <= flow)
+                {
+                    dn = dnList.Last().Item2;
+                }
+            }
+
+            return dn;
+
+        }
 
     }
 }

@@ -14,6 +14,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.Config;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -45,6 +46,7 @@ namespace ThMEPEngineCore.Engine
         private Action<Database, Point3dCollection> GetData;
 
         public bool YnExtractShearWall { get; set; } = true;
+        public bool UseConfigShearWallLayer { get; set; } = false;
 
         public ThRoomdata(bool isUseOldMode)
         {
@@ -150,6 +152,11 @@ namespace ThMEPEngineCore.Engine
             extractor.Accept(vm.DB3CorniceVisitor);
             extractor.Accept(vm.DB3CurtainWallVisitor);
             extractor.Accept(vm.DB3ShearWallVisitor);
+
+            if(UseConfigShearWallLayer)
+            {
+                vm.ShearWallVisitor.LayerFilter = ThExtractShearWallConfig.Instance.LayerInfos.Select(o => o.Layer).ToHashSet();
+            }
 
             if(YnExtractShearWall)
             {

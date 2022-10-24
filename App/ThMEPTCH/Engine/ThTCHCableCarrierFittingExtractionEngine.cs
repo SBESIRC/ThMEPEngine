@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPTCH.Engine
 {
@@ -16,12 +17,26 @@ namespace ThMEPTCH.Engine
     {
         public override void Extract(Database database)
         {
-            throw new NotImplementedException();
+            var visitor = new ThTCHCableCarrierFittingExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
+            var extractor = new ThFlowFittingExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results.AddRange(visitor.Results);
         }
 
         public override void ExtractFromMS(Database database)
         {
-            throw new NotImplementedException();
+            var visitor = new ThTCHCableCarrierFittingExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
+            var extractor = new ThFlowFittingExtractor();
+            extractor.Accept(visitor);
+            extractor.ExtractFromMS(database);
+            Results.AddRange(visitor.Results);
         }
 
         public override void ExtractFromEditor(Point3dCollection frame)

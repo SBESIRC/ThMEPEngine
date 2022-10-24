@@ -15,7 +15,7 @@ namespace ThMEPWSS.Command
     {
         private readonly PressureDrainageSystemDiagramVieModel _vm;
         public Point3d InsertPt { get; set; }
-        public bool Debug = true;
+        public bool Debug = false;
         public ThUNDPDrainageSystemDiagramCmd(PressureDrainageSystemDiagramVieModel pressureDrainageViewModel = null)
         {
             ActionName = "生成";

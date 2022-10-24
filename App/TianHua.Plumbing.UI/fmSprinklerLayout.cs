@@ -78,13 +78,13 @@ namespace TianHua.Plumbing.UI
 
         private void BtnLayout_Click(object sender, EventArgs e)
         {
-            if (FuncStr.NullToStr(ComBoxDeadZone.EditValue) == "圆形-高精度")
-            {
-                if (XtraMessageBox.Show("高精度的圆形盲区检测耗时较长,是否继续？", "提示", MessageBoxButtons.YesNo) == DialogResult.No)
-                {
-                    return;
-                }
-            }
+            //if (FuncStr.NullToStr(ComBoxDeadZone.EditValue) == "圆形-高精度")
+            //{
+            //    if (XtraMessageBox.Show("高精度的圆形盲区检测耗时较长,是否继续？", "提示", MessageBoxButtons.YesNo) == DialogResult.No)
+            //    {
+            //        return;
+            //    }
+            //}
 
             //聚焦到CAD
             SetFocusToDwgView();
@@ -95,13 +95,13 @@ namespace TianHua.Plumbing.UI
 
         private void BtnCheck_Click(object sender, EventArgs e)
         {
-            if (FuncStr.NullToStr(ComBoxDeadZone.EditValue) == "圆形-高精度")
-            {
-                if (XtraMessageBox.Show("高精度的圆形盲区检测耗时较长,是否继续？", "提示", MessageBoxButtons.YesNo) == DialogResult.No)
-                {
-                    return;
-                }
-            }
+            //if (FuncStr.NullToStr(ComBoxDeadZone.EditValue) == "圆形-高精度")
+            //{
+            //    if (XtraMessageBox.Show("高精度的圆形盲区检测耗时较长,是否继续？", "提示", MessageBoxButtons.YesNo) == DialogResult.No)
+            //    {
+            //        return;
+            //    }
+            //}
 
             //聚焦到CAD
             SetFocusToDwgView();
@@ -238,28 +238,45 @@ namespace TianHua.Plumbing.UI
         }
 
         /// <summary>
+        /// 是否考虑生成天正喷头
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CheckLayoutTCH_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.CheckLayoutTCH.Checked)
+            {
+                ThWSSUIService.Instance.Parameter.ConsiderTCH = true;
+            }
+            else
+            {
+                ThWSSUIService.Instance.Parameter.ConsiderTCH = false;
+            }
+        }
+
+        /// <summary>
         /// 盲区表达方式
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void ComBoxDeadZone_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (ComBoxDeadZone.Text == "矩形")
-            {
-                //ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.Rectangle;
-            }
-            else if (ComBoxDeadZone.Text == "圆形-低精度")
-            {
-                ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.SmallCircle;
-            }
-            else if (ComBoxDeadZone.Text == "圆形-中精度")
-            {
-                ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.MedianCircle;
-            }
-            else if (ComBoxDeadZone.Text == "圆形-高精度")
-            {
-                ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.BigCircle;
-            }
+            //if (ComBoxDeadZone.Text == "矩形")
+            //{
+            //    //ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.Rectangle;
+            //}
+            //else if (ComBoxDeadZone.Text == "圆形-低精度")
+            //{
+            //    ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.SmallCircle;
+            //}
+            //else if (ComBoxDeadZone.Text == "圆形-中精度")
+            //{
+            //    ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.MedianCircle;
+            //}
+            //else if (ComBoxDeadZone.Text == "圆形-高精度")
+            //{
+            //    ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.BigCircle;
+            //}
         }
 
         private void BtnHelp_Click(object sender, EventArgs e)

@@ -5,6 +5,7 @@ using GeometryExtensions;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.FanConnect.Model;
@@ -151,6 +152,41 @@ namespace ThMEPHVAC.FanConnect.Service
                 return retLine;
             }
         }
+        public static Dictionary<Line, Entity > GetWaterSpmNew(string layer)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                var retLine = new Dictionary<Line, Entity>();
+                var tmpLines = database.ModelSpace.OfType<Entity>();
+                foreach (var line in tmpLines)
+                {
+                    if (line.Layer == layer)
+                    {
+                        if (line is Line)
+                        {
+                            retLine.Add(line as Line, line);
+                        }
+                        else if (line is Polyline)
+                        {
+                            var pline = line as Polyline;
+                            var dbObjs = new DBObjectCollection();
+                            pline.Explode(dbObjs);
+                            foreach (var obj in dbObjs)
+                            {
+                                if (obj is Line)
+                                {
+                                    retLine.Add(obj as Line, pline);
+                                }
+                            }
+                        }
+                    }
+
+                }
+                return retLine;
+            }
+        }
+
+
         public static List<Entity> GetPipeDims(string layer)
         {
             using (var database = AcadDatabase.Active())
@@ -189,14 +225,16 @@ namespace ThMEPHVAC.FanConnect.Service
                 {
                     if (ent.Layer.ToUpper() == layer)
                     {
-                        if (ent is DBText)
+                        if (ent is DBText text)
                         {
-                            retData.Add(ent);
+                            if (IsCondMark(text.TextString) || IsACMark(text.TextString))
+                            {
+                                retData.Add(ent);
+                            }
                         }
-                        else if (ent is BlockReference)
+                        else if (ent is BlockReference blk)
                         {
-                            var blk = ent as BlockReference;
-                            if (blk.GetEffectiveName().Contains("AI-水管多排标注"))
+                            if (blk.GetEffectiveName().Contains(ThFanConnectCommon.BlkName_PipeDimPre))
                             {
                                 retData.Add(ent);
                             }
@@ -205,6 +243,18 @@ namespace ThMEPHVAC.FanConnect.Service
                 }
                 return retData;
             }
+        }
+
+        public static bool IsCondMark(string value)
+        {
+            var dtIsCondMark = Regex.IsMatch(value, @"\s*C\s+D"); //冷凝
+            return dtIsCondMark;
+        }
+        public static bool IsACMark(string value)
+        {
+            //var dtIsACMark = Regex.IsMatch(value, @"\w*\/\w*"); //冷媒
+            var dtIsACMark = Regex.IsMatch(value, @"[%%C]\d*?\.*\d*\/[%%C]\d*?\.*\d*");
+            return dtIsACMark;
         }
     }
 }

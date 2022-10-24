@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -44,6 +45,21 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
+
+                    //读取冷媒管径配置表
+                    var gasDNList = new List<Tuple<double, double>>();
+                    var liquidDNList = new List<Tuple<double, double>>();
+                    if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1 && ConfigInfo.WaterSystemConfigInfo.IsACPipeDim)
+                    {
+                        var file = ConfigInfo.WaterSystemConfigInfo.ACPipeDimConfigFile.FullPath;
+                        var bRead = ThFanConnectDataUtil.ReadCoolACPipeDNConfig(file, ref gasDNList, ref liquidDNList);
+                        if (bRead == false)
+                        {
+                            Active.Editor.WriteMessage("冷媒管管径配置有误，请检查修改\n");
+                            return;
+                        }
+                    }
+
                     //提取水管路由
                     var pipes = ThEquipElementExtractService.GetFanPipes(startPt, ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe, ConfigInfo.WaterSystemConfigInfo.IsCWPipe);
                     if (pipes.Count == 0)
@@ -90,6 +106,9 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu);
                     }
+                    //检查末端断管图块方向
+                    ThCheckUpdateEndBlkDir.UpdateEndBlkDir(treeModel.RootNode);
+
                     if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                     {
                         double fanWidth = 600;
@@ -133,9 +152,15 @@ namespace ThMEPHVAC.FanConnect.Command
                     if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
                     {
                         //提取各种线
-                        var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
-                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
-                        RemoveSPMLine(badLines, ref pipeDims, ref cPipes);
+                        //var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
+                        //RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
+                        //RemoveSPMLine(badLines, ref pipeDims, ref cPipes);
+
+                        var cPipes = ThEquipElementExtractService.GetWaterSpmNew("H-PIPE-C");
+                        RemoveSPMLineNew(treeModel.RootNode, ref pipeDims, ref cPipes);
+                        RemoveSPMLineNew(badLines, ref pipeDims, ref cPipes);
+
+
                     }
 
                     //扩展管路
@@ -170,7 +195,7 @@ namespace ThMEPHVAC.FanConnect.Command
                         ThPointTreeModelService.CalNodeLevel(flowCalTree);
                         ThPointTreeModelService.CheckMarkForLevel(flowCalTree);
                         ThPointTreeModelService.CalNodeFlowValue(flowCalTree, fcus);
-                        ThPointTreeModelService.CalNodeDimValue(flowCalTree, ConfigInfo.WaterSystemConfigInfo.FrictionCoeff);
+                        ThPointTreeModelService.CalNodeDimValue(flowCalTree, ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, gasDNList, liquidDNList);
                         ThPointTreeModelService.CheckDimChange(flowCalTree);
 
                         ThPointTreeModelService.PrintTree(flowCalTree, "l0node");
@@ -181,9 +206,6 @@ namespace ThMEPHVAC.FanConnect.Command
                         //pipeMarkServiece.PipeMark(pointTreeModel);
                         pipeMarkServiece.UpdateMark(flowCalTree, pipeTreeNodes, markes);
                     }
-
-
-
                 }
             }
             catch (Exception ex)
@@ -198,7 +220,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 RemoveSPMLine(l, ref dims, ref lines);
             }
         }
-        public void RemoveSPMLine(Line baseLine, ref List<Entity> dims, ref List<Line> lines)
+        private void RemoveSPMLine(Line baseLine, ref List<Entity> dims, ref List<Line> lines)
         {
             var box = baseLine.Buffer(440);
             var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection())
@@ -229,7 +251,94 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             RemoveSPMLine(node.Item.PLine, ref dims, ref lines);
         }
-        public void RemoveDims(Line line, ref List<Entity> dims)
+
+
+        public void RemoveSPMLineNew(ThFanTreeNode<ThFanPipeModel> node, ref List<Entity> dims, ref Dictionary<Line, Entity> lines)
+        {
+            foreach (var child in node.Children)
+            {
+                RemoveSPMLineNew(child, ref dims, ref lines);
+            }
+            RemoveSPMLineNew(node.Item.PLine, ref dims, ref lines);
+        }
+
+        public void RemoveSPMLineNew(List<Line> baseLines, ref List<Entity> dims, ref Dictionary<Line, Entity> lines)
+        {
+            foreach (var l in baseLines)
+            {
+                RemoveSPMLineNew(l, ref dims, ref lines);
+            }
+        }
+        private void RemoveSPMLineNew(Line baseLine, ref List<Entity> dims, ref Dictionary<Line, Entity> lines)
+        {
+            var box = baseLine.Buffer(440);
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.Select(x => x.Key).ToCollection())
+            {
+                AllowDuplicate = true,
+            };
+            var dbObjs = spatialIndex.SelectCrossingPolygon(box);
+            var remLines = new List<Line>();
+            foreach (var obj in dbObjs)
+            {
+                if (obj is Line)
+                {
+                    var line = obj as Line;
+                    if (ThFanConnectUtils.IsParallelLine(baseLine, line))
+                    {
+                        remLines.Add(line);
+                        RemoveDimsNew(line, ref dims, ref lines);
+                    }
+                }
+            }
+            foreach (var l in remLines)
+            {
+                lines.Remove(l);
+            }
+        }
+
+        private void RemoveDimsNew(Line line, ref List<Entity> dims, ref Dictionary<Line, Entity> lines)
+        {
+            var box = line.ExtendLine(10).Buffer(10);
+            var remEntity = new List<Entity>();
+            foreach (var e in dims)
+            {
+                if (e is Circle)
+                {
+                    var circle = e as Circle;
+                    if (box.Contains(circle.Center))
+                    {
+                        circle.UpgradeOpen();
+                        circle.Erase();
+                        circle.DowngradeOpen();
+                        remEntity.Add(e);
+                    }
+                }
+                else if (e is BlockReference)
+                {
+                    var blk = e as BlockReference;
+                    if (blk.GetEffectiveName().Contains("AI-分歧管"))
+                    {
+                        if (box.Contains(blk.Position))
+                        {
+                            blk.UpgradeOpen();
+                            blk.Erase();
+                            blk.DowngradeOpen();
+                            remEntity.Add(e);
+                        }
+                    }
+                }
+            }
+            dims = dims.Except(remEntity).ToList();
+
+            lines.TryGetValue(line, out var item);
+            item.UpgradeOpen();
+            item.Erase();
+            item.DowngradeOpen();
+
+        }
+
+
+        private void RemoveDims(Line line, ref List<Entity> dims)
         {
             var box = line.ExtendLine(10).Buffer(10);
             var remEntity = new List<Entity>();

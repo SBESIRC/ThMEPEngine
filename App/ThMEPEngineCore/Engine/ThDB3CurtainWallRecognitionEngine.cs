@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThDB3CurtainWallExtractionVisitor()
             {
-                LayerFilter = ThCurtainWallLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThCurtainWallLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

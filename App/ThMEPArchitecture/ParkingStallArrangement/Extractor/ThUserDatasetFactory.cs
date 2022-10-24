@@ -81,11 +81,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             var extractor = new ThBuildingElementExtractorEx();
             var boundaryVistor = new ThBoundaryExtractionVisitor()
             {
-                LayerFilter = new List<string> { "地库边界" },
+                LayerFilter = new List<string> { "地库边界" }.ToHashSet(),
             };
             var obstacleVisitor = new ThObstacleExtractionVisitor()
             { 
-                LayerFilter = new List<string> { "障碍物边缘" },
+                LayerFilter = new List<string> { "障碍物边缘" }.ToHashSet(),
             };
             extractor.Accept(boundaryVistor);
             extractor.Accept(obstacleVisitor);

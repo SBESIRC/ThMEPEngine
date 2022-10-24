@@ -264,6 +264,7 @@
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="IO\WKT\ThGeometryWKTWriter.cs" />
     <Compile Include="Model\Common\ThBlockInfo.cs" />
+    <Compile Include="Model\Common\ThContainerInfo.cs" />
     <Compile Include="Model\Common\ThLayerInfo.cs" />
     <Compile Include="Model\Hvac\ThIfcVirticalPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSprinkler.cs" />
@@ -826,7 +827,7 @@
     <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
     <PackageReference Include="Newtonsoft.Json">
-      <Version>13.0.1</Version>
+      <Version>9.0.1</Version>
     </PackageReference>
     <PackageReference Include="NPOI">
       <Version>2.5.5</Version>

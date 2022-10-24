@@ -453,20 +453,20 @@ namespace ThMEPEngineCore.Test
                 ThStopWatchService.Start();
                 var archWallVisitor = new ThDB3ArchWallExtractionVisitor()
                 {
-                    LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(acdb.Database),
+                    LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(acdb.Database).ToHashSet(),
                 };
                 var pcArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
                 {
-                    LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(acdb.Database),
+                    LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(acdb.Database).ToHashSet(),
                 };
                 var shearWallVisitor = new ThShearWallExtractionVisitor()
                 {
-                    LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(acdb.Database),
+                    LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(acdb.Database).ToHashSet(),
                 };
                 var db3ShearWallVisitor = new ThDB3ShearWallExtractionVisitor();
                 var columnVisitor = new ThColumnExtractionVisitor()
                 {
-                    LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(acdb.Database),
+                    LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(acdb.Database).ToHashSet(),
                 };
                 var db3ColumnVisitor = new ThDB3ColumnExtractionVisitor();
                 var extractor = new ThBuildingElementExtractor();

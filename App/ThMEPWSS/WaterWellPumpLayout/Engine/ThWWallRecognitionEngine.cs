@@ -15,7 +15,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Engine
         {
             var visitor = new ThWWallExtractionVisitor()
             {
-                LayerFilter = ThWWallLayerManager.XrefLayers(database),
+                LayerFilter = ThWWallLayerManager.XrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

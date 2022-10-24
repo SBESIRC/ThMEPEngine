@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Common;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -44,20 +45,21 @@ namespace ThMEPEngineCore.Engine
                     .ForEach(o =>
                     {
                         var mcs2wcs = o.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        DoExtract(o, mcs2wcs, Visitors);
+                        var containers = new List<ThContainerInfo>();
+                        DoExtract(o, mcs2wcs, Visitors, containers);
                     });
             }
         }
 
         private void DoExtract(BlockReference blockReference,Matrix3d matrix,
-            List<ThBuildingElementExtractionVisitor> visitors)
+            List<ThBuildingElementExtractionVisitor> visitors,List<ThContainerInfo> containers)
         {
             using (var acadDb = AcadDatabase.Use(blockReference.Database))
             {
                 if (!blockReference.BlockTableRecord.IsValid)
                 {
                     return;
-                }
+                }               
                 var blockTableRecord = acadDb.Blocks.Element(blockReference.BlockTableRecord);
                 if (RangePts.Count > 2 && blockReference.Bounds!=null)
                 {
@@ -65,13 +67,15 @@ namespace ThMEPEngineCore.Engine
                     rec.TransformBy(matrix);
                     if (!IsIntersect(rec.GeometricExtents))
                         return;
-                }
+                }                
                 //筛选可以对当前块能操作的Visitor
                 var executableVisitors = visitors.Where(v => v.IsBuildElementBlock(blockTableRecord)).ToList();
                 if (executableVisitors.Count == 0)
                 {
                     return;
                 }
+                var newContainers = containers.Select(o => o).ToList();
+                newContainers.Add(new ThContainerInfo(blockReference.GetEffectiveName(), blockReference.Layer));
                 var recordPreElements = new Dictionary<ThBuildingElementExtractionVisitor,
                     HashSet<ThRawIfcBuildingElementData>>();
                 executableVisitors.ForEach(v =>
@@ -81,6 +85,10 @@ namespace ThMEPEngineCore.Engine
                     var elements = new HashSet<ThRawIfcBuildingElementData>(items);
                     recordPreElements.Add(v, elements);
                     v.Results = new List<ThRawIfcBuildingElementData>();
+                    if (v is ISetContainer iSetContainer)
+                    {
+                        iSetContainer.SetContainers(newContainers);
+                    }
                 });
                 // 提取图元信息
                 foreach (var objId in blockTableRecord)
@@ -93,14 +101,14 @@ namespace ThMEPEngineCore.Engine
                             continue;
                         }
                         var collectBlkVisitors = executableVisitors.
-                            Where(v => v.IsBuildElementBlockReference(blockObj)).ToList();
+                            Where(v => v.IsBuildElementBlockReference(blockObj)).ToList();                        
                         collectBlkVisitors.ForEach(v => v.DoExtract(v.Results, blockObj, matrix));
                         var unCollectBlkVisitors = executableVisitors.
                             Where(v => !v.IsBuildElementBlockReference(blockObj)).ToList();
                         var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                         if (unCollectBlkVisitors.Count > 0)
                         {
-                            DoExtract(blockObj, mcs2wcs, unCollectBlkVisitors);
+                            DoExtract(blockObj, mcs2wcs, unCollectBlkVisitors,newContainers);
                         }
                     }
                     else

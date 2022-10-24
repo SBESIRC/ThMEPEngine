@@ -72,6 +72,40 @@ namespace ThMEPIFC
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THIFCHM", CommandFlags.Modal)]
+        public void THIFCHM()
+        {
+            //选择需要合模的文件
+            var filePath1 = OpenIFCFile("请选择需要合模的IFC文件1:");
+            var filePath2 = OpenIFCFile("请选择需要合模的IFC文件2:");
+            if (string.IsNullOrEmpty(filePath1) || string.IsNullOrEmpty(filePath2))
+            {
+                return;
+            }
+            try
+            {
+                THModelMergeService modelMergeService = new THModelMergeService();
+                var MergeModel = modelMergeService.ModelMerge(filePath1, filePath2);
+                if (!MergeModel.IsNull())
+                {
+                    var path = Path.GetDirectoryName(filePath1);
+                    var fileName = "合模文件";// Path.GetFileNameWithoutExtension(filePath);
+                    var NewFilePath = Path.Combine(path, fileName + DateTime.Now.ToString("yyyyMMddHHmmss") + "-100%.ifc");
+                    Ifc2x3.ThTGL2IFC2x3Builder.SaveIfcModel(MergeModel, NewFilePath);
+                    MergeModel.Dispose();
+                    Active.Database.GetEditor().WriteMessage($"合模成功：已更新IFC文件.[{NewFilePath}]");
+                }
+                else
+                {
+                    throw new System.Exception("合模失败!");
+                }
+            }
+            catch
+            {
+                Active.Database.GetEditor().WriteMessage($"合模失败!");
+            }
+        }
+
         private string OpenIFCFile(string Msg)
         {
             OpenFileDialog dlg = new OpenFileDialog();

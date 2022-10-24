@@ -7,4 +7,5 @@ message ThSUProjectData {
     ThTCHRootData root = 1;
     repeated ThSUBuildingElementData buildings = 2;
     repeated ThSUCompDefinitionData definitions = 3;
+    bool is_face_mesh = 4;
 }

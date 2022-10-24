@@ -5,6 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:s="clr-namespace:System;assembly=mscorlib"
+             xmlns:converters="clr-namespace:TianHua.Mep.UI.Converter"
              xmlns:local="clr-namespace:TianHua.Mep.UI.UI"
                     Title="提取房间框线"
                     SizeToContent="WidthAndHeight"
@@ -16,15 +17,18 @@
                     MaxWidth="400"
                     MaxHeight="500"
              mc:Ignorable="d" Closed="ThCustomWindow_Closed">
-    <Window.Resources>
-        <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
-            <Border x:Name="Border" BorderBrush="Gray" BorderThickness="1.5" CornerRadius="0" Background="White" TextBlock.Foreground="Black">
-                <!--设置控件的边框，圆角，背景色，字体颜色-->
-                <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <!--显示控件的内容-->
-                </ContentPresenter>
-            </Border>
-        </ControlTemplate>
+    <Window.Resources>        
+        <ResourceDictionary>
+            <converters:ShearwallLayerConfigOpsBooleanConverter x:Key="shearwallLayerConfigOpsConverter"/>
+            <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
+                <Border x:Name="Border" BorderBrush="Gray" BorderThickness="1.5" CornerRadius="0" Background="White" TextBlock.Foreground="Black">
+                    <!--设置控件的边框，圆角，背景色，字体颜色-->
+                    <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <!--显示控件的内容-->
+                    </ContentPresenter>
+                </Border>
+            </ControlTemplate>
+        </ResourceDictionary>
     </Window.Resources>
     <Grid Margin="3">
         <Grid.RowDefinitions>
@@ -70,9 +74,20 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <CheckBox Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="0,5,5,0"
+        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                <Label Content="剪力墙图层配置:" />
+                <RadioButton Margin="0,0,0,0" GroupName="ShearWallLayerConfig" Name="rbDefault" Content="默认" VerticalAlignment="Center" IsThreeState="False"
+                             IsChecked="{Binding ShearwallLayerConfigOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                             Converter={StaticResource shearwallLayerConfigOpsConverter},ConverterParameter=0}"/>
+                <RadioButton Margin="5,0,0,0" GroupName="ShearWallLayerConfig" Name="rbLayerConfig" Content="图层配置" VerticalAlignment="Center" IsThreeState="False"
+                             IsChecked="{Binding ShearwallLayerConfigOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                             Converter={StaticResource shearwallLayerConfigOpsConverter},ConverterParameter=1}"/>
+            </StackPanel>
+            <CheckBox HorizontalAlignment="Right" Margin="70,0,0,0" VerticalAlignment="Center"
                   x:Name="chkYnAddShearWall" IsThreeState="False" Content="自动提取剪力墙"
                   IsChecked="{Binding YnExtractShearWall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
         <Grid Grid.Row="3" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition/>

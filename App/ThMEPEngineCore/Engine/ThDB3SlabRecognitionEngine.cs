@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThDB3SlabExtractionVisitor()
             {
-                LayerFilter = ThSlabLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThSlabLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);

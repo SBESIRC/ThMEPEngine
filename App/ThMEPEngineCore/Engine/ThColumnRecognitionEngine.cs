@@ -26,7 +26,7 @@ namespace ThMEPEngineCore.Engine
         {
             return new ThColumnExtractionVisitor()
             {
-                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database),
+                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database).ToHashSet(),
             };
         }
 
