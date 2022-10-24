@@ -179,6 +179,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static List<LineSegment> SplitLine(LineSegment line, Polygon splitter)
         {
+            //has bug
             var tol = 1;
             var linestring = SplitCurve(new LineString(new List<Coordinate>() { line.P0, line.P1 }.ToArray()), new LineString(splitter.Coordinates.Select(p =>
             {
@@ -700,7 +701,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         {
             var project_a = new LineSegment(b.ClosestPoint(a.P0), b.ClosestPoint(a.P1));
             var buffer = project_a.Buffer(1);
-            var splits = SplitLine(b, buffer).Where(e => buffer.Contains(e.MidPoint)).ToList();
+            var splits = SplitCurve(b.ToLineString(), new LineString(buffer.Coordinates)).Where(e => buffer.Contains(e.GetMidPoint())).ToList();
             var length = 0.0;
             splits.ForEach(e => length += e.Length);
             return length;
