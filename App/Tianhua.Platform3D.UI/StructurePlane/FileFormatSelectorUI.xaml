@@ -27,7 +27,7 @@
                 <RadioButton x:Name="rbIFC" Content="  ifc模型" GroupName="FileFormat" IsThreeState="False" Margin="0,5,0,5"
                              IsChecked="{Binding Model.FileFormatOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                     Converter={StaticResource fileFormatSelectConverter},ConverterParameter=1}" />
-                <RadioButton x:Name="rbGET" Content="  缓存文件" GroupName="FileFormat" IsThreeState="False" Margin="0,5,0,5"
+                <RadioButton x:Name="rbGET" Content="  get文件" GroupName="FileFormat" IsThreeState="False" Margin="0,5,0,5"
                              IsChecked="{Binding Model.FileFormatOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                     Converter={StaticResource fileFormatSelectConverter},ConverterParameter=2}" />
             </StackPanel>
