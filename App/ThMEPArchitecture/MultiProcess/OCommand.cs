@@ -39,6 +39,8 @@ using static ThMEPArchitecture.PartitionLayout.DisplayTools;
 using ThParkingStall.Core.Tools;
 using ThParkingStall.Core.ObliqueMPartitionLayout;
 using ThMEPArchitecture.MultiProcess;
+using ThMEPEngineCore.Diagnostics;
+
 using ThParkingStall.Core;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
 
@@ -508,6 +510,10 @@ namespace ThMEPArchitecture.MultiProcess
             GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
             //车道微动
             globalBusiness.DeformLanes();
+
+            PrintTmpOutPut(globalBusiness.drawTmpOutPut0);
+
+
             var caledBound = globalBusiness.CalBound();
             if (disPlayBound) Display(caledBound, 141, Boundlayer);
             if (ObliqueMPartition.AllowProcessEndLanes)
@@ -607,6 +613,12 @@ namespace ThMEPArchitecture.MultiProcess
         public void Dispose()
         {
             //throw new NotImplementedException();
+        }
+
+        public void PrintTmpOutPut(DrawTmpOutPut drawTmpOutPut) 
+        {
+            //打印到CAD
+        
         }
     }
 }

@@ -57,6 +57,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public List<Coordinate> obsVertices = new List<Coordinate>();
         public List<VehicleLane> VehicleLanes = new List<VehicleLane>();
         public Polygon BOUND { get; set; }
+
+
+        public DrawTmpOutPut drawTmpOutPut0;
         public void DeformLanes()
         {
             return;
@@ -183,6 +186,16 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             lanes = _lanes;
             obstacles = _obstacles;
             return;
+        }
+    }
+
+
+    public class DrawTmpOutPut 
+    {
+        public Polygon ppp;
+        public DrawTmpOutPut() 
+        {
+
         }
     }
 }
