@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using ThMEPEngineCore.IO.JSON;
@@ -63,11 +64,21 @@ namespace ThMEPTCH.TCHArchDataConvert
             windows = DataTableToModels<TArchWindow>(dataTable);
             return windows;
         }
-        List<T> DataTableToModels<T>(DataTable dataTable) where T:class 
+        private List<T> DataTableToModels<T>(DataTable dt) where T:class 
         {
-            var jsonStr = JsonHelper.ToJson(dataTable);
-            var resList = JsonHelper.DeserializeJsonToList<T>(jsonStr);
-            return resList;
+            var arrayList = new ArrayList();
+            foreach (DataRow dataRow in dt.Rows)
+            {
+                var dictionary = new Dictionary<string, object>();
+                foreach (DataColumn dataColumn in dt.Columns)
+                {
+                    var s_value = dataRow[dataColumn.ColumnName];
+                    dictionary.Add(dataColumn.ColumnName, s_value);
+                }
+                arrayList.Add(dictionary);
+            }
+            var json = JsonHelper.SerializeObject(arrayList);
+            return JsonHelper.DeserializeJsonToList<T>(json);
         }
     }
 }
