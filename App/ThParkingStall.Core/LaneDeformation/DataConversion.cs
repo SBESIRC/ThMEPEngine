@@ -9,10 +9,6 @@ using System.Threading.Tasks;
 
 namespace ThParkingStall.Core.LaneDeformation
 {
-    public class DataConversion
-    {
-
-    }
     //输入
     //车道
     [Serializable]
@@ -23,17 +19,6 @@ namespace ThParkingStall.Core.LaneDeformation
         static public Polygon Boundary;      //地库外框
         static public List<Polygon> Blocks;   //墙体等障碍物
     }
-
-    //车位的集合块
-    [Serializable]
-    public class ParkingPlaceBlock
-    {
-        public VehicleLane FatherVehicleLane; //记录从属于哪个车道
-        public Polygon ParkingPlaceBlockObb; //外包框线
-        public Vector2D BlockDir;        //*生成的朝向
-        public List<SingleParkingPlace> Cars;   //块内包含的车位
-        public List<Column> ColunmList;     //块内包含的柱子
-    }
     //车道
     [Serializable]
     public class VehicleLane
@@ -43,6 +28,16 @@ namespace ThParkingStall.Core.LaneDeformation
         public List<ParkingPlaceBlock> ParkingPlaceBlockList; //某个车道生成的车位的集合起来的块
         public bool IsAnchorLane = false;                                     //不能移动的特殊车道信息
         //public double Width;//最小车道宽度 
+    }
+    //车位的集合块
+    [Serializable]
+    public class ParkingPlaceBlock
+    {
+        public VehicleLane FatherVehicleLane; //记录从属于哪个车道
+        public Polygon ParkingPlaceBlockObb; //外包框线
+        public Vector2D BlockDir;        //*生成的朝向
+        public List<SingleParkingPlace> Cars;   //块内包含的车位
+        public List<Column> ColunmList;     //块内包含的柱子
     }
 
     //车位
