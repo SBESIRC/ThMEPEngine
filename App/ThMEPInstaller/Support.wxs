@@ -24,6 +24,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" Guid="{FA3F8351-30BA-4B0A-A0CC-B3D9B066BE8A}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion_Table" Source="$(var.AutoloaderContentsPath)\Support\提资转换配置表.xlsx" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_TCH_Block_Conversion_Table" Guid="{4117D5DB-544C-425C-91B5-C9FF529CC964}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_TCH_Block_Conversion_Table" Source="$(var.AutoloaderContentsPath)\Support\天正提资转换配置表.xlsx" KeyPath="yes" />
+            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" Guid="{43833F2E-6239-4C90-A71E-61903B3F7A2A}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_HVAC" Source="$(var.AutoloaderContentsPath)\Support\地上给水排水平面图模板.dwg" KeyPath="yes" />
             </Component>
@@ -194,7 +197,6 @@
                 <File Id="FILE_Autoloader_PackageContents_Support_BeamStructure_BuildBeamConfig" Source="$(var.AutoloaderContentsPath)\Support\BeamStructure\BuildBeamConfig.json" KeyPath="yes" />
             </Component>
         </DirectoryRef>
-    
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_PowerDistributionSystem">
             <Component Id="CMP_Autoloader_PackageContents_Support_PDS_LV_AC_ATSE_ImportLibrary_19DX101" Guid="{4FDFFFF3-7F34-4E56-AEE4-81ED9066187C}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_PDS_LV_AC_ATSE_ImportLibrary_19DX101" Source="$(var.AutoloaderContentsPath)\Support\PowerDistributionSystem\LV_AC_ATSE_ImportLibrary_19DX101.xlsx" KeyPath="yes" />
@@ -279,6 +281,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Size_Parameter" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_TCH_Block_Conversion_Table" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Room_Category" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Cable_Routing" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fan_Parameters" />
