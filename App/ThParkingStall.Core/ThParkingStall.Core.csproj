@@ -70,6 +70,7 @@
     <Compile Include="IO\GetPath.cs" />
     <Compile Include="IO\ReadWriteEx.cs" />
     <Compile Include="LaneDeformation\DataConversion.cs" />
+    <Compile Include="LaneDeformation\LaneDeformationService.cs" />
     <Compile Include="LineCleaner\LineService.cs" />
     <Compile Include="MPartitionLayout\Command\MCompute.cs" />
     <Compile Include="MPartitionLayout\Model\MEssentialClasses.cs" />

@@ -184,13 +184,13 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         void ConstructConversionDatas()
         {
             var pureLaneForConversionDatas = ConstructPureLaneForConversionDatas();
-            VehicleLanes.AddRange(pureLaneForConversionDatas.Select(e => new VehicleLane(e.Line, e.Line.Buffer(DisLaneWidth / 2),e.Vec.Normalize())));
+            VehicleLanes.AddRange(pureLaneForConversionDatas.Select(e => new VehicleLane(e.Line, e.Line.Buffer(DisLaneWidth / 2),new PureVector(e.Vec.Normalize().X, e.Vec.Normalize().Y))));
             foreach (var parkingPlaceBlock in ParkingPlaceBlocks)
             {
                 VehicleLanes= VehicleLanes.OrderBy(e => e.CenterLine.MidPoint.Distance(parkingPlaceBlock.SourceLane.MidPoint)).ToList();
                 foreach (var vehicle in VehicleLanes)
-                {
-                    if ((vehicle.Vec - parkingPlaceBlock.BlockDir).Length() > 0.001) continue;
+                {           
+                    if ((new Vector2D(vehicle.Vec.X, vehicle.Vec.Y) - new Vector2D(parkingPlaceBlock.BlockDir.X, parkingPlaceBlock.BlockDir.Y)).Length() > 0.001) continue;
                     if(BelongToLine(parkingPlaceBlock.SourceLane,vehicle.CenterLine))
                     {
                         vehicle.ParkingPlaceBlockList.Add(parkingPlaceBlock);

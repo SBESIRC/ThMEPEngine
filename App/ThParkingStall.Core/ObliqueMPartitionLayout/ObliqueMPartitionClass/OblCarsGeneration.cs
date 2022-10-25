@@ -477,7 +477,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 _addpillars = Pillars.Except(_addpillars).ToList();
                 _SingleParkingPlaces = _addedcars.Select(e =>
                 {
-                    var sp = new SingleParkingPlace(e.Polyline, e.CarLayoutMode, e.Vector, e.Point);
+                    var sp = new SingleParkingPlace(e.Polyline, e.CarLayoutMode, new PureVector(e.Vector.X, e.Vector.Y), e.Point);
                     return sp;
                 }).ToList();
                 _LDColumns = _addpillars.Select(e =>
@@ -508,7 +508,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                     //
                     var sourceLine = iniLineToDataConversion.Translation(-vec.Normalize() * DisLaneWidth / 2);
                     var parkingPlaceBlockObb = PolyFromLines(iniLineToDataConversion, iniLineToDataConversion.Translation(vec.Normalize() * ((isBackBackmodule ? DisVertCarLengthBackBack : length_offset) + DisLaneWidth / 2)));
-                    var parkingPlaceBlock = new ParkingPlaceBlock(sourceLine, parkingPlaceBlockObb, vec.Normalize(), _SingleParkingPlaces, _LDColumns);
+                    var parkingPlaceBlock = new ParkingPlaceBlock(sourceLine, parkingPlaceBlockObb, new PureVector(vec.Normalize().X, vec.Normalize().Y), _SingleParkingPlaces, _LDColumns);
                     ParkingPlaceBlocks.Add(parkingPlaceBlock);
                 }
             } 
