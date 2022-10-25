@@ -115,6 +115,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         public List<Polygon> IniPillar = new List<Polygon>();
         public Polygon CaledBound { get; set; }
         public List<VehicleLane> VehicleLanes = new List<VehicleLane>();
+        public List<ParkingPlaceBlock> ParkingPlaceBlocks = new List<ParkingPlaceBlock>();
         /// <summary>
         /// 在判断生成车道的优先级时记载上一条生成车道的方向，法向，用于提高相同车道方向生成的优先级
         /// </summary>

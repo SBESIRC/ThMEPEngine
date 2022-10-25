@@ -23,9 +23,16 @@ namespace ThParkingStall.Core.LaneDeformation
     [Serializable]
     public class VehicleLane
     {
+        public VehicleLane(LineSegment centerLine, Polygon laneObb, Vector2D vec)
+        {
+            CenterLine=centerLine;
+            LaneObb = laneObb;
+            Vec=vec;
+        }
+        public Vector2D Vec;//接口转换使用数据,目前会认为一条车道线，垂直的两个方向生成车位，其实是两条车道线对应两个相反方向——如果这一步不需要区分，接口可作调整
         public LineSegment CenterLine; //中心线
         public Polygon LaneObb;    //车道外包框线
-        public List<ParkingPlaceBlock> ParkingPlaceBlockList; //某个车道生成的车位的集合起来的块
+        public List<ParkingPlaceBlock> ParkingPlaceBlockList = new List<ParkingPlaceBlock>(); //某个车道生成的车位的集合起来的块
         public bool IsAnchorLane = false;                                     //不能移动的特殊车道信息
         //public double Width;//最小车道宽度 
     }
@@ -33,36 +40,88 @@ namespace ThParkingStall.Core.LaneDeformation
     [Serializable]
     public class ParkingPlaceBlock
     {
-        public VehicleLane FatherVehicleLane; //记录从属于哪个车道
+        public ParkingPlaceBlock(LineSegment sourceLane, Polygon parkingPlaceBlockObb, Vector2D blockDir, List<SingleParkingPlace> cars, List<LDColumn> colunmList)
+        {
+            SourceLane = sourceLane;
+            ParkingPlaceBlockObb = parkingPlaceBlockObb;
+            BlockDir = blockDir;
+            Cars = cars;
+            ColunmList = colunmList;
+            InitColunmProperties();
+            InitCarProperties();
+        }
+        void InitColunmProperties()
+        {
+            ColunmList.ForEach(e => e.FatherParkingPlaceBlock = this);
+        }
+        void InitCarProperties()
+        {
+            Cars.ForEach(e => e.FatherParkingPlaceBlock = this);
+        }
+        public LineSegment SourceLane { get; set; }//接口转换使用数据
+        //记录从属于哪个车道
+        private VehicleLane _FatherVehicleLane = null;
+        public VehicleLane FatherVehicleLane
+        {
+            get { return _FatherVehicleLane; }
+            set
+            {
+                _FatherVehicleLane = value;
+                Cars.ForEach(e => e.FatherVehicleLane = value);
+            }
+        }
         public Polygon ParkingPlaceBlockObb; //外包框线
         public Vector2D BlockDir;        //*生成的朝向
         public List<SingleParkingPlace> Cars;   //块内包含的车位
-        public List<Column> ColunmList;     //块内包含的柱子
+        public List<LDColumn> ColunmList;     //块内包含的柱子
     }
 
     //车位
     [Serializable]
     public class SingleParkingPlace
     {
-        public VehicleLane FatherVehicleLane;             //记录车位从属于哪个车道
-        public ParkingPlaceBlock FatherParkingPlaceBlock; //记录车位从属于哪个块
+        public SingleParkingPlace(Polygon polygon, int type, Vector2D vec)
+        {
+            ParkingPlaceObb=polygon;
+            Type=type;
+            ParkingPlaceDir=vec;
+            InitParas();
+        }
+        void InitParas()
+        {
+            var nums = GetEdges(ParkingPlaceObb).Select(e => e.Length).OrderBy(e => e).ToList();
+            ShortSide = nums[0];
+            LongSide = nums[3];
+        }
+        public VehicleLane FatherVehicleLane { get; set; }        //记录车位从属于哪个车道
+        public ParkingPlaceBlock FatherParkingPlaceBlock { get; set; }  //记录车位从属于哪个块
         public Polygon ParkingPlaceObb;   //车位外包框线
         public int Type;                    //车位类型
         public Vector2D ParkingPlaceDir;   //车位朝向
         public double LongSide;            //长边
         public double ShortSide;           //短边
-        //车位原始块是cad图形数据不好传进来，如果以后需要数据可作补充
-        //public double original;            //*车位原始块,不知道有没有必要 
-        //见柱子注释
-        //public List<Column> ColunmList;  //*块内包含的柱子，暂时可有可无
+                                           //车位原始块是cad图形数据不好传进来，如果以后需要数据可作补充
+                                           //public double original;            //*车位原始块,不知道有没有必要 
+                                           //见柱子注释
+                                           //public List<Column> ColunmList;  //*块内包含的柱子，暂时可有可无
+        static List<LineSegment> GetEdges(Polygon polygon)
+        {
+            List<LineSegment> edges = new List<LineSegment>();
+            for (int i = 0; i < polygon.Coordinates.Count() - 1; i++)
+                edges.Add(new LineSegment(polygon.Coordinates[i], polygon.Coordinates[i + 1]));
+            return edges;
+        }
     }
 
     //柱子
     [Serializable]
-    public class Column
+    public class LDColumn
     {
-        public ParkingPlaceBlock FatherParkingPlaceBlock;    //记录从属于哪一个车位块
-        //
+        public LDColumn(Polygon colunmnObb)
+        {
+            ColunmnObb = colunmnObb;
+        }
+        public ParkingPlaceBlock FatherParkingPlaceBlock { get; set; }    //记录从属于哪一个车位块
         //note:柱子和车位之间的从属关系不是很明确，通常是柱子在两个车位中间的情况
         //public SingleParkingPlace FatherParkingPlace;        //*记录从属于哪一个车位
         public Polygon ColunmnObb;

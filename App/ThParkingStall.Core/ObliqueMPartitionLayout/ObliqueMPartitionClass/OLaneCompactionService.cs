@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
+using ThParkingStall.Core.LaneDeformation;
 using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 
@@ -46,6 +47,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             Pillars = new List<Polygon>();
             Cars = new List<InfoCar>();
             IniPillar = new List<Polygon>();
+            ParkingPlaceBlocks = new List<ParkingPlaceBlock>();
+            VehicleLanes = new List<VehicleLane>();
             //LaneBufferSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
             //LaneBoxes = new List<Polygon>();
             //LaneSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
+using ThParkingStall.Core.LaneDeformation;
 using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 
@@ -21,6 +22,7 @@ bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_
 bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_collision = false)
         {
             int inipillar_count = Pillars.Count;
+            bool isBackBackmodule=false;
             #region 允许柱子穿墙及背靠背对齐对车道线的起始位置调整
             //允许柱子穿墙
             if (allow_pillar_in_wall && GeneratePillars && Obstacles.Count > 0)
@@ -55,6 +57,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 }
             }
             if (line.Length == 0) return;
+
             //背靠背对齐
             if (Math.Abs(length_divided - DisVertCarWidth) < 1 && align_back_to_back)
             {
@@ -95,7 +98,6 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 }
             }
             #endregion
-
             var segobjs = new List<LineSegment>();
             LineSegment[] segs;
             if (GeneratePillars)
@@ -113,6 +115,12 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
             int segscount = segs.Count();
             int c = 0;
             if (segscount == 0) line_align_backback_rest = new LineSegment();
+
+            //data conversion set
+            List<SingleParkingPlace> _SingleParkingPlaces = new List<SingleParkingPlace>();
+            List<LDColumn> _LDColumns=new List<LDColumn>();
+            var _addedcars =new List<InfoCar>(Cars);
+            var _addpillars = new List<Polygon>(Pillars);
 
             foreach (var seg in segs)
             {
@@ -179,7 +187,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                                             CarSpots[carspots_index] = car_exist_transform;
                                             CarSpatialIndex.Update(new List<Polygon>() { car_exist_transform }, new List<Polygon>() { crossed_back_car });
                                         }
-
+                                        isBackBackmodule = true;
                                         s = new LineSegment(seg);
                                         s = s.Translation(vec.Normalize() * (DisVertCarLengthBackBack));
                                         car = PolyFromPoints(new List<Coordinate>() { seg.P0, seg.P1, s.P1, s.P0 });
@@ -356,6 +364,50 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                     #endregion
                 }
             }
+
+            #region data conversion set
+            if (!QuickCalculate)
+            {
+                _addedcars = Cars.Except(_addedcars).ToList();
+                _addpillars = Pillars.Except(_addpillars).ToList();
+                _SingleParkingPlaces = _addedcars.Select(e =>
+                {
+                    var sp = new SingleParkingPlace(e.Polyline, e.CarLayoutMode, e.Vector);
+                    return sp;
+                }).ToList();
+                _LDColumns = _addpillars.Select(e =>
+                {
+                    var ldp = new LDColumn(e);
+                    return ldp;
+                }).ToList();
+                //
+                if (_SingleParkingPlaces.Count > 0)
+                {
+                    var iniLineToDataConversion = new LineSegment(line);
+                    var coords_DataConversion = new List<Coordinate>();
+                    if (_SingleParkingPlaces.Count > 1)
+                    {
+                        coords_DataConversion.AddRange(_SingleParkingPlaces[0].ParkingPlaceObb.Coordinates);
+                        coords_DataConversion.AddRange(_SingleParkingPlaces[_SingleParkingPlaces.Count - 1].ParkingPlaceObb.Coordinates);
+                    }
+                    if (_LDColumns.Count > 1)
+                    {
+                        coords_DataConversion.AddRange(_LDColumns[0].ColunmnObb.Coordinates);
+                        coords_DataConversion.AddRange(_LDColumns[_LDColumns.Count - 1].ColunmnObb.Coordinates);
+                    }
+                    coords_DataConversion = coords_DataConversion.Select(e => line.ClosestPoint(e)).OrderBy(e => line.P0.Distance(e)).ToList();
+                    if (coords_DataConversion.Count >= 2)
+                    {
+                        iniLineToDataConversion = new LineSegment(coords_DataConversion[0], coords_DataConversion[coords_DataConversion.Count - 1]);
+                    }
+                    //
+                    var sourceLine = iniLineToDataConversion.Translation(-vec.Normalize() * DisLaneWidth / 2);
+                    var parkingPlaceBlockObb = PolyFromLines(iniLineToDataConversion, iniLineToDataConversion.Translation(vec.Normalize() * ((isBackBackmodule ? DisVertCarLengthBackBack : length_offset) + DisLaneWidth / 2)));
+                    var parkingPlaceBlock = new ParkingPlaceBlock(sourceLine, parkingPlaceBlockObb, vec.Normalize(), _SingleParkingPlaces, _LDColumns);
+                    ParkingPlaceBlocks.Add(parkingPlaceBlock);
+                }
+            } 
+            #endregion
 
             #region 对生成中柱的场景处理
             if (generate_middle_pillar)
