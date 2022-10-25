@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Runtime.Serialization;
 
 namespace ThAnalytics.SDK
@@ -32,13 +31,6 @@ namespace ThAnalytics.SDK
             this.Key = Key;
             this.Value = Value;
         }
-
-        /// <summary>
-        /// Needed for JSON deserialization
-        /// </summary>
-        [JsonConstructor]
-        private SegmentationItem()
-        { }
 
         public int CompareTo(SegmentationItem other)
         {

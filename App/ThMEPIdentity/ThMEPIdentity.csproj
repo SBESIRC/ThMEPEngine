@@ -100,7 +100,6 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="RestSharp" Version="106.15.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
