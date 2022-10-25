@@ -1,13 +1,18 @@
-﻿using ThCADExtension;
+﻿using System.Linq;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Common;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThWallExtractionVisitor : ThBuildingElementExtractionVisitor
+    public class ThWallExtractionVisitor : ThBuildingElementExtractionVisitor,ISetContainer
     {
+        private List<ThContainerInfo> _containers = new List<ThContainerInfo>();
+        public List<ThContainerInfo> Containers => _containers;
+
         public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
             // 忽略图纸空间
@@ -46,7 +51,55 @@ namespace ThMEPEngineCore.Engine
                     elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
                 }
             }
-        }  
+        }
+        public override bool IsBuildElement(Entity entity)
+        {
+            return base.IsBuildElement(entity) && entity.Visible;
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            if(base.CheckLayerValid(curve))
+            {
+                return true;
+            }
+            else
+            {
+                if(curve.Layer =="0")
+                {
+                    return CheckParentLayer();
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
+        public void SetContainers(List<ThContainerInfo> containers)
+        {
+            this._containers = containers;
+        }
+
+        private bool CheckParentLayer()
+        {
+            if(_containers.Count>0)
+            {
+                var parentLayer = _containers.Last().Layer;
+                if(!string.IsNullOrEmpty(parentLayer))
+                {
+                    return LayerFilter.Contains(parentLayer);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         private List<ThRawIfcBuildingElementData> HandleCurve(Curve curve, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
@@ -57,7 +110,7 @@ namespace ThMEPEngineCore.Engine
                     var clone = curve.WashClone();
                     if (clone != null)
                     {
-                        clone.TransformBy(matrix);
+                        clone.TransformBy(matrix);                       
                         results.Add(new ThRawIfcBuildingElementData()
                         {
                             Geometry = clone,

@@ -2,6 +2,7 @@
 using System.Windows.Data;
 using System.Globalization;
 using TianHua.Mep.UI.ViewModel;
+using ThMEPEngineCore.Config;
 
 namespace TianHua.Mep.UI.Converter
 {

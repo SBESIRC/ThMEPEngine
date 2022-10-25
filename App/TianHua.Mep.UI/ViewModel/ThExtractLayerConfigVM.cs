@@ -1,16 +1,18 @@
 ﻿using System.Linq;
+using System.Windows;
 using System.ComponentModel;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using AcHelper;
 using Linq2Acad;
+using DotNetARX;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model.Common;
-
+using TianHua.Mep.UI.Data;
 namespace TianHua.Mep.UI.ViewModel
 {
     public class ThExtractLayerConfigVM:INotifyPropertyChanged
@@ -19,12 +21,18 @@ namespace TianHua.Mep.UI.ViewModel
         public ObservableCollection<ThLayerInfo> ShearWallLayerInfos { get; set; }
         public ThExtractLayerConfigVM()
         {
-            // 加载配置
-            BeamLayerInfos = new ObservableCollection<ThLayerInfo>(LoadBeamLayers());
-            ShearWallLayerInfos = new ObservableCollection<ThLayerInfo>(LoadShearwallLayers());
-            beamEngineOption = ThExtractBeamConfig.Instance.BeamEngineOption;
+            // 优先从DataBase中读取
+            LoadFromActiveDatabase();
+            if(BeamLayerInfos.Count==0 && ShearWallLayerInfos.Count==0)
+            {
+                // 加载配置
+                BeamLayerInfos = new ObservableCollection<ThLayerInfo>(LoadBeamLayers());
+                ShearWallLayerInfos = new ObservableCollection<ThLayerInfo>(LoadShearwallLayers());
+                _beamEngineOption = ThExtractBeamConfig.Instance.BeamEngineOption;
+                _shearwallLayerConfigOption = ThExtractShearWallConfig.Instance.ShearWallLayerOption;
+            }  
         }
-        private BeamEngineOps beamEngineOption;
+        private BeamEngineOps _beamEngineOption;
         /// <summary>
         /// 梁引擎配置
         /// </summary>
@@ -32,14 +40,30 @@ namespace TianHua.Mep.UI.ViewModel
         {
             get
             {
-                return beamEngineOption;
+                return _beamEngineOption;
             }
             set
             {
-                beamEngineOption = value;
+                _beamEngineOption = value;
                 RaisePropertyChanged("BeamEngineOption");
             }
-        } 
+        }
+        private ShearwallLayerConfigOps _shearwallLayerConfigOption;
+        /// <summary>
+        /// 剪力墙图层配置
+        /// </summary>
+        public ShearwallLayerConfigOps ShearwallLayerConfigOption
+        {
+            get
+            {
+                return _shearwallLayerConfigOption;
+            }
+            set
+            {
+                _shearwallLayerConfigOption = value;
+                RaisePropertyChanged("ShearwallLayerConfigOption");
+            }
+        }
         public void PickBeamLayer()
         {
             // 选择图层
@@ -125,10 +149,14 @@ namespace TianHua.Mep.UI.ViewModel
         }
         public void Save()
         {
-            // 保存配置
+            // 保存配置到内存中
             ThExtractBeamConfig.Instance.LayerInfos = FilterLayers(BeamLayerInfos.ToList());
             ThExtractShearWallConfig.Instance.LayerInfos = FilterLayers(ShearWallLayerInfos.ToList());
-            ThExtractBeamConfig.Instance.BeamEngineOption = this.beamEngineOption;
+            ThExtractBeamConfig.Instance.BeamEngineOption = this._beamEngineOption;
+            ThExtractShearWallConfig.Instance.ShearWallLayerOption = this._shearwallLayerConfigOption;
+
+            // 保存配置到当前Database中
+            SaveToDatabase();
         }
         public void RemoveBeamLayers(List<string> layers)
         {
@@ -152,6 +180,99 @@ namespace TianHua.Mep.UI.ViewModel
                 ShearWallLayerInfos = new ObservableCollection<ThLayerInfo>(layerInfos);
             }
         }
+        private void LoadFromActiveDatabase()
+        {
+            this.BeamLayerInfos = new ObservableCollection<ThLayerInfo>();
+            this.ShearWallLayerInfos = new ObservableCollection<ThLayerInfo>();
+            // 从当前database获取图层
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var extractLayerConfigNamedDictId = acadDb.Database.GetNamedDictionary(ThConfigDataTool.ExtractLayerNamedDictKey);
+                if (extractLayerConfigNamedDictId != ObjectId.Null)
+                {
+                    var beamLayerTvs = extractLayerConfigNamedDictId.GetXrecord(ThConfigDataTool.BeamLayerSearchKey);
+                    if (beamLayerTvs != null)
+                    {
+                        foreach (TypedValue tv in beamLayerTvs)
+                        {
+                            this.BeamLayerInfos.Add(new ThLayerInfo { Layer = tv.Value.ToString() });
+                        }
+                    }
+
+                    var shearWallLayerTvs = extractLayerConfigNamedDictId.GetXrecord(ThConfigDataTool.ShearWallLayerSearchKey);
+                    if (shearWallLayerTvs != null)
+                    {
+                        foreach (TypedValue tv in shearWallLayerTvs)
+                        {
+                            this.ShearWallLayerInfos.Add(new ThLayerInfo { Layer = tv.Value.ToString() });
+                        }
+                    }
+                    var beamEngineOptionTvs = extractLayerConfigNamedDictId.GetXrecord(ThConfigDataTool.BeamEngineOptionSearchKey);
+                    if (beamEngineOptionTvs != null && beamEngineOptionTvs.Count == 1)
+                    {
+                        if ((int)beamEngineOptionTvs[0].Value == 0)
+                        {
+                            this._beamEngineOption = BeamEngineOps.Layer;
+                        }
+                        else if ((int)beamEngineOptionTvs[0].Value == 1)
+                        {
+                            this._beamEngineOption = BeamEngineOps.DB;
+                        }
+                        else
+                        {
+                            this._beamEngineOption = BeamEngineOps.BeamArea;
+                        }
+                    }
+
+                    var shearWallOptionTvs = extractLayerConfigNamedDictId.GetXrecord(ThConfigDataTool.ShearWallOptionSearchKey);
+                    if (shearWallOptionTvs != null && shearWallOptionTvs.Count == 1)
+                    {
+                        if ((int)shearWallOptionTvs[0].Value == 0)
+                        {
+                            this._shearwallLayerConfigOption = ShearwallLayerConfigOps.Default;
+                        }
+                        else if ((int)shearWallOptionTvs[0].Value == 1)
+                        {
+                            this._shearwallLayerConfigOption = ShearwallLayerConfigOps.LayerConfig;
+                        }
+                    }
+                }
+            }
+        }
+        private void SaveToDatabase()
+        {
+            using (var lockDoc = Active.Document.LockDocument())
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var extractLayerConfigNamedDictId = acadDb.Database.GetNamedDictionary(ThConfigDataTool.ExtractLayerNamedDictKey);
+                if (extractLayerConfigNamedDictId == ObjectId.Null)
+                {
+                    extractLayerConfigNamedDictId = acadDb.Database.AddNamedDictionary(ThConfigDataTool.ExtractLayerNamedDictKey);
+                }
+                // 保存梁图层
+                var beamLayerTvs = new TypedValueList();
+                BeamLayerInfos.ForEach(o => beamLayerTvs.Add(DxfCode.ExtendedDataAsciiString, o.Layer));
+                extractLayerConfigNamedDictId.UpdateXrecord(ThConfigDataTool.BeamLayerSearchKey, beamLayerTvs);
+
+                // 保存梁识别引擎
+                var beamEngineOptionTvs = new TypedValueList();
+                beamEngineOptionTvs.Add(DxfCode.Int32, (short)_beamEngineOption);
+                extractLayerConfigNamedDictId.UpdateXrecord(ThConfigDataTool.BeamEngineOptionSearchKey, beamEngineOptionTvs);
+
+                // 保存剪力墙图层
+                var shearWallLayerTvs = new TypedValueList();
+                ShearWallLayerInfos.ForEach(o => shearWallLayerTvs.Add(DxfCode.ExtendedDataAsciiString, o.Layer));
+                extractLayerConfigNamedDictId.UpdateXrecord(ThConfigDataTool.ShearWallLayerSearchKey, shearWallLayerTvs);
+
+                // 保存剪力墙图层配置
+                var shearWallOptionTvs = new TypedValueList();
+                shearWallOptionTvs.Add(DxfCode.Int32, (short)_shearwallLayerConfigOption);
+                extractLayerConfigNamedDictId.UpdateXrecord(ThConfigDataTool.ShearWallOptionSearchKey, shearWallOptionTvs);
+
+                //MessageBox.Show("配置已保存到当前图纸中！", "保存提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
         private List<ThLayerInfo> FilterLayers(List<ThLayerInfo> layerInfos)
         {
             // existed in current database
@@ -165,6 +286,7 @@ namespace TianHua.Mep.UI.ViewModel
             using (var acdb = AcadDatabase.Active())
             {
                 return acdb.Layers
+                    .Where(o => !(o.IsOff || o.IsFrozen))
                     .Where(o => IsSBeamLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
@@ -175,6 +297,7 @@ namespace TianHua.Mep.UI.ViewModel
             using (var acdb = AcadDatabase.Active())
             {
                 return acdb.Layers
+                    .Where(o => !(o.IsOff || o.IsFrozen))
                     .Where(o => IsShearWallLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
@@ -282,5 +405,5 @@ namespace TianHua.Mep.UI.ViewModel
                 handler(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-    } 
+    }
 }

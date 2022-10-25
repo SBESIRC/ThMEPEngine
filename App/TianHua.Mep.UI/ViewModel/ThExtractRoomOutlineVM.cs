@@ -25,6 +25,7 @@ using TianHua.Mep.UI.Command;
 using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Diagnostics;
+using ThMEPEngineCore.Config;
 
 namespace TianHua.Mep.UI.ViewModel
 {
@@ -60,23 +61,6 @@ namespace TianHua.Mep.UI.ViewModel
             }
         }
 
-        private ShearwallLayerConfigOps _shearwallLayerConfigOps;
-        /// <summary>
-        /// 剪力墙图层配置
-        /// </summary>
-        public ShearwallLayerConfigOps ShearwallLayerConfigOption
-        {
-            get
-            {
-                return _shearwallLayerConfigOps;
-            }
-            set
-            {
-                _shearwallLayerConfigOps = value;
-                RaisePropertyChanged("ShearwallLayerConfigOption");
-            }
-        }
-
         private string _id = "";
         public string Id => _id;
         private DBObjectCollection _doorBlkObbs;
@@ -92,6 +76,7 @@ namespace TianHua.Mep.UI.ViewModel
             _id = Guid.NewGuid().ToString();
             _rangePts = new Point3dCollection();
             _doorBlkObbs = new DBObjectCollection();
+            this._isExtractDoorObbs = DoorBlkInfos.Count > 0;
         }
         public void Dispose()
         {
@@ -115,7 +100,7 @@ namespace TianHua.Mep.UI.ViewModel
                         WallLayers = GetLayers(),
                         YnExtractShearWall = this.YnExtractShearWall,
                         NeibourRangeDistance = 200.0,
-                        UseConfigShearWallLayer = _shearwallLayerConfigOps == ShearwallLayerConfigOps.LayerConfig,
+                        UseConfigShearWallLayer = ThExtractShearWallConfig.Instance.ShearWallLayerOption== ShearwallLayerConfigOps.LayerConfig,
                     };
                     using (var datasetFactory = new ThRoomDataSetFactory(config))
                     {
@@ -189,6 +174,10 @@ namespace TianHua.Mep.UI.ViewModel
 
                 // 0、选取范围
                 var pts = ThAuxiliaryUtils.GetRange();
+                if(pts.Count<3)
+                {                    
+                    return;
+                }
 
                 // 1、获取房间名称
                 var roomNameTexts = GetRoomNames(Active.Database, pts);
@@ -220,8 +209,13 @@ namespace TianHua.Mep.UI.ViewModel
                     newRooms = cmd.RoomBoundaries;
                 }
 
+                // 只保留框内的范围
+                var innerRooms = SelectWindowPolygon(newRooms, pts);
+                var outerRooms = newRooms.Difference(innerRooms);
+                Erase(Active.Database, outerRooms.OfType<DBObject>().Select(o => o.ObjectId).ToCollection());
+
                 // 5、对新成对房间框线和已生成的房间框线去重                
-                var repeatedObjs = FilerSimilarObjs(existRooms, newRooms);
+                var repeatedObjs = FilerSimilarObjs(existRooms, innerRooms);
                 Erase(Active.Database, repeatedObjs.OfType<DBObject>().Select(o => o.ObjectId).ToCollection());
 
                 // 6、释放房间名称
@@ -409,19 +403,24 @@ namespace TianHua.Mep.UI.ViewModel
                 doorBlkInfos.ForEach(o => DoorBlkInfos.Remove(o));
             }
         }
-
         private DBObjectCollection FilerSimilarObjs(DBObjectCollection existedRooms,DBObjectCollection newRooms)
         {
             var simpilfer = new ThRoomOutlineSimplifier();
             return simpilfer.OverKill(existedRooms, newRooms);
         }
-
+        private DBObjectCollection SelectWindowPolygon(DBObjectCollection rooms,Point3dCollection pts)
+        {
+            var frame = pts.CreatePolyline();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms);
+            var results = spatialIndex.SelectWindowPolygon(frame);
+            frame.Dispose();
+            return results;
+        }
         private void ShowSBNDRunCmdTip()
         {
             MessageBox.Show("正在运行房间轮廓线生成命令，无法执行当前操作！", "信息提示",
                     MessageBoxButton.OK, MessageBoxImage.Warning);
         }
-
         private DBObjectCollection GetRoomDataFromMS()
         {
             var roomDatas = new DBObjectCollection();
@@ -474,6 +473,7 @@ namespace TianHua.Mep.UI.ViewModel
             {
                 var suffix= suffixLayer.ToUpper();
                 return acdb.Layers
+                    .Where(o => !(o.IsOff || o.IsFrozen))
                     .Where(o => ThMEPXRefService.OriginalFromXref(o.Name).ToUpper() == suffix)
                     .Select(o => o.Name).Distinct().ToList();
             }            
@@ -510,6 +510,7 @@ namespace TianHua.Mep.UI.ViewModel
             using (var acdb = AcadDatabase.Active())
             {
                 return acdb.Layers
+                    .Where(o => !(o.IsOff || o.IsFrozen))
                     .Where(o => IsAWallLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
@@ -520,6 +521,7 @@ namespace TianHua.Mep.UI.ViewModel
             using (var acdb = AcadDatabase.Active())
             {
                 return acdb.Layers
+                    .Where(o => !(o.IsOff || o.IsFrozen))
                     .Where(o => IsAEWallLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
@@ -892,10 +894,5 @@ namespace TianHua.Mep.UI.ViewModel
             return results;
         }
         #endregion
-    }
-    public enum ShearwallLayerConfigOps
-    {
-        Default = 0,
-        LayerConfig = 1,
     }
 }

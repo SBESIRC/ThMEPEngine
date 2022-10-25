@@ -4,8 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:s="clr-namespace:System;assembly=mscorlib"
-             xmlns:converters="clr-namespace:TianHua.Mep.UI.Converter"
+             xmlns:s="clr-namespace:System;assembly=mscorlib"             
              xmlns:local="clr-namespace:TianHua.Mep.UI.UI"
                     Title="提取房间框线"
                     SizeToContent="WidthAndHeight"
@@ -18,8 +17,7 @@
                     MaxHeight="500"
              mc:Ignorable="d" Closed="ThCustomWindow_Closed">
     <Window.Resources>        
-        <ResourceDictionary>
-            <converters:ShearwallLayerConfigOpsBooleanConverter x:Key="shearwallLayerConfigOpsConverter"/>
+        <ResourceDictionary>            
             <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
                 <Border x:Name="Border" BorderBrush="Gray" BorderThickness="1.5" CornerRadius="0" Background="White" TextBlock.Foreground="Black">
                     <!--设置控件的边框，圆角，背景色，字体颜色-->
@@ -74,17 +72,8 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <Label Content="剪力墙图层配置:" />
-                <RadioButton Margin="0,0,0,0" GroupName="ShearWallLayerConfig" Name="rbDefault" Content="默认" VerticalAlignment="Center" IsThreeState="False"
-                             IsChecked="{Binding ShearwallLayerConfigOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
-                             Converter={StaticResource shearwallLayerConfigOpsConverter},ConverterParameter=0}"/>
-                <RadioButton Margin="5,0,0,0" GroupName="ShearWallLayerConfig" Name="rbLayerConfig" Content="图层配置" VerticalAlignment="Center" IsThreeState="False"
-                             IsChecked="{Binding ShearwallLayerConfigOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
-                             Converter={StaticResource shearwallLayerConfigOpsConverter},ConverterParameter=1}"/>
-            </StackPanel>
-            <CheckBox HorizontalAlignment="Right" Margin="70,0,0,0" VerticalAlignment="Center"
+        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">            
+            <CheckBox HorizontalAlignment="Right" Margin="280,0,0,0" VerticalAlignment="Center"
                   x:Name="chkYnAddShearWall" IsThreeState="False" Content="自动提取剪力墙"
                   IsChecked="{Binding YnExtractShearWall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>

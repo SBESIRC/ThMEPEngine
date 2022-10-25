@@ -130,10 +130,19 @@ namespace TianHua.Mep.UI.Data
             _shearWalls = _shearWalls.Union(db3ShearWallObjs);
 
             // 柱
-            var columnObjs = Recognize(GetColumnElements(roomDataVisitors), newFrame, new ThColumnRecognitionEngine());
-            var db3ColumnObjs = Recognize(GetDB3ColumnElements(roomDataVisitors), newFrame, new ThDB3ColumnRecognitionEngine());            
-            _columns = _columns.Union(columnObjs);
-            _columns = _columns.Union(db3ColumnObjs);
+            var oldColumnBufferSwitch = ThMEPEngineCoreService.Instance.ExpandColumn;
+            try
+            {
+                ThMEPEngineCoreService.Instance.ExpandColumn = false;
+                var columnObjs = Recognize(GetColumnElements(roomDataVisitors), newFrame, new ThColumnRecognitionEngine());
+                var db3ColumnObjs = Recognize(GetDB3ColumnElements(roomDataVisitors), newFrame, new ThDB3ColumnRecognitionEngine());
+                _columns = _columns.Union(columnObjs);
+                _columns = _columns.Union(db3ColumnObjs);
+            }
+            finally
+            {
+                ThMEPEngineCoreService.Instance.ExpandColumn = oldColumnBufferSwitch;
+            }            
 
             // 窗户
             _windows = Recognize(GetDB3WindowElements(roomDataVisitors), newFrame, new ThDB3WindowRecognitionEngine());

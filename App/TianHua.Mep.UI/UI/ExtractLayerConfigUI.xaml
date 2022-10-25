@@ -13,6 +13,7 @@
     <Window.Resources>        
         <ResourceDictionary>
             <converters:BeamEngineOpsBooleanConverter x:Key="beamEngineOpsConverter"/>
+            <converters:ShearwallLayerConfigOpsBooleanConverter x:Key="shearwallLayerConfigOpsConverter"/>
             <ControlTemplate x:Key="ButtonTemplate" TargetType="{x:Type Button}">
                 <Border x:Name="Border" BorderBrush="Gray" BorderThickness="1.5" CornerRadius="5" Background="White" TextBlock.Foreground="Black">
                     <!--设置控件的边框，圆角，背景色，字体颜色-->
@@ -37,7 +38,7 @@
                                  IsChecked="{Binding BeamEngineOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                                  Converter={StaticResource beamEngineOpsConverter},ConverterParameter=1}" Checked="rbDB_Checked">
                         </RadioButton>
-                        <RadioButton Margin="5,6" x:Name="rbBeamArea" Content="梁区域" GroupName="CheckObject" IsThreeState="False"
+                        <RadioButton Margin="3,6" x:Name="rbBeamArea" Content="图层识别" GroupName="CheckObject" IsThreeState="False"
                                  IsChecked="{Binding BeamEngineOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                                  Converter={StaticResource beamEngineOpsConverter},ConverterParameter=2}" Checked="rbBeamArea_Checked">
                         </RadioButton>
@@ -47,26 +48,48 @@
                         <Button Content="增加图层" Name="btnAddBeamLayer" Margin="5,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnAddBeamLayer_Click"></Button>
                         <Button Content="删除图层" Name="btnDelBeamLayer" Margin="0,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnDelBeamLayer_Click"></Button>
                     </StackPanel>
-                    <ListBox x:Name="listBox1" Height="270" SelectionMode="Multiple" 
+                    <ListBox x:Name="listBox1" Height="300" SelectionMode="Extended" 
                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         ItemsSource="{Binding BeamLayerInfos}" Margin="5"
-                                        DisplayMemberPath="Layer">
+                                        DisplayMemberPath="Display">
+                        <ListBox.Resources>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <EventSetter Event="ListBoxItem.PreviewMouseLeftButtonDown" Handler="listBox1_lbItem_PreviewMouseLeftButtonDown"/>
+                                <EventSetter Event="ListBoxItem.PreviewMouseUp" Handler="listBox1_lbItem_PreviewMouseUp"/>
+                                <EventSetter Event="ListBoxItem.PreviewMouseMove" Handler="listBox1_lbItem_PreviewMouseMove"/>
+                            </Style>
+                        </ListBox.Resources>
                     </ListBox>                   
                 </StackPanel>
             </TabItem>
             <TabItem Header="剪力墙配置">
                 <StackPanel Orientation="Vertical">
-                    <StackPanel Orientation="Horizontal">
-                        <Label Content="图层配置" Margin="8,0"></Label>
-                        <Button Content="增加图层" Name="btnAddShearWallLayer" Margin="5,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnAddShearWallLayer_Click"></Button>
-                        <Button Content="删除图层" Name="btnDelShearWallLayer" Margin="0,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnDelShearWallLayer_Click"></Button>
+                    <StackPanel Margin="8,5,0,0" Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Label Content="图层配置：" />
+                        <RadioButton Margin="10,0,0,0" GroupName="ShearWallLayerConfig" Name="rbDefault" Content="默认" VerticalAlignment="Center" IsThreeState="False"
+                             IsChecked="{Binding ShearwallLayerConfigOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                             Converter={StaticResource shearwallLayerConfigOpsConverter},ConverterParameter=0}"/>
+                        <RadioButton Margin="5,0,0,0" GroupName="ShearWallLayerConfig" Name="rbLayerConfig" Content="图层识别" VerticalAlignment="Center" IsThreeState="False"
+                             IsChecked="{Binding ShearwallLayerConfigOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
+                             Converter={StaticResource shearwallLayerConfigOpsConverter},ConverterParameter=1}"/>
                     </StackPanel>
-                    <ListBox x:Name="listBox2" Height="300" Margin="5" SelectionMode="Multiple" 
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">                        
+                        <Button Content="增加图层" Name="btnAddShearWallLayer" Margin="5,0,0,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnAddShearWallLayer_Click"></Button>
+                        <Button Content="删除图层" Name="btnDelShearWallLayer" Margin="3,0,5,0" Width="70" Template="{StaticResource ButtonTemplate}" Click="btnDelShearWallLayer_Click"></Button>
+                    </StackPanel>
+                    <ListBox x:Name="listBox2" Height="300" Margin="5" SelectionMode="Extended" 
                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
                                         ItemsSource="{Binding ShearWallLayerInfos}" 
-                                        DisplayMemberPath="Layer">
+                                        DisplayMemberPath="Display">
+                        <ListBox.Resources>
+                            <Style TargetType="{x:Type ListBoxItem}">
+                                <EventSetter Event="ListBoxItem.PreviewMouseLeftButtonDown" Handler="listBox2_lbItem_PreviewMouseLeftButtonDown"/>
+                                <EventSetter Event="ListBoxItem.PreviewMouseUp" Handler="listBox2_lbItem_PreviewMouseUp"/>
+                                <EventSetter Event="ListBoxItem.PreviewMouseMove" Handler="listBox2_lbItem_PreviewMouseMove"/>
+                            </Style>
+                        </ListBox.Resources>
                     </ListBox>
                 </StackPanel>
                 
