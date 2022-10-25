@@ -121,6 +121,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         /// </summary>
         private Vector2D ParentDir = Vector2D.Zero;
 
+        public static bool AllowLaneDeformation=false;//允许车道微动
         public bool AccurateCalculate = true;
         public static double DifferenceFromBackBack = 200;
         public static double ScareFactorForCollisionCheck = 0.999999;

@@ -72,7 +72,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             {
                 ClassifyLanesForLayoutFurther();
             }
-            if (!QuickCalculate)
+            if (!QuickCalculate && AllowLaneDeformation)
             {
                 ConstructConversionDatas();
             }

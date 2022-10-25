@@ -366,7 +366,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
             }
 
             #region data conversion set
-            if (!QuickCalculate)
+            if (!QuickCalculate && AllowLaneDeformation)
             {
                 _addedcars = Cars.Except(_addedcars).ToList();
                 _addpillars = Pillars.Except(_addpillars).ToList();
