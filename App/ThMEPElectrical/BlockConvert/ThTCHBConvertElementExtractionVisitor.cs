@@ -7,10 +7,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPElectrical.BlockConvert.Model;
 
 namespace ThMEPElectrical.BlockConvert
 {
-    public class ThBConvertElementExtractionVisitor : ThDistributionElementExtractionVisitor
+    public class ThTCHBConvertElementExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         /// <summary>
         /// 块名
@@ -24,9 +25,21 @@ namespace ThMEPElectrical.BlockConvert
 
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
-            if (dbObj is BlockReference br)
+            if (dbObj.IsTCHEquipment())
             {
-                elements.AddRange(Handle(br, matrix));
+                dynamic acadObj = dbObj.AcadObject;
+                bool IsHvac()
+                {
+                    if (acadObj.Hvac_S5 is string v)
+                    {
+                        return NameFilter.Contains(v);
+                    }
+                    return false;
+                }
+                if (IsHvac())
+                {
+                    elements.AddRange(Handle(dbObj, matrix));
+                }
             }
         }
 
@@ -51,17 +64,18 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        private List<ThRawIfcDistributionElementData> Handle(BlockReference br, Matrix3d matrix)
+        private List<ThRawIfcDistributionElementData> Handle(Entity dbObj, Matrix3d matrix)
         {
             var results = new List<ThRawIfcDistributionElementData>();
-            if (IsDistributionElement(br) && CheckLayerValid(br))
+            if (IsDistributionElement(dbObj) && CheckLayerValid(dbObj))
             {
                 results.Add(new ThRawIfcDistributionElementData()
                 {
-                    Data = new ThBlockReferenceData(br.ObjectId, matrix),
-                    Geometry = br.ToOBB(br.BlockTransform.PreMultiplyBy(matrix)),
+                    Data = new ThTCHElementData(dbObj, matrix),
+                    Geometry = dbObj.GeometricExtents.ToRectangle().GetTransformedCopy(matrix),
                 });
             }
+            
             return results;
         }
 
@@ -69,11 +83,7 @@ namespace ThMEPElectrical.BlockConvert
         {
             try
             {
-                if (entity is BlockReference br)
-                {
-                    return NameFilter.Contains(ThMEPXRefService.OriginalFromXref(br.GetEffectiveName()));
-                }
-                return false;
+                return entity.IsTCHEquipment();
             }
             catch
             {

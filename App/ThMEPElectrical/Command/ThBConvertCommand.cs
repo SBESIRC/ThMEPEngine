@@ -41,9 +41,14 @@ namespace ThMEPElectrical.Command
         public string FrameStyle { get; set; }
 
         /// <summary>
-        /// 标注样式
+        /// 转换排烟阀手动执行机构
         /// </summary>
         public bool ConvertManualActuator { get; set; }
+
+        /// <summary>
+        /// 转换天正元素
+        /// </summary>
+        public bool TCHConvert { get; set; }
 
         /// <summary>
         /// 操作命令
@@ -55,6 +60,9 @@ namespace ThMEPElectrical.Command
         /// </summary>
         public List<ThBConvertCompareModel> CompareModels { get; set; }
 
+        /// <summary>
+        /// 转换结果
+        /// </summary>
         public List<ThBConvertEntityInfos> TarEntityInfos { get; set; }
 
         /// <summary>
@@ -76,8 +84,8 @@ namespace ThMEPElectrical.Command
 
         public override void SubExecute()
         {
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            using (var currentDb = AcadDatabase.Active())
+            using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
                 try
                 {
@@ -92,6 +100,7 @@ namespace ThMEPElectrical.Command
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
 
+                // 块 -> 块
                 var service = new ThBConvertService(currentDb, frame, Mode, Category, Scale, FrameStyle, ConvertManualActuator);
                 var srcNames = new List<string>();
                 var targetNames = new List<string>();
@@ -103,11 +112,32 @@ namespace ThMEPElectrical.Command
                 if (Command == BConvertCommand.BlockConvert)
                 {
                     service.Convert(manager, srcNames, targetBlocks, true);
+                    if (TCHConvert)
+                    {
+                        // 天正 -> 块
+                        var tchService = new ThTCHConvertService(currentDb, frame, Mode, Category, Scale);
+                        var tchSrcNames = new List<string>();
+                        var tchTargetNames = new List<string>();
+                        var tchManager = tchService.ReadFile(tchSrcNames, tchTargetNames);
+                        tchService.Convert(tchManager, tchSrcNames, targetBlocks, true);
+                    }
                 }
                 else
                 {
                     service.Convert(manager, srcNames, new List<ThBlockReferenceData>(), false);
-                    TarEntityInfos = service.EntityInfos;
+                    TarEntityInfos.AddRange(service.EntityInfos);
+
+                    if (TCHConvert)
+                    {
+                        // 天正 -> 块
+                        var tchService = new ThTCHConvertService(currentDb, frame, Mode, Category, Scale);
+                        var tchSrcNames = new List<string>();
+                        var tchTargetNames = new List<string>();
+                        var tchManager = tchService.ReadFile(tchSrcNames, tchTargetNames);
+                        tchService.Convert(tchManager, tchSrcNames, new List<ThBlockReferenceData>(), false);
+                        TarEntityInfos.AddRange(tchService.EntityInfos);
+                    }
+
                     var compareService = new ThBConvertCompareService(currentDb.Database, GetEntityInfos(targetBlocks, manager), TarEntityInfos);
                     compareService.Compare();
                     CompareModels = compareService.CompareModels;
@@ -155,7 +185,7 @@ namespace ThMEPElectrical.Command
                     result.Category = EquimentCategory.给排水;
                     result.EquimentType = ThBConvertCommon.BLOCK_SUBMERSIBLE_PUMP;
                 }
-                else if(t.EffectiveName.Equals("E-BFAS23-3"))
+                else if (t.EffectiveName.Equals("E-BFAS23-3"))
                 {
                     result.Category = EquimentCategory.给排水;
                     result.EquimentType = ThBConvertCommon.BLOCK_LEVEL_CONTROLLER;

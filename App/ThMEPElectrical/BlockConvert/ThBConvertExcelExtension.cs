@@ -15,5 +15,11 @@ namespace ThMEPElectrical.BlockConvert
             var engine = new ThBConvertRuleEngine();
             return engine.Acquire(bConvertConfigUrl, mode);
         }
+
+        public static List<ThBConvertRule> TCHRules(this string tchConvertConfigUrl, ConvertMode mode)
+        {
+            var engine = new ThBConvertRuleEngine();
+            return engine.TCHAcquire(tchConvertConfigUrl, mode);
+        }
     }
 }

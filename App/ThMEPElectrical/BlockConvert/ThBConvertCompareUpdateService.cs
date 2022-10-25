@@ -28,7 +28,7 @@ namespace ThMEPElectrical.BlockConvert
             using (var docLock = Active.Document.LockDocument())
             using (var currentDb = AcadDatabase.Active())
             {
-                if (CompareModels.Count > 0 && currentDb.Database.Equals(CompareModels[0].Database))
+                if (CheckLayer(ThBConvertCommon.HIDING_LAYER) && CompareModels.Count > 0 && currentDb.Database.Equals(CompareModels[0].Database))
                 {
                     var noteLayer = ThBConvertUtils.CreateAILayer(currentDb.Database, ThBConvertCommon.NOTE_LAYER);
                     var printParameterList = new List<ThRevcloudParameter>();
@@ -43,8 +43,10 @@ namespace ThMEPElectrical.BlockConvert
                                     // 删除源块
                                     currentDb.Element<BlockReference>(model.SourceId, true).Erase();
                                     // 添加目标块
-                                    ThBConvertDbUtils.UpdateLayerSettings(layer);
-                                    currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                    if (ThBConvertDbUtils.UpdateLayerSettings(layer))
+                                    {
+                                        currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                    }
                                 }
                                 break;
                             case ThBConvertCompareType.Delete:
@@ -52,13 +54,17 @@ namespace ThMEPElectrical.BlockConvert
                                 currentDb.Element<BlockReference>(model.SourceId, true).Erase();
                                 break;
                             case ThBConvertCompareType.Add:
-                                ThBConvertDbUtils.UpdateLayerSettings(layer);
-                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                if (ThBConvertDbUtils.UpdateLayerSettings(layer))
+                                {
+                                    currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                }
                                 printParameterList.Add(GetParameter(currentDb, model.TargetId, 1, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale));
                                 break;
                             case ThBConvertCompareType.Displacement:
-                                ThBConvertDbUtils.UpdateLayerSettings(layer);
-                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                if (ThBConvertDbUtils.UpdateLayerSettings(layer))
+                                {
+                                    currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                }
                                 printParameterList.Add(GetParameter(currentDb, model.SourceId, 2, ThBConvertCommon.LINE_TYPE_HIDDEN, scale));
                                 printParameterList.Add(GetParameter(currentDb, model.TargetId, 2, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale));
                                 currentDb.Element<BlockReference>(model.SourceId, true).Erase();
@@ -66,8 +72,10 @@ namespace ThMEPElectrical.BlockConvert
                             case ThBConvertCompareType.ParameterChange:
                                 var srcBlock = currentDb.Element<BlockReference>(model.SourceId, true);
                                 RemainLabel(currentDb, srcBlock, noteLayer);
-                                ThBConvertDbUtils.UpdateLayerSettings(layer);
-                                currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                if (ThBConvertDbUtils.UpdateLayerSettings(layer))
+                                {
+                                    currentDb.Element<BlockReference>(model.TargetId, true).Layer = layer;
+                                }
                                 printParameterList.Add(PrintLabelParameter(currentDb, model.SourceId, 3, ThBConvertCommon.LINE_TYPE_HIDDEN, scale));
                                 printParameterList.Add(PrintLabelParameter(currentDb, model.TargetId, 3, ThBConvertCommon.LINE_TYPE_CONTINUOUS, scale));
                                 break;
@@ -103,6 +111,16 @@ namespace ThMEPElectrical.BlockConvert
                 }
             }
             Active.Editor.Regen();
+        }
+
+        private bool CheckLayer(string name)
+        {
+            using (var docLock = Active.Document.LockDocument())
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var ltr = acadDatabase.Layers.ElementOrDefault(name, true);
+                return ltr != null;
+            }
         }
 
         private ThRevcloudParameter GetParameter(AcadDatabase acadDatabase, ObjectId objectId, short colorIndex, string lineType, double scale)

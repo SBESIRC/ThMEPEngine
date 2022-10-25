@@ -44,6 +44,7 @@
     <Compile Include="AFAS\Utils\ThAFASSelectFrameUtil.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
+    <Compile Include="BlockConvert\Model\ThTCHElementData.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockNameService.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />
@@ -80,6 +81,10 @@
     <Compile Include="BlockConvert\ThBConvertWipeOut.cs" />
     <Compile Include="BlockConvert\ThBConvertZoomService.cs" />
     <Compile Include="BlockConvert\ThRevcloudParameter.cs" />
+    <Compile Include="BlockConvert\ThTCHBConvertElementExtractionEngine.cs" />
+    <Compile Include="BlockConvert\ThTCHBConvertElementExtractionVisitor.cs" />
+    <Compile Include="BlockConvert\ThTCHBConvertEngine.cs" />
+    <Compile Include="BlockConvert\ThTCHConvertService.cs" />
     <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
     <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
     <Compile Include="Broadcast\Model\ThBroadcastParameter.cs" />

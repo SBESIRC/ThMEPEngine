@@ -23,6 +23,9 @@
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_LOAD_DESCRIPTION = "负载用途";
         public const string BLOCK_MAP_ATTRIBUTES_BLOCK_ROTATION_CORRECT = "旋转矫正";
 
+        public const string BLOCK_MAP_ATTRIBUTES_TCH_TYPE = "类型";
+        public const string BLOCK_MAP_ATTRIBUTES_TCH_MODEL = "型号";
+
         public const string PROPERTY_LOAD_FILP = "翻转状态1";
         public const string PROPERTY_POWER_VOLTAGE = "电压";
         public const string PROPERTY_LOAD_USAGE = "负载用途";

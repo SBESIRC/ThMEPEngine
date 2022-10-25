@@ -18,8 +18,8 @@ namespace ThMEPElectrical.BlockConvert
 {
     public static class ThBConvertBlockReferenceDataExtension
     {
-        public static List<ThBlockConvertBlock> SourceBConvertRules;
-        public static List<ThBlockConvertBlock> TargetBConvertRules;
+        public static List<ThBlockConvertBlock> SourceBConvertRules = new List<ThBlockConvertBlock>();
+        public static List<ThBlockConvertBlock> TargetBConvertRules = new List<ThBlockConvertBlock>();
 
         public static Point3d GetNewBasePoint(this ThBlockReferenceData data, bool isSourceBlock)
         {
@@ -38,8 +38,7 @@ namespace ThMEPElectrical.BlockConvert
                         .ToList();
                     if (convertRuleList.Count > 1)
                     {
-                        convertRule = convertRuleList.Where(rule => ThStringTools.CompareWithChinesePunctuation(data.CurrentVisibilityStateValue(),
-                            rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY] as string)).First();
+                        convertRule = convertRuleList.Where(rule => ThStringTools.CompareWithChinesePunctuation(data.CurrentVisibilityStateValue(),rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY] as string)).First();
                     }
                     else
                     {
@@ -48,9 +47,7 @@ namespace ThMEPElectrical.BlockConvert
                 }
                 else
                 {
-                    convertRule = TargetBConvertRules
-                        .Where(rule => (rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string).Equals(name))
-                        .First();
+                    convertRule = TargetBConvertRules.Where(rule => (rule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string).Equals(name)).First();
                 }
                 var positionMode = (ThBConvertInsertMode)convertRule.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_POSITION_MODE];
                 if (positionMode == ThBConvertInsertMode.BasePoint)

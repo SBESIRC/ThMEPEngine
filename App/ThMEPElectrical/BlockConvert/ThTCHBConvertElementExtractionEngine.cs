@@ -8,10 +8,10 @@ using ThMEPEngineCore.Engine;
 
 namespace ThMEPElectrical.BlockConvert
 {
-    public class ThBConvertElementExtractionEngine : ThDistributionElementExtractionEngine
+    public class ThTCHBConvertElementExtractionEngine : ThDistributionElementExtractionEngine
     {
         /// <summary>
-        /// 块名
+        /// 
         /// </summary>
         public List<string> NameFilter { get; set; }
 
@@ -22,7 +22,7 @@ namespace ThMEPElectrical.BlockConvert
 
         public override void Extract(Database database)
         {
-            var visitor = new ThBConvertElementExtractionVisitor()
+            var visitor = new ThTCHBConvertElementExtractionVisitor()
             {
                 NameFilter = NameFilter,
                 Category = Category,
