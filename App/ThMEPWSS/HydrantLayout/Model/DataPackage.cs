@@ -115,6 +115,8 @@ namespace ThMEPWSS.HydrantLayout.Model
         
         //确定车位旁边的立柱的地理环境
         public static double RangeLength = 3000;
+        public static double ProbeLength = 1500;
+        public static double InPakingThreshold = 1500;
         public static double BigScore = 80;
         public static double SmallScore = 50;
 

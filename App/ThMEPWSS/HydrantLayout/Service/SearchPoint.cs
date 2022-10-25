@@ -393,7 +393,7 @@ namespace ThMEPWSS.HydrantLayout.Service
                 int mainIndex = index.OrderBy(x => dis[x]).ToList().First();
                 int leftIndex = (mainIndex + index.Count - 1) % index.Count;
                 int rightIndex = (mainIndex + 1) % index.Count;
-                int columnType = GetColumnType(cl,mainIndex);
+                int columnType = GetColumnType2(cl,mainIndex);
 
                 for (int i = 0; i < cl.NumberOfVertices; i++)
                 {
@@ -1029,5 +1029,62 @@ namespace ThMEPWSS.HydrantLayout.Service
 
             return type;
         }
+
+        public int GetColumnType2(Polyline cl, int mainIndex)
+        {
+            int type = -1;
+            double probeLength = Info.ProbeLength;
+
+            Point3d start1 = cl.GetPoint3dAt(mainIndex);
+            Point3d end1 = cl.GetPoint3dAt((mainIndex + 1) % cl.NumberOfVertices);
+            Point3d center = start1 + (end1 - start1) * 0.5;
+            Vector3d dir1 = (end1 - start1).GetNormal();
+            Vector3d dirOut1 = new Vector3d(-dir1.Y, dir1.X, dir1.Z).GetNormal();
+            
+            Point3d end2 = cl.GetPoint3dAt((mainIndex + 2) % cl.NumberOfVertices);
+            Point3d start0 = cl.GetPoint3dAt((mainIndex -1 + cl.NumberOfVertices) % cl.NumberOfVertices);
+
+
+            Polyline probe0 = CreateBoundaryService.CreateRectangle2(start0 ,start1, probeLength);
+            DrawUtils.ShowGeometry(probe0, "l2Rec", 2, lineWeightNum: 30);
+
+            Polyline probe1 = CreateBoundaryService.CreateRectangle2(end1, end2, probeLength);
+            DrawUtils.ShowGeometry(probe1, "l2Rec", 2, lineWeightNum: 30);
+
+            DBObjectCollection pakings0 = ProcessedData.ParkingIndex.SelectCrossingPolygon(probe0);
+            DBObjectCollection pakings1 = ProcessedData.ParkingIndex.SelectCrossingPolygon(probe1);
+            List<Polyline> pakingList = pakings0.OfType<Polyline>().ToList();
+            pakingList.AddRange(pakings1.OfType<Polyline>().ToList());
+            DrawUtils.ShowGeometry(pakingList, "l2ProbePaking", 4);
+
+            if (pakingList.Count == 0) return 0;
+            else 
+            {
+                double dis = CheckMaxDis(pakingList, center, dirOut1);
+                if (dis > Info.InPakingThreshold) return 2;
+                else return 1;
+            }
+
+            return 0;
+        }
+
+        double CheckMaxDis(List<Polyline> pakingList, Point3d center, Vector3d dir) 
+        {
+            double maxDis = -100000;
+
+            for (int i = 0; i < pakingList.Count; i++) 
+            {
+                var points = pakingList[i].GetPoints().ToList();
+                for (int j = 0; j < points.Count; j++) 
+                {
+                    Vector3d vec0 = points[j] - center;
+                    double nowDis = vec0.DotProduct(dir);
+                    if (nowDis > maxDis) maxDis = nowDis;
+                }
+            }
+
+            return maxDis;
+        }
+
     }
 }

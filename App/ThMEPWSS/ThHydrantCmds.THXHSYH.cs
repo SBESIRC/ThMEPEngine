@@ -65,7 +65,11 @@ namespace ThMEPWSS
             HydrantLayoutSetting.Instance.BlockNameDict = new Dictionary<string, List<string>>()
                                 {
                                     { "集水井", new List<string>() { "A-Well-1" }},
-                                    { "非机械车位", new List<string>() { "43543trer123" , "C充电车位", "ert54645645", "C18196EFF", "ret456546434543543", "机械车位", "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437", "停车位2" ,"独立停垂直式小型车位1" } }
+                                    { "非机械车位", new List<string>() {"车位", "C39CE4015", "43543trer123" , "C充电车位", "ert54645645", "C18196EFF",
+                                        "ret456546434543543", "机械车位", "car0", "停车位4", "A-Parking-1", "C514C01F1", "car", 
+                                        "C614A45C8", "4213", "C6356253C", "车位5100", "bkcw", "C0A575437", "停车位2" ,"独立停垂直式小型车位1",
+                                        "SAFSADFAS","微型车位","SDFSAFSAD","商业车位"
+                                    } }
 
                                 };
             using (var cmd = new ThHydrantLayoutCmd())

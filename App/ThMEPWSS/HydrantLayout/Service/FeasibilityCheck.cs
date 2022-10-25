@@ -60,7 +60,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                     overlapArea = overlapArea + overlapObjs[i].Area;
                 }
 
-                if (overlapArea < Info.CollisionTolerance * fireArea.Area) 
+                if (overlapArea < Info.CollisionTolerance * fireArea.Area)    //此处设定了碰撞的比例
                 {
                     pakingFlag = true;
                 }

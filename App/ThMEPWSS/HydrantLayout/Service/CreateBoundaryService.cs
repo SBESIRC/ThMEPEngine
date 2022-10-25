@@ -140,7 +140,7 @@ namespace ThMEPWSS.HydrantLayout.Service
 
 
 
-        //其他
+        //其他 向左构造
         public static Polyline CreateRectangle2(Point3d pt0, Point3d pt1, double length)
         {
             Vector3d dir = pt1 - pt0;
