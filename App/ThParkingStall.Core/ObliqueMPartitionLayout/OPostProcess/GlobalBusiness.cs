@@ -86,11 +86,6 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
 
             readFromVehicles(vehiclesdata.VehicleLanes);
         }
-        VehicleLaneData func(VehicleLaneData data)
-        {
-            VehicleLaneData result = new VehicleLaneData();
-            return result;
-        }
         void readFromVehicles(List<VehicleLane> vehicles)
         {
             cars = new List<InfoCar>();
