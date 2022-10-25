@@ -383,7 +383,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         {
             if (_IsEmptyLoad)
                 return null;
-            return new Conductor("2x2.5+E2.5", MaterialStructure.BYJ, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.Location.StoreyTypeString, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod1);
+            return new Conductor(PDSProject.Instance.projectGlobalConfiguration.fireEmergencyLightingModel == ProjectConfigure.FireEmergencyLightingModel.A型 ? "2x2.5" : "2x2.5+E2.5", MaterialStructure.BYJ, _highPower, _edge.Target.Load.Phase, _edge.Target.Load.CircuitType, _edge.Target.Load.LoadTypeCat_1, _edge.Target.Load.FireLoad, _edge.Circuit.ViaConduit, _edge.Circuit.ViaCableTray, _edge.Target.Load.Location.StoreyNumber, _edge.Target.Load.Location.StoreyTypeString, _edge.Target.Load.CableLayingMethod1, _edge.Target.Load.CableLayingMethod1);
         }
 
         public override Contactor CreatContactor()
