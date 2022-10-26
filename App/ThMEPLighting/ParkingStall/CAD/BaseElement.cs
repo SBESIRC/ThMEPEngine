@@ -132,7 +132,7 @@ namespace ThMEPLighting.ParkingStall.CAD
             }
             return otherLanes;
         }
-        public List<Line> GetLayerLines(Polyline polyline, string layerName)
+        public List<Line> GetLayerLines(Polyline polyline, List<string> layerNames)
         {
             List<Line> otherLanes = new List<Line>();
             var objs = new DBObjectCollection();
@@ -140,7 +140,7 @@ namespace ThMEPLighting.ParkingStall.CAD
             {
                 var laneLines = acdb.ModelSpace
                 .OfType<Curve>()
-                .Where(o => o.Layer == layerName);
+                .Where(o => layerNames.Contains(o.Layer));
                 laneLines.ForEach(x =>
                 {
                     if(x.GetType().Name.ToLower().Contains("imp"))
