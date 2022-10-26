@@ -77,8 +77,10 @@ namespace TianHua.AutoCAD.ThCui
 
         private void RedirectAssemblies()
         {
+            ThCuiAssemblyService.RedirectAssembly("System.Memory", new Version(4, 0, 1, 2));
             ThCuiAssemblyService.RedirectAssembly("System.Buffers", new Version(4, 0, 3, 0));
             ThCuiAssemblyService.RedirectAssembly("ICSharpCode.SharpZipLib", new Version(1, 3, 2, 10));
+            ThCuiAssemblyService.RedirectAssembly("System.Runtime.CompilerServices.Unsafe", new Version(6, 0, 0, 0));
         }
 
         public void Terminate()
