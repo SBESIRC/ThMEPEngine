@@ -22,6 +22,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public CPS(double calculateCurrent,bool IsDomesticWaterPump)
         {
             this.ComponentType = ComponentType.CPS;
+            IsNeglectCombination = true;
             if (IsDomesticWaterPump)
                 DefaultResidualCurrent = "300";
             var cPSPicks = CPSConfiguration.CPSComponentInfos.Where(o => o.Amps > calculateCurrent).ToList();
@@ -36,11 +37,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             PolesNum = CPS.Poles;
             RatedCurrent = CPS.Amps;
             ResidualCurrent = DefaultResidualCurrent;
+            Icu = CPS.IcuConfig;
 
             AlternativeModels = new List<string>() { "CPS" };
             AlternativeFrameSpecifications = cPSPicks.Select(o => o.FrameSize).Distinct().ToList();
             AlternativePolesNums = cPSPicks.Select(o => o.Poles).Distinct().ToList();
             AlternativeRatedCurrents = cPSPicks.Select(o => o.Amps).Distinct().ToList();
+            AlternativeIcus = CPSPicks.Select(o => o.IcuConfig).Distinct().ToList();
             AlternativeCombinations = CPS.CPSCombination.Split(';').ToList();
             AlternativeCombinations.Insert(0, "-");
             AlternativeResidualCurrents = CPS.ResidualCurrent.Split(';').ToList();
@@ -54,9 +57,10 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// CPS
         /// </summary>
         /// <param name="cpsConfig"></param>
-        public CPS(string cpsConfig, bool IsDomesticWaterPump)
+        public CPS(string cpsConfig, bool IsDomesticWaterPump, bool isNeglectCombination = true)
         {
             this.ComponentType = ComponentType.CPS;
+            IsNeglectCombination = isNeglectCombination;
             //CPSJ32-M2.5/3P
             string[] configs = cpsConfig.Split('-');
             string[] detaileds = configs[1].Split('/');
@@ -95,11 +99,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             ResidualCurrent = DefaultResidualCurrent;
             Combination = combination;
             CodeLevel = codeLevel;
+            Icu = CPS.IcuConfig;
 
             AlternativeModels = new List<string>() { cpsModel };
             AlternativeFrameSpecifications = cPSPicks.Select(o => o.FrameSize).Distinct().ToList();
             AlternativePolesNums = cPSPicks.Select(o => o.Poles).Distinct().ToList();
             AlternativeRatedCurrents = cPSPicks.Select(o => o.Amps).Distinct().ToList();
+            AlternativeIcus = CPSPicks.Select(o => o.IcuConfig).Distinct().ToList();
             //AlternativeCombinations = CPS.CPSCombination.Split(';').ToList();
             AlternativeCombinations = new List<string>() { combination };//待定，等张皓确认
             AlternativeResidualCurrents = new List<string>() { DefaultResidualCurrent };
@@ -142,6 +148,16 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// </summary>
         public string ResidualCurrent { get; set; }
 
+        /// <summary>
+        /// 分断能力
+        /// </summary>
+        public string Icu { get; set; }
+
+        /// <summary>
+        /// 是否忽略组合形式(仅针对Content)
+        /// </summary>
+        public bool IsNeglectCombination { get; private set; }
+
         public List<string> GetModels()
         {
             return AlternativeModels;
@@ -152,6 +168,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.Poles == PolesNum
             && o.FrameSize == FrameSpecification
             && o.Amps == RatedCurrent
+            && o.IcuConfig == Icu
             && o.CPSCombination.Contains(Combination)
             && o.CPSCharacteristics.Contains(CodeLevel)
             && (ResidualCurrent.Equals("-") || o.ResidualCurrent.Contains(ResidualCurrent))))
@@ -165,6 +182,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 FrameSpecification = cps.FrameSize;
                 PolesNum = cps.Poles;
                 RatedCurrent = cps.Amps;
+                Icu = cps.IcuConfig;
                 AlternativeCombinations = cps.CPSCombination.Split(';').ToList();
                 Combination = AlternativeCombinations.First();
                 AlternativeCodeLevels = cps.CPSCharacteristics.Split(';').ToList();
@@ -185,6 +203,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
              && o.FrameSize == frameSpecification
              && o.Model == Model
              && o.Amps == RatedCurrent
+             && o.IcuConfig == Icu
              && o.CPSCombination.Contains(Combination)
              && o.CPSCharacteristics.Contains(CodeLevel)
              && (ResidualCurrent.Equals("-") || o.ResidualCurrent.Contains(ResidualCurrent))))
@@ -198,6 +217,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 FrameSpecification = cps.FrameSize;
                 PolesNum = cps.Poles;
                 RatedCurrent = cps.Amps;
+                Icu = cps.IcuConfig;
                 AlternativeCombinations = cps.CPSCombination.Split(';').ToList();
                 Combination = AlternativeCombinations.First();
                 AlternativeCodeLevels = cps.CPSCharacteristics.Split(';').ToList();
@@ -218,6 +238,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
              &&o.FrameSize == FrameSpecification
              && o.Model == Model
              && o.Amps == RatedCurrent
+             && o.IcuConfig == Icu
              && o.CPSCombination.Contains(Combination)
              && o.CPSCharacteristics.Contains(CodeLevel)
              && (ResidualCurrent.Equals("-") || o.ResidualCurrent.Contains(ResidualCurrent))))
@@ -231,6 +252,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 FrameSpecification = cps.FrameSize;
                 PolesNum = cps.Poles;
                 RatedCurrent = cps.Amps;
+                Icu = cps.IcuConfig;
                 AlternativeCombinations = cps.CPSCombination.Split(';').ToList();
                 Combination = AlternativeCombinations.First();
                 AlternativeCodeLevels = cps.CPSCharacteristics.Split(';').ToList();
@@ -251,6 +273,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
              && o.FrameSize == FrameSpecification
              && o.Model == Model
              && o.Poles == PolesNum
+             && o.IcuConfig == Icu
              && o.CPSCombination.Contains(Combination)
              && o.CPSCharacteristics.Contains(CodeLevel)
              && (ResidualCurrent.Equals("-") || o.ResidualCurrent.Contains(ResidualCurrent))))
@@ -264,6 +287,42 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 FrameSpecification = cps.FrameSize;
                 PolesNum = cps.Poles;
                 RatedCurrent = cps.Amps;
+                Icu = cps.IcuConfig;
+                AlternativeCombinations = cps.CPSCombination.Split(';').ToList();
+                Combination = AlternativeCombinations.First();
+                AlternativeCodeLevels = cps.CPSCharacteristics.Split(';').ToList();
+                CodeLevel = AlternativeCodeLevels.First();
+                AlternativeResidualCurrents = cps.ResidualCurrent.Split(';').ToList();
+                AlternativeResidualCurrents.Insert(0, "-");
+                ResidualCurrent = DefaultResidualCurrent;
+            }
+        }
+
+        public List<string> GetIcus()
+        {
+            return AlternativeIcus;
+        }
+        public void SetIcu(string icu)
+        {
+            if (CPSPicks.Any(o => o.Amps == RatedCurrent
+             && o.FrameSize == FrameSpecification
+             && o.Model == Model
+             && o.Poles == PolesNum
+             && o.IcuConfig == icu
+             && o.CPSCombination.Contains(Combination)
+             && o.CPSCharacteristics.Contains(CodeLevel)
+             && (ResidualCurrent.Equals("-") || o.ResidualCurrent.Contains(ResidualCurrent))))
+            {
+                this.Icu = icu;
+            }
+            else
+            {
+                var cps = CPSPicks.First(o => o.IcuConfig == icu);
+                Model = cps.Model;
+                FrameSpecification = cps.FrameSize;
+                PolesNum = cps.Poles;
+                RatedCurrent = cps.Amps;
+                Icu = cps.IcuConfig;
                 AlternativeCombinations = cps.CPSCombination.Split(';').ToList();
                 Combination = AlternativeCombinations.First();
                 AlternativeCodeLevels = cps.CPSCharacteristics.Split(';').ToList();
@@ -302,39 +361,44 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         }
 
         /// <summary>
-        /// 备选型号
+        /// 备选型号下拉框选项
         /// </summary>
         private List<string> AlternativeModels { get; set; }
 
         /// <summary>
-        /// 备选壳架规格
+        /// 备选壳架规格下拉框选项
         /// </summary>
         private List<string> AlternativeFrameSpecifications { get; set; }
 
         /// <summary>
-        /// 备选级数
+        /// 备选级数下拉框选项
         /// </summary>
         private List<string> AlternativePolesNums { get; set; }
 
         /// <summary>
-        /// 备选额定电流
+        /// 备选额定电流下拉框选项
         /// </summary>
         private List<double> AlternativeRatedCurrents { get; set; }
 
         /// <summary>
-        /// 备选组合形式
+        /// 备选组合形式下拉框选项
         /// </summary>
         private List<string> AlternativeCombinations { get; set; }
 
         /// <summary>
-        /// 备选级别代号
+        /// 备选级别代号下拉框选项
         /// </summary>
         private List<string> AlternativeCodeLevels { get; set; }
-        
+
         /// <summary>
-        /// 备选剩余电流动作
+        /// 备选剩余电流动作下拉框选项
         /// </summary>
         private List<string> AlternativeResidualCurrents { get; set; }
+
+        /// <summary>
+        /// 备选分断能力下拉框选项
+        /// </summary>
+        private List<string> AlternativeIcus { get; set; }
 
         /// <summary>
         /// 默认剩余电流动作

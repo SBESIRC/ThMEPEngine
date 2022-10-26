@@ -131,8 +131,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                     {
                         BreakerConfiguration.breakerComponentInfos.Add(new BreakerComponentInfo()
                         {
+                            Model =(BreakerModel)Enum.Parse(typeof(BreakerModel), row["产品序列"].ToString()),
                             ModelName = row["型号"].ToString(),
-                            Model =(BreakerModel)Enum.Parse(typeof(BreakerModel), System.Text.RegularExpressions.Regex.Replace(row["型号"].ToString(), @"\d", "")),
                             FrameSize = row["壳架规格"].ToString(),
                             MaxKV = row["额定电压"].ToString(),
                             Poles = row["级数"].ToString(),
@@ -141,6 +141,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
                             RCDCharacteristics = row["剩余电流脱扣器类型"].ToString(),
+                            IcuLevel = row["额定极限分断能力级别"].ToString(),
+                            Icu = row["额定极限分断能力"].ToString(),
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),
@@ -170,6 +172,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
                             RCDCharacteristics = row["剩余电流脱扣器类型"].ToString(),
+                            IcuLevel = row["额定极限分断能力级别"].ToString(),
+                            Icu = row["额定极限分断能力"].ToString(),
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),
@@ -199,6 +203,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             Characteristics = row["瞬时脱扣器型式"].ToString(),
                             RCDCharacteristics = String.Empty,
+                            IcuLevel = row["额定极限分断能力级别"].ToString(),
+                            Icu = row["额定极限分断能力"].ToString(),
                             Width = row["宽度"].ToString(),
                             Depth = row["深度"].ToString(),
                             Height = row["高度"].ToString(),
@@ -977,6 +983,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
                             ResidualCurrent = row["剩余电流动作"].ToString(),
                             CPSCombination = row["组合形式"].ToString(),
                             CPSCharacteristics = row["类别代号"].ToString(),
+                            IcuLevel = row["额定极限分断能力级别"].ToString(),
+                            Icu = row["额定极限分断能力"].ToString(),
                             InstallMethod = row["安装方式"].ToString()
                         });
                     }

@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Collections.Generic;
 using ThCADExtension;
 using TianHua.Electrical.PDS.Project;
 using TianHua.Electrical.PDS.Project.Module.Component;
@@ -25,7 +25,8 @@ namespace TianHua.Electrical.PDS.Extension
 
         public static string Content(this CPS cps)
         {
-            return $"{cps.Model}{cps.Combination}-{cps.FrameSpecification}/{cps.CodeLevel}{cps.RatedCurrent}/{cps.PolesNum}{cps.RatedCurrent}";
+            var IcuLevel = cps.Icu.Substring(1, 1);
+            return $"{cps.Model}{ (cps.IsNeglectCombination ? "" : cps.Combination)}{cps.FrameSpecification}{IcuLevel}-{cps.CodeLevel}{cps.RatedCurrent}/{cps.PolesNum}";
         }
 
         public static string Content(this OUVP cps)
@@ -35,43 +36,49 @@ namespace TianHua.Electrical.PDS.Extension
 
         public static string Content(this Breaker breaker)
         {
-            switch (breaker.ComponentType)
+            var IcuLevel = breaker.Icu.Substring(0, 1);
+            var appendixStr = "";
+            if (breaker.RCDAppendix.HasValue && true == breaker.RCDAppendix.Value)
             {
-                case ComponentType.CB:
+                appendixStr += "+RCD";
+            }
+            if (breaker.STAppendix.HasValue && true == breaker.STAppendix.Value)
+            {
+                appendixStr += "+ST";
+            }
+            if (breaker.ALAppendix.HasValue && true == breaker.ALAppendix.Value)
+            {
+                appendixStr += "+AL";
+            }
+            if (breaker.URAppendix.HasValue && true == breaker.URAppendix.Value)
+            {
+                appendixStr += "+UR";
+            }
+            if (breaker.AXAppendix.HasValue && true == breaker.AXAppendix.Value)
+            {
+                appendixStr += "+AX";
+            }
+
+            switch (breaker.Model)
+            {
+                case Project.Module.BreakerModel.MCB:
                     {
-                        if (breaker.Appendix == Project.Module.AppendixType.无)
-                        {
-                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}";
-                        }
-                        else
-                        {
-                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.Appendix}";
-                        }
+                        return $"{breaker.Model}{breaker.FrameSpecification}{IcuLevel}-{(breaker.TripUnitType == "TM" ? breaker.Characteristics : breaker.TripUnitType)}{breaker.RatedCurrent}/{breaker.PolesNum}{appendixStr}";
                     }
-                case ComponentType.一体式RCD:
+                case Project.Module.BreakerModel.MCCB:
+                case Project.Module.BreakerModel.ACB:
                     {
-                        if (breaker.Appendix == Project.Module.AppendixType.无)
-                        {
-                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}";
-                        }
-                        else
-                        {
-                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType} {breaker.ResidualCurrent.GetDescription()}/{breaker.Appendix}";
-                        }
+                        return $"{breaker.Model}{breaker.FrameSpecification}{IcuLevel}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}{appendixStr}";
                     }
-                case ComponentType.组合式RCD:
+                case Project.Module.BreakerModel.RCBO:
+                case Project.Module.BreakerModel.RCCB:
                     {
-                        if (breaker.Appendix == Project.Module.AppendixType.无)
-                        {
-                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
-                        }
-                        else
-                        {
-                            return $"{breaker.Model}{breaker.FrameSpecification}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}/{breaker.Appendix} {breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}";
-                        }
+                        return $"{breaker.Model}{breaker.FrameSpecification}{IcuLevel}-{breaker.TripUnitType}{breaker.RatedCurrent}/{breaker.PolesNum}  {breaker.RCDType}{breaker.ResidualCurrent.GetDescription()}{appendixStr}";
                     }
                 default:
-                    throw new NotSupportedException();
+                    {
+                        throw new NotSupportedException();
+                    }
             }
         }
 

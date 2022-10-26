@@ -54,6 +54,84 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
+        [DisplayName("分段能力")]
+        [Editor(typeof(ThPDSIcuPropertyEditor), typeof(PropertyEditorBase))]
+        public string Icu
+        {
+            get => _breaker.Icu;
+            set
+            {
+                _breaker.SetIcu(value);
+                OnPropertyChanged(null);
+            }
+        }
+
+        [Browsable(true)]
+        [Category("元器件参数")]
+        [DisplayName("RCD附件")]
+        public bool RCDAppendix
+        {
+            get => _breaker.GetRCDAppendix();
+            set
+            {
+                _breaker.SetRCDAppendix(value);
+                OnPropertyChanged(null);
+            }
+        }
+
+        [Browsable(true)]
+        [Category("元器件参数")]
+        [DisplayName("分励脱扣附件")]
+        public bool STAppendix
+        {
+            get => _breaker.STAppendix ?? false;
+            set
+            {
+                _breaker.STAppendix = value;
+                OnPropertyChanged(null);
+            }
+        }
+
+        [Browsable(true)]
+        [Category("元器件参数")]
+        [DisplayName("报警附件")]
+        public bool ALAppendix
+        {
+            get => _breaker.ALAppendix ?? false;
+            set
+            {
+                _breaker.ALAppendix = value;
+                OnPropertyChanged(null);
+            }
+        }
+
+        [Browsable(true)]
+        [Category("元器件参数")]
+        [DisplayName("失压脱扣附件")]
+        public bool URAppendix
+        {
+            get => _breaker.URAppendix ?? false;
+            set
+            {
+                _breaker.URAppendix = value;
+                OnPropertyChanged(null);
+            }
+        }
+
+        [Browsable(true)]
+        [Category("元器件参数")]
+        [DisplayName("辅助触电附件")]
+        public bool AXAppendix
+        {
+            get => _breaker.AXAppendix ?? false;
+            set
+            {
+                _breaker.AXAppendix = value;
+                OnPropertyChanged(null);
+            }
+        }
+
         [DisplayName("极数")]
         [Category("元器件参数")]
         [Editor(typeof(ThPDSPolesPropertyEditor), typeof(PropertyEditorBase))]
@@ -89,20 +167,6 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             set
             {
                 _breaker.SetTripDevice(value);
-                OnPropertyChanged(null);
-            }
-        }
-
-        [ReadOnly(true)]
-        [DisplayName("附件")]
-        [Category("元器件参数")]
-        [Editor(typeof(ThPDSEnumPropertyEditor<AppendixType>), typeof(PropertyEditorBase))]
-        public AppendixType Appendix
-        {
-            get => _breaker.Appendix;
-            set
-            {
-                _breaker.Appendix = value;
                 OnPropertyChanged(null);
             }
         }
@@ -186,9 +250,44 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
 
         [ReadOnly(true)]
         [Browsable(false)]
-        public bool IsAppendixEnabled
+        public List<string> AlternativeIcus
         {
-            get => _breaker.ComponentType != ComponentType.组合式RCD;
+            get => _breaker.GetIcus();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsRCDAppendixEnabled
+        {
+            get => _breaker.RCDAppendix.HasValue;
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsSTAppendixEnabled
+        {
+            get => _breaker.STAppendix.HasValue;
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsALAppendixEnabled
+        {
+            get => _breaker.ALAppendix.HasValue;
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsURAppendixEnabled
+        {
+            get => _breaker.URAppendix.HasValue;
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public bool IsAXAppendixEnabled
+        {
+            get => _breaker.AXAppendix.HasValue;
         }
 
         [ReadOnly(true)]

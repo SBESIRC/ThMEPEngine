@@ -49,6 +49,7 @@
     <Compile Include="Editors\ThPDSConductorLayingSitePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorMaterialStructurePropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorTypePropertyEditor.cs" />
+    <Compile Include="Editors\ThPDSIcuPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSNumberPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSSecondaryCircuitDescriptionEditPropertyEditor.cs" />
     <Compile Include="Editors\ThPDSConductorCrossSectionalAreasPropertyEditor.cs" />

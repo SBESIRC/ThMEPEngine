@@ -104,6 +104,19 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
             }
         }
 
+        [Category("元器件参数")]
+        [DisplayName("分段能力")]
+        [Editor(typeof(ThPDSIcuPropertyEditor), typeof(PropertyEditorBase))]
+        public string Icu
+        {
+            get => _cps.Icu;
+            set
+            {
+                _cps.SetIcu(value);
+                OnPropertyChanged(null);
+            }
+        }
+
         [ReadOnly(true)]
         [Browsable(false)]
         public List<string> AlternativeModels
@@ -144,6 +157,13 @@ namespace TianHua.Electrical.PDS.UI.Project.Module.Component
         public List<string> AlternativeCodeLevels
         {
             get => _cps.GetCodeLevels();
+        }
+
+        [ReadOnly(true)]
+        [Browsable(false)]
+        public List<string> AlternativeIcus
+        {
+            get => _cps.GetIcus();
         }
     }
 }

@@ -161,7 +161,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         }
 
         /// <summary>
-        /// 获取电动机-CPS回路信息
+        /// 获取电动机-CPS星三角启动回路信息
         /// </summary>
         /// <returns></returns>
         public Motor_CPSStarTriangleStartCircuit GetCPSStarTriangleStartCircuit()
@@ -170,7 +170,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             var configs = _isFireLoad ? MotorConfiguration.Fire_CPSStarTriangleStartInfos : MotorConfiguration.NonFire_CPSStarTriangleStartInfos;
             var config = configs.First(o => o.InstalledCapacity >= _highPower);
             _cPSConfig = config.CPS;
-            CircuitForm.cps = CreatCPS();
+            CircuitForm.cps = CreatCPS(false);
             _contactorConfig = config.QAC1;
             CircuitForm.contactor1 = CreatContactor();
             _contactorConfig = config.QAC2;
@@ -198,11 +198,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             var lowConfig = configs.First(o => o.InstalledCapacity >= _lowPower);
             var highConfig = configs.First(o => o.InstalledCapacity >= _highPower);
             _cPSConfig = lowConfig.CPS;
-            CircuitForm.cps1 = CreatCPS();
+            CircuitForm.cps1 = CreatCPS(false);
             _conductorConfig = lowConfig.Conductor1;
             CircuitForm.conductor1 = CreatConductor();
             _cPSConfig = highConfig.CPS;
-            CircuitForm.cps2 = CreatCPS();
+            CircuitForm.cps2 = CreatCPS(false);
             _conductorConfig = highConfig.Conductor2;
             CircuitForm.conductor2 = CreatConductor();
             return CircuitForm;
@@ -224,11 +224,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             var lowConfig = configs.First(o => o.InstalledCapacity >= _lowPower);
             var highConfig = configs.First(o => o.InstalledCapacity >= _highPower);
             _cPSConfig = lowConfig.CPS;
-            CircuitForm.cps1 = CreatCPS();
+            CircuitForm.cps1 = CreatCPS(false);
             _conductorConfig = lowConfig.Conductor1;
             CircuitForm.conductor1 = CreatConductor();
             _cPSConfig = highConfig.CPS;
-            CircuitForm.cps2 = CreatCPS();
+            CircuitForm.cps2 = CreatCPS(false);
             _conductorConfig = highConfig.Conductor2;
             CircuitForm.conductor2 = CreatConductor();
             _contactorConfig = highConfig.QAC;
@@ -394,6 +394,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
         public override CPS CreatCPS()
         {
             return new CPS(_cPSConfig , _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump);
+        }
+        
+        public CPS CreatCPS(bool isNeglectCombination = true)
+        {
+            return new CPS(_cPSConfig , _edge.Target.Load.LoadTypeCat_3 == ThPDSLoadTypeCat_3.DomesticWaterPump, isNeglectCombination);
         }
 
         public override ThermalRelay CreatThermalRelay()

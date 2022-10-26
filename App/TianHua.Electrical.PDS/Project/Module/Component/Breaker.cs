@@ -23,8 +23,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <param name="tripDevice">脱扣器类型</param>
         /// <param name="polesNum">极数</param>
         /// <param name="characteristics">瞬时脱扣器类型</param>
-        /// <param name="IsDomesticWaterPump">是否是生活水泵</param>
-        /// <param name="HasLeakageProtection">是否带漏电保护</param>
+        /// <param name="isDomesticWaterPump">是否是生活水泵</param>
+        /// <param name="hasLeakageProtection">是否带漏电保护</param>
         public Breaker(double calculateCurrent, List<string> tripDevice, string polesNum, string characteristics, bool isDomesticWaterPump , bool hasLeakageProtection)
         {
             if (ProjectSystemConfiguration.SinglePhasePolesNum.Contains(polesNum))
@@ -106,16 +106,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             PolesNum =breaker.Poles;
             RatedCurrent =breaker.Amps.ToString();
             TripUnitType =breaker.TripDevice;
+            Icu = breaker.IcuConfig;
 
             Characteristics = characteristics;
             Breakers = breakers;
             AlternativeModel = breakers.Select(o => o.Model).Distinct().ToList();
-            AlternativeFrameSpecifications = breakers.Select(o => o.FrameSize).Distinct().ToList();
-            AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
-            AlternativeTripDevice = breakers.Select(o => o.TripDevice).Distinct().ToList();
-            AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
-            Appendix = AppendixType.无;
-            AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };
+            var model_breakers = Breakers.Where(o => o.Model == breaker.Model);
+            AlternativeFrameSpecifications = model_breakers.Select(o => o.FrameSize).Distinct().ToList();
+            AlternativeRatedCurrent = model_breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
+            AlternativeTripDevice = model_breakers.Select(o => o.TripDevice).Distinct().ToList();
+            AlternativePolesNum = model_breakers.Select(o => o.Poles).Distinct().ToList();
+            AlternativeIcus = model_breakers.Select(o => o.IcuConfig).Distinct().ToList();
         }
 
         /// <summary>
@@ -162,8 +163,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
             AlternativeTripDevice = new List<string>() { TripUnitType };
             AlternativePolesNum = new List<string>() { PolesNum };
-            Appendix = AppendixType.无;
-            AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };
+            AlternativeIcus = breakers.Select(o => o.IcuConfig).Distinct().ToList();
         }
 
         public Breaker(List<string> breakerConfig, List<string> tripDevice, string characteristics)
@@ -204,18 +204,61 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             Characteristics = characteristics;
             Breakers = breakers;
             AlternativeModel = breakers.Select(o => o.Model).Distinct().ToList();
-            AlternativeFrameSpecifications = breakers.Select(o => o.FrameSize).Distinct().ToList();
-            AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
-            AlternativeTripDevice = breakers.Select(o => o.TripDevice).Distinct().ToList();
-            AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
-            Appendix = appendix;
-            AlternativeAppendixs = new List<AppendixType>() { appendix };
+            var model_breakers = Breakers.Where(o => o.Model == breaker.Model);
+            AlternativeFrameSpecifications = model_breakers.Select(o => o.FrameSize).Distinct().ToList();
+            AlternativeRatedCurrent = model_breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
+            AlternativeIcus = model_breakers.Select(o => o.IcuConfig).Distinct().ToList();
+            AlternativeTripDevice = model_breakers.Select(o => o.TripDevice).Distinct().ToList();
+            AlternativePolesNum = model_breakers.Select(o => o.Poles).Distinct().ToList();
+            switch(appendix)
+            {
+                case AppendixType.ST:
+                {
+                        STAppendix = true;
+                        break;
+                }
+                case AppendixType.AL:
+                    {
+                        ALAppendix = true;
+                        break;
+                    }
+                case AppendixType.AX:
+                    {
+                        AXAppendix = true;
+                        break;
+                    }
+                case AppendixType.RC:
+                    {
+                        RCDAppendix = true;
+                        break;
+                    }
+                case AppendixType.UR:
+                    {
+                        URAppendix = true;
+                        break;
+                    }
+                default:
+                    break;
+            }
         }
+
+        private BreakerModel _model;
 
         /// <summary>
         /// 型号
         /// </summary>
-        public BreakerModel Model { get; set; }
+        public BreakerModel Model
+        {
+            get
+            {
+                return _model;
+            }
+            set
+            {
+                _model = value;
+                BreakerModelUpdate(value);
+            }
+        }
 
         /// <summary>
         /// 壳架规格
@@ -238,9 +281,34 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public string TripUnitType { get; set; }
 
         /// <summary>
-        /// 附件
+        /// 分断能力
         /// </summary>
-        public AppendixType Appendix { get; set; }
+        public string Icu { get; set; }
+
+        /// <summary>
+        /// RCD附件
+        /// </summary>
+        public bool? RCDAppendix { get; set; } = null;
+
+        /// <summary>
+        /// 分励脱扣附件
+        /// </summary>
+        public bool? STAppendix { get; set; } = null;
+
+        /// <summary>
+        /// 报警附件
+        /// </summary>
+        public bool? ALAppendix { get; set; } = null;
+
+        /// <summary>
+        /// 失压脱扣附件
+        /// </summary>
+        public bool? URAppendix { get; set; } = null;
+
+        /// <summary>
+        /// 辅助触电附件
+        /// </summary>
+        public bool? AXAppendix { get; set; } = null;
 
         /// <summary>
         /// RCD类型(仅RCD可见)
@@ -261,7 +329,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             if (this.ComponentType == ComponentType.CB && componentType == ComponentType.组合式RCD)
             {
                 this.ComponentType = ComponentType.组合式RCD;
-                Appendix = AppendixType.RC;
+                RCDAppendix = true;
                 //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
                 RCDType = RCDType.A;
                 if (IsDomesticWaterPump)
@@ -278,7 +346,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             else if (this.ComponentType == ComponentType.组合式RCD && componentType == ComponentType.CB)
             {
                 this.ComponentType = ComponentType.CB;
-                Appendix = AppendixType.无;
+                RCDAppendix = false;
             }
             else
             {
@@ -346,13 +414,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                         }
                         if (componentType == ComponentType.CB)
                         {
-                            Appendix = AppendixType.无;
+                            RCDAppendix = false;
                             ComponentType = ComponentType.CB;
                         }
                         else
                         {
                             ComponentType = ComponentType.组合式RCD;
-                            Appendix = AppendixType.RC;
+                            RCDAppendix = true;
                             //剩余电流断路器 的RCD类型默认为A，负载为发动机，剩余电流选300，其余选择30
                             RCDType = RCDType.A;
                             if (IsDomesticWaterPump)
@@ -380,7 +448,6 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                     AlternativeRatedCurrent = breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
                     AlternativeTripDevice = breakers.Select(o => o.TripDevice).Distinct().ToList();
                     AlternativePolesNum = breakers.Select(o => o.Poles).Distinct().ToList();
-                    AlternativeAppendixs = new List<AppendixType>() { AppendixType.无, AppendixType.ST, AppendixType.AL, AppendixType.AX, AppendixType.UR };
                 }
             }
         }
@@ -396,18 +463,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == TripUnitType
-            && o.Amps == double.Parse(RatedCurrent)))
+            && o.Amps == double.Parse(RatedCurrent)
+            && o.IcuConfig == Icu))
             {
                 this.PolesNum = polesNum;
             }
             else
             {
-                var breaker = Breakers.First(o => o.Poles == polesNum);
-                Model = breaker.Model;
+                var breaker = Breakers.Where(o => o.Model == Model).First(o => o.Poles == polesNum);
                 FrameSpecification = breaker.FrameSize;
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                Icu = breaker.IcuConfig;
                 if (this.ComponentType == ComponentType.一体式RCD)
                 {
                     AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
@@ -442,18 +510,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == tripDevice
-            && o.Amps == double.Parse(RatedCurrent)))
+            && o.Amps == double.Parse(RatedCurrent)
+            && o.IcuConfig == Icu))
             {
                 this.TripUnitType = tripDevice;
             }
             else
             {
-                var breaker = Breakers.First(o => o.TripDevice == tripDevice);
-                Model = breaker.Model;
+                var breaker = Breakers.Where(o => o.Model == Model).First(o => o.TripDevice == tripDevice);
                 FrameSpecification = breaker.FrameSize;
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                Icu = breaker.IcuConfig;
                 if (this.ComponentType == ComponentType.一体式RCD)
                 {
                     AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
@@ -489,18 +558,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == TripUnitType
-            && o.Amps == ratedCurrent))
+            && o.Amps == ratedCurrent
+            && o.IcuConfig == Icu))
             {
                 this.RatedCurrent = ratedCurrentStr;
             }
             else
             {
-                var breaker = Breakers.First(o => o.Amps == ratedCurrent);
-                Model = breaker.Model;
+                var breaker = Breakers.Where(o => o.Model == Model).First(o => o.Amps == ratedCurrent);
                 FrameSpecification = breaker.FrameSize;
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                Icu = breaker.IcuConfig;
                 if (this.ComponentType == ComponentType.一体式RCD)
                 {
                     AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
@@ -535,18 +605,19 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.FrameSize == frameSpecifications
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == TripUnitType
-            && o.Amps == double.Parse(RatedCurrent)))
+            && o.Amps == double.Parse(RatedCurrent)
+            && o.IcuConfig == Icu))
             {
                 this.FrameSpecification = frameSpecifications;
             }
             else
             {
-                var breaker = Breakers.First(o => o.FrameSize == frameSpecifications);
-                Model = breaker.Model;
+                var breaker = Breakers.Where(o => o.Model == Model).First(o => o.FrameSize == frameSpecifications);
                 FrameSpecification = breaker.FrameSize;
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                Icu = breaker.IcuConfig;
                 if (this.ComponentType == ComponentType.一体式RCD)
                 {
                     AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
@@ -581,7 +652,8 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             && o.FrameSize == FrameSpecification
             && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
             && o.TripDevice == TripUnitType
-            && o.Amps == double.Parse(RatedCurrent)))
+            && o.Amps == double.Parse(RatedCurrent)
+            && o.IcuConfig == Icu))
             {
                 this.Model= model;
             }
@@ -593,6 +665,13 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 PolesNum =breaker.Poles;
                 RatedCurrent =breaker.Amps.ToString();
                 TripUnitType =breaker.TripDevice;
+                Icu = breaker.IcuConfig;
+                var model_breakers = Breakers.Where(o => o.Model == breaker.Model);
+                AlternativeFrameSpecifications = model_breakers.Select(o => o.FrameSize).Distinct().ToList();
+                AlternativeRatedCurrent = model_breakers.Select(o => o.Amps).Distinct().OrderBy(o => o).Select(o => o.ToString()).ToList();
+                AlternativeTripDevice = model_breakers.Select(o => o.TripDevice).Distinct().ToList();
+                AlternativePolesNum = model_breakers.Select(o => o.Poles).Distinct().ToList();
+                AlternativeIcus = model_breakers.Select(o => o.IcuConfig).Distinct().ToList();
                 if (this.ComponentType == ComponentType.一体式RCD)
                 {
                     AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
@@ -614,6 +693,140 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         public List<BreakerModel> GetModels()
         {
             return AlternativeModel;
+        }
+
+        private void BreakerModelUpdate(BreakerModel model)
+        {
+            switch (model)
+            {
+                case BreakerModel.MCB:
+                    {
+                        if (!RCDAppendix.HasValue)
+                            RCDAppendix = false;
+                        if (!STAppendix.HasValue)
+                            STAppendix = false;
+                        if (!AXAppendix.HasValue)
+                            AXAppendix = false;
+                        if (!ALAppendix.HasValue)
+                            ALAppendix = false;
+                        URAppendix = null;
+                        break;
+                    }
+                case BreakerModel.MCCB:
+                    {
+                        if (!RCDAppendix.HasValue)
+                            RCDAppendix = false;
+                        if (!STAppendix.HasValue)
+                            STAppendix = false;
+                        if (!AXAppendix.HasValue)
+                            AXAppendix = false;
+                        if (!URAppendix.HasValue)
+                            URAppendix = false;
+                        if (!ALAppendix.HasValue)
+                            ALAppendix = false;
+                        break;
+                    }
+                case BreakerModel.RCBO:
+                    {
+                        if (!STAppendix.HasValue)
+                            STAppendix = false;
+                        if (!AXAppendix.HasValue)
+                            AXAppendix = false;
+                        if (!URAppendix.HasValue)
+                            URAppendix = false;
+                        if (!ALAppendix.HasValue)
+                            ALAppendix = false;
+                        RCDAppendix = null;
+                        break;
+                    }
+                case BreakerModel.RCCB:
+                    {
+                        if (!STAppendix.HasValue)
+                            STAppendix = false;
+                        if (!AXAppendix.HasValue)
+                            AXAppendix = false;
+                        if (!URAppendix.HasValue)
+                            URAppendix = false;
+                        if (!ALAppendix.HasValue)
+                            ALAppendix = false;
+                        RCDAppendix = null;
+                        break;
+                    }
+                case BreakerModel.ACB:
+                    {
+                        if (!STAppendix.HasValue)
+                            STAppendix = false;
+                        if (!AXAppendix.HasValue)
+                            AXAppendix = false;
+                        if (!URAppendix.HasValue)
+                            URAppendix = false;
+                        if (!ALAppendix.HasValue)
+                            ALAppendix = false;
+                        RCDAppendix = null;
+                        break;
+                    }
+            }
+        }
+
+        public bool GetRCDAppendix()
+        {
+            return RCDAppendix ?? false;
+        }
+
+        public void SetRCDAppendix(bool value)
+        {
+            if (RCDAppendix != value)
+            {
+                RCDAppendix = value;
+                SetBreakerType(value ? ComponentType.组合式RCD : ComponentType.CB);
+            }
+        }
+
+        public void SetIcu(string icu)
+        {
+            if (Breakers.Any(o => o.Poles ==  PolesNum
+            && o.Model == Model
+            && o.FrameSize == FrameSpecification
+            && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
+            && o.TripDevice == TripUnitType
+            && o.Amps == double.Parse(RatedCurrent)
+            && o.IcuConfig == icu))
+            {
+                this.Icu = icu;
+            }
+            else
+            {
+                var breaker = Breakers.Where(o => o.Model == Model).First(o => o.IcuConfig == icu);
+                FrameSpecification = breaker.FrameSize;
+                PolesNum =breaker.Poles;
+                RatedCurrent =breaker.Amps.ToString();
+                TripUnitType =breaker.TripDevice;
+                Icu = breaker.IcuConfig;
+                if (this.ComponentType == ComponentType.一体式RCD)
+                {
+                    AlternativeRCDTypes = breaker.RCDCharacteristics.Split(';').Select(o => o.GetEnumName<RCDType>()).ToList();
+                    AlternativeResidualCurrents = breaker.ResidualCurrent.Split(';').Select(o => (o + "mA").GetEnumName<ResidualCurrentSpecification>()).ToList();
+                    if (!AlternativeResidualCurrents.Contains(ResidualCurrent))
+                    {
+                        if (IsDomesticWaterPump)
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification300;
+                        }
+                        else
+                        {
+                            ResidualCurrent = ResidualCurrentSpecification.Specification30;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 获取分段能力下拉框选值
+        /// </summary>
+        public List<string> GetIcus()
+        {
+            return AlternativeIcus;
         }
 
         /// <summary>
@@ -659,7 +872,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         /// <summary>
         /// 瞬时脱扣器类型
         /// </summary>
-        private string Characteristics { get; set; }
+        public string Characteristics { get; set; }
 
         /// <summary>
         /// 断路器信息
@@ -667,17 +880,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         private List<BreakerComponentInfo> Breakers { get; set; }
 
         /// <summary>
-        /// 额定电流
+        /// 额定电流下拉框选择项
         /// </summary>
         private List<string> AlternativeRatedCurrent { get; set; }
 
         /// <summary>
-        /// 级数
+        /// 级数下拉框选择项
         /// </summary>
         private List<string> AlternativePolesNum { get; set; }
 
         /// <summary>
-        /// 脱扣器类型
+        /// 脱扣器类型下拉框选择项
         /// </summary>
         private List<string> AlternativeTripDevice { get; set; }
         
@@ -687,12 +900,17 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
         private List<string> TripDevices { get; set; }
 
         /// <summary>
-        /// 壳架规格
+        /// 壳架规格下拉框选择项
         /// </summary>
         private List<string> AlternativeFrameSpecifications { get; set; }
 
         /// <summary>
-        /// 模型
+        /// 分段能力下拉框选择项
+        /// </summary>
+        private List<string> AlternativeIcus { get; set; }
+
+        /// <summary>
+        /// 模型下拉框选择项
         /// </summary>
         private List<BreakerModel> AlternativeModel { get; set; }
 
@@ -713,6 +931,5 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
 
         private List<RCDType> AlternativeRCDTypes { get; set; }
         private List<ResidualCurrentSpecification> AlternativeResidualCurrents { get; set; }
-        private List<AppendixType> AlternativeAppendixs { get; set; }
     }
 }
