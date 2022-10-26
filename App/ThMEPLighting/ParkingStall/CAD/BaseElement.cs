@@ -6,9 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.LaneLine;
+using ThMEPTCH.Services;
 
 namespace ThMEPLighting.ParkingStall.CAD
 {
@@ -141,12 +143,40 @@ namespace ThMEPLighting.ParkingStall.CAD
                 .Where(o => o.Layer == layerName);
                 laneLines.ForEach(x =>
                 {
+                    if(x.GetType().Name.ToLower().Contains("imp"))
+                        return;
                     var transCurve = x.Clone() as Curve;
                     if (null != _originTransformer)
                         _originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
+
+                //获取天正桥架
+                ThTCHCableTrayOutlineBuilder cableTrayOutlineBuilder = new ThTCHCableTrayOutlineBuilder();
+                var cableCurves = cableTrayOutlineBuilder.Build(acdb.Database , new Autodesk.AutoCAD.Geometry.Point3dCollection());
+                foreach (var item in cableCurves) 
+                {
+                    if (item is Curve curve)
+                    {
+                        var transCurve = curve.Clone() as Curve;
+                        if (null != _originTransformer)
+                            _originTransformer.Transform(transCurve);
+                        objs.Add(transCurve);
+                    }
+                    else if (item is MPolygon mPolygon) 
+                    {
+                        var loops  = mPolygon.Loops();
+                        foreach (var loop in loops) 
+                        {
+                            var transCurve = loop.Clone() as Curve;
+                            if (null != _originTransformer)
+                                _originTransformer.Transform(transCurve);
+                            objs.Add(transCurve);
+                        }
+                    }
+                }
             }
+            
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
             otherLanes.Clear();
