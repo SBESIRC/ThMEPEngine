@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Command\ThBuildDoorsCmd.cs" />
+    <Compile Include="Command\ThExtractArchitectureOutlineCmd.cs" />
     <Compile Include="Command\ThExtractRoomConfigCmd.cs" />
     <Compile Include="Converter\BeamEngineOpsBooleanConverter.cs" />
     <Compile Include="Converter\ShearwallLayerConfigOpsBooleanConverter.cs" />
@@ -39,10 +40,15 @@
     <Compile Include="Data\ThDoorZoneExtractionVisitor.cs" />
     <Compile Include="Data\ThOtherShearWallExtractionVisitor.cs" />
     <Compile Include="Data\ThOtherShearWallRecognitionEngine.cs" />
+    <Compile Include="Data\ThArchitectureOutlineDataSetFactory.cs" />
     <Compile Include="Data\ThRoomDataSetFactory.cs" />
     <Compile Include="FrameCompare\FrameCompareUI.xaml.cs">
       <DependentUpon>FrameCompareUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\ExtractArchitectureOutlineUI.xaml.cs">
+      <DependentUpon>ExtractArchitectureOutlineUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModel\ThExtractArchitectureOutlineVM.cs" />
     <Compile Include="ViewModel\ThFrameCompareVM.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMepUIApp.cs" />
@@ -69,6 +75,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\ExtractLayerConfigUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\ExtractArchitectureOutlineUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

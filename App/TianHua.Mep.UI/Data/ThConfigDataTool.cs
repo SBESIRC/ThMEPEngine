@@ -25,6 +25,9 @@ namespace TianHua.Mep.UI.Data
         public const string BeamEngineOptionSearchKey = "梁识别引擎"; // DB,图层
         public const string ShearWallOptionSearchKey = "剪力墙图层选项"; //默认，图层
 
+        //建筑轮廓线配置
+        public const string ExtractArchitectureOutlineNamedDictKey = "提取建筑轮廓线配置";
+
         public static DBObjectCollection GetDoorZones(Database database,Point3dCollection pts)
         {
             var doorBlkNames = GetDoorZoneBlkNames();

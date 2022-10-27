@@ -25,6 +25,7 @@ namespace ThMEPEngineCore
         public const string HAVCRoute = "AI-风管路由";
         public const string WaterPipeRoute = "AI-水管路由";        
         public const string Note = "AI-注释";
+        public const string ARCHOUTLINE = "AI-建筑轮廓线";
         public static ObjectId CreateAIBeamLayer(this Database database)       
         {
             return database.CreateAILayer(BEAM, 6);
@@ -112,6 +113,11 @@ namespace ThMEPEngineCore
         public static ObjectId CreateAINoteLayer(this Database database)
         {
             return database.CreateAILayer(Note, 6);
+        }
+
+        public static ObjectId CreateAIArchOutlineLayer(this Database database)
+        {
+            return database.CreateAILayer(ARCHOUTLINE, 5);
         }
 
         public static ObjectId CreateAILayer(this Database database, string name, short colorIndex)

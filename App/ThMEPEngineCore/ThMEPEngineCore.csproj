@@ -170,6 +170,7 @@
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="Command\ThPickRoomCmd.cs" />
+    <Compile Include="Command\ThTotalBoundaryCmd.cs" />
     <Compile Include="Command\ThSuperBoundaryCmd.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="Config\ThExtractShearWallConfig.cs" />
@@ -273,6 +274,7 @@
     <Compile Include="Model\ThIfcProject.cs" />
     <Compile Include="Model\ThIfcStoreyInfo.cs" />
     <Compile Include="Model\ThIfcTextNodeData.cs" />
+    <Compile Include="Service\ThTotalBoundaryService.cs" />
     <Compile Include="Service\ThBlockReferenceObbService.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
