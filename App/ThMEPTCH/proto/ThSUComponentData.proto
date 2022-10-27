@@ -3,5 +3,7 @@ import "ThTCHGeometry.proto";
 
 message ThSUComponentData {
     int32 definition_index = 1;
-    ThTCHMatrix3d transformations = 2;
+    string ifc_classification = 2;
+    string instance_name = 3;
+    ThTCHMatrix3d transformations = 4;
 }

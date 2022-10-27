@@ -4,8 +4,6 @@ import "ThSUFaceMeshData.proto";
 
 message ThSUCompDefinitionData {
     string definition_name = 1;
-    string ifc_classification = 2;
-    string instance_name = 3;
-    repeated ThSUFaceBrepData brep_faces = 4;
-    repeated ThSUFaceMeshData mesh_faces = 5;
+    repeated ThSUFaceBrepData brep_faces = 2;
+    repeated ThSUFaceMeshData mesh_faces = 3;
 }
