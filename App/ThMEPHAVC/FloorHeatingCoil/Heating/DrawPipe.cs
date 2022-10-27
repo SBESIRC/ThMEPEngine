@@ -791,9 +791,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 if (ProcessedData.RadiatorPipeIdList.Contains(i))
                 {
                     filletPolyList = FilletHelper(WholePipeList[i], pt2, pt3, 1);
+                    ProcessedData.ClearRadiator();
                 }
                 else filletPolyList = FilletHelper(WholePipeList[i], pt2, pt3);
 
+                
 
                 DrawUtils.ShowGeometry(filletPolyList, "l4FilletedPipe", 0, 30);
                 //nowPipePolyList.Add(fillet_poly);

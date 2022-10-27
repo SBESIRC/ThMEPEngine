@@ -108,6 +108,7 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             RegionConnection = null;
             PipeList = null;
             DoorPipeToPointMap = null;
+
         }
 
 
@@ -116,6 +117,18 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
             HaveVirtualPipe = false;
             VirtualPOut = new Point3d();
             VirtualPlNow = new Polyline();
+        }
+
+
+        public static void ClearRadiator() 
+        {
+            RadiatorRegion = -1;
+            RadiatorPipeIdList = new List<int>();
+            RadiatorPointList = new List<Point3d>();
+            RadiatorOriginalPointList = new List<Point3d>();
+            RadiatorDir = new Vector3d();
+            RadiatorAddArea = new Polyline();
+            RadiatorOffset = new Vector3d(0, 0, 0);
         }
     }
 
