@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
+using DotNetARX;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
@@ -42,7 +43,7 @@ namespace ThMEPWSS.SprinklerDim.Data
         public List<ThIfcRoom> RoomsData { get; set; }
         public List<Curve> LinePipeData { get; set; }
         public List<Entity> LinePipeTextData { get; set; }
-
+        public List<Entity> PreviousData { get; set; }
         public ThSprinklerDimDataFactory()
         {
             SprinklerPtData = new List<Point3d>();
@@ -51,6 +52,7 @@ namespace ThMEPWSS.SprinklerDim.Data
             LinePipeTextData = new List<Entity>();
             AxisCurves = new List<Curve>();
             RoomsData = new List<ThIfcRoom>();
+            PreviousData = new List<Entity>();
 
         }
 
@@ -66,6 +68,7 @@ namespace ThMEPWSS.SprinklerDim.Data
             GetSrpinklerPtBlkData(database, framePts);
             GetTCHPipeData(database, framePts);
             GetLinePipeData(database, framePts);
+            GetPreviousData(database, framePts);
         }
 
         private void ExtractBasicArchitechObject(Database database, Point3dCollection framePts)
@@ -240,6 +243,41 @@ namespace ThMEPWSS.SprinklerDim.Data
             var rooms = roomBuilder.BuildFromMS(database, framePts, isWithHole);
             RoomsData.AddRange(rooms);
         }
+
+        private void GetPreviousData(Database database, Point3dCollection framePts)
+        {
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                //之前的dim
+                var dimsTemp = acadDatabase.ModelSpace
+                    .OfType<Dimension>()
+                    .Where(o => o.Layer == ThSprinklerDimCommon.Layer_Dim)
+                    .ToList();
+
+                if (framePts.Count >= 3)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(dimsTemp.ToCollection());
+                    var items = spatialIndex.SelectCrossingPolygon(framePts).OfType<Dimension>().ToList();
+
+                    PreviousData.AddRange(items);
+                }
+
+                //之前的没标注的圆
+                var circleTemp = acadDatabase.ModelSpace
+                        .OfType<Circle>()
+                        .Where(o => o.Layer == ThSprinklerDimCommon.Layer_UnTagX || o.Layer == ThSprinklerDimCommon.Layer_UnTagY)
+                        .ToList();
+
+                if (framePts.Count >= 3)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(circleTemp.ToCollection());
+                    var items = spatialIndex.SelectCrossingPolygon(framePts).OfType<Circle>().ToList();
+
+                    PreviousData.AddRange(items);
+                }
+            }
+        }
+
     }
 
     class ExtractPipeMSPolyline : ThExtractPolylineService

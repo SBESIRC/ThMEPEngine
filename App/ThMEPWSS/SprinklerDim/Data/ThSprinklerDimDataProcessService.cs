@@ -44,6 +44,7 @@ namespace ThMEPWSS.SprinklerDim.Data
         public List<Polyline> Wall { get; set; } = new List<Polyline>(); //mpolygon //polyline
         public List<MPolygon> Room { get; set; } = new List<MPolygon>(); //mpolygon //polyline
         public List<Line> AxisCurves { get; set; } = new List<Line>();
+        public List<Entity> PreviousData { get; set; } = new List<Entity>();
         public void ProcessData()
         {
             ProcessArchitechData();
@@ -201,6 +202,12 @@ namespace ThMEPWSS.SprinklerDim.Data
             Room.ForEach(x => DrawUtils.ShowGeometry(x, "l0room", 30));
 
             AxisCurves.ForEach(x => DrawUtils.ShowGeometry(x, "l0axis", 1));
+        }
+
+        public void CleanPreviousData()
+        {
+            PreviousData.ForEach(x => { x.UpgradeOpen(); x.Erase(); x.DowngradeOpen(); });
+
         }
     }
 }

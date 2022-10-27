@@ -63,6 +63,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                     LinePipeTextData = dataFactory.LinePipeTextData,
                     SprinklerPt = dataFactory.SprinklerPtData,
                     AxisCurvesData = dataFactory.AxisCurves,
+                    PreviousData = dataFactory.PreviousData,
                     Transformer = transformer,
                 };
 

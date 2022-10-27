@@ -107,6 +107,7 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                     LinePipeTextData = dataFactory.LinePipeTextData,
                     SprinklerPt = dataFactory.SprinklerPtData,
                     AxisCurvesData = dataFactory.AxisCurves,
+                    PreviousData = dataFactory.PreviousData,
                     Transformer = transformer,
                 };
 
@@ -114,7 +115,11 @@ namespace ThMEPWSS.SprinklerDim.Cmd
                 dataProcess.Print();
 
                 var dims = ThSprinklerDimEngine.LayoutDimEngine(dataProcess, printTag, out var xUnDimedPtsAll, out var yUnDimedPtsAll);
-               
+
+                //清除前序结果
+                dataProcess.CleanPreviousData();
+
+                //生成结果
                 if (debugSwitch)
                 {
                     ThSprinklerDimInsertService.ToDebugDim(dims, printTag);
