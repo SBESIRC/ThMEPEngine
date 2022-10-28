@@ -76,7 +76,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         }
                     case StatisticType.Attributes:
                         {
-                            BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Where(x => GlobleBlockAttInfoDic.ContainsKey(x) && (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));
+                            BlockDataReturn.BlockStatistics[o.UniqueName] = VerticesData.Where(x => GlobleBlockAttInfoDic.ContainsKey(x)).Where(x =>
+                            {
+                                var atts = GlobleBlockAttInfoDic.First(b => b.Key.Equals(x)).Value;
+                                return !atts.Any(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Any(att => att[0] == '~' && att.Substring(1) == y.Value)) &&
+                                atts.Any(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value));
+                            }).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));
                             if (o.HasAlias)
                             {
                                 BlockDataReturn.BlockStatistics[o.UniqueName] += VerticesData.Where(x => o.AliasList.Contains(x.Name)).Sum(x => ThQuantityMarkExtension.GetQuantity(database.GetBlockReferenceOBB(x)));

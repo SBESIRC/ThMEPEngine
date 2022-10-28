@@ -90,13 +90,25 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                             }
                             dic.ForEach(keyvaluepair =>
                             {
-                                if (o.StatisticAttNameValues.ContainsKey(keyvaluepair.Key) && o.StatisticAttNameValues[keyvaluepair.Key].Contains(keyvaluepair.Value))
+                                if (o.StatisticAttNameValues.ContainsKey(keyvaluepair.Key))
                                 {
-                                    IsRequired = true;
-                                    return;
+                                    var atts = o.StatisticAttNameValues[keyvaluepair.Key];
+                                    if(atts.Any(att => att[0] == '~'))
+                                    {
+
+                                    }
+                                    if(atts.Any(att => att[0] == '~' && att.Substring(1) == keyvaluepair.Value))
+                                    {
+                                        IsRequired = false;
+                                        return;
+                                    }
+                                    if (atts.Contains(keyvaluepair.Value))
+                                    {
+                                        IsRequired = true;
+                                    }
                                 }
                             });
-                            break;
+                            return;
                         }
                     case StatisticType.NeedSpecialTreatment:
                         {
