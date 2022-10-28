@@ -46,6 +46,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public Polygon BOUND { get; set; }
         public void DeformLanes()
         {
+            return;
             InitLaneDeformationParas();
             var vehicles = VehicleLanes;
             func(vehicles);
