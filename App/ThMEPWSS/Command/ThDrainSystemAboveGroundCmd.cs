@@ -284,7 +284,6 @@ namespace ThMEPWSS.Command
                     var roofCheck = new RoofCollisionCheck(roofFloors, _allRailings);
                     var addPLines = roofCheck.GetCheckResults(createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "PL")).ToList());
                     createBasicElems.AddRange(addPLines);
-                    
                     if (OutputTCHElements)
                     {
                         PrintTCHElements(pipeTags);
@@ -381,9 +380,9 @@ namespace ThMEPWSS.Command
                 createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
                 createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
                 ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
-                var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
-                var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
-                var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
+                //var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
+                //var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
+                //var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
                 ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
                 ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
                 tchPipeService.InitPipe(verPipes);
