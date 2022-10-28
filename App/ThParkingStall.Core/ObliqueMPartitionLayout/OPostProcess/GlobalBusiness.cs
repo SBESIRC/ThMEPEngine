@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
-using ThParkingStall.Core.LaneDeformation;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.OInterProcess;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
@@ -19,69 +18,25 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public GlobalBusiness(List<OSubArea> oSubAreas)
         {
             OSubAreas = oSubAreas;
-            Init();
-        }
-        void Init()
-        {
-            BOUND = OSubAreas[0].OutBound.Clone();
-            foreach (var subArea in OSubAreas)
-            {
-                walls.AddRange(subArea.obliqueMPartition.Walls);
-                cars.AddRange(subArea.obliqueMPartition.Cars);
-                pillars.AddRange(subArea.obliqueMPartition.Pillars);
-                obsVertices.AddRange(subArea.obliqueMPartition.ObstacleVertexes);
-                lanes.AddRange(subArea.obliqueMPartition.IniLanes.Select(e => e.Line));
-                obstacles.AddRange(subArea.obliqueMPartition.Obstacles);
-                VehicleLanes.AddRange(subArea.obliqueMPartition.VehicleLanes);
-            }
         }
         private List<OSubArea> OSubAreas { get; set; }
-        public List<InfoCar> cars = new List<InfoCar>();
-        public List<Polygon> pillars = new List<Polygon>();
-        public List<LineSegment> lanes = new List<LineSegment>();
-        public List<Polygon> obstacles = new List<Polygon>();
-        public List<LineString> walls = new List<LineString>();
-        public List<Coordinate> obsVertices = new List<Coordinate>();
-        public List<VehicleLane> VehicleLanes = new List<VehicleLane>();
-        public Polygon BOUND { get; set; }
-        public void DeformLanes()
-        {
-            InitLaneDeformationParas();
-            var vehicles = VehicleLanes;
-            func(vehicles);
-            readFromVehicles(vehicles);
-        }
-        void func(List<VehicleLane> vehicles)
-        {
-
-        }
-        void readFromVehicles(List<VehicleLane> vehicles)
-        {
-            cars = new List<InfoCar>();
-            pillars = new List<Polygon>();
-            lanes = new List<LineSegment>();
-            foreach (var vehicle in vehicles)
-            {
-                lanes.Add(vehicle.CenterLine);
-                foreach (var block in vehicle.ParkingPlaceBlockList)
-                {
-                    cars.AddRange(block.Cars.Select(e => new InfoCar(e.ParkingPlaceObb, e.Point, e.ParkingPlaceDir) { CarLayoutMode = e.Type }));
-                    pillars.AddRange(block.ColunmList.Select(e => e.ColunmnObb));
-                }
-            }
-        }
-        void InitLaneDeformationParas()
-        {
-            VehicleLane.VehicleLaneWidth = ObliqueMPartition.DisLaneWidth / 2;
-            VehicleLane.Boundary = BOUND;
-            VehicleLane.Blocks = obstacles;
-        }
         public Polygon CalBound()
         {
+            var cars = new List<InfoCar>();
+            var pillars = new List<Polygon>();
+            var lanes = new List<LineSegment>();
+            var obstacles = new List<Polygon>();
+            //var obstacles = OInterParameter.BuildingBounds;
+            foreach (var subArea in OSubAreas)
+            {
+                cars.AddRange(subArea.obliqueMPartition.Cars);
+                pillars.AddRange(subArea.obliqueMPartition.Pillars);
+                lanes.AddRange(subArea.obliqueMPartition.IniLanes.Select(e => e.Line));
+                obstacles.AddRange(subArea.BuildingBounds);
+            }
             var newbound = MParkingPartitionPro.CalIntegralBound(pillars, lanes, OInterParameter.BuildingBounds, cars);
             return newbound;
         }
-
         public void ParaWrite()
         {
             MParkingPartitionPro.DisModulus = ObliqueMPartition.DisModulus;
@@ -130,28 +85,38 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         /// <summary>
         /// 尽端停车的处理
         /// </summary>
-        public void ProcessEndLanes()
+        public ObliqueMPartition ProcessEndLanes()
         {
             ParaWrite();
-            var _walls = walls;
-            var _cars = cars;
-            var _pillars = pillars;
-            var _obsVertices = obsVertices; 
-            var _lanes = lanes;
-            var _obstacles = obstacles;
-            var ObstaclesSpacialIndex = new MNTSSpatialIndex(_obstacles);
-            RemoveDuplicatedLines(_lanes);
-            MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref _cars, ref _pillars, ref _lanes, _walls, ObstaclesSpacialIndex, BOUND);
-            MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref _cars, ref _pillars, ref _lanes, _walls, ObstaclesSpacialIndex, BOUND);
-            MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref _cars);
-            MLayoutPostProcessing.RemoveInvalidPillars(ref _pillars, _cars);
-            walls = _walls;
-            cars = _cars;
-            pillars = _pillars;
-            obsVertices = _obsVertices;
-            lanes = _lanes;
-            obstacles = _obstacles;
-            return;
+            var walls = new List<LineString>();
+            var cars = new List<InfoCar>();
+            var pillars = new List<Polygon>();
+            var iniPillars = new List<Polygon>();
+            var obsVertices = new List<Coordinate>();
+            var lanes = new List<LineSegment>();
+            var obstacles = new List<Polygon>();
+            var Boundary = OSubAreas[0].OutBound.Clone();
+            foreach (var subArea in OSubAreas)
+            {
+                walls.AddRange(subArea.obliqueMPartition.Walls);
+                cars.AddRange(subArea.obliqueMPartition.Cars);
+                pillars.AddRange(subArea.obliqueMPartition.Pillars);
+                iniPillars.AddRange(subArea.obliqueMPartition.IniPillar);
+                obsVertices.AddRange(subArea.obliqueMPartition.ObstacleVertexes);
+                lanes.AddRange(subArea.obliqueMPartition.IniLanes.Select(e => e.Line));
+                obstacles.AddRange(subArea.obliqueMPartition.Obstacles);
+            }
+            var ObstaclesSpacialIndex = new MNTSSpatialIndex(obstacles);
+            RemoveDuplicatedLines(lanes);
+            MLayoutPostProcessing.GenerateCarsOntheEndofLanesByRemoveUnnecessaryLanes(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+            MLayoutPostProcessing.GenerateCarsOntheEndofLanesByFillTheEndDistrict(ref cars, ref pillars, ref lanes, walls, ObstaclesSpacialIndex, Boundary);
+            MLayoutPostProcessing.CheckLayoutDirectionInfoBeforePostProcessEndLanes(ref cars);
+            MLayoutPostProcessing.RemoveInvalidPillars(ref pillars, cars);
+            ObliqueMPartition obliqueMPartition=new ObliqueMPartition();
+            obliqueMPartition.Cars = cars;
+            obliqueMPartition.OutputLanes = lanes;
+            obliqueMPartition.Pillars = pillars;
+            return obliqueMPartition;
         }
     }
 }
