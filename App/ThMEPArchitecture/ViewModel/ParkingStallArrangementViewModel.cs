@@ -86,7 +86,7 @@ namespace ThMEPArchitecture.ViewModel
         }
 
         //补充分区线
-        private bool _AddBoundSegLines = true;
+        private bool _AddBoundSegLines = false;
         public bool AddBoundSegLines
         {
             get { return _AddBoundSegLines; }
