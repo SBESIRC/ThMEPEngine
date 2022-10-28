@@ -454,7 +454,7 @@ namespace ThMEPArchitecture.MultiProcess
         {
             DataToDeformationService dataToDeformationService = new DataToDeformationService(subAreas);
             var parkingPlaceBlocks = dataToDeformationService.GetParkingPlaceBlocks();
-            //`
+            //
             string Boundlayer = "AI-参考地库轮廓";
             var laneLayer = "AI-车道中心线";
             using (AcadDatabase acad = AcadDatabase.Active())
@@ -465,28 +465,19 @@ namespace ThMEPArchitecture.MultiProcess
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, laneLayer, 2);
             }
             GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
+            //车道微动
+            globalBusiness.DeformLanes();
             var caledBound = globalBusiness.CalBound();
-            if(disPlayBound) Display(caledBound, 141, Boundlayer);
+            if (disPlayBound) Display(caledBound, 141, Boundlayer);
             if (ObliqueMPartition.AllowProcessEndLanes)
             {
-                var integralObliqueMPartition = globalBusiness.ProcessEndLanes();
-                MultiProcessTestCommand.DisplayMParkingPartitionPros(integralObliqueMPartition.ConvertToMParkingPartitionPro());
-                var lines = integralObliqueMPartition.IniLanes.Select(e => e.Line).ToList();
-                MGeoUtilities.RemoveDuplicatedLines(lines);
-                lines.Select(e =>e.ToDbLine(2,laneLayer)).AddToCurrentSpace();
-                //integralObliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
+                globalBusiness.ProcessEndLanes();             
             }
-            else
-            {
-                foreach (var subArea in subAreas)
-                {
-                    MultiProcessTestCommand.DisplayMParkingPartitionPros(subArea.obliqueMPartition.ConvertToMParkingPartitionPro());
-                    var lines = subArea.obliqueMPartition.IniLanes.Select(e => e.Line).ToList();
-                    MGeoUtilities.RemoveDuplicatedLines(lines);
-                    lines.Select(e => e.ToDbLine(2,laneLayer)).AddToCurrentSpace();
-                    //subArea.obliqueMPartition.IniLanes.Select(e => e.Line.ToDbLine()).AddToCurrentSpace();
-                }
-            }
+            var integralObliqueMPartition = new ObliqueMPartition()
+            { Cars = globalBusiness.cars, OutputLanes = globalBusiness.lanes, Pillars = globalBusiness.pillars };
+            MultiProcessTestCommand.DisplayMParkingPartitionPros(integralObliqueMPartition.ConvertToMParkingPartitionPro());
+
+
             return caledBound;
         }
         private void ShowTitle(int ParkingStallCount, double areaPerStall, double TotalSeconds)

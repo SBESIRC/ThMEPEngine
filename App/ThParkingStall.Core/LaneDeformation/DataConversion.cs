@@ -34,7 +34,12 @@ namespace ThParkingStall.Core.LaneDeformation
         public Polygon LaneObb;    //车道外包框线
         public List<ParkingPlaceBlock> ParkingPlaceBlockList = new List<ParkingPlaceBlock>(); //某个车道生成的车位的集合起来的块
         public bool IsAnchorLane = false;                                     //不能移动的特殊车道信息
-        //public double Width;//最小车道宽度 
+                                                                              //public double Width;//最小车道宽度 
+        //static:方便数据传递
+        //车道线宽度的一半
+        static public double VehicleLaneWidth;       //这个放这里和放VehicleLane类里面都可以
+        static public Polygon Boundary;      //地库外框
+        static public List<Polygon> Blocks;   //墙体等障碍物
     }
     //车位的集合块
     [Serializable]
@@ -80,11 +85,12 @@ namespace ThParkingStall.Core.LaneDeformation
     [Serializable]
     public class SingleParkingPlace
     {
-        public SingleParkingPlace(Polygon polygon, int type, Vector2D vec)
+        public SingleParkingPlace(Polygon polygon, int type, Vector2D vec,Coordinate point)
         {
             ParkingPlaceObb=polygon;
             Type=type;
             ParkingPlaceDir=vec;
+            Point=point;
             InitParas();
         }
         void InitParas()
@@ -93,6 +99,7 @@ namespace ThParkingStall.Core.LaneDeformation
             ShortSide = nums[0];
             LongSide = nums[3];
         }
+        public Coordinate Point { get; set; }//数据转换使用,如果车位发生偏移了，请将此点偏移同向量
         public VehicleLane FatherVehicleLane { get; set; }        //记录车位从属于哪个车道
         public ParkingPlaceBlock FatherParkingPlaceBlock { get; set; }  //记录车位从属于哪个块
         public Polygon ParkingPlaceObb;   //车位外包框线

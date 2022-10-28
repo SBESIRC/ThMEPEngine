@@ -372,7 +372,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 _addpillars = Pillars.Except(_addpillars).ToList();
                 _SingleParkingPlaces = _addedcars.Select(e =>
                 {
-                    var sp = new SingleParkingPlace(e.Polyline, e.CarLayoutMode, e.Vector);
+                    var sp = new SingleParkingPlace(e.Polyline, e.CarLayoutMode, e.Vector, e.Point);
                     return sp;
                 }).ToList();
                 _LDColumns = _addpillars.Select(e =>
