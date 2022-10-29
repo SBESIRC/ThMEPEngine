@@ -21,10 +21,10 @@ namespace ThParkingStall.Core.LaneDeformation
         }
         public void Pipeline()
         {
-            Polygon b;
-            var a = b.Difference(b);
-            LineString c;
-            c.Buffer();
+            //Polygon b;
+            //var a = b.Difference(b);
+            //LineString c;
+            //c.Buffer();
             
             
 

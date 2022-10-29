@@ -21,15 +21,12 @@ namespace ThParkingStall.Core.LaneDeformation
 
     public class ProcessedData
     {
-        public List<List<FreeArea>> FreeAreaList = new List<List<FreeArea>>();
+        //临时做个示例
+        public List<List<FreeBlock>> FreeBlockList = new List<List<FreeBlock>>();
         public ProcessedData() { }
 
 
     }
-
-    public 
-
-
 
 
     public class Parameter 

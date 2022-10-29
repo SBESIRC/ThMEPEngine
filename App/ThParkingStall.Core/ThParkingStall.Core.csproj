@@ -73,8 +73,11 @@
     <Compile Include="LaneDeformation\DataPackage.cs" />
     <Compile Include="LaneDeformation\DataPreprocess.cs" />
     <Compile Include="LaneDeformation\LaneDeformationService.cs" />
-    <Compile Include="LaneDeformation\Model\FreeArea.cs" />
-    <Compile Include="LaneDeformation\Service\PolygonService.cs" />
+    <Compile Include="LaneDeformation\Model\BlockNode.cs" />
+    <Compile Include="LaneDeformation\Model\FreeBlock.cs" />
+    <Compile Include="LaneDeformation\Service\GetFreeBlock.cs" />
+    <Compile Include="LaneDeformation\Service\ToleranceCalculator.cs" />
+    <Compile Include="LaneDeformation\Utils\PolygonUtils.cs" />
     <Compile Include="LineCleaner\LineService.cs" />
     <Compile Include="MPartitionLayout\Command\MCompute.cs" />
     <Compile Include="MPartitionLayout\Model\MEssentialClasses.cs" />

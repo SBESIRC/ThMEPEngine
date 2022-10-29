@@ -24,7 +24,7 @@ namespace ThParkingStall.Core.LaneDeformation
             DataPreprocess dataPreprocess = new DataPreprocess(Data);
             dataPreprocess.Pipeline();
 
-            qianlizhijisaun qian li = new ()
+            //
             
 
             //
