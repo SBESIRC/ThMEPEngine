@@ -20,6 +20,9 @@ namespace ThParkingStall.Core.LaneDeformation
         public VehicleLaneData Result { get; set; }
         public void Process()
         {
+            DataPreprocess dataPreprocess = new DataPreprocess(Data);
+            dataPreprocess.Pipeline();
+
             Result = Data;
             return;
         }

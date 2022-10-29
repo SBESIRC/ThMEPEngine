@@ -27,10 +27,11 @@ namespace ThParkingStall.Core.LaneDeformation
     public static class LaneDeformationParas
     {
         //车道线宽度的一半
-        static public double VehicleLaneWidth;       //这个放这里和放VehicleLane类里面都可以
-        static public Polygon Boundary;      //地库外框
-        static public List<Polygon> Blocks;   //墙体等障碍物
+        static public double VehicleLaneWidth;    //这个放这里和放VehicleLane类里面都可以
+        static public Polygon Boundary;           //地库外框
+        static public List<Polygon> Blocks;       //墙体等障碍物
     }
+
     //接口转换使用数据
     [Serializable]
     public class VehicleLaneData
