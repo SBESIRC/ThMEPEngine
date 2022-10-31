@@ -179,6 +179,37 @@ namespace ThParkingStall.Host.Controllers
 
     [ApiController]
     [Route("[controller]")]
+    public class ValidateUser : ControllerBase
+    {
+        [HttpGet]
+        public string validate(string employeeId)
+        {
+            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "userEmployeeId.dat");
+            var ids =System.IO.File.ReadAllLines(path, Encoding.UTF8);
+            foreach (var id in ids)
+            {
+                var realId= HexStringToString(id,Encoding.UTF8);
+                if (employeeId.Equals(realId))
+                    return "1";
+            }
+            return "0";
+        }
+        public static string HexStringToString(string hs, Encoding encode)
+        {
+            string strTemp = "";
+            byte[] b = new byte[hs.Length / 2];
+            for (int i = 0; i < hs.Length / 2; i++)
+            {
+                strTemp = hs.Substring(i * 2, 2);
+                b[i] = Convert.ToByte(strTemp, 16);
+            }
+            //按照指定编码将字节数组变为字符串
+            return encode.GetString(b);
+        }
+    }
+
+    [ApiController]
+    [Route("[controller]")]
     public class RunParkingStall : ControllerBase
     {
         [HttpGet]

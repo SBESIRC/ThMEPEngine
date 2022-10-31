@@ -168,7 +168,7 @@ namespace ThMEPArchitecture.MultiProcess
             solution = readSolution;
             return solution;
         }
-        static void SetCertificatePolicy()
+        public static void SetCertificatePolicy()
         {
             ServicePointManager.ServerCertificateValidationCallback += RemoteCertificateValidate;
         }
@@ -176,7 +176,7 @@ namespace ThMEPArchitecture.MultiProcess
         ///  <summary>
         ///  远程证书验证
         ///  </summary>
-        static bool RemoteCertificateValidate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors error)
+        public static bool RemoteCertificateValidate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors error)
         {
             return true;
         }

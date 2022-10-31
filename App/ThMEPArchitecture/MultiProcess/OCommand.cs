@@ -44,6 +44,8 @@ using static ThParkingStall.Core.MPartitionLayout.MCompute;
 
 using System.Reflection;
 using System.Net;
+using ThMEPIdentity;
+using System.Windows;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -196,6 +198,38 @@ namespace ThMEPArchitecture.MultiProcess
         }
         public void Run(AcadDatabase acadDatabase, bool autoMode = false)
         {
+            ThAcsSystemService.Instance.Initialize();
+            var employeeId = ThAcsSystemService.Instance.EmployeeId;
+            //请求服务器身份验证
+            //开发用户豁免
+            var userNameMatched = false;
+            var userName = System.Environment.UserName.ToUpper();
+            var userList = new List<string>() { "WANGWENGUANG", "ZHANGWENXUAN" , "YUZHONGSHENG","CHENMO"};
+            foreach(var name in userList)
+                if(name.Contains(userName))
+                    userNameMatched = true;
+            //
+            if (!userNameMatched)
+            {
+                var appHttp = $"http://172.16.1.84:8088/Cal/ValidateUser?employeeId={employeeId}";
+                ServerGenerationService.SetCertificatePolicy();
+                List<Byte> pageData = new List<byte>();
+                string pageHtml = "";
+                WebClientEx MyWebClient = new WebClientEx();
+                MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
+                MyWebClient.Timeout = 10 * 60 * 1000;
+                Task.Factory.StartNew(() =>
+                {
+                    pageData = MyWebClient.DownloadData(appHttp).ToList();
+                }).Wait(-1);
+                pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
+                if (pageHtml == "0")
+                {
+                    MessageBox.Show("对不起，您暂未获取授权");
+                    return;
+                }
+            }    
+
             var blks = InputData.SelectBlocks(acadDatabase);
             var displayPro = ProcessForDisplay.CreateSubProcess();
             if (ParameterViewModel.ShowLogs)
