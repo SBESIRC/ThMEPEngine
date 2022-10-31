@@ -59,7 +59,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public Polygon BOUND { get; set; }
 
 
-        public DrawTmpOutPut drawTmpOutPut0;
+        public DrawTmpOutPut drawTmpOutPut0 = new DrawTmpOutPut();
         public void DeformLanes()
         {
             return;
@@ -84,6 +84,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             fileStream.Close();
 
             LaneDeformationService deformationService = new LaneDeformationService(vehiclesdata);
+            drawTmpOutPut0 = deformationService.DrawTmpOutPut0;
             deformationService.Process();
             vehiclesdata = deformationService.Result;
 
@@ -192,7 +193,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
 
     public class DrawTmpOutPut 
     {
-        public Polygon ppp;
+        public List<Polygon> OriginalFreeAreaList =new List<Polygon>();
         public DrawTmpOutPut() 
         {
 

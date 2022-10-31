@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.LaneDeformation;
+using ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess;
 
 namespace ThParkingStall.Core.LaneDeformation
 {
@@ -15,9 +16,13 @@ namespace ThParkingStall.Core.LaneDeformation
         public LaneDeformationService(VehicleLaneData data)
         {
             Data = data;
+            LDOutput.DrawTmpOutPut0 = new DrawTmpOutPut();
         }
         private VehicleLaneData Data { get; }
         public VehicleLaneData Result { get; set; }
+
+        public DrawTmpOutPut DrawTmpOutPut0 = new DrawTmpOutPut();
+
         public void Process()
         {
             //
@@ -25,13 +30,18 @@ namespace ThParkingStall.Core.LaneDeformation
             dataPreprocess.Pipeline();
 
             //
-            
+
 
             //
-            
+            GetResult();
+            return;
+        }
+
+        public void GetResult() 
+        {
+            DrawTmpOutPut0 = LDOutput.DrawTmpOutPut0;
 
             Result = Data;
-            return;
         }
     }
 }

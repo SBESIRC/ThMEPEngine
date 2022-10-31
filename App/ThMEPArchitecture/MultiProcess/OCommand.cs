@@ -510,7 +510,7 @@ namespace ThMEPArchitecture.MultiProcess
             GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
             //车道微动
             globalBusiness.DeformLanes();
-
+            //打印变量
             PrintTmpOutPut(globalBusiness.drawTmpOutPut0);
 
 
@@ -618,7 +618,11 @@ namespace ThMEPArchitecture.MultiProcess
         public void PrintTmpOutPut(DrawTmpOutPut drawTmpOutPut) 
         {
             //打印到CAD
-        
+            foreach (Polygon a in drawTmpOutPut.OriginalFreeAreaList) 
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l0OriginalFreeAreaList", 0);
+            }
         }
     }
 }

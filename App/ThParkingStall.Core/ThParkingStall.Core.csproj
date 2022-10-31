@@ -75,7 +75,7 @@
     <Compile Include="LaneDeformation\LaneDeformationService.cs" />
     <Compile Include="LaneDeformation\Model\BlockNode.cs" />
     <Compile Include="LaneDeformation\Model\FreeBlock.cs" />
-    <Compile Include="LaneDeformation\Service\GetFreeBlock.cs" />
+    <Compile Include="LaneDeformation\Service\BuildFreeBlock.cs" />
     <Compile Include="LaneDeformation\Service\ToleranceCalculator.cs" />
     <Compile Include="LaneDeformation\Utils\PolygonUtils.cs" />
     <Compile Include="LineCleaner\LineService.cs" />
