@@ -33,26 +33,63 @@ namespace ThParkingStall.Core.LaneDeformation
                 BlockNode node = WaitQueue.Dequeue();
                 if (node.Type is BlockType.FREE || node.Type is BlockType.SPOT)
                 {
-                    // 取前继中的最小值
-                    double min = double.PositiveInfinity;
+                    // 更新容差值
+                    if (node.LastNodes(dir).Count is 0)
+                        node.SetMoveTolerance(dir, 0);
+                    else
+                    {
+                        double min = double.PositiveInfinity;
+                        foreach (BlockNode n in node.LastNodes(dir))
+                            min = Math.Min(n.Tolerance(dir), min);
+                        node.SetMoveTolerance(dir, min);
+                    }
+
+                    // 更新后继的入度,为0则入队
                     foreach (BlockNode n in node.NextNodes(dir))
                     {
-                        min = Math.Min(n.Tolerance(dir), min);
-                    }
-
-                    // 更新后继的入度
-                    foreach (BlockNode n in node.LastNodes(dir))
-                    {
                         n.SetInDegree(dir, n.InDegree(dir) - 1);
+                        if (n.InDegree(dir) is 0)
+                            WaitQueue.Enqueue(n);
                     }
-
-                    // 更新容差值
-                    node.SetMoveTolerance(dir, min);
                 }
-
-                 else if (node.Type is BlockType.LANE)
+                else if (node.Type is BlockType.LANE)
                 {
+                    LaneBlock laneBlock = (LaneBlock)node;
 
+                    // 不可动车道
+                    if (laneBlock.Lane.IsAnchorLane)
+                    {
+                        // 更新容差值
+                        node.SetMoveTolerance(dir, 0);
+
+                        // 更新后继的入度,为0则入队
+                        foreach (BlockNode n in node.NextNodes(dir))
+                        {
+                            n.SetInDegree(dir, n.InDegree(dir) - 1);
+                            if (n.InDegree(dir) is 0)
+                                WaitQueue.Enqueue(n);
+                        }
+                    }
+                    // 垂直车道
+                    else if (laneBlock.IsVerticle)
+                    {
+                        if (node.LastNodes(dir).Count is 0)
+                            node.SetMoveTolerance(dir, 0);
+                        else
+                        {
+                            List<Coordinate> coords = new List<Coordinate>();
+                            List<double> values;
+                            foreach (BlockNode n in node.LastNodes(dir))
+                            {
+                                coords.Add(n.LeftDownPoint);
+                            }
+                        }
+                    }
+                    // 其余车道
+                    else
+                    {
+
+                    }
                 }
             }
         }

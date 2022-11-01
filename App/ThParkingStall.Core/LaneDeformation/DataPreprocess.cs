@@ -18,6 +18,9 @@ namespace ThParkingStall.Core.LaneDeformation
     {
 
         public VehicleLaneData rawData;
+
+        public List<Polygon> originalFreeAreaList = new List<Polygon>();
+
         public DataPreprocess(VehicleLaneData data) 
         {
             RawData.rawData = data;
@@ -47,7 +50,7 @@ namespace ThParkingStall.Core.LaneDeformation
             var freeAreeResult = OverlayNGRobust.Overlay(LaneDeformationParas.Boundary, differenceObjs, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
 
 
-            List<Polygon> originalFreeAreaList = new List<Polygon>();
+            
             if (freeAreeResult is Polygon a)
             {
                 originalFreeAreaList.Add(a);
@@ -96,29 +99,29 @@ namespace ThParkingStall.Core.LaneDeformation
             var freeAreeResult = OverlayNGRobust.Overlay(LaneDeformationParas.Boundary, differenceObjs, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
 
 
-            List<Polygon> originalFreeAreaList = new List<Polygon>();
-            if (freeAreeResult is Polygon a)
-            {
-                originalFreeAreaList.Add(a);
-            }
-            else if (freeAreeResult is GeometryCollection collection)
-            {
-                foreach (var geo in collection.Geometries)
-                {
-                    if (geo is Polygon pl)
-                    {
-                        originalFreeAreaList.Add(pl);
-                    }
-                }
-            }
+            //List<Polygon> originalFreeAreaList = new List<Polygon>();
+            //if (freeAreeResult is Polygon a)
+            //{
+            //    originalFreeAreaList.Add(a);
+            //}
+            //else if (freeAreeResult is GeometryCollection collection)
+            //{
+            //    foreach (var geo in collection.Geometries)
+            //    {
+            //        if (geo is Polygon pl)
+            //        {
+            //            originalFreeAreaList.Add(pl);
+            //        }
+            //    }
+            //}
         }
 
         public void BuildFreeArea() 
         {
             Vector2D testVector = new Vector2D(0, 1);
-            BuildFreeBlock buildFreeBlock = new BuildFreeBlock(testVector);
+            BuildFreeBlock buildFreeBlock = new BuildFreeBlock(originalFreeAreaList,testVector);
         
-        
+
         }
     }
 }
