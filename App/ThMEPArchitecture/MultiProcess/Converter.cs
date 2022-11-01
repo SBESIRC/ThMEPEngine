@@ -188,6 +188,35 @@ namespace ThMEPArchitecture.MultiProcess
             datawraper.BoundaryShrink = vm.BoundaryShrink;
             //最大建筑位移距离
             datawraper.BuildingMoveDistance = vm.BuildingMoveDistance;
+            //处理器核心数
+            datawraper.ProcessCount = vm.ProcessCount;
+            //种群数
+            datawraper.PopulationCount = vm.PopulationCount;
+            //相同退出次数
+            datawraper.MaxEqualCnt = vm.MaxEqualCnt;
+            //最大迭代时间
+            datawraper.MaxTimespan = vm.MaxTimespan;
+            //变异因子
+            datawraper.MutationRate = vm.MutationRate;
+            //特殊基因比例
+            datawraper.SpecialGeneProp = vm.SpecialGeneProp;
+            //基因变异因子
+            datawraper.GeneMutationRate = vm.GeneMutationRate;
+            //保留因子
+            datawraper.SelectionRate = vm.SelectionRate;
+            //精英比例
+            datawraper.EliteProp = vm.EliteProp;
+            //小变异比例
+            datawraper.SMProp = vm.SMProp;
+            datawraper.TargetParkingCntMin = vm.TargetParkingCntMin;
+            datawraper.TargetParkingCntMax = vm.TargetParkingCntMax;
+            //面积平均缩减比例
+            datawraper.AreaShrinkProp = vm.AreaShrinkProp;
+            datawraper.BorderlineMoveRange = vm.BorderlineMoveRange;
+            datawraper.ThreadCount = vm.ThreadCount;
+            datawraper.LogSubProcess = ParkingStallArrangementViewModel.LogSubProcess;
+            datawraper.AreaMax = ParkingStallArrangementViewModel.AreaMax;
+            datawraper.TotalArea = ParkingStallArrangementViewModel.TotalArea;
         }
         public static List<Ramp> GetRamps(this OuterBrder outerBrder)
         {

@@ -18,6 +18,7 @@ using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using Autodesk.AutoCAD.Geometry;
+using ThParkingStall.Core.Tools;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -45,8 +46,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public override void SubExecute()
         {
             ParameterStock.Set(ParameterViewModel);
-            Utils.SetSeed();
-            Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+            ThParkingStallCoreTools.SetSeed();
+            Logger?.Information($"Random Seed:{ThParkingStallCoreTools.GetSeed()}");
             try
             {
                 using (var docLock = Active.Document.LockDocument())

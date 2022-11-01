@@ -380,6 +380,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             //ObstacleBoundaries = result.Get<Polygon>(true);
             var mmtoM = 0.001 * 0.001;
             ParameterStock.TotalArea = WallLine.Buffer(ParameterStock.WallLineThickness,bufferParameters).Area*mmtoM;
+            ParkingStallArrangementViewModel.TotalArea= WallLine.Buffer(ParameterStock.WallLineThickness, bufferParameters).Area * mmtoM;
             ParameterStock.BuildingArea = result.Area * mmtoM; 
             Logger?.Information($"地库总面积:"+ string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2) );
             Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2) );

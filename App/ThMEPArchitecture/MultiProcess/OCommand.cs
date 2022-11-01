@@ -39,17 +39,23 @@ using static ThMEPArchitecture.PartitionLayout.DisplayTools;
 using ThParkingStall.Core.Tools;
 using ThParkingStall.Core.ObliqueMPartitionLayout;
 using ThMEPArchitecture.MultiProcess;
+using ThParkingStall.Core;
+using static ThParkingStall.Core.MPartitionLayout.MCompute;
+
+using System.Reflection;
+using System.Net;
+using ThMEPIdentity;
+using System.Windows;
+
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThOArrangementCmd : ThMEPBaseCommand, IDisposable
     {
         public static string LogFileName = Path.Combine(GetPath.GetAppDataPath(), "MPLog.txt");
         public static string DisplayLogFileName = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog.txt");
-        public static string DisplayLogFileName2 = Path.Combine(System.IO.Path.GetTempPath(), "DisplayLog2.txt");
         public Serilog.Core.Logger Logger = null;
         List<DisplayInfo> displayInfos;
         public static Serilog.Core.Logger DisplayLogger = null;//用于记录信息日志
-        public Serilog.Core.Logger DisplayLogger2 = null;//用于记录信息日志
 
         public string DrawingName;
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
@@ -75,8 +81,6 @@ namespace ThMEPArchitecture.MultiProcess
 
             System.IO.FileStream emptyStream = new System.IO.FileStream(DisplayLogFileName, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
             emptyStream.Close();
-            System.IO.FileStream emptyStream2 = new System.IO.FileStream(DisplayLogFileName2, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-            emptyStream2.Close();
             ParameterStock.Set(ParameterViewModel);
             if (ParameterStock.LogMainProcess)
             {
@@ -84,10 +88,8 @@ namespace ThMEPArchitecture.MultiProcess
                             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
                 DisplayLogger = new Serilog.LoggerConfiguration().WriteTo
                             .File(DisplayLogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
-                DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
-            .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
-            Utils.SetSeed();
+            ThParkingStallCoreTools.SetSeed();
             try
             {
                 using (var docLock = Active.Document.LockDocument())
@@ -113,12 +115,12 @@ namespace ThMEPArchitecture.MultiProcess
                         {
                             Run(currentDb);
                         }
-                        
-                        else if(ParameterViewModel.CommandType == CommandTypeEnum.RunWithIterationAutomatically)
+
+                        else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIterationAutomatically)
                         {
-                            Run(currentDb,true);
+                            Run(currentDb, true);
                         }
-                        else if(ParameterViewModel.CommandType == CommandTypeEnum.BuildingAnalysis)
+                        else if (ParameterViewModel.CommandType == CommandTypeEnum.BuildingAnalysis)
                         {
                             BuildingAnalysis(currentDb);
                         }
@@ -131,8 +133,8 @@ namespace ThMEPArchitecture.MultiProcess
             }
             catch (Exception ex)
             {
-                DisplayLogger2?.Information(ex.Message);
-                DisplayLogger2?.Information("程序出错！");
+                DisplayLogger?.Information(ex.Message);
+                DisplayLogger?.Information("程序出错！");
                 Logger?.Information(ex.Message);
                 Logger?.Information("##################################");
                 Logger?.Information(ex.StackTrace);
@@ -140,10 +142,8 @@ namespace ThMEPArchitecture.MultiProcess
             }
             finally
             {
-                DisplayLogger?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分\n");
-                DisplayLogger?.Information($"地库程序运行结束 \n");
+                DisplayLogger?.Information($"地库程序运行结束,总用时: {_stopwatch.Elapsed.TotalMinutes} 分\n");
                 DisplayLogger?.Dispose();
-                DisplayLogger2?.Dispose();
             }
         }
 
@@ -196,7 +196,7 @@ namespace ThMEPArchitecture.MultiProcess
                 }
             }
         }
-        public void Run(AcadDatabase acadDatabase,bool autoMode = false)
+        public void Run(AcadDatabase acadDatabase, bool autoMode = false)
         {
             var blks = InputData.SelectBlocks(acadDatabase);
             var displayPro = ProcessForDisplay.CreateSubProcess();
@@ -266,7 +266,7 @@ namespace ThMEPArchitecture.MultiProcess
                 var entities = new List<Entity>();
                 using (AcadDatabase acad = AcadDatabase.Active())
                 {
-                    if (!acad.Layers.Contains( "障碍物"))
+                    if (!acad.Layers.Contains("障碍物"))
                         ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "障碍物", 0);
                     if (!acad.Layers.Contains("分区线"))
                         ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "分区线", 0);
@@ -275,11 +275,11 @@ namespace ThMEPArchitecture.MultiProcess
                 }
                 foreach (var b in OInterParameter.Buildings)
                 {
-                    var pl = b.Shell.ToDbPolyline(5,"障碍物");
+                    var pl = b.Shell.ToDbPolyline(5, "障碍物");
                     DisplayParkingStall.Add(pl);
                     entities.Add(pl);
                 }
-                foreach(var l in OInterParameter.InitSegLines)
+                foreach (var l in OInterParameter.InitSegLines)
                 {
                     var line = l.Splitter.ToDbLine(2, "分区线");
                     DisplayParkingStall.Add(line);
@@ -291,17 +291,15 @@ namespace ThMEPArchitecture.MultiProcess
                 //DisplayParkingStall.MoveAddedEntities();
                 //OInterParameter.Buildings.ForEach(b => entities.Add( b.Shell.ToDbPolyline(5, "障碍物")));
                 //OInterParameter.Buildings.ForEach(b => b.ToDbPolylines().ForEach(pl => { pl.AddToCurrentSpace(); DisplayParkingStall.Add(pl); }));
-                ProcessAndDisplay(null, 1, stopWatch,false);
+                ProcessAndDisplay(null, 1, stopWatch, false);
                 //OInterParameter.BuildingBounds.ForEach(b => b.ToDbMPolygon().AddToCurrentSpace());
                 //lanes.Get<LineString>(true).ForEach(l => l.ToDbPolyline().AddToCurrentSpace());
                 //ProcessAndDisplay(null, 0, stopWatch);
                 entities.ShowBlock("障碍物移位结果", "障碍物移位结果");
             }
         }
-        private void ProcessTheBlock(BlockReference block,bool autoMode = false, bool definePriority = true)
+        private void ProcessTheBlock(BlockReference block, bool autoMode = false, bool definePriority = true)
         {
-            int fileSize = 64; // 64Mb
-            var nbytes = fileSize * 1024 * 1024;
             var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
             //var MultiSolutionList = new List<int> { 0 };
             var blkName = block.GetEffectiveName();
@@ -348,43 +346,80 @@ namespace ThMEPArchitecture.MultiProcess
                     return;
                 }
             }
-            layoutData.ProcessSegLines(autoSegLines,ParameterViewModel.AddBoundSegLines);
+            layoutData.ProcessSegLines(autoSegLines, ParameterViewModel.AddBoundSegLines);
             if(layoutData.SegLines.Count == 0) return;
             //layoutData.SetInterParam();
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
+                var guid = (Guid.NewGuid()).ToString();
+                WriteGuidToMemoryFile(guid);
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
                 ParameterStock.RunMode = MultiSolutionList[i];
                 var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
-                using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
-                {
-                    using (MemoryMappedViewStream stream = mmf.CreateViewStream())
-                    {
-                        IFormatter formatter = new BinaryFormatter();
-                        formatter.Serialize(stream, dataWraper);
-                    }
-                    var GA_Engine = new OGAGenerator(ParameterViewModel);
-                    GA_Engine.Logger = Logger;
-                    GA_Engine.DisplayLogger = DisplayLogger;
-                    GA_Engine.displayInfo = displayInfos.Last();
-                    var Solution = GA_Engine.Run().First();
-                    ProcessAndDisplay(Solution, i, stopWatch);
-                }
+                Genome Solution;
+                //Solution = GetGenomeInitially(dataWraper);
+                DisplayLogger.Information("发送至服务器计算;");
+                Solution = GetGenomeFromServer(dataWraper,guid);
+                DisplayLogger.Information("接受到服务器计算结果;");
+                ProcessAndDisplay(Solution, i, stopWatch);
             }
         }
+        void WriteGuidToMemoryFile(string data)
+        {
+            //byte[] B = Encoding.UTF8.GetBytes(data);
+            //MemoryMappedFile memory = MemoryMappedFile.CreateOrOpen("AI-guid", B.Length);    // 创建指定大小的内存文件，会在应用程序退出时自动释放
+            //MemoryMappedViewAccessor accessor1 = memory.CreateViewAccessor();               // 访问内存文件对象
+            //accessor1.Flush();
+            //accessor1.WriteArray<byte>(0, B, 0, B.Length);
+            //accessor1.Dispose();
+            //return;
+            string file = Path.Combine(System.IO.Path.GetTempPath(), "AICal_File_id.txt");
+            FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs);
+            sw.WriteLine(data);
+            sw.Close();
+            fs.Close();
+            return;
+        }
+        Genome GetGenomeInitially(DataWraper dataWraper)
+        {
+            int fileSize = 64; // 64Mb
+            var nbytes = fileSize * 1024 * 1024;
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew("DataWraper", nbytes))
+            {
+                using (MemoryMappedViewStream stream = mmf.CreateViewStream())
+                {
+                    IFormatter formatter = new BinaryFormatter();
+                    formatter.Serialize(stream, dataWraper);
+                }
+                var GA_Engine = new OGAGenerator(ParameterViewModel);
+                GA_Engine.Logger = Logger;
+                GA_Engine.DisplayLogger = DisplayLogger;
+                GA_Engine.displayInfo = displayInfos.Last();
+                var Solution = GA_Engine.Run().First();
+                return Solution;
+            }
+        }
+        Genome GetGenomeFromServer(DataWraper dataWraper,string guid)
+        {
+            ServerGenerationService serverGenerationService = new ServerGenerationService();
+            var gene = serverGenerationService.GetGenome(dataWraper,guid);
+            return gene;
+        }
+
         private Polygon CaledBound;
-        private void ProcessAndDisplay(Genome solution, int SolutionID = 0, Stopwatch stopWatch = null,bool disPlayBound = true)
+        private void ProcessAndDisplay(Genome solution, int SolutionID = 0, Stopwatch stopWatch = null, bool disPlayBound = true)
         {
             var moveDistance = SolutionID * 2 * (OInterParameter.TotalArea.Coordinates.Max(c => c.X) -
                                                 OInterParameter.TotalArea.Coordinates.Min(c => c.X));
             var subAreas = OInterParameter.GetOSubAreas(solution);
             subAreas.ForEach(s => s.UpdateParkingCnts(true));
-            
+
             var ParkingStallCount = subAreas.Where(s => s.Count > 0).Sum(s => s.Count);
-            
-            CaledBound = ProcessPartitionGlobally(subAreas,disPlayBound);
-            if(solution != null)
+
+            CaledBound = ProcessPartitionGlobally(subAreas, disPlayBound);
+            if (solution != null)
             {
                 var finalLayer = "最终分区线";
                 using (AcadDatabase acad = AcadDatabase.Active())
@@ -392,7 +427,7 @@ namespace ThMEPArchitecture.MultiProcess
                     if (!acad.Layers.Contains(finalLayer))
                         ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, finalLayer, 2);
                     var outSegLines = OInterParameter.CurrentSegs.Where(l =>l.Splitter!= null).Select(l => l.Splitter.ToDbLine(2, finalLayer)).Cast<Entity>().ToList();
-                    foreach(var subarea in subAreas)
+                    foreach (var subarea in subAreas)
                         outSegLines.AddRange(subarea.obliqueMPartition.OutEnsuredLanes.Select(e => e.ToDbLine()));
                     outSegLines.ShowBlock(finalLayer, finalLayer);
                     MPEX.HideLayer(finalLayer);
@@ -427,7 +462,7 @@ namespace ThMEPArchitecture.MultiProcess
             {
                 Logger?.Information($"单地库用时: {stopWatch.Elapsed.TotalSeconds}秒 \n");
                 DisplayLogger?.Information($"最大车位数: {ParkingStallCount}");
-                var areaPerStall = CaledBound.Area*0.001*0.001 / ParkingStallCount;
+                var areaPerStall = CaledBound.Area * 0.001 * 0.001 / ParkingStallCount;
                 DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆");
                 DisplayLogger?.Information($"单地库用时: {stopWatch.Elapsed.TotalMinutes} 分\n");
 
@@ -439,7 +474,7 @@ namespace ThMEPArchitecture.MultiProcess
                         OInterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
                     TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
                 }
-                if(displayInfos != null)
+                if (displayInfos != null)
                 {
                     displayInfos.Last().FinalStalls = $"最大车位数: {ParkingStallCount} ";
                     displayInfos.Last().FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
@@ -537,24 +572,24 @@ namespace ThMEPArchitecture.MultiProcess
         }
         private void ShowDisplayInfo(int blkCnt)
         {
-            DisplayLogger2?.Information("----------------------------------------------");
-            DisplayLogger2?.Information("----------------------------------------------");
-            DisplayLogger2?.Information("----------------------");
-            DisplayLogger2?.Information("地库总数：" + blkCnt);
-            DisplayLogger2?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分");
-            DisplayLogger2?.Information("----------------------");
+            DisplayLogger?.Information("----------------------------------------------");
+            DisplayLogger?.Information("----------------------------------------------");
+            DisplayLogger?.Information("----------------------");
+            DisplayLogger?.Information("地库总数：" + blkCnt);
+            DisplayLogger?.Information($"总用时: {_stopwatch.Elapsed.TotalMinutes} 分");
+            DisplayLogger?.Information("----------------------");
             foreach (var displayInfo in displayInfos)
             {
-                DisplayLogger2?.Information(displayInfo.BlockName);
-                DisplayLogger2?.Information(displayInfo.FinalIterations);
-                DisplayLogger2?.Information(displayInfo.FinalStalls);
-                DisplayLogger2?.Information(displayInfo.FinalAveAreas);
-                DisplayLogger2?.Information(displayInfo.CostTime);
-                DisplayLogger2?.Information("----------------------");
+                DisplayLogger?.Information(displayInfo.BlockName);
+                DisplayLogger?.Information(displayInfo.FinalIterations);
+                DisplayLogger?.Information(displayInfo.FinalStalls);
+                DisplayLogger?.Information(displayInfo.FinalAveAreas);
+                DisplayLogger?.Information(displayInfo.CostTime);
+                DisplayLogger?.Information("----------------------");
             }
-            DisplayLogger2?.Information("----------------------------------------------");
-            DisplayLogger2?.Information("----------------------------------------------");
-            DisplayLogger2?.Information("地库程序运行结束");
+            DisplayLogger?.Information("----------------------------------------------");
+            DisplayLogger?.Information("----------------------------------------------");
+            DisplayLogger?.Information("地库程序运行结束");
         }
         private void ReclaimMemory()
         {

@@ -134,6 +134,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             init_WallLine = WallLine.Clone();
             MaxArea = WallLine.Buffer(ParameterStock.BorderlineMoveRange,MitreParam).Area *0.001 * 0.001;
             ParameterStock.AreaMax = MaxArea;
+            ParkingStallArrangementViewModel.AreaMax = MaxArea;
             UpdateObstacles();//更新障碍物
             if(Obstacles.Count == 0)
             {
@@ -377,6 +378,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             result = result.Intersection(WallLine);
             var mmtoM = 0.001 * 0.001;
             ParameterStock.TotalArea = WallLine.Area * mmtoM;
+            ParkingStallArrangementViewModel.TotalArea = WallLine.Area * mmtoM;
             ParameterStock.BuildingArea = result.Area * mmtoM;
             Logger?.Information($"地库总面积:" + string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2));
             Logger?.Information($"建筑物投影总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2));
@@ -420,6 +422,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             var unbuffered = new MultiPolygon(BuildingBounds.ToArray()).Buffer(-buildingtol, MitreParam).Get<Polygon>(true);
             WallLine = WallLine.Union(new MultiPolygon(unbuffered.ToArray())).Get<Polygon>(true).OrderBy(p => p.Area).Last();
             ParameterStock.TotalArea = WallLine.Area * mmtoM;
+            ParkingStallArrangementViewModel.TotalArea = WallLine.Area * mmtoM;
             ParameterStock.BuildingArea = unbuffered.Sum(p =>p.Area) * mmtoM;
             Logger?.Information($"地库总面积:" + string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2));
             Logger?.Information($"建筑物投影总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2));
@@ -704,8 +707,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         {
             var lb = -10000;
             var ub = 10000;
-            var x = General.Utils.RandDouble() *(ub-lb) + lb;
-            var y = General.Utils.RandDouble() *(ub-lb) + lb;
+            var x = ThParkingStallCoreTools.RandDouble() *(ub-lb) + lb;
+            var y = ThParkingStallCoreTools.RandDouble() *(ub-lb) + lb;
             return new Coordinate(x, y);
         }
 

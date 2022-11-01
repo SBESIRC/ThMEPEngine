@@ -1,7 +1,4 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
@@ -13,20 +10,16 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ThMEPArchitecture.MultiProcess;
-using ThMEPArchitecture.ParkingStallArrangement.Method;
-using ThMEPArchitecture.ParkingStallArrangement.Model;
-using ThMEPArchitecture.ViewModel;
-using ThMEPEngineCore;
+using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.IO;
 using ThParkingStall.Core.MPartitionLayout;
 using ThParkingStall.Core.OInterProcess;
 using ThParkingStall.Core.OTools;
 using ThParkingStall.Core.Tools;
 
-namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
+namespace ThParkingStallServer.Core
 {
-    public class OGAGenerator : IDisposable
+    public class ServerGAGenerator : IDisposable
     {
         //Genetic Algorithm parameters
         double MaxTime = 60;
@@ -56,27 +49,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //private List<(double, double)> LowerUpperBound;
         //Inputs
 
-        ParkingStallArrangementViewModel ParameterViewModel;
         public Serilog.Core.Logger Logger = null;
         public Serilog.Core.Logger DisplayLogger = null;
         public DisplayInfo displayInfo = null;
+        public bool isNotInHost { get; set; }
         public int ProcessCount;
         //public List<Process> ProcList;//进程列表
         public List<List<Mutex>> MutexLists;//进程锁列表的列表
 
         public int CurIteration;
-        public OGAGenerator(ParkingStallArrangementViewModel parameterViewModel = null)
+        private DataWraper _DataWraper { get; }
+        public ServerGAGenerator(DataWraper dataWraper)
         {
+            _DataWraper=dataWraper;
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618
-            IterationCount = parameterViewModel == null ? 60 : parameterViewModel.IterationCount;
+            IterationCount = _DataWraper.IterationCount;
 
-            PopulationSize = parameterViewModel == null ? 80 : parameterViewModel.PopulationCount;//种群数量
-            MaxCount = parameterViewModel == null ? 10 : parameterViewModel.MaxEqualCnt;//相同退出次数
+            PopulationSize = _DataWraper.PopulationCount;//种群数量
+            MaxCount = _DataWraper.MaxEqualCnt;//相同退出次数
             if (PopulationSize < 3) throw (new ArgumentOutOfRangeException("种群数量至少为3"));
             //默认值 核心数 -1,最多为种群数
             int max_process;
-            if (ParameterStock.ProcessCount == -1)
+            if (_DataWraper.ProcessCount == -1)
             {
                 if (Environment.ProcessorCount <= 32)
                 {
@@ -84,35 +79,35 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 else max_process = PopulationSize;
             }
-            else max_process = ParameterStock.ProcessCount;
+            else max_process = _DataWraper.ProcessCount;
             ProcessCount = Math.Min(max_process, PopulationSize);
             MutexLists = new List<List<Mutex>>();
-            MaxTime = parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
+            MaxTime = _DataWraper.MaxTimespan;//最大迭代时间
 
-            MutationRate = parameterViewModel.MutationRate;//变异因子,0.382
-            SpecialGeneProp = parameterViewModel.SpecialGeneProp;
+            MutationRate = _DataWraper.MutationRate;//变异因子,0.382
+            SpecialGeneProp = _DataWraper.SpecialGeneProp;
 
-            GeneMutationRate = parameterViewModel.GeneMutationRate;//基因变异因子0.382,保持迭代过程中变异基因的比例
+            GeneMutationRate = _DataWraper.GeneMutationRate;//基因变异因子0.382,保持迭代过程中变异基因的比例
 
-            SelectionRate = parameterViewModel.SelectionRate;//保留因子0.382
+            SelectionRate = _DataWraper.SelectionRate;//保留因子0.382
             SelectionSize = Math.Max(2, (int)(SelectionRate * PopulationSize));
 
-            //InputsF
-            ParameterViewModel = parameterViewModel;
+            ////InputsF
+            //ParameterViewModel = parameterViewModel;
 
             // Run2 添加参数
-            EliteProp = parameterViewModel.EliteProp;
+            EliteProp = _DataWraper.EliteProp;
             Elite_popsize = Math.Max((int)(PopulationSize * EliteProp), 1);//精英种群数量,种群数要大于3
             EliminateRate = GoldenRatio;//除保留部分随机淘汰概率0.618
             Max_SelectionSize = Math.Max(2, (int)(GoldenRatio * PopulationSize));//最大保留数量0.618
-            SMProp = parameterViewModel.SMProp;
+            SMProp = _DataWraper.SMProp;
             SMsize = Math.Max(1, (int)(SMProp * PopulationSize));//小变异比例
 
-            TargetParkingCntMin = parameterViewModel.TargetParkingCntMin;
-            TargetParkingCntMax = parameterViewModel.TargetParkingCntMax;
-            AreaMax = ParameterStock.AreaMax;
+            TargetParkingCntMin = _DataWraper.TargetParkingCntMin;
+            TargetParkingCntMax = _DataWraper.TargetParkingCntMax;
+            AreaMax = _DataWraper.AreaMax;
 
-            InitLenProp =Math.Sqrt(1-parameterViewModel.AreaShrinkProp);
+            InitLenProp = Math.Sqrt(1 - _DataWraper.AreaShrinkProp);
         }
 
         private void ReclaimMemory()
@@ -121,7 +116,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             GC.WaitForPendingFinalizers();
             GC.WaitForFullGCComplete();
         }
-        public double GetScore(Genome genome,int flag)
+        public double GetScore(Genome genome, int flag)
         {
             var parkingCnt = genome.ParkingStallCount;
             double score;
@@ -131,20 +126,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     score = parkingCnt;
                     break;
                 case 1:
-                    if(parkingCnt < 2) { score = 99999; }
-                    else if(parkingCnt < ParameterViewModel.TargetParkingCntMin)
+                    if (parkingCnt < 2) { score = 99999; }
+                    else if (parkingCnt < _DataWraper.TargetParkingCntMin)
                     {
                         score = AreaMax / parkingCnt;
                     }
-                    else if(parkingCnt <= ParameterViewModel.TargetParkingCntMax)
+                    else if (parkingCnt <= _DataWraper.TargetParkingCntMax)
                     {
-                        if(genome.Area >0) score = genome.Area / parkingCnt;
-                        else score = ParameterStock.TotalArea / parkingCnt;
+                        if (genome.Area > 0) score = genome.Area / parkingCnt;
+                        else score = _DataWraper.TotalArea / parkingCnt;
                     }
                     else
                     {
-                        if (genome.Area > 0) score = genome.Area / ParameterViewModel.TargetParkingCntMax;
-                        else score = ParameterStock.TotalArea / ParameterViewModel.TargetParkingCntMax;
+                        if (genome.Area > 0) score = genome.Area / _DataWraper.TargetParkingCntMax;
+                        else score = _DataWraper.TotalArea / _DataWraper.TargetParkingCntMax;
                     }
                     break;
                 default:
@@ -159,7 +154,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             var center = OInterParameter.TotalArea.Centroid;
             var solution = new Genome();
-            foreach(var segLine in OInterParameter.InitSegLines)
+            foreach (var segLine in OInterParameter.InitSegLines)
             {
                 double relativeValue;
                 var maxDist = segLine.MaxValue - segLine.MinValue;
@@ -169,28 +164,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 else
                 {
-                    relativeValue = ToRelativeValue(RandDoubleInRange(0, maxDist),maxDist);//纯随机数
+                    relativeValue = ToRelativeValue(RandDoubleInRange(0, maxDist), maxDist);//纯随机数
                 }
-                solution.Add(new OGene(0,relativeValue));
+                solution.Add(new OGene(0, relativeValue));
             }
-            if(OInterParameter.BorderLines != null)
+            if (OInterParameter.BorderLines != null)
             {
-                foreach(var l in OInterParameter.BorderLines)
+                foreach (var l in OInterParameter.BorderLines)
                 {
-                    var std = ParameterViewModel.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
+                    var std = _DataWraper.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
                     double relativeValue;
-                    if(new Vector2D(center.Coordinate,l.MidPoint).Dot(l.NormalVector()) > 0)
+                    if (new Vector2D(center.Coordinate, l.MidPoint).Dot(l.NormalVector()) > 0)
                     {
-                        relativeValue = RandNormalInRange(ParameterViewModel.BorderlineMoveRange, std, 0, ParameterViewModel.BorderlineMoveRange);
+                        relativeValue = RandNormalInRange(_DataWraper.BorderlineMoveRange, std, 0, _DataWraper.BorderlineMoveRange);
                     }
                     else
                     {
-                        relativeValue = RandNormalInRange(-ParameterViewModel.BorderlineMoveRange, std, -ParameterViewModel.BorderlineMoveRange,0);
+                        relativeValue = RandNormalInRange(-_DataWraper.BorderlineMoveRange, std, -_DataWraper.BorderlineMoveRange, 0);
                     }
                     solution.Add(new OGene(1, relativeValue));
                 }
             }
-            else if(OInterParameter.Center != null)
+            else if (OInterParameter.Center != null)
             {
                 for (int i = 0; i < OInterParameter.MaxMoveDistances.Count(); i++)
                 {
@@ -213,9 +208,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     orgSolution.Add(new OGene(1, 0.0));
                 }
             }
-            else if(OInterParameter.Center != null)
+            else if (OInterParameter.Center != null)
             {
-                for(int i = 0; i < OInterParameter.MaxMoveDistances.Count(); i++)
+                for (int i = 0; i < OInterParameter.MaxMoveDistances.Count(); i++)
                 {
                     orgSolution.Add(new OGene(InitLenProp, 0.5));//取最大可布置区域
                 }
@@ -231,7 +226,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         #endregion
         #region 随机函数
         //输入0~maxDist的数，返回正（相对于最小值）或负数（相对于最大值）
-        public double ToRelativeValue(double RandomNumber,double maxDist)
+        public double ToRelativeValue(double RandomNumber, double maxDist)
         {
             if (RandomNumber < maxDist / 2)
             {
@@ -270,9 +265,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             //随机的特殊解，用于卡车位
             // 输出的之保持在最大最小值之间
-            var dist = ParameterStock.VerticalSpotLength + ParameterStock.D2;
+            var dist = _DataWraper.VerticalSpotLength + _DataWraper.D2;
             var SolutionLis = new List<double>() { 0.1, -0.1 };
-            if(dist < maxDist)
+            if (dist < maxDist)
             {
                 SolutionLis.Add(dist);
                 SolutionLis.Add(-dist);
@@ -291,7 +286,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");
             Logger?.Information($"CPU数量：" + Environment.ProcessorCount.ToString());
-            DisplayLogger?.Information($"预计代数: {IterationCount}\t");
+            //DisplayLogger?.Information($"预计代数: {IterationCount}\t");
+            DisplayLogFilePut.LogDisplayLog($"预计代数: {IterationCount}");
+            if (isNotInHost)
+                DisplayLogFilePut.PutDisplayLogFileToHost();
             //DisplayLogger?.Information($"种群数量: {PopulationSize}\t");
             MCompute.Logger = Logger;
             var stopWatch = new Stopwatch();
@@ -306,7 +304,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var initSingnal = CreateMutex("Mutex", idx);
                 initSingnals.Add(initSingnal);
                 initSingnal.ReleaseMutex();
-                var proc = CreateSubProcess(idx, ParameterStock.LogSubProcess, ParameterStock.ThreadCount);
+                var proc = CreateSubProcess(idx, _DataWraper.LogSubProcess, _DataWraper.ThreadCount);
                 //var proc = CreateSubProcess(idx, true, ParameterStock.ThreadCount);
                 ProcList.Add(proc);
                 currentMutexList.Add(CreateMutex("Mutex0_", idx));
@@ -330,12 +328,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 int maxCount = 0;
                 int maxNums = 0;
                 int lamda; //变异方差，随代数递减
-                initSingnals.ForEach(s =>s.WaitOne());  
+                initSingnals.ForEach(s => s.WaitOne());
                 while (CurIteration++ < IterationCount && maxCount < MaxCount && stopWatch.Elapsed.TotalMinutes < MaxTime)
                 {
                     var strCurIterIndex = $"迭代次数：{CurIteration}";
                     Logger?.Information(strCurIterIndex);
-                    DisplayLogger?.Information(strCurIterIndex + "\t");
+                    //DisplayLogger?.Information(strCurIterIndex + "\t");
+                    DisplayLogFilePut.LogDisplayLog(strCurIterIndex);
+                    if (isNotInHost)
+                        DisplayLogFilePut.PutDisplayLogFileToHost();
                     System.Diagnostics.Debug.WriteLine(strCurIterIndex);
                     System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
                     selected = Selection(pop, out int CurNums);
@@ -367,11 +368,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 string strConverged;
                 if (maxCount < MaxCount) strConverged = $"未收敛";
                 else strConverged = $"已收敛";
-                Active.Editor.WriteMessage(strConverged);
+                //Active.Editor.WriteMessage(strConverged);
                 Logger?.Information(strConverged);
                 if (displayInfo != null) displayInfo.FinalIterations = "最终代数: " + (CurIteration - 1).ToString() + "(" + strConverged + ")";
-                DisplayLogger?.Information("最终代数: " + (CurIteration - 1).ToString() + "\t");
-                DisplayLogger?.Information("收敛情况: " + strConverged + "\t");
+                //DisplayLogger?.Information("最终代数: " + (CurIteration - 1).ToString() + "\t");
+                DisplayLogFilePut.LogDisplayLog("最终代数: " + (CurIteration - 1).ToString());
+                //DisplayLogger?.Information("收敛情况: " + strConverged + "\t");
+                DisplayLogFilePut.LogDisplayLog("收敛情况: " + strConverged);
+                if (isNotInHost)
+                    DisplayLogFilePut.PutDisplayLogFileToHost();
                 stopWatch.Stop();
                 var strTotalMins = $"迭代时间: {stopWatch.Elapsed.TotalMinutes} 分";
                 Logger?.Information(strTotalMins);
@@ -408,7 +413,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             CalculateMP(inputSolution);
 #endif
             List<Genome> sorted;
-            if (ParameterStock.BorderlineMoveRange == 0&& OInterParameter.Center == null)
+            if (_DataWraper.BorderlineMoveRange == 0 && OInterParameter.Center == null)
             {
                 sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
                 maxNums = sorted.First().ParkingStallCount;
@@ -417,12 +422,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 inputSolution.ForEach(s => GetScore(s, 1));
                 sorted = inputSolution.OrderBy(s => s.score).ToList();
-                var scores = inputSolution.Select(s =>s.score).OrderBy(l =>l).ToList();
+                var scores = inputSolution.Select(s => s.score).OrderBy(l => l).ToList();
                 maxNums = sorted.First().ParkingStallCount;
                 var strScore = $"当前分数：";
                 for (int k = 0; k < sorted.Count; ++k)
                 {
-                    strScore += string.Format("{0:N2}",(scores[k]));
+                    strScore += string.Format("{0:N2}", (scores[k]));
                     strScore += " ";
                 }
                 Logger?.Information(strScore);
@@ -443,9 +448,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             Logger?.Information(strCnt);
             var maxCnt = sorted[0].ParkingStallCount;
-            DisplayLogger?.Information("当前车位: " + maxCnt.ToString() + "\t");
+            //DisplayLogger?.Information("当前车位: " + maxCnt.ToString() + "\t");
+            DisplayLogFilePut.LogDisplayLog("当前车位: " + maxCnt.ToString());
             var areaPerStall = sorted[0].Area / maxCnt;
-            DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
+            //DisplayLogger?.Information("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆\t");
+            DisplayLogFilePut.LogDisplayLog("车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆");
+            if (isNotInHost)
+                DisplayLogFilePut.PutDisplayLogFileToHost();
             //System.Diagnostics.Debug.WriteLine(strCnt);
             var rst = new List<Genome>();
             // SelectionSize 直接保留
@@ -560,15 +569,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private Genome Crossover(Genome s1, Genome s2)
         {
             var newS = new Genome();
-            foreach(var k in s1.OGenes.Keys)
+            foreach (var k in s1.OGenes.Keys)
             {
-                if(k == 2)//连续基因交叉
+                if (k == 2)//连续基因交叉
                 {
                     int startIdx = RandInt(s1.OGenes[k].Count);
-                    for(int i =0;i< s1.OGenes[k].Count; i++)
+                    for (int i = 0; i < s1.OGenes[k].Count; i++)
                     {
-                        var index = (startIdx+i) % s1.OGenes[k].Count;
-                        if(i < s1.OGenes[k].Count/2)newS.Add(s1.OGenes[k][index]);
+                        var index = (startIdx + i) % s1.OGenes[k].Count;
+                        if (i < s1.OGenes[k].Count / 2) newS.Add(s1.OGenes[k][index]);
                         else newS.Add(s2.OGenes[k][index]);
                     }
                 }
@@ -667,7 +676,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             // large mutation
             int cnt = Math.Min((int)(s.Count * MutationRate), 1);//需要变异的染色体数目，最小为1
-           
+
             //需要变异的染色体list：
             var selectedGenomeIdx = RandChoice(s.Count, cnt);
             foreach (int i in selectedGenomeIdx)
@@ -689,8 +698,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 break;
                             case 1:
                                 var orgValue = s[i].OGenes[geneType][j].dDNAs.First().Value;
-                                double std = ParameterViewModel.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
-                                double relativeValue = RandNormalInRange(orgValue, std, -ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
+                                double std = _DataWraper.BorderlineMoveRange / 4;//2sigma 原则，从mean到边界概率为95.45%
+                                double relativeValue = RandNormalInRange(orgValue, std, -_DataWraper.BorderlineMoveRange, _DataWraper.BorderlineMoveRange);
                                 s[i].OGenes[geneType][j].dDNAs.First().Value = relativeValue;
                                 break;
                             case 2:
@@ -731,7 +740,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             // 除第一个染色体变异
             for (int i = 1; i < s.Count; i++)
             {
-                foreach(var geneType in s[i].OGenes.Keys)
+                foreach (var geneType in s[i].OGenes.Keys)
                 {
                     var totalGeneCnt = s[i].OGenes[geneType].Count;
                     var mutationCnt = Math.Min((int)(totalGeneCnt * GeneMutationRate), 1);//需要变异的基因数目，最小为1
@@ -749,7 +758,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
                                 if (RandDouble() > SpecialGeneProp)
                                 {
-                                    if(orgValue > 0)//变异出的值也大于0
+                                    if (orgValue > 0)//变异出的值也大于0
                                     {
                                         newValue = RandNormalInRange(orgValue, std, 0, maxDist);
                                     }
@@ -766,12 +775,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 break;
                             case 1:
                                 orgValue = s[i].OGenes[geneType][j].dDNAs.First().Value;
-                                std = ParameterViewModel.BorderlineMoveRange / lamda;//2sigma 原则，从mean到边界概率为95.45%
-                                double relativeValue = RandNormalInRange(orgValue, std, -ParameterViewModel.BorderlineMoveRange, ParameterViewModel.BorderlineMoveRange);
+                                std = _DataWraper.BorderlineMoveRange / lamda;//2sigma 原则，从mean到边界概率为95.45%
+                                double relativeValue = RandNormalInRange(orgValue, std, -_DataWraper.BorderlineMoveRange, _DataWraper.BorderlineMoveRange);
                                 s[i].OGenes[geneType][j].dDNAs.First().Value = relativeValue;
                                 break;
                             case 2:
-                                
+
                                 //if (RandDouble() < 0.5)
                                 //{
                                 //    std = 1 / (lamda + 6);
@@ -786,7 +795,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 //    var RandAngleProp = RandNormalInRange(orgAngleProp, std, 0, 1);
                                 //    s[i].OGenes[geneType][j].dDNAs[1].Value = RandAngleProp;
                                 //}
-                                std = 1 / (lamda+6 );
+                                std = 1 / (lamda + 6);
                                 var orgDistProp = s[i].OGenes[geneType][j].dDNAs[0].Value;
                                 var RandDistProp = RandNormalInRange(orgDistProp, std, 0, 1);
                                 s[i].OGenes[geneType][j].dDNAs[0].Value = RandDistProp;
@@ -801,33 +810,47 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
             }
         }
-#endregion
+        #endregion
 
-        private void showSegLines(List<SegLine> segLines,bool showSplitters = true)
+        private void showSegLines(List<SegLine> segLines, bool showSplitters = true)
         {
-            var layer = "基因线，代数：" + CurIteration + "_";
-            List<LineSegment> LineToShow;
-            if (showSplitters)
-            {
-                LineToShow = segLines.Where(l => l.Splitter != null).Select(l => l.Splitter).ToList();
-            }
-            else
-            {
-                LineToShow = segLines.Where(l => l.VaildLane != null).Select(l => l.VaildLane).ToList();
-            }
-            using (AcadDatabase acad = AcadDatabase.Active())
-            {
-                if (!acad.Layers.Contains(layer))
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
-                var outSegLines = LineToShow.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList();
-                outSegLines.ShowBlock(layer, layer);
-                //finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
-                //MPEX.HideLayer(layer);
-            }
+            //var layer = "基因线，代数：" + CurIteration + "_";
+            //List<LineSegment> LineToShow;
+            //if (showSplitters)
+            //{
+            //    LineToShow = segLines.Where(l => l.Splitter != null).Select(l => l.Splitter).ToList();
+            //}
+            //else
+            //{
+            //    LineToShow = segLines.Where(l => l.VaildLane != null).Select(l => l.VaildLane).ToList();
+            //}
+            //using (AcadDatabase acad = AcadDatabase.Active())
+            //{
+            //    if (!acad.Layers.Contains(layer))
+            //        ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
+            //    var outSegLines = LineToShow.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList();
+            //    outSegLines.ShowBlock(layer, layer);
+            //    //finalSegLines.Select(l => l.ToDbLine(2, layer)).Cast<Entity>().ToList().ShowBlock(layer, layer);
+            //    //MPEX.HideLayer(layer);
+            //}
         }
         public void Dispose()
         {
 
         }
     }
+
+    public class DisplayInfo
+    {
+        public string BlockName { get; set; }
+        public string FinalIterations { get; set; }
+        public string FinalStalls { get; set; }
+        public string FinalAveAreas { get; set; }
+        public string CostTime { get; set; }
+        public DisplayInfo(string blockName)
+        {
+            BlockName = "地库块名：" + blockName;
+        }
+    }
+
 }

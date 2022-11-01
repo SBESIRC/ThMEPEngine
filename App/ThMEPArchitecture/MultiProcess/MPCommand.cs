@@ -98,7 +98,7 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
             .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
-            Utils.SetSeed();
+            ThParkingStallCoreTools.SetSeed();
             try
             {
                 using (var docLock = Active.Document.LockDocument())
