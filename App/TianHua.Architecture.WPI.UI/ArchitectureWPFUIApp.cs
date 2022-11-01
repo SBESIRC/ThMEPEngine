@@ -32,16 +32,22 @@ namespace TianHua.Architecture.WPI.UI
         [CommandMethod("TIANHUACAD", "THZDCWBZ", "CWBZ_CmdId", CommandFlags.Modal)]
         public void ThCreateParkingStallsWithUI()
         {
-            if (!Validate())
-                return;
+            if (!UiParkingStallArrangement.DebugLocal)
+            {
+                if (!Validate())
+                    return;
+            }
             var w = new UiParkingStallArrangement();
             AcadApp.ShowModelessWindow(w);
         }
         [CommandMethod("TIANHUACAD", "CWBZ", CommandFlags.Modal)]
         public void ThCreateParkingStallsWithUI1()
         {
-            if (!Validate())
-                return;
+            if (!UiParkingStallArrangement.DebugLocal)
+            {
+                if (!Validate())
+                    return;
+            }
             var w = new UiParkingStallArrangement();
             AcadApp.ShowModelessWindow(w);
         }

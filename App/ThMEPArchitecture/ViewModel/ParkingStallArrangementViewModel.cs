@@ -18,6 +18,7 @@ namespace ThMEPArchitecture.ViewModel
     public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small}
     public class ParkingStallArrangementViewModel : NotifyPropertyChangedBase
     {
+        public static bool DebugLocal { get; set; }
         private CommandTypeEnum _CommandType = CommandTypeEnum.RunWithoutIteration;
         public CommandTypeEnum CommandType
         {

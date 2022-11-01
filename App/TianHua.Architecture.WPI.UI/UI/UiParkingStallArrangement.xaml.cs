@@ -28,8 +28,10 @@ namespace TianHua.Architecture.WPI.UI.UI
     {
         static ParkingStallArrangementViewModel _ViewModel = null;
         public static string Version = "3.3";
+        public static bool DebugLocal = false;
         public UiParkingStallArrangement()
         {
+            ParkingStallArrangementViewModel.DebugLocal = DebugLocal;
             if (_ViewModel == null)
             {
                 _ViewModel = new ParkingStallArrangementViewModel();

@@ -358,10 +358,16 @@ namespace ThMEPArchitecture.MultiProcess
                 ParameterStock.RunMode = MultiSolutionList[i];
                 var dataWraper = Converter.GetDataWraper(layoutData, ParameterViewModel);
                 Genome Solution;
-                //Solution = GetGenomeInitially(dataWraper);
-                DisplayLogger.Information("发送至服务器计算;");
-                Solution = GetGenomeFromServer(dataWraper,guid);
-                DisplayLogger.Information("接受到服务器计算结果;");
+                if (ParkingStallArrangementViewModel.DebugLocal)
+                {
+                    Solution = GetGenomeInitially(dataWraper);
+                }
+                else
+                {
+                    DisplayLogger.Information("发送至服务器计算;");
+                    Solution = GetGenomeFromServer(dataWraper, guid);
+                    DisplayLogger.Information("接受到服务器计算结果;");
+                }
                 ProcessAndDisplay(Solution, i, stopWatch);
             }
         }
