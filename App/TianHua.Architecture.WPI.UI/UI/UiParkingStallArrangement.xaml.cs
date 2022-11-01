@@ -27,6 +27,7 @@ namespace TianHua.Architecture.WPI.UI.UI
     public partial class UiParkingStallArrangement : ThCustomWindow
     {
         static ParkingStallArrangementViewModel _ViewModel = null;
+        public static string Version = "3.3";
         public UiParkingStallArrangement()
         {
             if (_ViewModel == null)

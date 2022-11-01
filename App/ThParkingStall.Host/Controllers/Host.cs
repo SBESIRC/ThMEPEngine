@@ -25,7 +25,7 @@ namespace ThParkingStall.Host.Controllers
             SERVERS = new Queue<string>();
             SERVERS.Enqueue("http://172.17.1.73");
             SERVERS.Enqueue("http://172.16.1.84");//host服务器
-            SERVERS.Enqueue("http://172.16.1.109");
+            //SERVERS.Enqueue("http://172.16.1.109");
         }
     }
     public class WebClientEx : WebClient
@@ -174,6 +174,18 @@ namespace ThParkingStall.Host.Controllers
             foreach (var item in list)
                 res += item + ";";
             return res;
+        }
+    }
+    [ApiController]
+    [Route("[controller]")]
+    public class ReadVersion : ControllerBase
+    {
+        [HttpGet]
+        public string readVersion()
+        {
+            string path = @"C:\AIIIS\DATAIIS\version.dat";
+            var ids = System.IO.File.ReadAllLines(path, Encoding.UTF8).ToList();
+            return ids[0];
         }
     }
 
