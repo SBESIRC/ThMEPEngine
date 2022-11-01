@@ -128,10 +128,9 @@ namespace TianHua.Architecture.WPI.UI.UI
 
         }
 
-        private void oDirect_Click(object sender, RoutedEventArgs e)
+        private void preprocess_Click(object sender, RoutedEventArgs e)
         {
-            _ViewModel.CommandType = CommandTypeEnum.RunWithoutIteration;
-            using (var cmd = new ThOArrangementCmd(_ViewModel))
+            using (var cmd = new ThParkingStallPreprocessCmd())
             {
                 cmd.Execute();
             }

@@ -28,7 +28,7 @@ using System.Diagnostics;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
-    class ThParkingStallPreprocessCmd : ThMEPBaseCommand, IDisposable
+    public class ThParkingStallPreprocessCmd : ThMEPBaseCommand, IDisposable
     {
         //public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "PreProcessLog.txt");
 
@@ -79,6 +79,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 Active.Editor.WriteMessage("未拿到障碍物块");
                 return;
             }
+            _stopwatch.Restart();
             foreach (BlockReference block in blocks) PreprocessOneBlock(acadDatabase, block, tol);
         }
         private void PreprocessOneBlock(AcadDatabase acadDatabase, BlockReference block, double tol = 5)
