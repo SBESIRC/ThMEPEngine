@@ -119,7 +119,7 @@ namespace ThParkingStall.Core.LaneDeformation
         public void BuildFreeArea() 
         {
             Vector2D testVector = new Vector2D(0, 1);
-            BuildFreeBlock buildFreeBlock = new BuildFreeBlock(originalFreeAreaList,testVector);
+            BuildFreeArea buildFreeBlock = new BuildFreeArea(originalFreeAreaList,testVector);
         
 
         }

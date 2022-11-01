@@ -12,7 +12,7 @@ using NetTopologySuite.Operation.OverlayNG;
 
 namespace ThParkingStall.Core.LaneDeformation
 {
-    public class BuildFreeBlock
+    public class BuildFreeArea
     {
         
         //类公共变量
@@ -26,7 +26,7 @@ namespace ThParkingStall.Core.LaneDeformation
         double maxY = 0;
         double minY = 0;
 
-        public BuildFreeBlock(List<Polygon> originalFreeAreaList,Vector2D dir) 
+        public BuildFreeArea(List<Polygon> originalFreeAreaList,Vector2D dir) 
         {
             MoveDir = dir;
             OriginalFreeAreaList = originalFreeAreaList;
@@ -106,13 +106,13 @@ namespace ThParkingStall.Core.LaneDeformation
 
         }
 
-        public List<List<double>> GetXYMap(Polygon oPl,List<double> xList) 
-        {
-            List<List<double>> xyMap = new List<List<double>>();
-            for (int i = 0; i < xList.Count; i++) 
-            {
-                LineSegment line = new LineSegment()
-            }
-        }
+        //public List<List<double>> GetXYMap(Polygon oPl,List<double> xList) 
+        //{
+        //    List<List<double>> xyMap = new List<List<double>>();
+        //    for (int i = 0; i < xList.Count; i++) 
+        //    {
+        //        LineSegment line = new LineSegment()
+        //    }
+        //}
     }
 }

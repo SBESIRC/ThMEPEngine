@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ThParkingStall.Core.LaneDeformation
 {
-    public class FreeAreaRec:BlockNode
+    public class FreeAreaRec
     {
         public Coordinate LeftUpPoint = new Coordinate(0, 0);
         public Coordinate LeftDownPoint = new Coordinate(0, 0);
@@ -34,11 +34,6 @@ namespace ThParkingStall.Core.LaneDeformation
             pointList.Add(RightUpPoint);
             pointList.Add(LeftDownPoint);
             Obb = new Polygon(new LinearRing(pointList.ToArray()));
-        }
-
-        public void UpdataBase() 
-        {
-
         }
     }
 }
