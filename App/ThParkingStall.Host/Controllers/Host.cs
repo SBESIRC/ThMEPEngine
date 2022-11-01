@@ -196,12 +196,12 @@ namespace ThParkingStall.Host.Controllers
         [HttpGet]
         public string validate(string employeeId)
         {
-            string path = @"C:\AIIIS\DATAIIS\userEmployeeId.dat";
+            string path = @"C:\AIIIS\DATAIIS\userEmployeeId.txt";
             var ids = System.IO.File.ReadAllLines(path, Encoding.UTF8);
             foreach (var id in ids)
             {
-                var realId = HexStringToString(id, Encoding.UTF8);
-                if (realId.Contains(employeeId))
+                //var realId = HexStringToString(id, Encoding.UTF8);
+                if (id.Contains(employeeId))
                     return "1";
             }
             return "0";
