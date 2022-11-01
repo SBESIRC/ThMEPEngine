@@ -8,7 +8,7 @@ using Accord.Math;
 namespace ThParkingStall.Core.Tools
 {
     //from https://stackoverflow.com/questions/273313/randomize-a-listt
-    static class ShuffleExtensions
+    public static class ShuffleExtensions
     {
         public static void Shuffle<T>(this IList<T> list)
         {

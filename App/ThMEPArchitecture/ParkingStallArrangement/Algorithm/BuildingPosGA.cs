@@ -94,7 +94,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         #region 随机函数
         private double RandDouble()
         {
-            return General.Utils.RandDouble();
+            return ThParkingStall.Core.Tools.ThParkingStallCoreTools.RandDouble();
         }
         private double RandDoubleInRange(double LowerBound, double UpperBound)
         {
@@ -114,7 +114,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             IdxToCalculate.Clear();
             var currentBest = Population.Max(p => p.Score);
             var bestOnes = Population.Where(p => p.Score == currentBest).ToList();
-            bestOnes.Shuffle();
+            ThParkingStall.Core.Tools.ShuffleExtensions.Shuffle(bestOnes);
             if (BestScore == -1)
             {
                 BestScore = init_Score;
