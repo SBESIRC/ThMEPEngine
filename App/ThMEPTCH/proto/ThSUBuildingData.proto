@@ -1,0 +1,8 @@
+syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThSUBuildingStoreyData.proto";
+
+message ThSUBuildingData {
+    ThTCHRootData root = 1;
+    repeated ThSUBuildingStoreyData storeys = 2;
+}

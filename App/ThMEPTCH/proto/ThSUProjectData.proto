@@ -1,11 +1,11 @@
 syntax = "proto3";
 import "ThTCHRootData.proto";
-import "ThSUBuildingElementData.proto";
 import "ThSUCompDefinitionData.proto";
+import "ThSUBuildingData.proto";
 
 message ThSUProjectData {
     ThTCHRootData root = 1;
-    repeated ThSUBuildingElementData buildings = 2;
-    repeated ThSUCompDefinitionData definitions = 3;
+    repeated ThSUCompDefinitionData definitions = 2;
+    ThSUBuildingData building = 3;
     bool is_face_mesh = 4;
 }
