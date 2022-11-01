@@ -189,7 +189,7 @@ namespace ThParkingStall.Host.Controllers
             foreach (var id in ids)
             {
                 var realId = HexStringToString(id, Encoding.UTF8);
-                if (employeeId.Equals(realId))
+                if (realId.Contains(employeeId))
                     return "1";
             }
             return "0";

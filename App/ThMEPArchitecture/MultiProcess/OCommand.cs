@@ -204,7 +204,7 @@ namespace ThMEPArchitecture.MultiProcess
             //开发用户豁免
             var userNameMatched = false;
             var userName = System.Environment.UserName.ToUpper();
-            var userList = new List<string>() { "WANGWENGUANG", "ZHANGWENXUAN" , "YUZHONGSHENG","CHENMO"};
+            var userList = new List<string>() { "WANGWENGUANG", "ZHANGWENXUAN" , "YUZHONGSHENG"};
             foreach(var name in userList)
                 if(name.Contains(userName))
                     userNameMatched = true;
