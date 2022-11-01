@@ -88,7 +88,9 @@
     <Compile Include="Data\ThCircleLableGroupData.cs" />
     <Compile Include="Data\ThDimensionGroupData.cs" />
     <Compile Include="Data\ThGridLineSyetemData.cs" />
+    <Compile Include="Data\ThSUBuildingData.cs" />
     <Compile Include="Data\ThSUBuildingElementData.cs" />
+    <Compile Include="Data\ThSUBuildingStoreyData.cs" />
     <Compile Include="Data\ThSUCompDefinitionData.cs" />
     <Compile Include="Data\ThSUComponentData.cs" />
     <Compile Include="Data\ThSUFaceBrepData.cs" />
@@ -288,10 +290,13 @@
     <None Include="proto\ThCircleLableGroupData.proto" />
     <None Include="proto\ThDimensionGroupData.proto" />
     <None Include="proto\ThGridLineSyetemData.proto" />
+    <None Include="proto\ThSUBuildingData.proto" />
     <None Include="proto\ThSUBuildingElementData.proto" />
+    <None Include="proto\ThSUBuildingStoreyData.proto" />
     <None Include="proto\ThSUCompDefinitionData.proto" />
     <None Include="proto\ThSUComponentData.proto" />
-    <None Include="proto\ThSUFaceData.proto" />
+    <None Include="proto\ThSUFaceBrepData.proto" />
+    <None Include="proto\ThSUFaceMeshData.proto" />
     <None Include="proto\ThSUGeometry.proto" />
     <None Include="proto\ThSULoopData.proto" />
     <None Include="proto\ThSUMaterialData.proto" />
