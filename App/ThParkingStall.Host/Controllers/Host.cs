@@ -184,11 +184,11 @@ namespace ThParkingStall.Host.Controllers
         [HttpGet]
         public string validate(string employeeId)
         {
-            string path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "userEmployeeId.dat");
-            var ids =System.IO.File.ReadAllLines(path, Encoding.UTF8);
+            string path = @"C:\AIIIS\DATAIIS\userEmployeeId.dat";
+            var ids = System.IO.File.ReadAllLines(path, Encoding.UTF8);
             foreach (var id in ids)
             {
-                var realId= HexStringToString(id,Encoding.UTF8);
+                var realId = HexStringToString(id, Encoding.UTF8);
                 if (employeeId.Equals(realId))
                     return "1";
             }
