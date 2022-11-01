@@ -8,8 +8,6 @@ namespace ThMEPWSS.BlockNameConfig
         /// <summary>
         /// 将序列化的json字符串内容写入Json文件，并且保存
         /// </summary>
-        /// <param name="path">路径</param>
-        /// <param name="jsonConents">Json内容</param>
         public static void WriteJsonFile(string path, string jsonConents)
         {
             using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite, FileShare.ReadWrite))
@@ -25,8 +23,6 @@ namespace ThMEPWSS.BlockNameConfig
         /// <summary>
         /// 获取到本地的Json文件并且解析返回对应的json字符串
         /// </summary>
-        /// <param name="filepath">文件路径</param>
-        /// <returns></returns>
         public static string GetJsonFile(string filepath)
         {
             string json = string.Empty;

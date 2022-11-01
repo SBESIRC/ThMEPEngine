@@ -42,13 +42,12 @@ namespace ThMEPWSS.BlockNameConfig
                     var imgFileNum = picInfo.ImgFileNum;
 
                     String[] classes = { "坐便器", "小便器", "蹲便器", "洗脸盆", "洗涤槽", "拖把池", "洗衣机", "地漏", "淋浴房", "淋浴房-转角型", "浴缸", "淋浴器" };
-                    System.IO.StreamReader file = System.IO.File.OpenText(@"D:\THdetection\label\" + Convert.ToString(imgFileNum) + ".json");
+                    System.IO.StreamReader file = System.IO.File.OpenText(System.IO.Path.GetTempPath() + @"\label\" + Convert.ToString(imgFileNum) + ".json");
                     JsonTextReader reader = new JsonTextReader(file);
                     JArray array = (JArray)JToken.ReadFrom(reader);
                     List<JsonBoxAnnoItem> boxlist = array.ToObject<List<JsonBoxAnnoItem>>();
                     foreach (JsonBoxAnnoItem box_anno in boxlist)
                     {
-                        String boxstring = "";
                         String label = classes[box_anno.class_index];
                         Point2dCollection point2Ds = new Point2dCollection();
                         double[] textLoc = { 0, 0 };

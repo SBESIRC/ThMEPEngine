@@ -80,7 +80,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             Active.Editor.WriteLine(stopwatch.Elapsed.Minutes + "分" + stopwatch.Elapsed.Seconds + "秒");
 
-            await Program.Main(strs);
+            await Program.Run(strs);
 
             var json2Cad = new Json2Cad();
             json2Cad.DrawRect(picInfo);
@@ -99,7 +99,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             Active.Editor.WriteMessage("生成图片用时: " + stopwatch.Elapsed.Seconds+" s\n");
             stopwatch.Reset();
             stopwatch.Start();
-            await Program.Main(new string[1] { zipFile });
+            await Program.Run(new string[1] { zipFile });
             stopwatch.Stop();
             Active.Editor.WriteMessage("分类用时: " + stopwatch.Elapsed.Seconds + " s\n");
             stopwatch.Reset();

@@ -72,9 +72,9 @@ namespace ThMEPWSS.BlockNameConfig
                 picInfo.PaperIndex = paper_index;
                 var pr = Active.Editor.GetInteger("Input a number as img name:");
 
-                String RootFolder = "d:\\THdetection";
-                String ImgFolder = "d:\\THdetection\\image";
-                String LabelFolder = "d:\\THdetection\\label";
+                String RootFolder = System.IO.Path.GetTempPath();//"d:\\THdetection";
+                String ImgFolder = RootFolder+"\\image";
+                String LabelFolder = RootFolder+"\\label";
                 if (Directory.Exists(RootFolder) == false)//如果不存在就创建file文件夹
                 {
                     Directory.CreateDirectory(RootFolder);
@@ -275,9 +275,6 @@ namespace ThMEPWSS.BlockNameConfig
                             Active.Editor.WriteLine(PlotFactory.ProcessPlotState);
                             // Start to plot the layout
                             acPlEng.BeginPlot(acPlProgDlg, null);
-
-                            string strTempPath = "d:";
-                            // strFileName = Path.Combine(strTempPath,acDoc.Name.Substring(acDoc.Name.LastIndexOf("\\") + 1).Replace("dwg", "")+ DateTime.Now.ToString("yyyyMMddhhmmssfff") + "Compare" + ".jpg");
                             strFileName = strImgName + ".jpg";
 
                             // Define the plot output

@@ -189,7 +189,7 @@
             <cus:ImageButton Content="⊕" Tag="门块" HorizontalAlignment="Right" ImageTextLocation="TextOnly"  Click="show__Click"  Margin="30,0,0,0" Width="30"  TabIndex="3"></cus:ImageButton>
         </Grid>
 
-        <Grid   Grid.Row="20">
+        <!--<Grid   Grid.Row="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="5*"/>
                 <ColumnDefinition Width="66*"/>
@@ -198,7 +198,7 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="2.381,10,0,0" Grid.Column="1">
                 <cus:ImageButton ImageTextLocation="TextOnly" Content="云配置" Width="50" Height="24" Name="OK2" Click="Cloud_Configuration"></cus:ImageButton>
             </StackPanel>
-        </Grid>
+        </Grid>-->
 
         <Grid   Grid.Row="21">
             <Grid.ColumnDefinitions>
