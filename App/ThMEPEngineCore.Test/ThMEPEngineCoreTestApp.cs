@@ -39,7 +39,11 @@ namespace ThMEPEngineCore.Test
         {
             //
         }
-
+        [CommandMethod("TIANHUACAD", "THIMAGEOUT", CommandFlags.Modal)]
+        public void THIMAGEOUT()
+        {
+            ImagePlot.Service.ThCADImagePlotService.ImageOut();
+        }
         /// <summary>
         /// 提取指定区域内的梁信息
         /// </summary>
