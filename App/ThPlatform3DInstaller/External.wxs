@@ -65,12 +65,6 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{73447F36-3568-443F-8668-67185F7BF5A9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Google.Protobuf.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" Guid="{A4615012-4FF2-4D13-8724-6D6BF172258F}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\MathNet.Numerics.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Log4net" Guid="{D9B7731A-0910-462E-AF62-AA8CED56CD76}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Log4net" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\log4net.dll" />
-            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -141,12 +135,6 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{0C814A86-4D61-4D76-9194-C79341F83A2A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Google.Protobuf.dll" />
             </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" Guid="{1C0C7D4C-2F39-4783-AA12-D9340D401A54}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\MathNet.Numerics.dll" />
-            </Component>
-            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Log4net" Guid="{0E97C476-8E33-484D-B177-C9721AE8F117}" Win64="yes">
-                <File Id="FILE_Autoloader_Contents_App_Win64_Common_Log4net" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\log4net.dll" />
-            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -180,8 +168,6 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Log4net" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_Features" />
@@ -204,8 +190,6 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MathNet_Numerics" />
-            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Log4net" />
             <?endif?>
         </ComponentGroup>
     </Fragment>
