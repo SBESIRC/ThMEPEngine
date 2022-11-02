@@ -30,7 +30,7 @@ namespace ThParkingStall.Core.LaneDeformation
         public void Pipeline()
         {
             GetOriginalFreeAreaTest();
-            GetOriginalFreeArea();
+            //GetOriginalFreeArea();
         }
 
         public void GetOriginalFreeArea()
@@ -39,6 +39,8 @@ namespace ThParkingStall.Core.LaneDeformation
             for (int i = 0; i < rawData.VehicleLanes.Count; i++)
             {
                 geometries.Add(rawData.VehicleLanes[i].LaneObb);
+
+                if (i == 70|| i==89) continue;
                 for (int j = 0; j < rawData.VehicleLanes[i].ParkingPlaceBlockList.Count; j++)
                 {
                     geometries.Add(rawData.VehicleLanes[i].ParkingPlaceBlockList[j].ParkingPlaceBlockObb);
@@ -76,9 +78,10 @@ namespace ThParkingStall.Core.LaneDeformation
             List<Geometry> geometries = new List<Geometry>();
             for (int i = 0; i < rawData.VehicleLanes.Count; i++)
             {
-                if (i == 70) 
+                if (i == 70 || i == 89) 
                 {
                     int stop = 0;
+                    continue;
                 }
 
                 tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].LaneObb, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
@@ -94,9 +97,9 @@ namespace ThParkingStall.Core.LaneDeformation
                 tmpG = OverlayNGRobust.Overlay(tmpG, LaneDeformationParas.Blocks[i], NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
             }
 
-            geometries.AddRange(LaneDeformationParas.Blocks);
-            GeometryCollection differenceObjs = new GeometryCollection(geometries.ToArray());
-            var freeAreeResult = OverlayNGRobust.Overlay(LaneDeformationParas.Boundary, differenceObjs, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+            //geometries.AddRange(LaneDeformationParas.Blocks);
+            //GeometryCollection differenceObjs = new GeometryCollection(geometries.ToArray());
+            //var freeAreeResult = OverlayNGRobust.Overlay(LaneDeformationParas.Boundary, differenceObjs, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
 
 
             //List<Polygon> originalFreeAreaList = new List<Polygon>();
@@ -114,6 +117,18 @@ namespace ThParkingStall.Core.LaneDeformation
             //        }
             //    }
             //}
+
+            if (tmpG is GeometryCollection collection)
+            {
+                foreach (var e in collection)
+                {
+                    if (e is Polygon) LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)e);
+                }
+            }
+            else if (tmpG is Polygon)
+            {
+                LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)tmpG);
+            }
         }
 
         public void BuildFreeArea() 

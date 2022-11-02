@@ -84,8 +84,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             fileStream.Close();
 
             LaneDeformationService deformationService = new LaneDeformationService(vehiclesdata);
-            drawTmpOutPut0 = deformationService.DrawTmpOutPut0;
             deformationService.Process();
+            drawTmpOutPut0 = deformationService.DrawTmpOutPut0;
             vehiclesdata = deformationService.Result;
 
             readFromVehicles(vehiclesdata.VehicleLanes);

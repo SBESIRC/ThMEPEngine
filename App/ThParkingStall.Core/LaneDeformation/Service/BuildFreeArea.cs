@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ThParkingStall.Core.LaneDeformation;
 
 using NetTopologySuite.Operation.OverlayNG;
+using ThParkingStall.Core.MPartitionLayout;
 
 namespace ThParkingStall.Core.LaneDeformation
 {
@@ -57,7 +58,7 @@ namespace ThParkingStall.Core.LaneDeformation
             xList = IgnoreSmall(xList);
             List<List<double>> XYListMap = GetXYMap(singleFreeArea,xList);
 
-
+            //
 
         }
 
@@ -106,13 +107,18 @@ namespace ThParkingStall.Core.LaneDeformation
 
         }
 
-        //public List<List<double>> GetXYMap(Polygon oPl,List<double> xList) 
-        //{
-        //    List<List<double>> xyMap = new List<List<double>>();
-        //    for (int i = 0; i < xList.Count; i++) 
-        //    {
-        //        LineSegment line = new LineSegment()
-        //    }
-        //}
+        public List<List<double>> GetXYMap(Polygon oPl, List<double> xList)
+        {
+            List<List<double>> xyMap = new List<List<double>>();
+            for (int i = 0; i < xList.Count; i++)
+            {
+                double nowx = xList[i];
+                LineSegment line = new LineSegment(xList[i],minY, xList[i], maxY);
+                List<Coordinate> coordinates = line.IntersectPoint(oPl).ToList();
+                List<double> nowyList = new List<double>();
+                xyMap.Add(nowyList);
+            }
+            return xyMap;
+        }
     }
 }
