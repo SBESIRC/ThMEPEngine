@@ -942,8 +942,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public DrawPipeData CreateVOut(Polyline vpl, int pipeId) 
         {
             Point3d focus = vpl.GetMaximumInscribedCircleCenter();
-            return new DrawPipeData(focus, 50, 0, pipeId);
             DrawUtils.ShowGeometry(focus, "l6VCenter", 0, 50, 50);
+            return new DrawPipeData(focus, 50, 0, pipeId);
         }
         public void TransformBy(Matrix3d matrix)
         {
