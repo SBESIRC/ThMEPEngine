@@ -11,6 +11,8 @@ using ThMEPIdentity;
 using TianHua.Architecture.WPI.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThParkingStall.ClientUpdate;
+using System.Net.Sockets;
+
 namespace TianHua.Architecture.WPI.UI
 {
     public class ArchitectureWPFUIApp : IExtensionApplication
@@ -71,6 +73,18 @@ namespace TianHua.Architecture.WPI.UI
             foreach (var name in userList)
                 if (name.Contains(userName))
                     userNameMatched = true;
+            //服务器本地部署验证豁免
+            string ipname = Dns.GetHostName();
+            IPAddress[] ipadrlist = Dns.GetHostAddresses(ipname);
+            var whiteIps = new List<string>() { "172.16.1.109" };
+            var curIp = "";
+            foreach (IPAddress ipa in ipadrlist)
+            {
+                if (ipa.AddressFamily == AddressFamily.InterNetwork)
+                    curIp = ipa.ToString();
+            }
+            if (whiteIps.Contains(curIp))
+                userNameMatched = true;
             //
             if (!userNameMatched)
             {
