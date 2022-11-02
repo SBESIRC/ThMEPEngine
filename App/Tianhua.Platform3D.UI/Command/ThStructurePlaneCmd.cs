@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPEngineCore.Model;
@@ -133,7 +134,50 @@ namespace Tianhua.Platform3D.UI.Command
             var ui = new FileFormatSelectorUI(fileFormatVM);
             ui.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModalWindow(ui);
+            
+
             return fileFormatVM.SelectedFileName;
+        }
+    }
+
+    class Program
+    {
+        static Mutex CadMutex = null;
+        static Mutex ViewerMutex = null;
+        public static void Run()
+        {
+            try
+            {
+                var flag = Mutex.TryOpenExisting("viewerMutex", out ViewerMutex);
+                if (!flag) return;
+                InitMutex();
+                CadMutex.ReleaseMutex();
+                ViewerMutex.WaitOne();
+            }
+            catch
+            {
+                return;
+            }
+            finally
+            {
+                CadMutex?.Dispose();
+                ViewerMutex?.Dispose();
+            }
+        }
+
+        static void InitMutex()
+        {
+            var cadMutexName = "cutdata";
+            try
+            {
+                CadMutex = new Mutex(true, cadMutexName, out bool cadMutexCreated);
+            }
+            catch
+            {
+                CadMutex = Mutex.OpenExisting(cadMutexName, System.Security.AccessControl.MutexRights.FullControl);
+                CadMutex.Dispose();
+                CadMutex = new Mutex(true, cadMutexName, out _);
+            }
         }
     }
 }

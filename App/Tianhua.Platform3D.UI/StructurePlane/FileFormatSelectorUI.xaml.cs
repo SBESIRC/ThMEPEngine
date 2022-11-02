@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using ThControlLibraryWPF.CustomControl;
+using Tianhua.Platform3D.UI.Command;
 
 namespace Tianhua.Platform3D.UI.StructurePlane
 {
@@ -15,6 +16,10 @@ namespace Tianhua.Platform3D.UI.StructurePlane
 
         private void btnConfirm_Click(object sender, RoutedEventArgs e)
         {
+            if (ViewModel.Model.FileFormatOption == FileFormatOps.GET)
+            {
+                Program.Run();
+            }
             ViewModel.Save();
             ViewModel.BrowseFile();
             this.Close();
