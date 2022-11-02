@@ -2,5 +2,5 @@ syntax = "proto3";
 import "ThSUComponentData.proto";
 
 message ThSUFollowSlopeElementData {
-    ThSUComponentData component = 2;
+    ThSUComponentData component = 1;
 }
