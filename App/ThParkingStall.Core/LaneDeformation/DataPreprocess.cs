@@ -31,6 +31,8 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             GetOriginalFreeAreaTest();
             //GetOriginalFreeArea();
+
+            BuildFreeArea();
         }
 
         public void GetOriginalFreeArea()
@@ -118,25 +120,42 @@ namespace ThParkingStall.Core.LaneDeformation
             //    }
             //}
 
+
+            
             if (tmpG is GeometryCollection collection)
             {
                 foreach (var e in collection)
                 {
-                    if (e is Polygon) LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)e);
+                    if (e is Polygon)
+                    {
+                        LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)e);
+                    }
                 }
             }
             else if (tmpG is Polygon)
             {
                 LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)tmpG);
             }
+
+            originalFreeAreaList = LDOutput.DrawTmpOutPut0.OriginalFreeAreaList;
         }
 
         public void BuildFreeArea() 
         {
             Vector2D testVector = new Vector2D(0, 1);
             BuildFreeArea buildFreeBlock = new BuildFreeArea(originalFreeAreaList,testVector);
-        
+            buildFreeBlock.Pipeline();
+            ProcessedData.FreeBlockList = buildFreeBlock.FreeAreaRecsList;
 
+            List<Polygon> freeAreaRecsToDraw = new List<Polygon>();
+            for (int i = 0; i < buildFreeBlock.FreeAreaRecsList.Count; i++) 
+            {
+                for (int j = 0; j < buildFreeBlock.FreeAreaRecsList[i].Count; j++) 
+                {
+                    freeAreaRecsToDraw.Add(buildFreeBlock.FreeAreaRecsList[i][j].Obb);
+                }
+            }
+            LDOutput.DrawTmpOutPut0.FreeAreaRecs = freeAreaRecsToDraw;
         }
     }
 }

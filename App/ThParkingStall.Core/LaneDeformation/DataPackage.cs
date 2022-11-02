@@ -24,7 +24,7 @@ namespace ThParkingStall.Core.LaneDeformation
     public class ProcessedData
     {
         //临时做个示例
-        public List<List<FreeAreaRec>> FreeBlockList = new List<List<FreeAreaRec>>();
+        static public List<List<FreeAreaRec>> FreeBlockList = new List<List<FreeAreaRec>>();
         public ProcessedData() { }
 
 

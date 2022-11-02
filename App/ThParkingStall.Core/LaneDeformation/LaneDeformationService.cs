@@ -29,9 +29,11 @@ namespace ThParkingStall.Core.LaneDeformation
             DataPreprocess dataPreprocess = new DataPreprocess(Data);
             dataPreprocess.Pipeline();
 
-            //
+            //可自由添加
 
 
+
+            
             //
             GetResult();
             return;

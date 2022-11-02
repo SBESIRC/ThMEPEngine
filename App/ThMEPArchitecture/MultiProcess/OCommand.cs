@@ -623,6 +623,14 @@ namespace ThMEPArchitecture.MultiProcess
                 MPolygon ma = a.ToDbMPolygon();
                 DrawUtils.ShowGeometry(ma, "l0OriginalFreeAreaList", 0);
             }
+
+            foreach (Polygon a in drawTmpOutPut.FreeAreaRecs)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l0FreeAreaRecs", 1);
+            }
+
+
         }
     }
 }

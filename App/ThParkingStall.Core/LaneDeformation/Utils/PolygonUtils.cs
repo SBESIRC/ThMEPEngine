@@ -1,13 +1,36 @@
-﻿using System;
+﻿using NetTopologySuite.Geometries;
+using NetTopologySuite.Index.Strtree;
+using NetTopologySuite.Mathematics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThParkingStall.Core.LaneDeformation;
+
+using NetTopologySuite.Operation.OverlayNG;
+using ThParkingStall.Core.MPartitionLayout;
 
 namespace ThParkingStall.Core.LaneDeformation
 {
     internal class PolygonUtils
     {
+
+        static public Polygon CreatePolygonRec(double x0,double x1,double y0,double y1) 
+        {
+            List<Coordinate> pointList = new List<Coordinate>();
+            pointList.Add(new Coordinate(x0, y0));
+            pointList.Add(new Coordinate(x1, y0));
+            pointList.Add(new Coordinate(x1, y1));
+            pointList.Add(new Coordinate(x0, y1));
+            pointList.Add(new Coordinate(x0, y0));
+            Polygon Obb = new Polygon(new LinearRing(pointList.ToArray()));
+            
+            return Obb;
+        } 
+
+
+
         ////清理polyline
         //static public Polygon Regularization2(Polyline originPl, double value)
         //{

@@ -194,7 +194,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
     public class DrawTmpOutPut 
     {
         public List<Polygon> OriginalFreeAreaList =new List<Polygon>();
+        public List<Polygon> FreeAreaRecs = new List<Polygon>(); 
 
+
+        //增加要打印的东西
         public DrawTmpOutPut() 
         {
 

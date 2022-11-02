@@ -18,20 +18,23 @@ namespace ThParkingStall.Core.LaneDeformation
         public Coordinate RightUpPoint = new Coordinate(0, 0);
 
         public Polygon Obb;
-        public double FreeLength = 0;        
+        public double FreeLength = 0;
+        public double Width = 0;
 
-        public FreeAreaRec(Coordinate leftDown, Coordinate leftUp, Coordinate rightDown, Coordinate rightUp) 
+        public FreeAreaRec(Coordinate leftDown,  Coordinate rightDown, Coordinate rightUp, Coordinate leftUp) 
         {
             LeftDownPoint = leftDown;
             LeftUpPoint = leftUp;
             RightDownPoint = rightDown;
             RightUpPoint = rightUp;
             FreeLength = new Vector2D(rightDown,rightUp).Length();
+            Width = new Vector2D(leftDown,rightDown).Length();  
 
             List<Coordinate> pointList = new List<Coordinate>();
             pointList.Add(LeftDownPoint);
-            pointList.Add(LeftUpPoint);
+            pointList.Add(RightDownPoint);
             pointList.Add(RightUpPoint);
+            pointList.Add(LeftUpPoint);
             pointList.Add(LeftDownPoint);
             Obb = new Polygon(new LinearRing(pointList.ToArray()));
         }
