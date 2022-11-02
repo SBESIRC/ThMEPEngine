@@ -1,0 +1,6 @@
+syntax = "proto3";
+import "ThSUComponentData.proto";
+
+message ThSUFollowSlopeElementData {
+    ThSUComponentData component = 2;
+}
