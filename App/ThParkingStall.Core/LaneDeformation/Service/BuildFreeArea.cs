@@ -68,7 +68,7 @@ namespace ThParkingStall.Core.LaneDeformation
             FromPointToRecs(xList,XYListMap);
 
             //修改数值
-            ModifiedRecs();
+            //ModifiedRecs();
 
             //
             FreeAreaRecsList.Add(tmpRecs);
@@ -279,10 +279,13 @@ namespace ThParkingStall.Core.LaneDeformation
         }
 
 
-        public void ModifiedRecs() 
-        {
+        //public void ModifiedRecs(double threshold = 5) 
+        //{
+        //    for (int i = 0; i < tmpRecs.Count; i++) 
+        //    {
+        //        if (tmpRecs[i].Width < )
             
-        
-        }
+        //    }
+        //}
     }
 }
