@@ -79,6 +79,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             RemoveDuplicateCars();
             RemoveCarsIntersectedWithBoundary();
             InsuredForTheCaseOfoncaveBoundary();
+            CleanLanesByLine(ref IniLanes);
             if (AccurateCalculate && !QuickCalculate)
             {
                 PostProcessPillars();
@@ -184,7 +185,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         void ConstructConversionDatas()
         {
             var pureLaneForConversionDatas = ConstructPureLaneForConversionDatas();
-            VehicleLanes.AddRange(pureLaneForConversionDatas.Select(e => new VehicleLane(e.Line, e.Line.Buffer(DisLaneWidth / 2),new PureVector(e.Vec.Normalize().X, e.Vec.Normalize().Y))));
+            VehicleLanes.AddRange(pureLaneForConversionDatas.Select(e => new VehicleLane(e.Line, PolyFromLines(e.Line,e.Line.Translation(e.Vec.Normalize()*DisLaneWidth/2)),new PureVector(e.Vec.Normalize().X, e.Vec.Normalize().Y))));
             foreach (var parkingPlaceBlock in ParkingPlaceBlocks)
             {
                 VehicleLanes= VehicleLanes.OrderBy(e => e.CenterLine.MidPoint.Distance(parkingPlaceBlock.SourceLane.MidPoint)).ToList();
@@ -268,6 +269,78 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                 }
             }
             return new LineSegment(ps, pe);
+        }
+        public static bool IsSameVector(Vector2D a, Vector2D b)
+        {
+            double tol = 0.001;
+            a = a.Normalize();
+            b = b.Normalize();
+            return Math.Abs((a.X - b.X)) + Math.Abs((a.Y - b.Y)) < tol;
+        }
+        public static void CleanLanesByLine(ref List<Lane> lanes)
+        {
+            if (lanes.Count < 2) return;
+            //删除部分共线的直线只保留一份
+            for (int i = 0; i < lanes.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lanes.Count; j++)
+                {
+                    if (!IsSameVector(lanes[i].Vec, lanes[j].Vec))
+                        continue;
+                    if (IsParallelLine(lanes[i].Line, lanes[j].Line) && lanes[j].Line.ClosestPoint(lanes[i].Line.MidPoint, true).Distance(lanes[i].Line.MidPoint) < 0.001)
+                    {
+                        if (lanes[j].Line.ClosestPoint(lanes[i].Line.P0, false).Distance(lanes[i].Line.P0) < 0.001
+                            && lanes[j].Line.ClosestPoint(lanes[i].Line.P1, false).Distance(lanes[i].Line.P1) > 0.001)
+                        {
+                            var p = lanes[j].Line.P0.Distance(lanes[i].Line.P1) <= lanes[j].Line.P1.Distance(lanes[i].Line.P1) ?
+                                lanes[j].Line.P0 : lanes[j].Line.P1;
+                            lanes[i].Line = new LineSegment(p, lanes[i].Line.P1);
+                        }
+                        if (lanes[j].Line.ClosestPoint(lanes[i].Line.P1, false).Distance(lanes[i].Line.P1) < 0.001
+                            && lanes[j].Line.ClosestPoint(lanes[i].Line.P0, false).Distance(lanes[i].Line.P0) > 0.001)
+                        {
+                            var p = lanes[j].Line.P0.Distance(lanes[i].Line.P0) <= lanes[j].Line.P1.Distance(lanes[i].Line.P0) ?
+                                lanes[j].Line.P0 : lanes[j].Line.P1;
+                            lanes[i].Line = new LineSegment(lanes[i].Line.P0, p);
+                        }
+                    }
+                }
+            }
+            //删除重复的子车道线
+            lanes = lanes.OrderBy(e => e.Line.Length).ToList();
+            double tol = 2750;//近似重复
+            for (int i = 0; i < lanes.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lanes.Count; j++)
+                {
+                    if (IsSameVector(lanes[i].Vec, lanes[j].Vec)&& IsSubLine(lanes[i].Line, lanes[j].Line))
+                    {
+                        lanes.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
+            //合并车道线
+            JoinLanes(lanes);
+            //删除近似重复的子车道线
+            lanes = lanes.OrderBy(e => e.Line.Length).ToList();
+            for (int i = 0; i < lanes.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lanes.Count; j++)
+                {
+                    if (!IsSameVector(lanes[i].Vec, lanes[j].Vec))
+                        continue;
+                    bool isSimilarDuplicated = IsParallelLine(lanes[i].Line, lanes[j].Line) && lanes[j].Line.ClosestPoint(lanes[i].Line.MidPoint, false).Distance(lanes[i].Line.MidPoint) < tol
+                        && Math.Abs(lanes[j].Line.ClosestPoint(lanes[i].Line.P0, false).Distance(lanes[i].Line.P0) - lanes[j].Line.ClosestPoint(lanes[i].Line.P1, false).Distance(lanes[i].Line.P1)) < 1;
+                    if (isSimilarDuplicated)
+                    {
+                        lanes.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
         }
     }
 }

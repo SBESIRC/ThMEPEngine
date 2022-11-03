@@ -323,6 +323,50 @@ namespace ThParkingStall.Core.MPartitionLayout
                 }
             }
         }
+        public static void JoinLanes(List<Lane> lines)
+        {
+            double tol = 0.001;
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if (!ObliqueMPartitionLayout.ObliqueMPartition.IsSameVector(lines[i].Vec, lines[j].Vec))
+                        continue;
+                    if (IsParallelLine(lines[i].Line, lines[j].Line) && !IsSubLine(lines[i].Line, lines[j].Line))
+                    {
+                        if (lines[i].Line.P0.Distance(lines[j].Line.P0) < tol)
+                        {
+                            lines[j].Line = new LineSegment(lines[i].Line.P1, lines[j].Line.P1);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].Line.P0.Distance(lines[j].Line.P1) < tol)
+                        {
+                            lines[j].Line = new LineSegment(lines[i].Line.P1, lines[j].Line.P0);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].Line.P1.Distance(lines[j].Line.P0) < tol)
+                        {
+                            lines[j].Line = new LineSegment(lines[i].Line.P0, lines[j].Line.P1);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].Line.P1.Distance(lines[j].Line.P1) < tol)
+                        {
+                            lines[j].Line = new LineSegment(lines[i].Line.P0, lines[j].Line.P0);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         private static List<Coordinate> removeDuplicatePts(List<Coordinate> points, double tol = 0, bool preserve_order = true)
         {
             if (points.Count < 2) return points;

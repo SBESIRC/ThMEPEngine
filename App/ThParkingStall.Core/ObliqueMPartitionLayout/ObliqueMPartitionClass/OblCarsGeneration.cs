@@ -507,7 +507,7 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                     }
                     //
                     var sourceLine = iniLineToDataConversion.Translation(-vec.Normalize() * DisLaneWidth / 2);
-                    var parkingPlaceBlockObb = PolyFromLines(iniLineToDataConversion, iniLineToDataConversion.Translation(vec.Normalize() * ((isBackBackmodule ? DisVertCarLengthBackBack : length_offset) + DisLaneWidth / 2)));
+                    var parkingPlaceBlockObb = PolyFromLines(iniLineToDataConversion, iniLineToDataConversion.Translation(vec.Normalize() * ((isBackBackmodule ? DisVertCarLengthBackBack : length_offset))));
                     var parkingPlaceBlock = new ParkingPlaceBlock(sourceLine, parkingPlaceBlockObb, new PureVector(vec.Normalize().X, vec.Normalize().Y), _SingleParkingPlaces, _LDColumns);
                     ParkingPlaceBlocks.Add(parkingPlaceBlock);
                 }
