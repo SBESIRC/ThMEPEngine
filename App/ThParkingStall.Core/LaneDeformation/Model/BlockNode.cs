@@ -13,24 +13,28 @@ namespace ThParkingStall.Core.LaneDeformation
     {
         public BlockType Type;
         public Vector2D Dir;
+        public Polygon Obb;
         public double SelfTolerance;
         public Coordinate LeftDownPoint;
         public Coordinate RightUpPoint;
-        protected List<List<BlockNode>> NeighborNodes;
+        public List<List<BlockNode>> NeighborNodes;
         protected List<double> MoveTolerances;
         protected List<int> InDegrees;
         public BlockNode()  //父类无参构造
         {
 
         }
-        public BlockNode(BlockType type, Vector2D dir, Coordinate leftDown, Coordinate rightUp, double selfTolerance = 0)  //此处freeLength设置了默认值
+        public BlockNode(BlockType type, Vector2D dir, Polygon obb, Coordinate leftDown, Coordinate rightUp, double selfTolerance = 0)  //此处freeLength设置了默认值
         {
             Type = type;
             Dir = dir;
+            Obb = obb;
             LeftDownPoint = leftDown;
             RightUpPoint = rightUp;
             SelfTolerance = selfTolerance;
-            NeighborNodes = new List<List<BlockNode>>(2);
+            NeighborNodes = new List<List<BlockNode>>();
+            NeighborNodes.Add(new List<BlockNode>());
+            NeighborNodes.Add(new List<BlockNode>());
             MoveTolerances = new List<double> { 0, 0 };
             InDegrees = new List<int> { 0, 0 };
         }
@@ -58,6 +62,14 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             return InDegrees[(int)dir];
         }
+        public void InDegreeIncre(PassDirection dir)
+        {
+            InDegrees[(int)dir]++;
+        }
+        public void InDegreeDecre(PassDirection dir)
+        {
+            InDegrees[(int)dir]--;
+        }
         public void SetInDegree(PassDirection dir, int degree)
         {
             InDegrees[(int)dir] = degree;
@@ -70,6 +82,7 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             Spot = spot;
             this.Dir = dir;
+            this.Obb = spot.ParkingPlaceObb;
             UpdateBase();
         }
         private void UpdateBase()
@@ -77,7 +90,9 @@ namespace ThParkingStall.Core.LaneDeformation
             InitCoordinates();
             this.Type = BlockType.SPOT;
             this.SelfTolerance = 0;
-            this.NeighborNodes = new List<List<BlockNode>>(2);
+            this.NeighborNodes = new List<List<BlockNode>>();
+            NeighborNodes.Add(new List<BlockNode>());
+            NeighborNodes.Add(new List<BlockNode>());
             this.MoveTolerances = new List<double> { 0, 0 };
             this.InDegrees = new List<int> { 0, 0 };
         }
@@ -95,7 +110,6 @@ namespace ThParkingStall.Core.LaneDeformation
             }
         }
     }
-
     public class LaneBlock : BlockNode
     {
         public VehicleLane Lane;
@@ -104,15 +118,18 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             Lane = lane;
             this.Dir = dir;
+            this.Obb = lane.LaneObb;
             IsVerticle = Dir.Dot(new Vector2D(Lane.CenterLine.P0, Lane.CenterLine.P1)).Equals(0);
             UpdateBase();
         }
         private void UpdateBase()
         {
             InitCoordinates();
-            this.Type = BlockType.SPOT;
+            this.Type = BlockType.LANE;
             this.SelfTolerance = 0;
-            this.NeighborNodes = new List<List<BlockNode>>(2);
+            this.NeighborNodes = new List<List<BlockNode>>();
+            NeighborNodes.Add(new List<BlockNode>());
+            NeighborNodes.Add(new List<BlockNode>());
             this.MoveTolerances = new List<double> { 0, 0 };
             this.InDegrees = new List<int> { 0, 0 };
         }
@@ -128,6 +145,35 @@ namespace ThParkingStall.Core.LaneDeformation
                 if (coord.CompareTo(RightUpPoint) is 1)
                     RightUpPoint = coord;
             }
+        }
+    }
+    public class FreeBlock : BlockNode
+    {
+        public FreeAreaRec Area;
+        public bool IsVerticle;
+        public FreeBlock(FreeAreaRec area, Vector2D dir)
+        {
+            Area = area;
+            this.Dir = dir;
+            this.Obb = area.Obb;
+            UpdateBase();
+        }
+        private void UpdateBase()
+        {
+            InitCoordinates();
+            this.Type = BlockType.FREE;
+            this.SelfTolerance = Area.FreeLength;
+            this.NeighborNodes = new List<List<BlockNode>>();
+            NeighborNodes.Add(new List<BlockNode>());
+            NeighborNodes.Add(new List<BlockNode>());
+            this.MoveTolerances = new List<double> { 0, 0 };
+            this.InDegrees = new List<int> { 0, 0 };
+        }
+        private void InitCoordinates()
+        {
+            // TODO：根据方向进行旋转
+            this.LeftDownPoint = Area.LeftDownPoint;
+            this.RightUpPoint = Area.RightUpPoint;
         }
     }
     public enum BlockType : int
