@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,7 +17,6 @@ namespace ThParkingStall.ClientUpdate
         static void Main(string[] args)
         {
             var dir = args[0];
-            MessageBox.Show("正在更新中，请勿操作CAD界面");
             //关闭当前cad应用程序
             Process[] processes = Process.GetProcesses();
             foreach (Process p in processes)
@@ -25,19 +25,67 @@ namespace ThParkingStall.ClientUpdate
                 {
                     p.Kill();
                 }
-            } 
+            }
+            Thread.Sleep(1000);
+
             //删除目标文件所有内容
             var fileDir = dir;
-            DelectDir(fileDir);
+            DirectoryInfo _dir = new DirectoryInfo(fileDir);
+            var files=_dir.GetFiles();
+            foreach (var f in files)
+            {
+                try
+                {
+                    File.Delete(f.FullName);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            Console.WriteLine("已移除旧版本");
+            //DelectDir(fileDir);
             //从服务器拿到更新文件
             using (WebClient client = new WebClient())
             {
                 client.Credentials = new NetworkCredential("upload", "Thape123123");
                 client.DownloadFile($"http://172.16.1.84:8089/ServerBuild/build.zip", $"build.zip");
             }
-            //解压缩到目标文件夹
-            ZipFile.ExtractToDirectory($"build.zip", fileDir);
-            MessageBox.Show("更新成功");
+            Console.WriteLine("远端资源下载成功");
+            //解压缩到temp文件夹
+            var tmpDir = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            var tmpFileDir= tmpDir + "\\AiCalBuild";
+            if (!Directory.Exists(tmpFileDir))
+            {
+                Directory.CreateDirectory(tmpFileDir);
+            }
+            DelectDir(tmpFileDir);
+            ZipFile.ExtractToDirectory($"build.zip", tmpFileDir);
+            Console.WriteLine("远端资源包解压缩成功");
+            //移动到目标文件夹
+            var tmpFiles = Directory.GetFiles(tmpFileDir);
+            foreach (var f in tmpFiles)
+            {
+                FileInfo info = new FileInfo(f);
+                if (File.Exists(Path.Combine(fileDir, info.Name)))
+                {
+                    try
+                    {
+                        File.Delete(Path.Combine(fileDir, info.Name));
+                        File.Move(info.FullName, Path.Combine(fileDir, info.Name));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                else
+                {
+                    File.Move(info.FullName, Path.Combine(fileDir, info.Name));
+                }
+            }
+
+            MessageBox.Show("更新成功，请重启CAD使用");
         }
         public static void DelectDir(string srcPath)
         {

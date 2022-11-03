@@ -139,14 +139,21 @@ namespace TianHua.Architecture.WPI.UI
                 var dialogResult = MessageBox.Show("您当前的地库版本过低，点击升级自动更新为最新版：(请先保存CAD文件数据)", "版本提示", MessageBoxButton.OKCancel);
                 if (dialogResult==MessageBoxResult.OK)
                 {
-                    var pro = new System.Diagnostics.Process();
-                    pro.StartInfo.FileName = "ThParkingStall.ClientUpdate.exe";
-                    pro.StartInfo.Arguments = dir;
-                    pro.StartInfo.CreateNoWindow = false;
-                    pro.StartInfo.UseShellExecute = false;
-                    pro.StartInfo.RedirectStandardOutput = true;
-                    var started = pro.Start();
-                    pro.WaitForExit();
+                    try
+                    {
+                        var pro = new System.Diagnostics.Process();
+                        pro.StartInfo.FileName = "ThParkingStall.ClientUpdate.exe";
+                        pro.StartInfo.Arguments = dir;
+                        pro.StartInfo.CreateNoWindow = false;
+                        pro.StartInfo.UseShellExecute = false;
+                        pro.StartInfo.RedirectStandardOutput = true;
+                        var started = pro.Start();
+                        pro.WaitForExit();
+                    }
+                    catch (System.Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
                 }
                 return false;
             }
