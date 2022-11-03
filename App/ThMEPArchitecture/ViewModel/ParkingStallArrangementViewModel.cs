@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,13 +12,29 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPArchitecture.ViewModel
 {
-    public enum CommandMode { WithUI, WithoutUI}
-    public enum CommandTypeEnum {RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically,BuildingAnalysis}//directly, with splitters, without splitters
+    public enum CommandMode { WithUI, WithoutUI }
+    public enum CommandTypeEnum { RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically, BuildingAnalysis }//directly, with splitters, without splitters
     //public enum CommandRunModeEnum { Auto, Horizental, Vertical }
     public enum CommandRunSpeedEnum { Fast, General, Slow, Advanced }
-    public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small}
+    public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small }
     public class ParkingStallArrangementViewModel : NotifyPropertyChangedBase
     {
+        public static string Version
+        {
+            get
+            {
+                FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                string AssmblyVersion = myFileVersionInfo.FileVersion;
+                return AssmblyVersion;
+            }
+        }
+        public static string VersionName
+        {
+            get
+            {
+                return $"车位自动排布{Version}";
+            }
+        }
         public static bool DebugLocal { get; set; }
         private CommandTypeEnum _CommandType = CommandTypeEnum.RunWithoutIteration;
         public CommandTypeEnum CommandType
@@ -35,8 +52,8 @@ namespace ThMEPArchitecture.ViewModel
         private bool _UseMultiProcess = true;
 
         private Visibility _AdvancedSettingVisibility = Visibility.Collapsed;
-        public Visibility AdvancedSettingVisibility 
-        { 
+        public Visibility AdvancedSettingVisibility
+        {
             get
             {
                 return _AdvancedSettingVisibility;
@@ -46,7 +63,7 @@ namespace ThMEPArchitecture.ViewModel
                 _AdvancedSettingVisibility = value;
                 RaisePropertyChanged("AdvancedSettingVisibility");
             }
-        } 
+        }
 
         public bool UseMultiProcess
         {
@@ -81,8 +98,8 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("NormalMode");
             }
         }
-        public bool NormalMode 
-        { 
+        public bool NormalMode
+        {
             get { return !_ObliqueMode; }
         }
 
@@ -103,10 +120,10 @@ namespace ThMEPArchitecture.ViewModel
         public bool JustCreateSplittersChecked
         {
             get { return _JustCreateSplittersChecked; }
-            set 
-            { 
-                _JustCreateSplittersChecked = value; 
-                RaisePropertyChanged("JustCreateSplittersChecked"); 
+            set
+            {
+                _JustCreateSplittersChecked = value;
+                RaisePropertyChanged("JustCreateSplittersChecked");
             }
         }
 
@@ -116,10 +133,10 @@ namespace ThMEPArchitecture.ViewModel
         public int LayoutCount
         {
             get { return _LayoutCount; }
-            set 
-            { 
-                _LayoutCount = value; 
-                RaisePropertyChanged("LayoutCount"); 
+            set
+            {
+                _LayoutCount = value;
+                RaisePropertyChanged("LayoutCount");
             }
         }
         //最大建筑位移距离
@@ -149,12 +166,12 @@ namespace ThMEPArchitecture.ViewModel
 
         public int ParallelSpotLength
         {
-            get 
-            { 
-                return _ParallelSpotLength; 
+            get
+            {
+                return _ParallelSpotLength;
             }
-            set 
-            { 
+            set
+            {
                 _ParallelSpotLength = value;
                 RaisePropertyChanged("ParallelSpotLength");
             }
@@ -242,7 +259,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
 
-        private int _RoadWidth  = 5500; //mm
+        private int _RoadWidth = 5500; //mm
 
         public int RoadWidth
         {
@@ -260,8 +277,8 @@ namespace ThMEPArchitecture.ViewModel
         public int WallLineThickness
         {
             get { return _WallLineThickness; }
-            set 
-            { 
+            set
+            {
                 _WallLineThickness = value;
                 RaisePropertyChanged("WallLineThickness");
             }
@@ -478,7 +495,7 @@ namespace ThMEPArchitecture.ViewModel
         public bool SpeedUpMode
         {
             get { return _SpeedUpMode; }
-            set 
+            set
             {
                 _SpeedUpMode = value;
                 RaisePropertyChanged("SpeedUpMode");
@@ -493,25 +510,25 @@ namespace ThMEPArchitecture.ViewModel
             set
             {
                 _CommandRunSpeed = value;
-                if(value == CommandRunSpeedEnum.Fast)
+                if (value == CommandRunSpeedEnum.Fast)
                 {
                     IterationCount = 30;
                     PopulationCount = 30;
                     MaxTimespan = 10;
                 }
-                else if(value == CommandRunSpeedEnum.General&&NormalMode)
+                else if (value == CommandRunSpeedEnum.General && NormalMode)
                 {
                     IterationCount = 60;
                     PopulationCount = 80;
                     MaxTimespan = 30;
                 }
-                else if(value == CommandRunSpeedEnum.General && ObliqueMode)
+                else if (value == CommandRunSpeedEnum.General && ObliqueMode)
                 {
                     IterationCount = 100;
                     PopulationCount = 32;
                     MaxTimespan = 30;
                 }
-                else if(value == CommandRunSpeedEnum.Slow)//slow
+                else if (value == CommandRunSpeedEnum.Slow)//slow
                 {
                     IterationCount = 200;
                     PopulationCount = 200;
@@ -665,7 +682,7 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("GeneMutationRate");
             }
         }
-        
+
         //特殊基因比例
         private double _SpecialGeneProp = 0.382;
         public double SpecialGeneProp
@@ -805,12 +822,12 @@ namespace ThMEPArchitecture.ViewModel
         public List<int> GetMultiSolutionList()
         {
             var list = new List<int>();
-            if(AutoSolution) list.Add(0);
-            if(HorizontalSolution) list.Add(1);
-            if(VerticalSolution) list.Add(2);
+            if (AutoSolution) list.Add(0);
+            if (HorizontalSolution) list.Add(1);
+            if (VerticalSolution) list.Add(2);
             return list;
         }
-        public static bool LogSubProcess=false;
+        public static bool LogSubProcess = false;
         public static double AreaMax = 0;
         public static double TotalArea = 0;
     }
@@ -820,18 +837,18 @@ namespace ThMEPArchitecture.ViewModel
         private static int _RoadWidth = 5500;
         public static int RoadWidth
         {
-            get 
+            get
             {
                 if (Setted) return _RoadWidth;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
-        private static double _WallLineThickness =300;
+        private static double _WallLineThickness = 300;
         public static double WallLineThickness
         {
-            get 
-            { 
-                if(Setted) return _WallLineThickness;
+            get
+            {
+                if (Setted) return _WallLineThickness;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
@@ -841,8 +858,8 @@ namespace ThMEPArchitecture.ViewModel
 
         public static int ParallelSpotLength
         {
-            get 
-            { 
+            get
+            {
                 if (Setted) return _ParallelSpotLength;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
@@ -879,8 +896,8 @@ namespace ThMEPArchitecture.ViewModel
         {
             get
             {
-                if(Setted)
-                return _VerticalSpotWidth;
+                if (Setted)
+                    return _VerticalSpotWidth;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
@@ -899,7 +916,7 @@ namespace ThMEPArchitecture.ViewModel
         {
             get
             {
-                if (Setted)return _BuildingTolerance;
+                if (Setted) return _BuildingTolerance;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
@@ -1049,7 +1066,7 @@ namespace ThMEPArchitecture.ViewModel
                     writer.Close();
             }
         }
-        public static HiddenParameter ReadOrCreateDefault() 
+        public static HiddenParameter ReadOrCreateDefault()
         {
             TextReader reader = null;
             var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -1057,7 +1074,7 @@ namespace ThMEPArchitecture.ViewModel
             HiddenParameter hp = new HiddenParameter();
             try
             {
-                if (ParameterStock.ReadHiddenParameter &&File.Exists(filePath))
+                if (ParameterStock.ReadHiddenParameter && File.Exists(filePath))
                 {
                     reader = new StreamReader(filePath);
                     var fileContents = reader.ReadToEnd();
@@ -1065,7 +1082,7 @@ namespace ThMEPArchitecture.ViewModel
                 }
                 else
                 {
-                    if (!File.Exists(filePath))hp.Save();
+                    if (!File.Exists(filePath)) hp.Save();
                 }
                 ParameterStock.LogMainProcess = hp.LogMainProcess;
                 ParameterStock.LogSubProcess = hp.LogSubProcess;

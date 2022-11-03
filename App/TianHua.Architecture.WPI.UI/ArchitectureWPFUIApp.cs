@@ -12,6 +12,8 @@ using TianHua.Architecture.WPI.UI.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThParkingStall.ClientUpdate;
 using System.Net.Sockets;
+using System.Diagnostics;
+using ThMEPArchitecture.ViewModel;
 
 namespace TianHua.Architecture.WPI.UI
 {
@@ -118,7 +120,8 @@ namespace TianHua.Architecture.WPI.UI
         }
         bool ValidateVersion()
         {
-            var curVersion = UiParkingStallArrangement.Version;
+            string AssmblyVersion = ParkingStallArrangementViewModel.Version;
+            var curVersion = AssmblyVersion;
             var dir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
             var romoteVersion = "";
             var appHttp = $"http://172.16.1.84:8088/Cal/ReadVersion";

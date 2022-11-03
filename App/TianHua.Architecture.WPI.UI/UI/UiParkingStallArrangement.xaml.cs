@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -27,7 +28,17 @@ namespace TianHua.Architecture.WPI.UI.UI
     public partial class UiParkingStallArrangement : ThCustomWindow
     {
         static ParkingStallArrangementViewModel _ViewModel = null;
-        public static string Version = "3.4";
+        private static string _Version = null;
+        public static string Version
+        {
+            get { return _Version; }
+            set
+            {
+                FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                string AssmblyVersion = myFileVersionInfo.FileVersion;
+                _Version = AssmblyVersion;
+            }
+        }
         public static bool DebugLocal = false;
         public UiParkingStallArrangement()
         {

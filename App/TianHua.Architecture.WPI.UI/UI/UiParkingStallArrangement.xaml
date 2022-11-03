@@ -6,7 +6,7 @@
               xmlns:s="clr-namespace:System;assembly=mscorlib"
               xmlns:local="clr-namespace:ThMEPArchitecture.UI.Converters"
               xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
-              Title="车位自动排布(3.4)" SizeToContent="Height"
+              Title= "{Binding VersionName}" SizeToContent="Height"
 
               Width="460" MaxWidth="550"  WindowStartupLocation="CenterScreen"
               mc:Ignorable="d"
@@ -17,7 +17,13 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
-        <StackPanel>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="83*"/>
+            <ColumnDefinition Width="8*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="355*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.ColumnSpan="4">
             <StackPanel >
                 <StackPanel Orientation="Horizontal">
                     <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
