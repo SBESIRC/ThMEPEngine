@@ -31,8 +31,9 @@ namespace Tianhua.Platform3D.UI
             //  Etc.
             PlatformRemoveEvents();
         }
-        [CommandMethod("TIANHUACAD", "TH3D", CommandFlags.Modal)]
-        public void ThTH3D()
+
+        [CommandMethod("TIANHUACAD", "THBM", CommandFlags.Modal)]
+        public void THBM()
         {
             Platform3DMainService.Instace.ShowUI();
         }
