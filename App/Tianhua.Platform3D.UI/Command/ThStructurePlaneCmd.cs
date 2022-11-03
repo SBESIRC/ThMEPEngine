@@ -1,8 +1,13 @@
 ﻿using AcHelper.Commands;
+using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.MemoryMappedFiles;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPEngineCore.Model;
@@ -12,6 +17,7 @@ using ThPlatform3D.StructPlane;
 using ThPlatform3D.StructPlane.Service;
 using Tianhua.Platform3D.UI.StructurePlane;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using AcHelper;
 
 namespace Tianhua.Platform3D.UI.Command
 {
@@ -28,21 +34,11 @@ namespace Tianhua.Platform3D.UI.Command
 
         public void Execute()
         {
-            // 选择文件名
+            Active.Document.Window.Focus();
             var fileName = SelectFile();
-            if (string.IsNullOrEmpty(fileName))
+            if (string.IsNullOrEmpty(fileName) || fileName=="error")
             {
                 return;
-            }
-
-            // ydb to ifc
-            if (Path.GetExtension(fileName).ToUpper() == ".YDB")
-            {
-                ThStopWatchService.Start();
-                var ydbToIfcService = new ThYdbToIfcConvertService();
-                fileName = ydbToIfcService.Convert(fileName);
-                ThStopWatchService.Stop();
-                ThStopWatchService.Print("YdbToIfc解析时间：");
             }
 
             // 转Svg ，*.Storey.txt
@@ -129,48 +125,56 @@ namespace Tianhua.Platform3D.UI.Command
 
         private string SelectFile()
         {
-            // 选择文件格式
-            var fileFormatVM = new FileFormatSelectVM();
-            var ui = new FileFormatSelectorUI(fileFormatVM);
-            ui.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
-            AcadApp.ShowModalWindow(ui);
-            
-
-            return fileFormatVM.SelectedFileName;
+           return Program.Run();
         }
     }
 
-    class Program
+    static class Program
     {
         static Mutex CadMutex = null;
         static Mutex ViewerMutex = null;
-        public static void Run()
+        static Mutex FileMutex = null;
+        public static string Run()
         {
             try
             {
                 var flag = Mutex.TryOpenExisting("viewerMutex", out ViewerMutex);
-                if (!flag) return;
+                if (!flag) return "";
+                var flag2 = Mutex.TryOpenExisting("fileMutex", out FileMutex);
+                if (!flag2) return "";
                 InitMutex();
+                FileMutex.WaitOne(3000);
+                using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("getFileName"))
+                {
+                    using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
+                    {
+                        IFormatter formatter = new BinaryFormatter();
+                        return (string)formatter.Deserialize(stream);
+                    }
+                }
                 CadMutex.ReleaseMutex();
                 ViewerMutex.WaitOne();
             }
-            catch
+            catch(Exception ex)
             {
-                return;
+                return "error";
             }
             finally
             {
                 CadMutex?.Dispose();
                 ViewerMutex?.Dispose();
+                FileMutex?.Dispose();
             }
+            return "";
         }
 
         static void InitMutex()
         {
-            var cadMutexName = "cutdata";
+            var cadMutexName = "cadMutex";
             try
             {
                 CadMutex = new Mutex(true, cadMutexName, out bool cadMutexCreated);
+                
             }
             catch
             {

@@ -206,6 +206,9 @@
     <Resource Include="Resources\Images\railing.png" />
     <Resource Include="Resources\Images\slab.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\structurePlane.png" />
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

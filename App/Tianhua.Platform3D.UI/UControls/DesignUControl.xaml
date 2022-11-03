@@ -92,7 +92,7 @@
                 <Border BorderThickness="0,0,0,1" Grid.RowSpan="99"
                     Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" 
                     Style="{StaticResource DesignBorder}"/>
-                <tControl:ImageButton Grid.Row="0" Grid.Column="0"
+                <!--<tControl:ImageButton Grid.Row="0" Grid.Column="0"
                                       Visibility="Collapsed"
                               NormalImage="../Resources/Images/viewUpdata.png" Content="视图更新"
                               Command="{Binding OnButtonClickCommand}"
@@ -101,7 +101,11 @@
                                       Visibility="Collapsed"
                               NormalImage="../Resources/Images/viewManage.png" Content="视图管理"
                               Command="{Binding OnButtonClickCommand}"
-                              CommandParameter=""></tControl:ImageButton>
+                              CommandParameter=""></tControl:ImageButton>-->
+                <tControl:ImageButton Grid.Row="0" Grid.Column="0"                                     
+                              NormalImage="../Resources/Images/structurePlane.png" Content="平面图"
+                              Command="{Binding OnButtonClickCommand}"
+                              CommandParameter="THSMBTUI"></tControl:ImageButton>
             </Grid>
 
             <!--视图行 end-->

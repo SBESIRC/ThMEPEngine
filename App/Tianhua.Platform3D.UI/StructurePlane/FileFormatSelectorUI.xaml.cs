@@ -17,8 +17,7 @@ namespace Tianhua.Platform3D.UI.StructurePlane
         private void btnConfirm_Click(object sender, RoutedEventArgs e)
         {
             if (ViewModel.Model.FileFormatOption == FileFormatOps.GET)
-            {
-                Program.Run();
+            {                
             }
             ViewModel.Save();
             ViewModel.BrowseFile();
