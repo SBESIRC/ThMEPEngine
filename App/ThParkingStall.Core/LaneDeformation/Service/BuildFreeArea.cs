@@ -27,6 +27,7 @@ namespace ThParkingStall.Core.LaneDeformation
         double maxY = 0;
         double minY = 0;
         List<FreeAreaRec> tmpRecs = new List<FreeAreaRec>();
+        List<List<FreeAreaRec>> tmpRecsX = new List<List<FreeAreaRec>>();
         Polygon nowBoundary;
 
         public BuildFreeArea(List<Polygon> originalFreeAreaList,Vector2D dir) 
@@ -188,6 +189,9 @@ namespace ThParkingStall.Core.LaneDeformation
             return newxyMap;
         }
 
+
+
+        //第一类分割法
         public void FromPointToRecs(List<double> xList,List<List<double>> XYListMap) 
         {
             tmpRecs.Clear();
@@ -278,13 +282,63 @@ namespace ThParkingStall.Core.LaneDeformation
             }
         }
 
+        //第二类分割法
+        public void FromPointToRecs2(List<double> xList)
+        {
+            tmpRecsX = new List<List<FreeAreaRec>>();
+            for (int i = 0; i < xList.Count - 1; i++)
+            {
+                List<FreeAreaRec> tmpRecSingleX = new List<FreeAreaRec>();
+                double x0 = xList[i];
+                double x1 = xList[i + 1];
+                Polygon tmpRec = PolygonUtils.CreatePolygonRec(x0, x1, minY - 100, maxY + 100);
+                var result =
+                OverlayNGRobust.Overlay(tmpRec, nowBoundary, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
+
+                List<Polygon> pendingPolygons = new List<Polygon>();
+                if (result is GeometryCollection collection)
+                {
+                    foreach (var e in collection)
+                    {
+                        if (e is Polygon)
+                        {
+                            pendingPolygons.Add((Polygon)e);
+                        }
+                    }
+                }
+                else if (result is Polygon)
+                {
+                    pendingPolygons.Add((Polygon)result);
+                }
+
+                for (int j = 0; j < pendingPolygons.Count ; j++) {
+                    List<Coordinate> isRec = RecVerification(pendingPolygons[j]);
+                    if (isRec.Count > 0) 
+                    {
+                        tmpRecSingleX.Add(new FreeAreaRec(isRec[0], isRec[1], isRec[2], isRec[3]));
+                    }
+                }
+
+                tmpRecSingleX = tmpRecSingleX.OrderBy(x=>x.LeftDownPoint.Y).ToList();
+
+                tmpRecsX.Add(tmpRecSingleX);
+            }
+        }
+
+        public List<Coordinate> RecVerification(Polygon maybeRec) 
+        {
+            List<Coordinate> coordinates = new List<Coordinate>();
+
+            return coordinates;
+        }
+
 
         //public void ModifiedRecs(double threshold = 5) 
         //{
         //    for (int i = 0; i < tmpRecs.Count; i++) 
         //    {
         //        if (tmpRecs[i].Width < )
-            
+
         //    }
         //}
     }

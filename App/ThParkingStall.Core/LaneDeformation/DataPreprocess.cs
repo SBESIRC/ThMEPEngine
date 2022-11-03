@@ -86,17 +86,17 @@ namespace ThParkingStall.Core.LaneDeformation
                     continue;
                 }
 
-                tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].LaneObb, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+                tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].LaneObb.Buffer(0.1), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
                 for (int j = 0; j < rawData.VehicleLanes[i].ParkingPlaceBlockList.Count; j++)
                 {
                     geometries.Add(rawData.VehicleLanes[i].ParkingPlaceBlockList[j].ParkingPlaceBlockObb);
-                    tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].ParkingPlaceBlockList[j].ParkingPlaceBlockObb, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+                    tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].ParkingPlaceBlockList[j].ParkingPlaceBlockObb.Buffer(0.1), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
                 }
             }
 
-            for (int i = 0; i < LaneDeformationParas.Blocks.Count; i++) 
+            for (int i = 0; i < VehicleLane.Blocks.Count; i++) 
             {
-                tmpG = OverlayNGRobust.Overlay(tmpG, LaneDeformationParas.Blocks[i], NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+                tmpG = OverlayNGRobust.Overlay(tmpG, VehicleLane.Blocks[i].Buffer(0.1), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
             }
 
             //geometries.AddRange(LaneDeformationParas.Blocks);
