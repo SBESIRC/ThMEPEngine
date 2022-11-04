@@ -146,7 +146,7 @@ namespace TianHua.Architecture.WPI.UI
                     {
                         var pro = new System.Diagnostics.Process();
                         pro.StartInfo.FileName = dir+"\\ThParkingStall.ClientUpdate.exe";
-                        pro.StartInfo.Arguments = dir;
+                        pro.StartInfo.Arguments = $"\"{dir}\"";
                         pro.StartInfo.CreateNoWindow = false;
                         pro.StartInfo.UseShellExecute = false;
                         pro.StartInfo.RedirectStandardOutput = true;
