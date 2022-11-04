@@ -39,7 +39,7 @@ namespace TianHua.Architecture.WPI.UI.UI
                 _Version = AssmblyVersion;
             }
         }
-        public static bool DebugLocal = false;
+        public static bool DebugLocal = true;
         public UiParkingStallArrangement()
         {
             ParkingStallArrangementViewModel.DebugLocal = DebugLocal;
