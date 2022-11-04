@@ -31,19 +31,19 @@ namespace ThParkingStall.ClientUpdate
             //删除目标文件所有内容
             var fileDir = dir;
             DirectoryInfo _dir = new DirectoryInfo(fileDir);
-            var files=_dir.GetFiles();
-            foreach (var f in files)
-            {
-                try
-                {
-                    File.Delete(f.FullName);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-            }
-            Console.WriteLine("已移除旧版本");
+            //var files=_dir.GetFiles();
+            //foreach (var f in files)
+            //{
+            //    try
+            //    {
+            //        File.Delete(f.FullName);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine(ex.Message);
+            //    }
+            //}
+            //Console.WriteLine("已移除旧版本");
             //DelectDir(fileDir);
             //从服务器拿到更新文件
             using (WebClient client = new WebClient())

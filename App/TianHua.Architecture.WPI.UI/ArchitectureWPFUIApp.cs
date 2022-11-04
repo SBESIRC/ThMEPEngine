@@ -145,7 +145,7 @@ namespace TianHua.Architecture.WPI.UI
                     try
                     {
                         var pro = new System.Diagnostics.Process();
-                        pro.StartInfo.FileName = "ThParkingStall.ClientUpdate.exe";
+                        pro.StartInfo.FileName = dir+"\\ThParkingStall.ClientUpdate.exe";
                         pro.StartInfo.Arguments = dir;
                         pro.StartInfo.CreateNoWindow = false;
                         pro.StartInfo.UseShellExecute = false;
@@ -155,7 +155,7 @@ namespace TianHua.Architecture.WPI.UI
                     }
                     catch (System.Exception ex)
                     {
-                        MessageBox.Show(ex.Message);
+                        MessageBox.Show("启动更新程序出错:" + ex.Message);
                     }
                 }
                 return false;
