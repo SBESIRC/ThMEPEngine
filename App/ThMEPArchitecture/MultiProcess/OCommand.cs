@@ -508,10 +508,10 @@ namespace ThMEPArchitecture.MultiProcess
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, laneLayer, 2);
             }
             GlobalBusiness globalBusiness = new GlobalBusiness(subAreas);
-            //车道微动
-            globalBusiness.DeformLanes();
-            //打印变量
-            PrintTmpOutPut(globalBusiness.drawTmpOutPut0);
+            ////车道微动
+            //globalBusiness.DeformLanes();
+            ////打印变量
+            //PrintTmpOutPut(globalBusiness.drawTmpOutPut0);
 
 
             var caledBound = globalBusiness.CalBound();

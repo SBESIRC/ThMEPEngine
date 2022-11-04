@@ -54,20 +54,20 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     , ref line_align_backback_rest, true, false, false, false, true, true, false);
             }
 
-            UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
-            //居中放、不进行碰撞检查(check_adjcollision为false,如果为true，起点会除开碰撞检查位置)
-            vertlanes = GeneratePerpModuleLanes(DisVertCarLengthBackBack + DisLaneWidth / 2, /*DisVertCarWidth*/1800, false, null, false, null, false, true);
-            SortLaneByDirection(vertlanes, LayoutMode, Vector2D.Zero);
-            foreach (var k in vertlanes)
-            {
-                var vl = k.Line;
-                UnifyLaneDirection(ref vl, IniLanes);
-                var line = new LineSegment(vl);
-                line = TranslateReservedConnection(line, k.Vec.Normalize() * DisLaneWidth / 2, false);
-                var line_align_backback_rest = new LineSegment();
-                GenerateCarsAndPillarsForEachLane(line, k.Vec, 1800, DisVertCarLength
-                    , ref line_align_backback_rest, true, false, false, false, true, true, false, false, false, true, false, false, false, false, true);
-            }
+            //UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+            ////居中放、不进行碰撞检查(check_adjcollision为false,如果为true，起点会除开碰撞检查位置)
+            //vertlanes = GeneratePerpModuleLanes(DisVertCarLengthBackBack + DisLaneWidth / 2, /*DisVertCarWidth*/1800, false, null, false, null, false, true);
+            //SortLaneByDirection(vertlanes, LayoutMode, Vector2D.Zero);
+            //foreach (var k in vertlanes)
+            //{
+            //    var vl = k.Line;
+            //    UnifyLaneDirection(ref vl, IniLanes);
+            //    var line = new LineSegment(vl);
+            //    line = TranslateReservedConnection(line, k.Vec.Normalize() * DisLaneWidth / 2, false);
+            //    var line_align_backback_rest = new LineSegment();
+            //    GenerateCarsAndPillarsForEachLane(line, k.Vec, 1800, DisVertCarLength
+            //        , ref line_align_backback_rest, true, false, false, false, true, true, false, false, false, true, false, false, false, false, true);
+            //}
 
         }
         public void ProcessLanes(ref List<Lane> Lanes, bool preprocess = false)
