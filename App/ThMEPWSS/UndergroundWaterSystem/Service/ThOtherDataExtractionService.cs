@@ -101,7 +101,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 {
                     foreach (var name in names[i])
                     {
-                        var bks = ExtractBlocks(adb.Database, name).Cast<BlockReference>().ToList();
+                        var bks = BlockExtractService.ExtractBlocks(adb.Database, name).Cast<BlockReference>().ToList();
                         foreach (var br in bks)
                         {
                             ThValveModel thValveModel = new ThValveModel(br,br.GeometricExtents.CenterPoint() );
@@ -198,7 +198,7 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 };
                 if(pts!=null)
                     bound.CreatePolyline(pts);
-                var blks = ExtractBlocks(adb.Database, "给水角阀平面").Cast<BlockReference>().ToList();
+                var blks = BlockExtractService.ExtractBlocks(adb.Database, "给水角阀平面").Cast<BlockReference>().ToList();
                 if(pts!=null)
                     blks = blks.Where(br => bound.Contains(br.Position)).ToList();
                 foreach (var br in blks)
@@ -209,26 +209,6 @@ namespace ThMEPWSS.UndergroundWaterSystem.Service
                 return result;
             }
         }
-        private DBObjectCollection ExtractBlocks(Database db, string blockName)
-        {
-            Func<Entity, bool> IsBlkNameQualified = (e) =>
-            {
-                if (e is BlockReference br)
-                {
-                    return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper());
-                }
-                return false;
-            };
-            var blkVisitor = new ThBlockReferenceExtractionVisitor();
-            blkVisitor.CheckQualifiedLayer = (e) => true;
-            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
-
-            var extractor = new ThDistributionElementExtractor();
-            extractor.Accept(blkVisitor);
-            extractor.Extract(db); // 提取块中块(包括外参)
-            extractor.ExtractFromMS(db); // 提取本地块
-
-            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
-        }
+       
     }
 }

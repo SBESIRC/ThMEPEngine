@@ -415,7 +415,9 @@
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Command\FireHydrantAcross.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Extract\BlockExtractService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\StoreyRect.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\StrTools.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Utils.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\ValveCasing.cs" />
     <Compile Include="UndergroundSpraySystem\Service\AlarmValveSys.cs" />
