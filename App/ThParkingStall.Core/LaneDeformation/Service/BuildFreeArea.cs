@@ -28,6 +28,7 @@ namespace ThParkingStall.Core.LaneDeformation
         double minY = 0;
         List<FreeAreaRec> tmpRecs = new List<FreeAreaRec>();
         List<List<FreeAreaRec>> tmpRecsX = new List<List<FreeAreaRec>>();
+        List<List<FreeAreaRec>> clearedTmpRecsX = new List<List<FreeAreaRec>>(); //只取上下两个矩形的tmpRecsX
         Polygon nowBoundary;
 
         public BuildFreeArea(List<Polygon> originalFreeAreaList,Vector2D dir) 
@@ -40,7 +41,7 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             for (int i = 0; i < OriginalFreeAreaList.Count; i++) 
             {
-                if (i == 12) 
+                if (i == 7) 
                 {
                     int stop = 0;
                 }
@@ -60,18 +61,16 @@ namespace ThParkingStall.Core.LaneDeformation
 
             List<double> xList = GetXList(obbPointList);
 
-            //清楚部分重合点
+            //清除部分重合点
             xList = IgnoreSmall(xList);
-            List<List<double>> XYListMap = GetXYMap(singleFreeArea,xList);
-            //XYListMap = CombineXYMap(ref xList, XYListMap);
 
-            //
-            FromPointToRecs(xList,XYListMap);
 
-            //修改数值
-            //ModifiedRecs();
+            //两种切分方式
+            //GetCutRecs0(singleFreeArea, xList);
+            GetCutRecs1(singleFreeArea, xList);
 
-            //
+
+
             FreeAreaRecsList.Add(tmpRecs);
             tmpRecs = new List<FreeAreaRec>();
         }
@@ -96,16 +95,17 @@ namespace ThParkingStall.Core.LaneDeformation
             return yList.OrderBy(x => x).ToList();
         }
 
-        public List<double> IgnoreSmall(List<double> numberList,double threshold= 50) 
+        public List<double> IgnoreSmall(List<double> numberList, double threshold = 50)
         {
             double nowX = numberList[0];
             List<int> deleteIndexList = new List<int>();
-            for (int i = 0; i < numberList.Count-1;i++) 
+            for (int i = 0; i < numberList.Count - 1; i++)
             {
-                if (numberList[i+1] - nowX < threshold) 
+                if (numberList[i + 1] - nowX < threshold)
                 {
                     deleteIndexList.Add(i + 1);
-                }else nowX = numberList[i+1]; 
+                }
+                else nowX = numberList[i + 1];
             }
 
             List<double> newList = new List<double>();
@@ -119,6 +119,22 @@ namespace ThParkingStall.Core.LaneDeformation
 
             return newList;
 
+        }
+
+
+        //第一类分割法
+        public void GetCutRecs0(Polygon singleFreeArea,List<double> xList) 
+        {
+            List<List<double>> XYListMap = GetXYMap(singleFreeArea, xList);
+            //XYListMap = CombineXYMap(ref xList, XYListMap);
+
+            //
+            FromPointToRecs(xList, XYListMap);
+
+            //修改数值
+            //ModifiedRecs();
+
+            //
         }
 
         public List<List<double>> GetXYMap(Polygon oPl, List<double> xList)
@@ -189,9 +205,6 @@ namespace ThParkingStall.Core.LaneDeformation
             return newxyMap;
         }
 
-
-
-        //第一类分割法
         public void FromPointToRecs(List<double> xList,List<List<double>> XYListMap) 
         {
             tmpRecs.Clear();
@@ -282,7 +295,26 @@ namespace ThParkingStall.Core.LaneDeformation
             }
         }
 
+
+
         //第二类分割法
+        public void GetCutRecs1(Polygon singleFreeArea, List<double> xList)
+        {
+       
+            FromPointToRecs2(xList);
+
+            //仅仅保留上下两个矩形
+            GetUsefulRecs();
+
+            //修改数值
+            //ModifiedRecs();
+
+
+            //展平
+            List<FreeAreaRec> flatten = clearedTmpRecsX.SelectMany(x => x).ToList();
+            tmpRecs = flatten;
+        }
+
         public void FromPointToRecs2(List<double> xList)
         {
             tmpRecsX = new List<List<FreeAreaRec>>();
@@ -302,14 +334,21 @@ namespace ThParkingStall.Core.LaneDeformation
                     {
                         if (e is Polygon)
                         {
-                            pendingPolygons.Add((Polygon)e);
+                            List<Polygon> polygons = PolygonUtils.ClearBufferHelper((Polygon)e, -30, 30);
+                            //pendingPolygons.Add((Polygon)e);
+                            pendingPolygons.AddRange(polygons);
                         }
                     }
                 }
                 else if (result is Polygon)
                 {
-                    pendingPolygons.Add((Polygon)result);
+                    List<Polygon> polygons = PolygonUtils.ClearBufferHelper((Polygon)result, -30, 30);
+                    //pendingPolygons.Add((Polygon)result);
+                    pendingPolygons.AddRange(polygons);
                 }
+
+                LDOutput.DrawTmpOutPut0.TmpCutRecs.AddRange(pendingPolygons);
+
 
                 for (int j = 0; j < pendingPolygons.Count ; j++) {
                     List<Coordinate> isRec = RecVerification(pendingPolygons[j]);
@@ -318,8 +357,10 @@ namespace ThParkingStall.Core.LaneDeformation
                         tmpRecSingleX.Add(new FreeAreaRec(isRec[0], isRec[1], isRec[2], isRec[3]));
                     }
                 }
-
-                tmpRecSingleX = tmpRecSingleX.OrderBy(x=>x.LeftDownPoint.Y).ToList();
+                if (tmpRecSingleX.Count > 0)
+                {
+                    tmpRecSingleX = tmpRecSingleX.OrderBy(x => x.LeftDownPoint.Y).ToList();
+                }
 
                 tmpRecsX.Add(tmpRecSingleX);
             }
@@ -328,10 +369,44 @@ namespace ThParkingStall.Core.LaneDeformation
         public List<Coordinate> RecVerification(Polygon maybeRec) 
         {
             List<Coordinate> coordinates = new List<Coordinate>();
+            var xlist = GetXList(maybeRec.Coordinates.ToList());
+            var ylist = GetYList(maybeRec.Coordinates.ToList());
+            double deltay = ylist.Last() - ylist.First();
+            double deltax = xlist.Last() - xlist.First();
+            double recArea = deltax * deltay;
+            //if (maybeRec.Area > recArea * 0.1 && deltax > 50) 
+            if(true)
+            {
+                coordinates.Add(new Coordinate(xlist.First(),ylist.First()));
+                coordinates.Add(new Coordinate(xlist.Last(),ylist.First()));
+                coordinates.Add(new Coordinate(xlist.Last(), ylist.Last()));
+                coordinates.Add(new Coordinate(xlist.First(), ylist.Last()));
+            }
 
             return coordinates;
         }
 
+
+        public void GetUsefulRecs() 
+        {
+            clearedTmpRecsX = new List<List<FreeAreaRec>>();
+            for (int i = 0; i < tmpRecsX.Count; i++) 
+            {
+                List<FreeAreaRec> tmpNewSingleRecs = new List<FreeAreaRec>();
+                if (tmpRecsX[i].Count >= 2)
+                {
+                    tmpNewSingleRecs.Add(tmpRecsX[i].First());
+                    tmpNewSingleRecs.Add(tmpRecsX[i].Last());
+
+                }
+                else if (tmpRecsX[i].Count == 1) 
+                {
+                    tmpNewSingleRecs.Add(tmpRecsX[i].First());
+                }
+
+                clearedTmpRecsX.Add(tmpNewSingleRecs);
+            }
+        }
 
         //public void ModifiedRecs(double threshold = 5) 
         //{

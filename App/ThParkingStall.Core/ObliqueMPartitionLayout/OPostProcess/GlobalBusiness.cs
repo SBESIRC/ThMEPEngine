@@ -62,7 +62,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public DrawTmpOutPut drawTmpOutPut0 = new DrawTmpOutPut();
         public void DeformLanes()
         {
-            return;
+            //return;
             InitLaneDeformationParas();
             var vehiclesdata = new VehicleLaneData(VehicleLanes);
 
@@ -198,6 +198,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public List<Polygon> LaneNodes = new List<Polygon>();
         public List<Polygon> SpotNodes = new List<Polygon>();
 
+        public List<Polygon> TmpCutRecs = new List<Polygon>();
 
         //增加要打印的东西
         public DrawTmpOutPut() 

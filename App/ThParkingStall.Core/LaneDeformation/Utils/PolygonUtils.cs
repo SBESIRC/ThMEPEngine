@@ -10,11 +10,13 @@ using ThParkingStall.Core.LaneDeformation;
 
 using NetTopologySuite.Operation.OverlayNG;
 using ThParkingStall.Core.MPartitionLayout;
+using NetTopologySuite.Operation.Buffer;
 
 namespace ThParkingStall.Core.LaneDeformation
 {
     internal class PolygonUtils
     {
+        static public BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
 
         static public Polygon CreatePolygonRec(double x0,double x1,double y0,double y1) 
         {
@@ -27,7 +29,60 @@ namespace ThParkingStall.Core.LaneDeformation
             Polygon Obb = new Polygon(new LinearRing(pointList.ToArray()));
             
             return Obb;
-        } 
+        }
+
+
+        static public List<Polygon> GetBufferedPolygons(Polygon pl,double dis) 
+        {
+            List<Polygon> result = new List<Polygon>();
+            Geometry g = pl.Buffer(dis,MitreParam);
+            if (g is GeometryCollection collection)
+            {
+                foreach (var e in collection.Geometries)
+                {
+                    if (e is Polygon)
+                    {
+                        if (!e.IsEmpty)
+                            result.Add((Polygon)e);
+                    }
+                }
+            }
+            else if (g is Polygon)
+            {
+                if (!g.IsEmpty)
+                    result.Add((Polygon)g);
+            }
+
+            return result;
+        }
+
+        static public List<Polygon> ClearBufferHelper(Polygon pl,double fdis,double dis) 
+        {
+            List<Polygon> polygons = GetBufferedPolygons(pl, fdis);
+            List<Polygon> result = new List<Polygon>();
+            for (int i = 0; i < polygons.Count; i++) 
+            {
+                var g = polygons[i].Buffer(dis,MitreParam);
+                if (g is GeometryCollection collection)
+                {
+                    foreach (var e in collection)
+                    {
+                        if (e is Polygon)
+                        {
+                            if(!e.IsEmpty)
+                            result.Add((Polygon)e);
+                        }
+                    }
+                }
+                else if (g is Polygon)
+                {
+                    if (!g.IsEmpty)
+                        result.Add((Polygon)g);
+                }
+            }
+
+            return result;
+        }
 
 
 

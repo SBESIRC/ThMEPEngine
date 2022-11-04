@@ -86,17 +86,17 @@ namespace ThParkingStall.Core.LaneDeformation
                     continue;
                 }
 
-                tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].LaneObb.Buffer(0.1), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+                tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].LaneObb.Buffer(0.1,PolygonUtils.MitreParam), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
                 for (int j = 0; j < rawData.VehicleLanes[i].ParkingPlaceBlockList.Count; j++)
                 {
                     geometries.Add(rawData.VehicleLanes[i].ParkingPlaceBlockList[j].ParkingPlaceBlockObb);
-                    tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].ParkingPlaceBlockList[j].ParkingPlaceBlockObb.Buffer(0.1), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+                    tmpG = OverlayNGRobust.Overlay(tmpG, rawData.VehicleLanes[i].ParkingPlaceBlockList[j].ParkingPlaceBlockObb.Buffer(0.1, PolygonUtils.MitreParam), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
                 }
             }
 
             for (int i = 0; i < VehicleLane.Blocks.Count; i++) 
             {
-                tmpG = OverlayNGRobust.Overlay(tmpG, VehicleLane.Blocks[i].Buffer(0.1), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+                tmpG = OverlayNGRobust.Overlay(tmpG, VehicleLane.Blocks[i].Buffer(0.1, PolygonUtils.MitreParam), NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
             }
 
             //geometries.AddRange(LaneDeformationParas.Blocks);
@@ -128,13 +128,17 @@ namespace ThParkingStall.Core.LaneDeformation
                 {
                     if (e is Polygon)
                     {
-                        LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)e);
+                        List<Polygon> polygons = PolygonUtils.ClearBufferHelper((Polygon)e, -100,100);
+                        //LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)e);
+                        LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.AddRange(polygons);
                     }
                 }
             }
             else if (tmpG is Polygon)
             {
-                LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)tmpG);
+                //LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add((Polygon)tmpG);
+                List<Polygon> polygons = PolygonUtils.ClearBufferHelper((Polygon)tmpG, -100, 100);
+                LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.AddRange(polygons);
             }
 
             originalFreeAreaList = LDOutput.DrawTmpOutPut0.OriginalFreeAreaList;
