@@ -17,6 +17,9 @@ using ThMEPArchitecture.MultiProcess;
 using ThParkingStall.Core.InterProcess;
 using ThParkingStall.Core.MPartitionLayout;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
+using NetTopologySuite.Geometries;
+using ThParkingStall.Core.Tools;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
     public class ParkingStallGAGenerator : IDisposable
@@ -430,7 +433,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         #region 随机函数
         private List<int> RandChoice(int UpperBound, int n = -1, int LowerBound = 0)
         {
-            return General.Utils.RandChoice(UpperBound, n, LowerBound);
+            return ThParkingStallCoreTools.RandChoice(UpperBound, n, LowerBound);
         }
         private double RandNormalInRange(double loc, double scale, double LowerBound, double UpperBound)
         {
@@ -441,15 +444,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             double tol = 1e-4;
             if (UpperBound- LowerBound <= tol) return loc;
 
-            else return General.Utils.Truncnormal(loc, scale, LowerBound, UpperBound);
+            else return ThParkingStallCoreTools.Truncnormal(loc, scale, LowerBound, UpperBound);
         }
         private int RandInt(int range)
         {
-            return General.Utils.RandInt(range);
+            return ThParkingStallCoreTools.RandInt(range);
         }
         private double RandDouble()
         {
-            return General.Utils.RandDouble();
+            return ThParkingStallCoreTools.RandDouble();
         }
         private double RandDoubleInRange(double LowerBound, double UpperBound)
         {
@@ -622,8 +625,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var chrom = chromosomeCollection.Chromosomes[i];
                 var subAreas = InterParameter.GetSubAreas(chrom);
                 List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
-                MParkingPartitionPro mParkingPartition=new MParkingPartitionPro();
-                inputSolution[i].ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
+                MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
+                Polygon CaledBound = new Polygon(new LinearRing(new Coordinate[0]));
+                inputSolution[i].ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, ref CaledBound);
             }
         }
         private List<List<Chromosome>> CreateNextGeneration2(List<Chromosome> solutions)

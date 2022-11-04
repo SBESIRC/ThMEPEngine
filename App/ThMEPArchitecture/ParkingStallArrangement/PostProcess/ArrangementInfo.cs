@@ -16,6 +16,8 @@ using ThCADCore.NTS;
 using ThParkingStall.Core.Tools;
 using NetTopologySuite.Operation.Buffer;
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
+using ThParkingStall.Core.OInterProcess;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.PostProcess
 {
     public static class ArrangementInfo
@@ -50,31 +52,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PostProcess
             var obstacleArea = subArea.GetObstacleArea(distance);
             return obstacleArea / subArea.Area.Area;
         }
-
-        //public static double GetRValue(double a)
-        //{
-        //    var LisA = new List<double> { 0, 1.0/30.0, 1.0/15.0, 1.0/10.0, 1.0/6.0, 1.0/4.0, 1.0/3.0, 1.0/2.0 };
-        //    var LisR = new List<double> { 25, 27, 28, 29, 31, 33, 36, 42 };
-        //    double prop;
-        //    for(int i = 0; i < LisA.Count-1; i++)
-        //    {
-        //        if(a >= LisA[i] && a < LisA[i + 1])
-        //        {
-        //            var lb = LisR[i];
-        //            var ub = LisR[i + 1];
-        //            prop = (a - LisA[i]) / (LisA[i + 1] - LisA[i]);
-        //            var r = prop * (ub - lb) + lb;
-        //            //Active.Editor.WriteMessage(r.ToString() + " \n");
-        //            return r;
-        //        }
-        //    }
-        //    var trans_a_start = Math.Atan(LisR.Last());
-        //    var trans_a_end = Math.PI/2;
-        //    prop = (a - LisA.Last()) / (1- LisA.Last());
-        //    var trans_a = prop*(trans_a_end - trans_a_start) + trans_a_start;
-        //    return Math.Tan(trans_a);
-
-        //}
         public static DBText GetText( string strText, Point3d position,double height, string layer)
         {
             var dbText = new DBText();
@@ -151,6 +128,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PostProcess
             A_text.ColorIndex = 0;
             lisText.Add(A_text);
             lisText.ShowBlock(layer, layer, Center.X, Center.Y);
+        }
+
+        public static void ShowText(this OSubArea oSubArea,double distance = 3000,string layer = "AI-分区指标")
+        {
+            var subArea = new SubArea(oSubArea.Region, oSubArea.VaildLanes.ToLineStrings(), oSubArea.Walls, oSubArea.Buildings, new List<Ramp>(), new List<Polygon>());
+            subArea.Count = oSubArea.Count;
+            subArea.ShowText(distance, layer);
         }
     }
 }

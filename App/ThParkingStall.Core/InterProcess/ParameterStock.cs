@@ -124,6 +124,19 @@ namespace ThParkingStall.Core.InterProcess
         {
             get { return _DoubleRowModularDecrease200; }
         }
+        //尽端环通
+        private static int _AllowLoopThroughEnd = 50000;
+        public static int AllowLoopThroughEnd
+        {
+            get { return _AllowLoopThroughEnd; }
+        }
+        //背靠背长度限制
+        private static int _DisAllowMaxLaneLength = 50000;
+        public static int DisAllowMaxLaneLength
+        {
+            get { return _DisAllowMaxLaneLength; }
+        }
+
         //背靠背模块：柱子沿车道法向偏移距离
         private static int _ColumnShiftDistanceOfDoubleRowModular = 550; //mm
 
@@ -190,6 +203,15 @@ namespace ThParkingStall.Core.InterProcess
         private static double _SingleVertModulePlacementFactor;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public static double SingleVertModulePlacementFactor { get { return _SingleVertModulePlacementFactor; } }
+        //加速运算
+        private static bool _SpeedUpMode;
+        public static bool SpeedUpMode{get { return _SpeedUpMode; }}
+        //边界迭代
+        private static bool _BoundaryShrink;
+        public static bool BoundaryShrink { get { return _BoundaryShrink; }}
+        //最大建筑位移距离
+        private static int _BuildingMoveDistance;
+        public static int BuildingMoveDistance { get { return _BuildingMoveDistance; }}
         public static void Init(DataWraper datawraper)
         {
             _RunMode = datawraper.RunMode;
@@ -215,6 +237,10 @@ namespace ThParkingStall.Core.InterProcess
             _ColumnWidth = datawraper.ColumnWidth; //mm
             //背靠背模块：缩进200
             _DoubleRowModularDecrease200 = datawraper.DoubleRowModularDecrease200;
+            //尽端环通
+            _AllowLoopThroughEnd = datawraper.AllowLoopThroughEnd;
+            //背靠背长度限制
+            _DisAllowMaxLaneLength = datawraper.DisAllowMaxLaneLength;
             //背靠背模块：柱子沿车道法向偏移距离
             _ColumnShiftDistanceOfDoubleRowModular = datawraper.ColumnShiftDistanceOfDoubleRowModular; //mm
             //背靠背模块是否使用中柱
@@ -235,6 +261,12 @@ namespace ThParkingStall.Core.InterProcess
             _LayoutScareFactor_SingleVert = datawraper.LayoutScareFactor_SingleVert;
             //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
             _SingleVertModulePlacementFactor = datawraper.SingleVertModulePlacementFactor;
+            //加速运算模式
+            _SpeedUpMode = datawraper.SpeedUpMode;
+            //边界迭代
+            _BoundaryShrink = datawraper.BoundaryShrink;
+            //最大建筑位移距离
+            _BuildingMoveDistance = datawraper.BuildingMoveDistance;
         }
     }
 }

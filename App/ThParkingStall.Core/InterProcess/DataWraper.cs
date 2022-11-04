@@ -8,25 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using NetTopologySuite.Geometries;
 using ThParkingStall.Core.MPartitionLayout;
+using ThParkingStall.Core.OInterProcess;
 using static ThParkingStall.Core.MPartitionLayout.MCompute;
 namespace ThParkingStall.Core.InterProcess
 {
     [Serializable]
     public class DataWraper
     {
-        #region LayoutParameter(InterParameter)
-        public Polygon TotalArea;//总区域
-        public List<LineSegment> SegLines;//初始分区线
-        public List<Polygon> Buildings;//建筑物，包含坡道
-        public List<int> OuterBuildingIdxs = new List<int>(); //可穿建筑物（外围障碍物）的index,包含坡道
-        public List<Polygon> BoundingBoxes;//建筑外包框
-        public List<Ramp> Ramps;//坡道
-
-        public List<(double, double)> LowerUpperBound; // 基因的上下边界，绝对值
-        public List<List<int>> SeglineIndexList ;// 分区线相交关系
-        public List<(bool, bool)> SeglineConnectToBound;//分区线（负，正）方向是否与边界连接
-        public List<(int, int, int, int)> SegLineIntSecNode;//四岔节点关系，上下左右的分区线index
-        #endregion
+        public InterParamWraper interParamWraper = null;//正交数据
+        public OParamWraper oParamWraper = null;//斜交数据
         #region ViewModel Parameters
         //平行车位尺寸,长度
         public int ParallelSpotLength = 6000; //mm
@@ -50,6 +40,10 @@ namespace ThParkingStall.Core.InterProcess
         public int ColumnWidth = 7800; //mm
         //背靠背模块：缩进200
         public bool DoubleRowModularDecrease200 = true;
+        //尽端环通
+        public int AllowLoopThroughEnd = 50000;
+        //背靠背长度限制
+        public int DisAllowMaxLaneLength = 50000;
         //背靠背模块：柱子沿车道法向偏移距离
         public int ColumnShiftDistanceOfDoubleRowModular = 550; //mm
         //背靠背模块是否使用中柱
@@ -62,6 +56,7 @@ namespace ThParkingStall.Core.InterProcess
         public int D2 = 200;
         //迭代次数
         public int IterationCount = -1;
+        public int PopulationCount = 80;
         public int RunMode;
         //横向优先_纵向车道计算长度调整_背靠背模块
         public double LayoutScareFactor_Intergral = 0.7;
@@ -73,10 +68,77 @@ namespace ThParkingStall.Core.InterProcess
         public double LayoutScareFactor_SingleVert = 0.7;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public double SingleVertModulePlacementFactor = 1.0;
+        //加速运算
+        public bool SpeedUpMode = false;
+        //边界收缩
+        public bool BoundaryShrink = true;
+        //最大建筑位移距离
+        public int BuildingMoveDistance = 500;
+        //处理器核心数
+        public int ProcessCount = -1;
+        //相同退出次数
+        public int MaxEqualCnt = 10;
+        //最大迭代时间
+        public double MaxTimespan = 30;
+        //变异因子
+        public double MutationRate = 0.382;
+        //特殊基因比例
+        public double SpecialGeneProp = 0.382;
+        //基因变异因子
+        public double GeneMutationRate = 0.382;
+        //保留因子
+        public double SelectionRate = 0.382;
+        //精英比例
+        public double EliteProp = 0.2;
+        //小变异比例
+        public double SMProp = 0.382;
+        public int TargetParkingCntMin = 1;
+        public int TargetParkingCntMax = 1;
+        //最大地库面积
+        public double AreaMax { get; set; }
+        //面积平均缩减比例
+        public double AreaShrinkProp = 0.2;
+        //地库面积
+        public double TotalArea { get; set; }
+        public int BorderlineMoveRange = 0;
+        public bool LogSubProcess = false;
+        public int ThreadCount = 3;
+
         #endregion
-        public Chromosome chromosome;
+        public Chromosome chromosome = null;//正交基因记录
+        public Genome genome = null;//斜交基因记录
+        public BuildingPosGene BPGene = null;//障碍物移位基因记录
     }
 
+    [Serializable]
+    public class InterParamWraper
+    {
+        public Polygon TotalArea;//总区域
+        public List<LineSegment> SegLines;//初始分区线
+        public List<Polygon> Buildings;//建筑物，包含坡道
+        public List<int> OuterBuildingIdxs = new List<int>(); //可穿建筑物（外围障碍物）的index,包含坡道
+        public List<Polygon> BoundingBoxes;//建筑外包框
+        public List<Ramp> Ramps;//坡道
+        public List<(double, double)> LowerUpperBound; // 基因的上下边界，绝对值
+        public List<List<int>> SeglineIndexList;// 分区线相交关系
+        public List<(bool, bool)> SeglineConnectToBound;//分区线（负，正）方向是否与边界连接
+        public List<(int, int, int, int)> SegLineIntSecNode;//四岔节点关系，上下左右的分区线index
+    }
+
+    [Serializable]
+    public class OParamWraper
+    {
+        public Polygon TotalArea;//总区域
+        public List<SegLine> SegLines;//初始分区线
+        public List<Polygon> Buildings;//所有建筑物，包含坡道
+        public List<ORamp> Ramps;//坡道
+        public List<(List<int>, List<int>)> seglineIndex;//每根分区线初始以及终点接到哪
+        public List<LineSegment> borderLines = null;//可动边界
+        public double[] MaxMoveDistances;////扇形移动最大距离
+        public Coordinate Center;//点集圆心
+        public List<Polygon> MovingBounds;
+        //缺一个可动边界的连接关系
+    }
     public class ProgramDebug
     {
         public static List<int> TestMain(string[] ProcessInfo, ChromosomeCollection chromosomeCollection)
@@ -94,7 +156,8 @@ namespace ThParkingStall.Core.InterProcess
                 var subAreas = InterParameter.GetSubAreas(chromosome);
                 List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
                 MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-                var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition);
+                Polygon CaledBound = new Polygon(new LinearRing(new Coordinate[0]));
+                var ParkingCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros,ref mParkingPartition,ref CaledBound);
                 Result.Add(ParkingCount);
             }
             return Result;

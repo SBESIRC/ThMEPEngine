@@ -12,7 +12,7 @@ namespace ThParkingStall.Core.MPartitionLayout
 {
     public static partial class MLayoutPostProcessing
     {
-        public static void RemoveInvalidPillars(ref List<Polygon> pillars,List<InfoCar>cars)
+        public static void RemoveInvalidPillars(ref List<Polygon> pillars, List<InfoCar> cars)
         {
             List<Polygon> tmps = new List<Polygon>();
             foreach (var t in pillars)
@@ -35,7 +35,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 var car = vertcars[i].Polyline;
                 var edge = car.GetEdges().OrderBy(e => e.Length).Take(2).OrderBy(e => e.MidPoint.Distance(vertcars[i].Point)).First();
-                var car_transform = PolyFromLines(edge, edge.Translation(vertcars[i].Vector.Normalize() * MParkingPartitionPro.DisVertCarLength));
+                var car_transform = PolyFromLines(edge, edge.Translation(vertcars[i].Vector.Normalize() * ((MParkingPartitionPro.DisVertCarLength-MParkingPartitionPro.DisVertCarLengthBackBack)*2+ MParkingPartitionPro.DisVertCarLengthBackBack)));
                 var crossed = car_spacial_index.SelectCrossingGeometry(car_transform.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck));
                 if (crossed.Count() < 2)
                 {

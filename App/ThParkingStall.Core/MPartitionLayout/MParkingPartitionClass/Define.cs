@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using static ThParkingStall.Core.MPartitionLayout.MGeoUtilities;
 using ThParkingStall.Core.InterProcess;
 using System.Collections.Concurrent;
+using NetTopologySuite.Operation.OverlayNG;
 
 namespace ThParkingStall.Core.MPartitionLayout
 {
@@ -33,7 +34,17 @@ namespace ThParkingStall.Core.MPartitionLayout
             PillarNetDepth = VMStock.ColumnSizeOfPerpendicularToRoad;
             ThicknessOfPillarConstruct = VMStock.ColumnAdditionalSize;
             HasImpactOnDepthForPillarConstruct = VMStock.ColumnAdditionalInfluenceLaneWidth;
+            DisAllowMaxLaneLength = VMStock.DisAllowMaxLaneLength;
+            if (VMStock.AllowLoopThroughEnd > 30000)
+            {
+                LoopThroughEnd = true;
+                DisConsideringLoopThroughEnd = VMStock.AllowLoopThroughEnd;
+            }
+            else
+                LoopThroughEnd = false;
+
             //LayoutMode = ((int)VMStock.RunMode);
+            AllowCompactedLane = VMStock.BoundaryShrink;
 
             //其它参数设置
             GeneratePillars = PillarSpacing < DisVertCarWidth ? false : GeneratePillars;
@@ -89,6 +100,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public MNTSSpatialIndex LaneBufferSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
         public MNTSSpatialIndex CarSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
         public List<Lane> IniLanes = new List<Lane>();
+        public List<Lane> InitialLanes = new List<Lane>();
         public List<Polygon> CarSpots = new List<Polygon>();
         public List<Polygon> Pillars = new List<Polygon>();
         private List<Polygon> CarBoxes = new List<Polygon>();
@@ -101,6 +113,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public List<Polygon> BuildingBoxes = new List<Polygon>();
         public List<Ramp> RampList = new List<Ramp>();
         public List<Polygon> IniPillar = new List<Polygon>();
+        public Polygon CaledBound { get; set; }
 
         public bool AccurateCalculate = true;
         public static double DifferenceFromBackBcek = 200;
@@ -149,6 +162,12 @@ namespace ThParkingStall.Core.MPartitionLayout
         public static double LayoutScareFactor_SingleVert = 0.7;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值.单排车位数大于para*非单排，排单排
         public static double SingleVertModulePlacementFactor = 1.0;
+        public static bool LoopThroughEnd = false;//尽端环通
+        public double DisAllowMaxLaneLength = 50000;//允许生成车道最大长度-
+        public double DisConsideringLoopThroughEnd = 50000;//尽端环通车道条件判断长度
+        public bool AllowCompactedLane = false;
+        public bool hasCompactedLane = false;
+        private int CalCompactLaneCount = 0;
         public enum LayoutDirection : int
         {
             LENGTH = 0,
@@ -159,21 +178,157 @@ namespace ThParkingStall.Core.MPartitionLayout
         {
             AccurateCalculate = accurate;
             GenerateParkingSpaces();
+            CaledBound=CalBoundary(Boundary,Pillars,IniLanes,Obstacles,Cars);
             return CarSpots.Count;
         }
         public void GenerateParkingSpaces()
         {
-            PreProcess();
+            if (!hasCompactedLane)
+                PreProcess();
             GenerateLanes();
             GeneratePerpModules();
             GenerateCarsInModules();
             ProcessLanes(ref IniLanes);
             GenerateCarsOnRestLanes();
             PostProcess();
+            if (!hasCompactedLane && AllowCompactedLane)
+                CompactLane();
+        }
+
+        private void ClearNecessaryElements()
+        {
+            IniLanes = new List<Lane>();
+            OutputLanes = new List<LineSegment>();
+            OutEnsuredLanes = new List<LineSegment>();
+            OutUnsuredLanes = new List<LineSegment>();         
+            CarSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
+            CarSpots = new List<Polygon>();
+            Pillars = new List<Polygon>();          
+            Cars = new List<InfoCar>();        
+            IniPillar = new List<Polygon>();
+            LaneBufferSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
+            LaneBoxes = new List<Polygon>();
+            LaneSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
+
+            //CarBoxesSpatialIndex = new MNTSSpatialIndex(new List<Geometry>());
+            //CarBoxes = new List<Polygon>();
+            //CarBoxesPlus = new List<CarBoxPlus>();
+            //CarModules = new List<CarModule>();
+        }
+
+        private void Update(List<Lane> newlanes, List<Lane> eldlanes)
+        {
+            IniLanes = new List<Lane>(newlanes);
+            //var reversed_lanes=new List<Lane>();
+            //for (int i=0;i< eldlanes.Count;i++)
+            //{
+            //    var lane=eldlanes[i];
+            //    if (lane.NotCopyReverseForLaneCompaction)
+            //    {
+            //        var ln = new Lane(lane.Line, -lane.Vec);
+            //        ln.Copy(lane);
+            //        reversed_lanes.Add(ln);
+            //        var ln_new = new Lane(newlanes[i].Line, -newlanes[i].Vec);
+            //        ln_new.Copy(newlanes[i]);
+            //        newlanes.Add(ln_new);
+            //    }     
+            //}
+            //eldlanes.AddRange(reversed_lanes);
+            var add_carBoxes = new List<Polygon>();
+            var add_carBoxes_plus = new List<CarBoxPlus>();
+            var add_modules = new List<CarModule>();
+            //for (int i = 0; i < eldlanes.Count; i++)
+            //{
+            //    var eldLine = eldlanes[i].Line;
+            //    foreach (var box in CarBoxes)
+            //    {
+            //        var baseLine=new LineSegment();
+            //        if (IsMatchCarBox_Lane(box, eldlanes[i],ref baseLine))
+            //        {
+            //            var depth = box.GetEdges().OrderBy(e => e.Length).First().Length;
+            //            var l = new LineSegment(newlanes[i].Line.ClosestPoint(baseLine.P0), newlanes[i].Line.ClosestPoint(baseLine.P1));
+            //            var pl = PolyFromLines(l, l.Translation(newlanes[i].Vec.Normalize() * depth));
+            //            add_carBoxes.Add(pl);
+            //        }
+            //    }
+            //    foreach (var box in CarBoxesPlus.Where(e => e.Box!=null))
+            //    {
+            //        var baseLine = new LineSegment();
+            //        if (IsMatchCarBox_Lane(box.Box, eldlanes[i], ref baseLine))
+            //        {
+            //            var depth = box.Box.GetEdges().OrderBy(e => e.Length).First().Length;
+            //            var l = new LineSegment(newlanes[i].Line.ClosestPoint(baseLine.P0), newlanes[i].Line.ClosestPoint(baseLine.P1));
+            //            var pl = PolyFromLines(l, l.Translation(newlanes[i].Vec.Normalize() * depth));
+            //            var carbox_plus = new CarBoxPlus(pl, box.IsSingleForParallelExist);
+            //            add_carBoxes_plus.Add(carbox_plus);
+            //        }
+            //    }
+            //    foreach (var module in CarModules)
+            //    {
+            //        var baseLine = new LineSegment();
+            //        if (IsMatchCarBox_Lane(module.Box, eldlanes[i], ref baseLine))
+            //        {
+            //            var depth = module.Box.GetEdges().OrderBy(e => e.Length).First().Length;
+            //            var l = new LineSegment(newlanes[i].Line.ClosestPoint(baseLine.P0), newlanes[i].Line.ClosestPoint(baseLine.P1));
+            //            var pl = PolyFromLines(l, l.Translation(newlanes[i].Vec.Normalize() * depth));
+            //            var _module_line = l;
+            //            if (module.Line.ClosestPoint(baseLine.MidPoint).Distance(baseLine.MidPoint) > 1000)
+            //                _module_line = l.Translation(newlanes[i].Vec.Normalize() * depth);
+            //            var _module = new CarModule(pl, _module_line, module.Vec);
+            //            _module.Copy(module);
+            //            add_modules.Add(_module);
+            //        }
+            //    }
+
+            //    //var carBoxes = CarBoxes.Where(e => /*e.Contains(testpoint)&&*/
+            //    //  IsMatchCarBox_Lane(e, eldlanes[i]));
+            //    //if (carBoxes.Any())
+            //    //{
+            //    //    var box = carBoxes.First();
+            //    //    var depth = box.GetEdges().OrderBy(e => e.Length).First().Length;
+            //    //    var pl = PolyFromLines(newlanes[i].Line, newlanes[i].Line.Translation(newlanes[i].Vec.Normalize() * depth));
+            //    //    add_carBoxes.Add(pl);
+            //    //}
+            //    //var carBoxesplus = CarBoxesPlus.Where(e => e.Box!=null && /*e.Box.Contains(testpoint)&&*/
+            //    //   IsMatchCarBox_Lane(e.Box, eldlanes[i]));
+            //    //if (carBoxesplus.Any())
+            //    //{
+            //    //    var box = carBoxesplus.First();
+            //    //    var depth = box.Box.GetEdges().OrderBy(e => e.Length).First().Length;
+            //    //    var pl = PolyFromLines(newlanes[i].Line, newlanes[i].Line.Translation(newlanes[i].Vec.Normalize() * depth));
+            //    //    var carbox_plus = new CarBoxPlus(pl, box.IsSingleForParallelExist);
+            //    //    add_carBoxes_plus.Add(carbox_plus);
+            //    //}
+            //    //var modules=CarModules.Where(e => /*e.Box.Contains(testpoint)&&*/
+            //    //     IsMatchCarBox_Lane(e.Box, eldlanes[i]));
+            //    //if (modules.Any())
+            //    //{
+            //    //    var module=modules.First();
+            //    //    var depth = module.Box.GetEdges().OrderBy(e => e.Length).First().Length;
+            //    //    var pl = PolyFromLines(newlanes[i].Line, newlanes[i].Line.Translation(newlanes[i].Vec.Normalize() * depth));
+            //    //    var _module = new CarModule(pl, newlanes[i].Line, newlanes[i].Vec);
+            //    //    _module.Copy(module);
+            //    //    add_modules.Add(_module);
+            //    //}
+            //}
+            CarBoxes = add_carBoxes.Distinct().ToList();
+            CarBoxesPlus = add_carBoxes_plus.Distinct().ToList();
+            CarModules = add_modules.Distinct().ToList();
+            CarBoxesSpatialIndex = new MNTSSpatialIndex(CarBoxes);
+            CarBoxesSpatialIndex.Update(IniLanes.Select(e => PolyFromLine(e.Line)).ToArray(),new List<Polygon>());
+            foreach (var ln in IniLanes)
+            {
+                ln.CanExtend = true;
+                ln.CanBeMoved = true;
+                //ln.IsGeneratedForLoopThrough = false;
+                //ln.IsAdjLaneForProcessLoopThroughEnd = false;
+                ln.GEndAdjLine = false;
+                ln.GStartAdjLine = false;
+            }
         }
 
         private void InitialzeDatas(List<LineSegment> iniLanes)
-        {      
+        {
             //如果柱子完成面宽度对车道间距没有影响，则在一开始便将柱子缩小为净尺寸
             if (!HasImpactOnDepthForPillarConstruct)
             {

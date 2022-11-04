@@ -147,7 +147,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             else
             {
-                var randLs = General.Utils.RandChoice(spliters.Count);
+                var randLs = ThParkingStall.Core.Tools.ThParkingStallCoreTools.RandChoice(spliters.Count);
                 int index = 0;
                 while (index < spliters.Count)
                 {

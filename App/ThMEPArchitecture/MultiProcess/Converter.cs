@@ -22,6 +22,7 @@ using Dreambuild.AutoCAD;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using Linq2Acad;
+using ThParkingStall.Core.OInterProcess;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -46,7 +47,7 @@ namespace ThMEPArchitecture.MultiProcess
             InterParameter.Init(dataWraper);
             if (AddSegLines)
             {
-                var newSegs = InterParameterEx.AddSegLines();
+                var newSegs = InterParameter.InitSegLines.AddSegLines();
                 using (AcadDatabase acad = AcadDatabase.Active())
                 {
                     if (acad.Layers.Contains("添加分区线"))
@@ -58,23 +59,53 @@ namespace ThMEPArchitecture.MultiProcess
             }
             return dataWraper;
         }
+
+        public static DataWraper GetDataWraper(OLayoutData oLayoutData,ParkingStallArrangementViewModel vm)
+        {
+            OCached.Clear();//清空cache
+            MCompute.CatchedTimes = 0;
+            var dataWraper = new DataWraper();
+            dataWraper.UpdateVMParameter(vm);
+            VMStock.Init(dataWraper);
+            dataWraper.UpdateOInterParameter(oLayoutData);
+            OInterParameter.Init(dataWraper);
+            return dataWraper;
+        }
         private static void UpdateInterParameter(this DataWraper dataWraper, LayoutData layoutData)
         {
-            dataWraper.TotalArea = layoutData.WallLine;
-            dataWraper.SegLines = layoutData.SegLines;
-            dataWraper.Buildings = layoutData.Buildings;
-            dataWraper.BoundingBoxes = layoutData.BoundingBoxes;
-            dataWraper.Ramps = layoutData.Ramps;
-            dataWraper.SeglineIndexList = layoutData.SeglineIndexList;
-            dataWraper.LowerUpperBound = layoutData.LowerUpperBound;
-            dataWraper.OuterBuildingIdxs = layoutData.OuterBuildingIdxs;
-            dataWraper.SeglineConnectToBound = layoutData.SeglineConnectToBound;
-            dataWraper.SegLineIntSecNode = layoutData.SegLineIntSecNode;
+            var interParamWraper = new InterParamWraper();
+            interParamWraper.TotalArea = layoutData.WallLine;
+            interParamWraper.SegLines = layoutData.SegLines;
+            interParamWraper.Buildings = layoutData.Buildings;
+            interParamWraper.BoundingBoxes = layoutData.BoundingBoxes;
+            interParamWraper.Ramps = layoutData.Ramps;
+            interParamWraper.SeglineIndexList = layoutData.SeglineIndexList;
+            interParamWraper.LowerUpperBound = layoutData.LowerUpperBound;
+            interParamWraper.OuterBuildingIdxs = layoutData.OuterBuildingIdxs;
+            interParamWraper.SeglineConnectToBound = layoutData.SeglineConnectToBound;
+            interParamWraper.SegLineIntSecNode = layoutData.SegLineIntSecNode;
+            dataWraper.interParamWraper = interParamWraper;
+        }
+
+        private static void UpdateOInterParameter(this DataWraper dataWraper,OLayoutData oLayoutData)
+        {
+            var oWraper = new OParamWraper();
+            oWraper.TotalArea = oLayoutData.WallLine;
+            oWraper.SegLines = oLayoutData.SegLines;
+            oWraper.Buildings = oLayoutData.Buildings;
+            oWraper.Ramps = oLayoutData.Ramps;
+            oWraper.seglineIndex = oLayoutData.SeglineIndex;
+            oWraper.borderLines = oLayoutData.BorderLines;
+            oWraper.MaxMoveDistances = oLayoutData.MaxMoveDistances;
+            oWraper.Center = oLayoutData.Center;
+            oWraper.MovingBounds = oLayoutData.MovingBounds;
+            dataWraper.oParamWraper = oWraper;
         }
         private static void UpdateInterParameter(this DataWraper dataWraper, OuterBrder outerBrder)
         {
-            dataWraper.TotalArea = outerBrder.WallLine.ToNTSPolygon().RemoveHoles();
-            dataWraper.SegLines = outerBrder.SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).
+            var interParamWraper = new InterParamWraper();
+            interParamWraper.TotalArea = outerBrder.WallLine.ToNTSPolygon().RemoveHoles();
+            interParamWraper.SegLines = outerBrder.SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).
                 Select(l => l.ToNTSLineSegment()).ToList();
             var entities = outerBrder.BuildingObjs.ExplodeBlocks();
             var buildingBounds = new List<LineString>();
@@ -86,20 +117,21 @@ namespace ThMEPArchitecture.MultiProcess
                     buildingBounds.Add(bound);
                 }
             }
-            dataWraper.Buildings = buildingBounds.GetPolygons();
-            dataWraper.Buildings = dataWraper.Buildings.Select(build => build.RemoveHoles()).ToList();
-            dataWraper.BoundingBoxes = new List<Polygon>();
+            interParamWraper.Buildings = buildingBounds.GetPolygons();
+            interParamWraper.Buildings = interParamWraper.Buildings.Select(build => build.RemoveHoles()).ToList();
+            interParamWraper.BoundingBoxes = new List<Polygon>();
             foreach (BlockReference blk in outerBrder.BuildingWithoutRampObjs)
             {
-                dataWraper.BoundingBoxes.Add(blk.GetRect().ToNTSPolygon());
+                interParamWraper.BoundingBoxes.Add(blk.GetRect().ToNTSPolygon());
             }
-            dataWraper.BoundingBoxes = dataWraper.BoundingBoxes.Select(box => box.RemoveHoles()).ToList();
-            dataWraper.Ramps = outerBrder.GetRamps();
-            dataWraper.SeglineIndexList = outerBrder.SegLines.Select(l =>l.ToNTSLineSegment()).ToList().GetSegLineIntsecList();
-            dataWraper.LowerUpperBound = dataWraper.SegLines.GetLowerUpperBound(dataWraper);
+            interParamWraper.BoundingBoxes = interParamWraper.BoundingBoxes.Select(box => box.RemoveHoles()).ToList();
+            interParamWraper.Ramps = outerBrder.GetRamps();
+            interParamWraper.SeglineIndexList = outerBrder.SegLines.Select(l =>l.ToNTSLineSegment()).ToList().GetSegLineIntsecList();
+            interParamWraper.LowerUpperBound = interParamWraper.SegLines.GetLowerUpperBound(dataWraper);
+            dataWraper.interParamWraper = interParamWraper;
 
         }
-        private static void UpdateVMParameter(this DataWraper datawraper, ParkingStallArrangementViewModel vm)
+        public static void UpdateVMParameter(this DataWraper datawraper, ParkingStallArrangementViewModel vm)
         {
             //平行车位尺寸,长度
             datawraper.ParallelSpotLength = vm.ParallelSpotLength; //mm
@@ -123,6 +155,10 @@ namespace ThMEPArchitecture.MultiProcess
             datawraper.ColumnWidth = vm.ColumnWidth; //mm
             //背靠背模块：缩进200
             datawraper.DoubleRowModularDecrease200 = vm.DoubleRowModularDecrease200;
+            //尽端环通
+            datawraper.AllowLoopThroughEnd = vm.AllowLoopThroughEnd;
+            //背靠背长度限制
+            datawraper.DisAllowMaxLaneLength = vm.DisAllowMaxLaneLength;
             //背靠背模块：柱子沿车道法向偏移距离
             datawraper.ColumnShiftDistanceOfDoubleRowModular = vm.ColumnShiftDistanceOfDoubleRowModular; //mm
             //背靠背模块是否使用中柱
@@ -148,6 +184,39 @@ namespace ThMEPArchitecture.MultiProcess
             datawraper.LayoutScareFactor_SingleVert = ParameterStock.LayoutScareFactor_SingleVert;
             //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
             datawraper.SingleVertModulePlacementFactor = ParameterStock.SingleVertModulePlacementFactor;
+            datawraper.SpeedUpMode = vm.SpeedUpMode;
+            datawraper.BoundaryShrink = vm.BoundaryShrink;
+            //最大建筑位移距离
+            datawraper.BuildingMoveDistance = vm.BuildingMoveDistance;
+            //处理器核心数
+            datawraper.ProcessCount = vm.ProcessCount;
+            //种群数
+            datawraper.PopulationCount = vm.PopulationCount;
+            //相同退出次数
+            datawraper.MaxEqualCnt = vm.MaxEqualCnt;
+            //最大迭代时间
+            datawraper.MaxTimespan = vm.MaxTimespan;
+            //变异因子
+            datawraper.MutationRate = vm.MutationRate;
+            //特殊基因比例
+            datawraper.SpecialGeneProp = vm.SpecialGeneProp;
+            //基因变异因子
+            datawraper.GeneMutationRate = vm.GeneMutationRate;
+            //保留因子
+            datawraper.SelectionRate = vm.SelectionRate;
+            //精英比例
+            datawraper.EliteProp = vm.EliteProp;
+            //小变异比例
+            datawraper.SMProp = vm.SMProp;
+            datawraper.TargetParkingCntMin = vm.TargetParkingCntMin;
+            datawraper.TargetParkingCntMax = vm.TargetParkingCntMax;
+            //面积平均缩减比例
+            datawraper.AreaShrinkProp = vm.AreaShrinkProp;
+            datawraper.BorderlineMoveRange = vm.BorderlineMoveRange;
+            datawraper.ThreadCount = vm.ThreadCount;
+            datawraper.LogSubProcess = ParkingStallArrangementViewModel.LogSubProcess;
+            datawraper.AreaMax = ParkingStallArrangementViewModel.AreaMax;
+            datawraper.TotalArea = ParkingStallArrangementViewModel.TotalArea;
         }
         public static List<Ramp> GetRamps(this OuterBrder outerBrder)
         {
@@ -183,9 +252,10 @@ namespace ThMEPArchitecture.MultiProcess
 
         public static List<(double, double)> GetLowerUpperBound(this List<LineSegment> SegLines, DataWraper dataWraper)
         {
-            var TotalArea = dataWraper.TotalArea;
-            var Buildings = dataWraper.Buildings;
-            var Ramps = dataWraper.Ramps;
+            var interParamWraper = dataWraper.interParamWraper;
+            var TotalArea = interParamWraper.TotalArea;
+            var Buildings = interParamWraper.Buildings;
+            var Ramps = interParamWraper.Ramps;
             var lowerUpperBound = new List<(double, double)>();
             var vaildSegs = SegLines.GetVaildSegLines(TotalArea,0);//获取有效分区线,边界上线取最大值
             var ObstacleSpatialIndex = new MNTSSpatialIndex(Buildings);

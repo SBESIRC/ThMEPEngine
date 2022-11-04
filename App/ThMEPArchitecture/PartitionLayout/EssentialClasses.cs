@@ -83,6 +83,14 @@ namespace ThMEPArchitecture.PartitionLayout
         public Vector3d Vector;
         public Point3d Point;
         public Polyline Polyline;
+        public int TypeTag = 0;
+    }
+    public enum CarTypeTag : int
+    {
+        Normal = 0,//正常车位
+        CollidedByCarDoor = 1,//车门阻挡
+        CollidedByStruct = 2,//结构转换
+        CollidedByCarDoorAndStruct = 3,//车门阻挡&结构转换
     }
     public enum CarLayoutMode : int
     {

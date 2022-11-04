@@ -31,6 +31,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArchitectureWPFUIApp.cs" />
+    <Compile Include="ArchitectureWPFUIApp.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ArchitectureWPFUIApp.resx</DependentUpon>
+    </Compile>
     <Compile Include="Converters\Converters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\UiParkingStallArrangement.xaml.cs">
@@ -108,6 +113,14 @@
       <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPIdentity\ThMEPIdentity.csproj">
+      <Project>{4BC759A7-B662-4177-8767-ADDDE5C0E9EA}</Project>
+      <Name>ThMEPIdentity</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThParkingStall.ClientUpdate\ThParkingStall.ClientUpdate.csproj">
+      <Project>{51cc879d-640c-4e57-9193-5d97d9786cd8}</Project>
+      <Name>ThParkingStall.ClientUpdate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThParkingStall.Core\ThParkingStall.Core.csproj">
       <Project>{0B67DA69-EE95-472C-8A4D-326BCB220621}</Project>
       <Name>ThParkingStall.Core</Name>
@@ -117,12 +130,18 @@
       <Name>ThParkingStallProgramDisplay</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Page Include="UI\UiParkingStallArrangement.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ArchitectureWPFUIApp.resx">
+      <DependentUpon>ArchitectureWPFUIApp.cs</DependentUpon>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ArchitectureWPFUIApp.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
