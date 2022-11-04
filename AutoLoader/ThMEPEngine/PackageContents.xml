@@ -461,7 +461,9 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Architecture.WPI.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPIUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THZDCWBZ" Global="THZDCWPZ" />
+                <Command Local="THZDCWBZ" Global="THZDCWBZ" />
+                <Command Local="CWBZ" Global="CWBZ" />
+                <Command Local="THCWBZTC" Global="THCWBZTC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -470,7 +472,9 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Architecture.WPI.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPIUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THZDCWBZ" Global="THZDCWPZ" />
+                <Command Local="THZDCWBZ" Global="THZDCWBZ" />
+                <Command Local="CWBZ" Global="CWBZ" />
+                <Command Local="THCWBZTC" Global="THCWBZTC" />
             </Commands>
         </ComponentEntry>
     </Components>
