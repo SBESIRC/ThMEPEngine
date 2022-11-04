@@ -3,7 +3,10 @@ using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
@@ -16,6 +19,16 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
 {
     public class GlobalBusiness
     {
+        class UBinder : SerializationBinder
+        {
+            public override Type BindToType(string assemblyName, string typeName)
+            {
+                Type typeToDeserialize = null;
+                typeToDeserialize = Type.GetType(String.Format("{0}, {1}",
+                    typeName, assemblyName));
+                return typeToDeserialize;
+            }
+        }
         public GlobalBusiness(List<OSubArea> oSubAreas)
         {
             OSubAreas = oSubAreas;
@@ -44,17 +57,38 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public List<Coordinate> obsVertices = new List<Coordinate>();
         public List<VehicleLane> VehicleLanes = new List<VehicleLane>();
         public Polygon BOUND { get; set; }
+
+
+        public DrawTmpOutPut drawTmpOutPut0 = new DrawTmpOutPut();
         public void DeformLanes()
         {
             return;
             InitLaneDeformationParas();
-            var vehicles = VehicleLanes;
-            func(vehicles);
-            readFromVehicles(vehicles);
-        }
-        void func(List<VehicleLane> vehicles)
-        {
+            var vehiclesdata = new VehicleLaneData(VehicleLanes);
 
+            //序列化
+            var dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+            var local_path = dir + "\\vehiclesdata.dat";
+            FileStream fileStream = new FileStream(local_path, FileMode.Create);
+            BinaryFormatter binaryFormatter = new BinaryFormatter();
+            binaryFormatter.Serialize(fileStream, vehiclesdata); //序列化 参数：流 对象
+            fileStream.Close();
+
+            //反序列化
+            fileStream = new FileStream(local_path, FileMode.Open);
+            var formatter = new BinaryFormatter
+            {
+                Binder = new UBinder()
+            };
+            vehiclesdata = (VehicleLaneData)formatter.Deserialize(fileStream);
+            fileStream.Close();
+
+            LaneDeformationService deformationService = new LaneDeformationService(vehiclesdata);
+            deformationService.Process();
+            drawTmpOutPut0 = deformationService.DrawTmpOutPut0;
+            vehiclesdata = deformationService.Result;
+
+            readFromVehicles(vehiclesdata.VehicleLanes);
         }
         void readFromVehicles(List<VehicleLane> vehicles)
         {
@@ -66,7 +100,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
                 lanes.Add(vehicle.CenterLine);
                 foreach (var block in vehicle.ParkingPlaceBlockList)
                 {
-                    cars.AddRange(block.Cars.Select(e => new InfoCar(e.ParkingPlaceObb, e.Point, e.ParkingPlaceDir) { CarLayoutMode = e.Type }));
+                    cars.AddRange(block.Cars.Select(e => new InfoCar(e.ParkingPlaceObb, e.Point, new Vector2D(e.ParkingPlaceDir.X, e.ParkingPlaceDir.Y)) { CarLayoutMode = e.Type }));
                     pillars.AddRange(block.ColunmList.Select(e => e.ColunmnObb));
                 }
             }
@@ -137,7 +171,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             var _walls = walls;
             var _cars = cars;
             var _pillars = pillars;
-            var _obsVertices = obsVertices; 
+            var _obsVertices = obsVertices;
             var _lanes = lanes;
             var _obstacles = obstacles;
             var ObstaclesSpacialIndex = new MNTSSpatialIndex(_obstacles);
@@ -153,6 +187,22 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
             lanes = _lanes;
             obstacles = _obstacles;
             return;
+        }
+    }
+
+
+    public class DrawTmpOutPut 
+    {
+        public List<Polygon> OriginalFreeAreaList =new List<Polygon>();
+        public List<Polygon> FreeAreaRecs = new List<Polygon>();
+        public List<Polygon> LaneNodes = new List<Polygon>();
+        public List<Polygon> SpotNodes = new List<Polygon>();
+
+
+        //增加要打印的东西
+        public DrawTmpOutPut() 
+        {
+
         }
     }
 }

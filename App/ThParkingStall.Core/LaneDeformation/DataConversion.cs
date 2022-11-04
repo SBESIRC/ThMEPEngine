@@ -10,26 +10,54 @@ using System.Threading.Tasks;
 namespace ThParkingStall.Core.LaneDeformation
 {
     //输入
+    [Serializable]
+    public class PureVector
+    {
+        public PureVector(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+        public double X { get; set; }
+        public double Y { get; set; }
+    }
+
     //车道
     [Serializable]
     public static class LaneDeformationParas
     {
         //车道线宽度的一半
-        static public double VehicleLaneWidth;       //这个放这里和放VehicleLane类里面都可以
-        static public Polygon Boundary;      //地库外框
-        static public List<Polygon> Blocks;   //墙体等障碍物
+        static public double VehicleLaneWidth;    //这个放这里和放VehicleLane类里面都可以
+        static public Polygon Boundary;           //地库外框
+        static public List<Polygon> Blocks;       //墙体等障碍物
     }
+
+    //接口转换使用数据
+    [Serializable]
+    public class VehicleLaneData
+    {
+        public VehicleLaneData()
+        {
+
+        }
+        public VehicleLaneData(List<VehicleLane> vehicleLanes)
+        {
+            VehicleLanes=vehicleLanes;
+        }
+        public List<VehicleLane> VehicleLanes = new List<VehicleLane>();
+    }
+
     //车道
     [Serializable]
     public class VehicleLane
     {
-        public VehicleLane(LineSegment centerLine, Polygon laneObb, Vector2D vec)
+        public VehicleLane(LineSegment centerLine, Polygon laneObb, PureVector vec)
         {
             CenterLine=centerLine;
             LaneObb = laneObb;
             Vec=vec;
         }
-        public Vector2D Vec;//接口转换使用数据,目前会认为一条车道线，垂直的两个方向生成车位，其实是两条车道线对应两个相反方向——如果这一步不需要区分，接口可作调整
+        public PureVector Vec;//接口转换使用数据,目前会认为一条车道线，垂直的两个方向生成车位，其实是两条车道线对应两个相反方向——如果这一步不需要区分，接口可作调整
         public LineSegment CenterLine; //中心线
         public Polygon LaneObb;    //车道外包框线
         public List<ParkingPlaceBlock> ParkingPlaceBlockList = new List<ParkingPlaceBlock>(); //某个车道生成的车位的集合起来的块
@@ -45,7 +73,7 @@ namespace ThParkingStall.Core.LaneDeformation
     [Serializable]
     public class ParkingPlaceBlock
     {
-        public ParkingPlaceBlock(LineSegment sourceLane, Polygon parkingPlaceBlockObb, Vector2D blockDir, List<SingleParkingPlace> cars, List<LDColumn> colunmList)
+        public ParkingPlaceBlock(LineSegment sourceLane, Polygon parkingPlaceBlockObb, PureVector blockDir, List<SingleParkingPlace> cars, List<LDColumn> colunmList)
         {
             SourceLane = sourceLane;
             ParkingPlaceBlockObb = parkingPlaceBlockObb;
@@ -76,7 +104,7 @@ namespace ThParkingStall.Core.LaneDeformation
             }
         }
         public Polygon ParkingPlaceBlockObb; //外包框线
-        public Vector2D BlockDir;        //*生成的朝向
+        public PureVector BlockDir;        //*生成的朝向
         public List<SingleParkingPlace> Cars;   //块内包含的车位
         public List<LDColumn> ColunmList;     //块内包含的柱子
     }
@@ -85,7 +113,7 @@ namespace ThParkingStall.Core.LaneDeformation
     [Serializable]
     public class SingleParkingPlace
     {
-        public SingleParkingPlace(Polygon polygon, int type, Vector2D vec,Coordinate point)
+        public SingleParkingPlace(Polygon polygon, int type, PureVector vec,Coordinate point)
         {
             ParkingPlaceObb=polygon;
             Type=type;
@@ -104,7 +132,7 @@ namespace ThParkingStall.Core.LaneDeformation
         public ParkingPlaceBlock FatherParkingPlaceBlock { get; set; }  //记录车位从属于哪个块
         public Polygon ParkingPlaceObb;   //车位外包框线
         public int Type;                    //车位类型
-        public Vector2D ParkingPlaceDir;   //车位朝向
+        public PureVector ParkingPlaceDir;   //车位朝向
         public double LongSide;            //长边
         public double ShortSide;           //短边
                                            //车位原始块是cad图形数据不好传进来，如果以后需要数据可作补充
