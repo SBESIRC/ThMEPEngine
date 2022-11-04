@@ -205,7 +205,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             inilinesplitcarboxesaction = inilinesplitcarboxesaction.Translation(-gvec.Normalize() * (DisVertCarLength + DisLaneWidth));
             var inilinesplitcarboxesactionpolyline = PolyFromLines(inilinesplitcarboxes, inilinesplitcarboxesaction);
             var inilinesplitcarboxesactionlaneboxes = IniLanes.Where(e => IsParallelLine(e.Line, inilinesplitcarboxesaction))
-                .Select(e => e.Line.Buffer(DisLaneWidth / 2 - 0.001));
+                .Select(e => e.Line.Buffer(DisLaneWidth / 2));
             var inilinesplitcarboxesactionpoints = new List<Coordinate>();
             foreach (var box in inilinesplitcarboxesactionlaneboxes)
             {
@@ -213,7 +213,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 inilinesplitcarboxesactionpoints.AddRange(box.IntersectPoint(inilinesplitcarboxesactionpolyline));
             }
             inilinesplitcarboxesactionpoints = inilinesplitcarboxesactionpoints
-                .Where(e => inilinesplitcarboxesactionpolyline.Contains(e) || inilinesplitcarboxesactionpolyline.ClosestPoint(e).Distance(e) < 0.0001)
+                .Where(e => inilinesplitcarboxesactionpolyline.Scale(ScareFactorForCollisionCheck).Contains(e) /*|| inilinesplitcarboxesactionpolyline.ClosestPoint(e).Distance(e) < 0.0001*/)
                 .Select(e => inilinesplitcarboxes.ClosestPoint(e)).ToList();
             SortAlongCurve(inilinesplitcarboxesactionpoints, inilinesplitcarboxes);
             if (inilinesplitcarboxesactionpoints.Count > 0)
@@ -267,8 +267,10 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (isStart) paras.SetGStartAdjLane = index;
             else paras.SetGEndAdjLane = index;
             Lane inilan = new Lane(iniobsplit, gvec);
+            //inilan.IsAdjLaneForProcessLoopThroughEnd = true;
             paras.LanesToAdd.Add(inilan);
             Lane inilanopposite = new Lane(iniobsplit, -gvec);
+            inilanopposite.IsAdjLaneForProcessLoopThroughEnd=true;
             paras.LanesToAdd.Add(inilanopposite);
             paras.CarBoxesToAdd.Add(pl);
             generate_lane_length = iniobsplit.Length;

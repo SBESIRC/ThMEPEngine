@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -11,13 +12,30 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPArchitecture.ViewModel
 {
-    public enum CommandMode { WithUI, WithoutUI}
-    public enum CommandTypeEnum {RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically}//directly, with splitters, without splitters
+    public enum CommandMode { WithUI, WithoutUI }
+    public enum CommandTypeEnum { RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically, BuildingAnalysis }//directly, with splitters, without splitters
     //public enum CommandRunModeEnum { Auto, Horizental, Vertical }
     public enum CommandRunSpeedEnum { Fast, General, Slow, Advanced }
-    public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small}
+    public enum CommandColumnSizeEnum { Large, LargeAndSmall, Small }
     public class ParkingStallArrangementViewModel : NotifyPropertyChangedBase
     {
+        public static string Version
+        {
+            get
+            {
+                FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                string AssmblyVersion = myFileVersionInfo.FileVersion;
+                return AssmblyVersion;
+            }
+        }
+        public static string VersionName
+        {
+            get
+            {
+                return $"车位自动排布{Version}";
+            }
+        }
+        public static bool DebugLocal { get; set; }
         private CommandTypeEnum _CommandType = CommandTypeEnum.RunWithoutIteration;
         public CommandTypeEnum CommandType
         {
@@ -28,13 +46,14 @@ namespace ThMEPArchitecture.ViewModel
                 _CommandType = value;
                 RaisePropertyChanged("CommandType");
                 RaisePropertyChanged("IsComputationParaSetupEnabled");
+                if (value == CommandTypeEnum.BuildingAnalysis) MaxEqualCnt = 5;
             }
         }
         private bool _UseMultiProcess = true;
 
         private Visibility _AdvancedSettingVisibility = Visibility.Collapsed;
-        public Visibility AdvancedSettingVisibility 
-        { 
+        public Visibility AdvancedSettingVisibility
+        {
             get
             {
                 return _AdvancedSettingVisibility;
@@ -44,7 +63,7 @@ namespace ThMEPArchitecture.ViewModel
                 _AdvancedSettingVisibility = value;
                 RaisePropertyChanged("AdvancedSettingVisibility");
             }
-        } 
+        }
 
         public bool UseMultiProcess
         {
@@ -55,8 +74,37 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("UseMultiProcess");
             }
         }
+        //斜交模式
+        private bool _ObliqueMode = true;
+        public bool ObliqueMode
+        {
+            get { return _ObliqueMode; }
+            set
+            {
+                _ObliqueMode = value;
+                if (value)
+                {
+                    IterationCount = 100;
+                    PopulationCount = 32;
+                    MaxTimespan = 30;
+                }
+                else
+                {
+                    IterationCount = 60;
+                    PopulationCount = 80;
+                    MaxTimespan = 30;
+                }
+                RaisePropertyChanged("ObliqueMode");
+                RaisePropertyChanged("NormalMode");
+            }
+        }
+        public bool NormalMode
+        {
+            get { return !_ObliqueMode; }
+        }
+
         //补充分区线
-        private bool _AddBoundSegLines = true;
+        private bool _AddBoundSegLines = false;
         public bool AddBoundSegLines
         {
             get { return _AddBoundSegLines; }
@@ -72,10 +120,10 @@ namespace ThMEPArchitecture.ViewModel
         public bool JustCreateSplittersChecked
         {
             get { return _JustCreateSplittersChecked; }
-            set 
-            { 
-                _JustCreateSplittersChecked = value; 
-                RaisePropertyChanged("JustCreateSplittersChecked"); 
+            set
+            {
+                _JustCreateSplittersChecked = value;
+                RaisePropertyChanged("JustCreateSplittersChecked");
             }
         }
 
@@ -85,24 +133,45 @@ namespace ThMEPArchitecture.ViewModel
         public int LayoutCount
         {
             get { return _LayoutCount; }
-            set 
-            { 
-                _LayoutCount = value; 
-                RaisePropertyChanged("LayoutCount"); 
+            set
+            {
+                _LayoutCount = value;
+                RaisePropertyChanged("LayoutCount");
             }
         }
-
+        //最大建筑位移距离
+        private int _BuildingMoveDistance = 500;
+        public int BuildingMoveDistance
+        {
+            get { return _BuildingMoveDistance; }
+            set
+            {
+                _BuildingMoveDistance = value;
+                RaisePropertyChanged("BuildingMoveDistance");
+            }
+        }
+        //障碍物移位是否用遗传算法
+        private bool _UseGA = true;
+        public bool UseGA
+        {
+            get { return _UseGA; }
+            set
+            {
+                _UseGA = value;
+                RaisePropertyChanged("UseGA");
+            }
+        }
         //平行车位尺寸,长度
         private int _ParallelSpotLength = 6000; //mm
 
         public int ParallelSpotLength
         {
-            get 
-            { 
-                return _ParallelSpotLength; 
+            get
+            {
+                return _ParallelSpotLength;
             }
-            set 
-            { 
+            set
+            {
                 _ParallelSpotLength = value;
                 RaisePropertyChanged("ParallelSpotLength");
             }
@@ -167,7 +236,30 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("BackToBackDecrease200");
             }
         }
-        private int _RoadWidth  = 5500; //mm
+        //尽端环通
+        private int _AllowLoopThroughEnd = 100000;
+        public int AllowLoopThroughEnd
+        {
+            get { return _AllowLoopThroughEnd; }
+            set
+            {
+                _AllowLoopThroughEnd = value;
+                RaisePropertyChanged("AllowLoopThroughEnd");
+            }
+        }
+        //背靠背长度限制
+        private int _DisAllowMaxLaneLength = 200000;
+        public int DisAllowMaxLaneLength
+        {
+            get { return _DisAllowMaxLaneLength; }
+            set
+            {
+                _DisAllowMaxLaneLength = value;
+                RaisePropertyChanged("DisAllowMaxLaneLength");
+            }
+        }
+
+        private int _RoadWidth = 5500; //mm
 
         public int RoadWidth
         {
@@ -181,6 +273,17 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("RoadWidth");
             }
         }
+        private int _WallLineThickness = 300;
+        public int WallLineThickness
+        {
+            get { return _WallLineThickness; }
+            set
+            {
+                _WallLineThickness = value;
+                RaisePropertyChanged("WallLineThickness");
+            }
+        }
+
         // 建筑物判断容差。将所有建筑物外扩3000做并集，在内缩3000即为建筑外包框
         private int _BuildingTolerance = 3000;
         public int BuildingTolerance
@@ -388,6 +491,16 @@ namespace ThMEPArchitecture.ViewModel
                 RaisePropertyChanged("VerticalSolution");
             }
         }
+        private bool _SpeedUpMode = false;
+        public bool SpeedUpMode
+        {
+            get { return _SpeedUpMode; }
+            set
+            {
+                _SpeedUpMode = value;
+                RaisePropertyChanged("SpeedUpMode");
+            }
+        }
 
         private CommandRunSpeedEnum _CommandRunSpeed = CommandRunSpeedEnum.General;
         public CommandRunSpeedEnum CommandRunSpeed
@@ -397,19 +510,25 @@ namespace ThMEPArchitecture.ViewModel
             set
             {
                 _CommandRunSpeed = value;
-                if(value == CommandRunSpeedEnum.Fast)
+                if (value == CommandRunSpeedEnum.Fast)
                 {
                     IterationCount = 30;
                     PopulationCount = 30;
                     MaxTimespan = 10;
                 }
-                else if(value == CommandRunSpeedEnum.General)
+                else if (value == CommandRunSpeedEnum.General && NormalMode)
                 {
                     IterationCount = 60;
                     PopulationCount = 80;
                     MaxTimespan = 30;
                 }
-                else if(value == CommandRunSpeedEnum.Slow)//slow
+                else if (value == CommandRunSpeedEnum.General && ObliqueMode)
+                {
+                    IterationCount = 100;
+                    PopulationCount = 32;
+                    MaxTimespan = 30;
+                }
+                else if (value == CommandRunSpeedEnum.Slow)//slow
                 {
                     IterationCount = 200;
                     PopulationCount = 200;
@@ -426,7 +545,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //迭代次数
-        private int _IterationCount = 60; //General mode
+        private int _IterationCount = 100; //General mode
         public int IterationCount
         {
             get
@@ -438,7 +557,7 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
         //种群数量
-        private int _PopulationCount = 80; //Generalmode
+        private int _PopulationCount = 32; //Generalmode
         public int PopulationCount
         {
             get
@@ -459,6 +578,179 @@ namespace ThMEPArchitecture.ViewModel
             {
                 _MaxTimespan = value;
                 RaisePropertyChanged("MaxTimespan");
+            }
+        }
+        private int _MaxEqualCnt = 10;
+        public int MaxEqualCnt
+        {
+            get { return _MaxEqualCnt; }
+            set
+            {
+                _MaxEqualCnt = value;
+                RaisePropertyChanged("MaxEqualCnt");
+            }
+        }
+        private int _BorderlineMoveRange = 0;
+        public int BorderlineMoveRange
+        {
+            get
+            { return _BorderlineMoveRange; }
+            set
+            {
+                _BorderlineMoveRange = value;
+                RaisePropertyChanged("BorderlineMoveRange");
+            }
+        }
+        private int _TargetParkingCntMin = 1;
+        public int TargetParkingCntMin
+        {
+            get
+            { return _TargetParkingCntMin; }
+            set
+            {
+                _TargetParkingCntMin = value;
+                RaisePropertyChanged("TargetParkingCntMin");
+            }
+        }
+
+        private int _TargetParkingCntMax = 1;
+        public int TargetParkingCntMax
+        {
+            get
+            { return _TargetParkingCntMax; }
+            set
+            {
+                _TargetParkingCntMax = value;
+                RaisePropertyChanged("TargetParkingCntMax");
+            }
+        }
+        private bool _BoundaryShrink = true;
+        public bool BoundaryShrink
+        {
+            get { return _BoundaryShrink; }
+            set
+            {
+                _BoundaryShrink = value;
+                RaisePropertyChanged("BoundaryShrink");
+            }
+        }
+
+        //面积平均缩减比例
+        private double _AreaShrinkProp = 0.2;
+        public double AreaShrinkProp
+        {
+            get { return _AreaShrinkProp; }
+            set
+            {
+                _AreaShrinkProp = value;
+                RaisePropertyChanged("AreaShrinkProp");
+            }
+        }
+        private int _BoundPointCnt = 8;
+        public int BoundPointCnt
+        {
+            get
+            { return _BoundPointCnt; }
+            set
+            {
+                _BoundPointCnt = value;
+                RaisePropertyChanged("BoundPointCnt");
+            }
+        }
+
+        //变异概率
+        private double _MutationRate = 0.382;
+        public double MutationRate
+        {
+            get
+            { return _MutationRate; }
+            set
+            {
+                _MutationRate = value;
+                RaisePropertyChanged("MutationRate");
+            }
+        }
+        //基因变异概率
+        private double _GeneMutationRate = 0.382;
+        public double GeneMutationRate
+        {
+            get
+            { return _GeneMutationRate; }
+            set
+            {
+                _GeneMutationRate = value;
+                RaisePropertyChanged("GeneMutationRate");
+            }
+        }
+
+        //特殊基因比例
+        private double _SpecialGeneProp = 0.382;
+        public double SpecialGeneProp
+        {
+            get
+            { return _SpecialGeneProp; }
+            set
+            {
+                _SpecialGeneProp = value;
+                RaisePropertyChanged("SpecialGeneProp");
+            }
+        }
+        private int _SampleDistance = 25;
+        public int SampleDistance
+        {
+            get => _SampleDistance;
+            set
+            {
+                _SampleDistance = value;
+                RaisePropertyChanged("SampleDistance");
+            }
+        }
+        //精英比例
+        private double _EliteProp = 0.2;
+        public double EliteProp
+        {
+            get
+            { return _EliteProp; }
+            set
+            {
+                _EliteProp = value;
+                RaisePropertyChanged("EliteProp");
+            }
+        }
+
+        //小变异比例
+        private double _SMProp = 0.382;
+        public double SMProp
+        {
+            get
+            { return _SMProp; }
+            set
+            {
+                _SMProp = value;
+                RaisePropertyChanged("SMProp");
+            }
+        }
+
+        //小变异比例
+        private double _SelectionRate = 0.382;
+        public double SelectionRate
+        {
+            get
+            { return _SelectionRate; }
+            set
+            {
+                _SelectionRate = value;
+                RaisePropertyChanged("SelectionRate");
+            }
+        }
+        private int _FirstPopMagnitude = 2;
+        public int FirstPopMagnitude
+        {
+            get { return _FirstPopMagnitude; }
+            set
+            {
+                _FirstPopMagnitude = value;
+                RaisePropertyChanged("FirstPopMagnitude");
             }
         }
         private int _ProcessCount = -1; //自动，设置为核心数量
@@ -530,11 +822,14 @@ namespace ThMEPArchitecture.ViewModel
         public List<int> GetMultiSolutionList()
         {
             var list = new List<int>();
-            if(AutoSolution) list.Add(0);
-            if(HorizontalSolution) list.Add(1);
-            if(VerticalSolution) list.Add(2);
+            if (AutoSolution) list.Add(0);
+            if (HorizontalSolution) list.Add(1);
+            if (VerticalSolution) list.Add(2);
             return list;
         }
+        public static bool LogSubProcess = false;
+        public static double AreaMax = 0;
+        public static double TotalArea = 0;
     }
 
     public static class ParameterStock
@@ -542,9 +837,18 @@ namespace ThMEPArchitecture.ViewModel
         private static int _RoadWidth = 5500;
         public static int RoadWidth
         {
-            get 
+            get
             {
                 if (Setted) return _RoadWidth;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
+        private static double _WallLineThickness = 300;
+        public static double WallLineThickness
+        {
+            get
+            {
+                if (Setted) return _WallLineThickness;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
@@ -554,8 +858,8 @@ namespace ThMEPArchitecture.ViewModel
 
         public static int ParallelSpotLength
         {
-            get 
-            { 
+            get
+            {
                 if (Setted) return _ParallelSpotLength;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
@@ -592,8 +896,8 @@ namespace ThMEPArchitecture.ViewModel
         {
             get
             {
-                if(Setted)
-                return _VerticalSpotWidth;
+                if (Setted)
+                    return _VerticalSpotWidth;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
@@ -612,7 +916,7 @@ namespace ThMEPArchitecture.ViewModel
         {
             get
             {
-                if (Setted)return _BuildingTolerance;
+                if (Setted) return _BuildingTolerance;
                 else throw new ArgumentException("ParameterStock Unsetted");
             }
         }
@@ -673,10 +977,20 @@ namespace ThMEPArchitecture.ViewModel
                 }
             }
         }
-
+        private static int _BoundPointCnt = 8;
+        public static int BoundPointCnt
+        {
+            get
+            {
+                if (Setted) return _BoundPointCnt;
+                else throw new ArgumentException("ParameterStock Unsetted");
+            }
+        }
         public static bool AddBoundSegLines;
         public static double BuildingArea;//建筑面积（m^2)
         public static double TotalArea;//地库面积（m^2)
+        public static double AreaMax;//最大地库面积
+        public static int BorderlineMoveRange;
         public static bool ReadHiddenParameter = false;
         public static int CutTol = 995;//全自动分区线比车道多出的额外距离
         private static bool Setted = false;
@@ -691,10 +1005,10 @@ namespace ThMEPArchitecture.ViewModel
         public static double LayoutScareFactor_SingleVert = 1.0;
         //孤立的单排垂直式模块生成条件控制_非单排模块车位预计数与孤立单排车位的比值
         public static double SingleVertModulePlacementFactor = 1.0;
-
         public static void Set(ParkingStallArrangementViewModel vm)
         {
             _RoadWidth = vm.RoadWidth;
+            _WallLineThickness = vm.WallLineThickness;
             _ParallelSpotLength = vm.ParallelSpotLength;
             _ParallelSpotWidth = vm.ParallelSpotWidth;
             _VerticalSpotLength = vm.VerticalSpotLength;
@@ -703,7 +1017,10 @@ namespace ThMEPArchitecture.ViewModel
             _ProcessCount = vm.ProcessCount;
             _ThreadCount = vm.ThreadCount;
             AddBoundSegLines = vm.AddBoundSegLines;
+            BorderlineMoveRange = vm.BorderlineMoveRange;
+            _BoundPointCnt = vm.BoundPointCnt;
             var hp = HiddenParameter.ReadOrCreateDefault();
+            ParkingStallArrangementViewModel.LogSubProcess = hp.LogSubProcess;
             if (ReadHiddenParameter)
             {
                 LayoutScareFactor_Intergral = hp.LayoutScareFactor_Intergral;
@@ -749,7 +1066,7 @@ namespace ThMEPArchitecture.ViewModel
                     writer.Close();
             }
         }
-        public static HiddenParameter ReadOrCreateDefault() 
+        public static HiddenParameter ReadOrCreateDefault()
         {
             TextReader reader = null;
             var currentDllPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -757,7 +1074,7 @@ namespace ThMEPArchitecture.ViewModel
             HiddenParameter hp = new HiddenParameter();
             try
             {
-                if (ParameterStock.ReadHiddenParameter &&File.Exists(filePath))
+                if (ParameterStock.ReadHiddenParameter && File.Exists(filePath))
                 {
                     reader = new StreamReader(filePath);
                     var fileContents = reader.ReadToEnd();
@@ -765,7 +1082,7 @@ namespace ThMEPArchitecture.ViewModel
                 }
                 else
                 {
-                    if (!File.Exists(filePath))hp.Save();
+                    if (!File.Exists(filePath)) hp.Save();
                 }
                 ParameterStock.LogMainProcess = hp.LogMainProcess;
                 ParameterStock.LogSubProcess = hp.LogSubProcess;

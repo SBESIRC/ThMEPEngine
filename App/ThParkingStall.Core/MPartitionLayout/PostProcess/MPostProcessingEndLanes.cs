@@ -76,6 +76,10 @@ namespace ThParkingStall.Core.MPartitionLayout
                             split_p = lanes[i].ClosestPoint(split_p);
                             var splits = SplitLine(lanes[i], new List<Coordinate>() { split_p }).OrderByDescending(e => e.MidPoint.Distance(point));
                             lanes[i] = splits.First();
+                            if (splits.Count() == 1)
+                            {
+                                lanes.RemoveAt(i);
+                            }
                             //lane = splits.First();
                             int carscount = cars.Count;
                             generate_cars(Walls, lanes, lane, lane.P1, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars, false);
@@ -88,36 +92,6 @@ namespace ThParkingStall.Core.MPartitionLayout
                             //lanes[i] = l;
                         }
                     }
-                    //var lane_endpoints = new List<Coordinate>() { lane.P0, lane.P1 };
-                    //for (int j = 0; j < lane_endpoints.Count; j++)
-                    //{
-                    //    var endpoint = lane_endpoints[j];
-                    //    var lane_vec_inner_to_wall = j == 0 ? -Vector(lane) : Vector(lane);
-                    //    lane_vec_inner_to_wall = lane_vec_inner_to_wall.Normalize();
-                    //    if (boundary.ClosestPoint(endpoint).Distance(endpoint) < 10)
-                    //    {
-                    //        var pointtest = endpoint.Translation(-lane_vec_inner_to_wall * 5000);
-                    //        var perp_vec = Vector(lane).Normalize().GetPerpendicularVector();
-                    //        var carLine = new LineSegment();
-                    //        var succeed_line = new LineSegment();
-                    //        var vecmove = new Vector2D();
-                    //        if (CanAddCarSpotsParallelCase(lanes, lane_vec_inner_to_wall, pointtest, perp_vec, ref carspacialindex, ref cars, ref carLine, ref succeed_line))
-                    //        {
-                    //            found = true;
-                    //            var splits = SplitLine(lanes[i], new List<LineSegment>() { succeed_line }).OrderByDescending(e => e.MidPoint.Distance(endpoint));
-                    //            if (splits.Count() > 1) lanes[i] = splits.First();
-                    //            else
-                    //            {
-                    //                lanes.RemoveAt(i);
-                    //                i--;
-                    //            }
-                    //            int carscount = cars.Count;
-                    //            generate_cars_parallel_case(carLine, succeed_line, ref lanes, ref lane_vec_inner_to_wall, ref cars, ref pillars, Walls, boundary, obspacialindex);
-                    //            if (carscount == cars.Count) found = false;
-                    //            break;
-                    //        }
-                    //    }
-                    //}
                 }
                 if (!found) break;
             }
@@ -159,16 +133,6 @@ namespace ThParkingStall.Core.MPartitionLayout
                             lanes_index.Add(i);
                             endpoints.Add(endpoint);
                             vecs.Add(lane_vec_inner_to_wall);
-
-                            //var splits = SplitLine(lanes[i], new List<LineSegment>() { succeed_line }).OrderByDescending(e => e.MidPoint.Distance(endpoint));
-                            //if (splits.Count() > 1) lanes[i] = splits.First();
-                            //else
-                            //{
-                            //    lanes.RemoveAt(i);
-                            //    i--;
-                            //}
-                            //int carscount = cars.Count;
-                            //generate_cars_parallel_case(carLine, succeed_line, ref lanes, ref lane_vec_inner_to_wall, ref cars, ref pillars, Walls, boundary, obspacialindex);
                         }
                     }
                 }
@@ -223,6 +187,8 @@ namespace ThParkingStall.Core.MPartitionLayout
             for (int i = 0; i < removed_cars_group.Count; i++)
             {
                 bool isbackbackmodule = true;
+                if (removed_cars_group[i].Count == 0)
+                    continue;
                 foreach (var pl in removed_cars_group[i])
                 {
                     if (Math.Abs(pl.Area - MParkingPartitionPro.DisVertCarWidth * MParkingPartitionPro.DisVertCarLengthBackBack) > 1)
@@ -332,7 +298,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 tlane_rec = tlane_rec.Scale(MParkingPartitionPro.ScareFactorForCollisionCheck);
                 var prepsplit_lanes=lanes.Where(e => e.IntersectPoint(tlane_rec).Count()>0).Where(e => IsPerpLine(e,lane))
                     .Where(e => e.ToLineString().IntersectPoint(lane.ToLineString()).Count()>0).ToList();
-                var lanes_split=SplitLine(lane, prepsplit_lanes);
+                var lanes_split=SplitLine(lane, prepsplit_lanes).OrderBy(e => e.MidPoint.Distance(carLine.MidPoint)).ToList();
                 if (lanes_split.Count() > 0)
                 {
                     lane=lanes_split[0];
@@ -445,6 +411,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                 var edge_b = car_b.GetEdges().OrderBy(seg => iline.ClosestPoint(seg.MidPoint).Distance(seg.MidPoint)).First();
                 var iaVert_a = Math.Abs(edge_a.Length - MParkingPartitionPro.DisVertCarLength) < 1;
                 var iaVert_b = Math.Abs(edge_b.Length - MParkingPartitionPro.DisVertCarLength) < 1;
+                if (!IsParallelLine(edge_a, edge_b)) return false;
                 if (iaVert_a && !iaVert_b)
                 {
                     var added_cars = new List<InfoCar>();
@@ -662,7 +629,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 var segs = cara.GetEdges();
                 var seg = segs.OrderByDescending(e => e.Length).First();
-                if (seg.Length != MParkingPartitionPro.DisVertCarLength)
+                if (Math.Abs(seg.Length-MParkingPartitionPro.DisVertCarLength)>1)
                     hasvert = true;
                 if (IsParallelLine(seg, line))
                 {
@@ -675,7 +642,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 var segs = carb.GetEdges();
                 var seg = segs.OrderByDescending(e => e.Length).First();
-                if (seg.Length != MParkingPartitionPro.DisVertCarLength)
+                if (Math.Abs(seg.Length - MParkingPartitionPro.DisVertCarLength) > 1)
                     hasvert = true;
                 if (IsParallelLine(seg, line))
                 {
@@ -761,19 +728,19 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 if (lanes_copy[i].ClosestPoint(ls.P0).Distance(ls.P0) < 1)
                 {
-                    inilanesex.Add(lanes_copy[i]);
-                    i--;
+                    inilanesex.Add(lanes_copy[i]);             
                     lanes_copy.RemoveAt(i);
+                    i--;
                 }
                 else if (lanes_copy[i].ClosestPoint(ls.P1).Distance(ls.P1) < 1)
                 {
-                    inilanesex.Add(lanes_copy[i]);
-                    i--;
+                    inilanesex.Add(lanes_copy[i]);          
                     lanes_copy.RemoveAt(i);
+                    i--;
                 }
             }
             var tlanes = JoinCurves(new List<LineString>(), inilanesex).OrderByDescending(e => e.Length);
-            if (tlanes.Count() >= 2)
+            if (tlanes.Count() >= 2 || inilanesex.Count==1)
             {
                 var tlane = new LineSegment(tlanes.First().StartPoint.Coordinate, tlanes.First().EndPoint.Coordinate);
                 var tlane_depth = tlane.Translation(vecmove.Normalize() * (MParkingPartitionPro.DisVertCarLength + MParkingPartitionPro.DisLaneWidth / 2));
@@ -848,9 +815,10 @@ namespace ThParkingStall.Core.MPartitionLayout
             var recoglines = new List<LineSegment>();
             for (int i = 0; i < lanes.Count; i++)
             {
-                if (ClosestPointInVertLines(lanes[i].P0, lanes[i], lanes) > 1)
+                var line = lanes[i];
+                if (ClosestPointInLines(lanes[i].P0, lanes[i], lanes.Where(e => !IsParallelLine(line, e))) > 1)
                     recoglines.Add(new LineSegment(lanes[i].P1, lanes[i].P0));
-                else if (ClosestPointInVertLines(lanes[i].P1, lanes[i], lanes) > 1)
+                if (ClosestPointInLines(lanes[i].P1, lanes[i], lanes.Where(e => !IsParallelLine(line, e))) > 1)
                     recoglines.Add(new LineSegment(lanes[i]));
             }
             int count = 0;

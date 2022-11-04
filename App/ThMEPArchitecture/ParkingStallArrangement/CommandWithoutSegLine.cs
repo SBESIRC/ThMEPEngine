@@ -72,7 +72,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public override void SubExecute()
         {
             ParameterStock.Set(ParameterViewModel);
-            Utils.SetSeed();
+            ThParkingStallCoreTools.SetSeed();
             try
             {
                 using (var docLock = Active.Document.LockDocument())
@@ -88,7 +88,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         {
                             Logger?.Information($"############################################");
                             Logger?.Information($"自动分割线迭代");
-                            Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                            Logger?.Information($"Random Seed:{ThParkingStallCoreTools.GetSeed()}");
                             var stopWatch = new Stopwatch();
                             stopWatch.Start();
                             var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);

@@ -12,6 +12,23 @@ namespace ThParkingStall.Core.MPartitionLayout
     //public class Ramps { }
     public class Lane
     {
+        public Lane(Lane lane)
+        {
+            Line = lane.Line;
+            Vec = lane.Vec;
+            CanBeMoved = lane.CanBeMoved;
+            GStartAdjLine = lane.GStartAdjLine;
+            GEndAdjLine = lane.GEndAdjLine;
+            CanExtend = lane.CanExtend;
+            IsGeneratedForLoopThrough = lane.IsGeneratedForLoopThrough;
+            IsGeneratedForRestrictLength = lane.IsGeneratedForRestrictLength;
+            NOTJUDGELAYOUTBYPARENT = lane.NOTJUDGELAYOUTBYPARENT;
+            IsAdjLaneForProcessLoopThroughEnd = lane.IsAdjLaneForProcessLoopThroughEnd;
+            NotCopyReverseForLaneCompaction = lane.NotCopyReverseForLaneCompaction;
+            ISCopiedFromCarmodelus = lane.ISCopiedFromCarmodelus;
+            AdjustedForCompacted = lane.AdjustedForCompacted;
+            MoveableDistanceForCompacted = lane.MoveableDistanceForCompacted;
+        }
         public Lane(LineSegment line, Vector2D vec, bool canBeMoved = true)
         {
             Line = line;
@@ -24,6 +41,32 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool GStartAdjLine = false;
         public bool GEndAdjLine = false;
         public bool CanExtend = true;
+        public bool IsGeneratedForLoopThrough = false;
+        public bool IsGeneratedForRestrictLength = false;
+        public bool NOTJUDGELAYOUTBYPARENT = false;
+        public bool IsAdjLaneForProcessLoopThroughEnd = false;
+        public bool NotCopyReverseForLaneCompaction=false;
+        public bool ISCopiedFromCarmodelus = false;
+        public bool AdjustedForCompacted = false;
+        public double MoveableDistanceForCompacted = 0;
+        public Vector2D VecforCompacted { get; set; }
+        public void Copy(Lane lane)
+        {
+            CanBeMoved=lane.CanBeMoved;
+            GStartAdjLine=lane.GStartAdjLine;
+            GEndAdjLine=lane.GEndAdjLine;
+            CanExtend=lane.CanExtend;
+            IsGeneratedForLoopThrough=lane.IsGeneratedForLoopThrough;
+            IsAdjLaneForProcessLoopThroughEnd=lane.IsAdjLaneForProcessLoopThroughEnd;
+            NotCopyReverseForLaneCompaction=lane.NotCopyReverseForLaneCompaction;
+            ISCopiedFromCarmodelus=lane.ISCopiedFromCarmodelus;
+        }
+        public Lane Clone()
+        {
+            var res = new Lane(new LineSegment(Line), Vec, CanBeMoved);
+            res.Copy(this);
+            return res;
+        }
     }
     public class CarBoxPlus
     {
@@ -52,6 +95,14 @@ namespace ThParkingStall.Core.MPartitionLayout
         public bool IsInBackBackModule = false;
         public bool IsInVertUnsureModule = false;
         public bool IsSingleModule=false;//针对单box7850与车位5300，在生成新车道有可能碰车位做特殊处理时的标记
+        public bool AdjustedForCompacted = false;
+        public void Copy(CarModule module)
+        {
+            GenerateCars=module.GenerateCars;
+            IsInBackBackModule = module.IsInBackBackModule;
+            IsInVertUnsureModule=module.IsInVertUnsureModule;
+            IsSingleModule=module.IsSingleModule;
+        }
     }
     public class GenerateLaneParas
     {
@@ -84,11 +135,19 @@ namespace ThParkingStall.Core.MPartitionLayout
         public Vector2D Vector;
         public Coordinate Point;
         public Polygon Polyline;
+        public int TypeTag=0;
     }
     public enum CarLayoutMode : int
     {
         VERT = 0,
         PARALLEL = 1,
         VERTBACKBACK=2,
+    }
+    public enum CarTypeTag:int
+    {
+        Normal=0,//正常车位
+        CollidedByCarDoor=1,//车门阻挡
+        CollidedByStruct=2,//结构转换
+        CollidedByCarDoorAndStruct=3,//车门阻挡&结构转换
     }
 }

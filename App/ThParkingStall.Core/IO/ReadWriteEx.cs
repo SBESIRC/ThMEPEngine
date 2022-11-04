@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.InterProcess;
+using ThParkingStall.Core.OInterProcess;
 
 namespace ThParkingStall.Core.IO
 {
@@ -17,8 +18,7 @@ namespace ThParkingStall.Core.IO
             writer.Write(coordinates.Count());
             foreach (var coordinate in coordinates)
             {
-                writer.Write(coordinate.X);
-                writer.Write(coordinate.Y);
+                coordinate.WriteToStream(writer);
             }
         }
         public static LinearRing ReadLinearRing(BinaryReader reader)
@@ -28,36 +28,23 @@ namespace ThParkingStall.Core.IO
             for (int i = 0; i < CoorCnt; i++)
             {
                 {
-                    var x = reader.ReadDouble();
-                    var y = reader.ReadDouble();
-                    coordinates[i] = new Coordinate(x, y);
+                    coordinates[i] = ReadCoordinate(reader);
                 }
             }
             return new LinearRing(coordinates);
         }
-        //public static void WriteToStream(this Dictionary<LinearRing, int> CachedCnts, BinaryWriter writer)
-        //{
-        //    var dicCnt = CachedCnts.Count;
-        //    writer.Write(dicCnt);
-        //    foreach (var kv in CachedCnts)
-        //    {
-        //        kv.Key.WriteToStream(writer);
-        //        writer.Write(kv.Value);
-        //    }
-        //}
-        //public static Dictionary<LinearRing, int> ReadCached(BinaryReader reader)
-        //{
-        //    var cached = new Dictionary<LinearRing, int>();
-        //    var keyCnt = reader.ReadInt32();
-        //    for (int i = 0; i < keyCnt; ++i)
-        //    {
-        //        var key = ReadLinearRing(reader);
-        //        var value = reader.ReadInt32();
-        //        cached.Add(key, value);
-        //    }
-        //    return cached;
-        //}
+        public static void WriteToStream(this Coordinate coordinate, BinaryWriter writer)
+        {
+            writer.Write(coordinate.X);
+            writer.Write(coordinate.Y);
+        }
 
+        public static Coordinate ReadCoordinate(BinaryReader reader)
+        {
+            var x = reader.ReadDouble();
+            var y = reader.ReadDouble();
+            return new Coordinate(x, y);
+        }
         public static void WriteToStream(this Dictionary<SubAreaKey, int> CachedCnts, BinaryWriter writer)
         {
             var dicCnt = CachedCnts.Count;
@@ -80,6 +67,29 @@ namespace ThParkingStall.Core.IO
             }
             return cached;
         }
+
+        public static void WriteToStream(this Dictionary<OSubAreaKey, LayoutResult> CachedCnts, BinaryWriter writer)
+        {
+            var dicCnt = CachedCnts.Count;
+            writer.Write(dicCnt);
+            foreach (var kv in CachedCnts)
+            {
+                kv.Key.WriteToStream(writer);
+                kv.Value.WriteToStream(writer); 
+            }
+        }
+        public static Dictionary<OSubAreaKey, LayoutResult> ReadOCached(BinaryReader reader)
+        {
+            var cached = new Dictionary<OSubAreaKey, LayoutResult>();
+            var keyCnt = reader.ReadInt32();
+            for (int i = 0; i < keyCnt; ++i)
+            {
+                var key = OSubAreaKey.ReadFromStream(reader);
+                var value = LayoutResult.ReadFromStream(reader);
+                cached.Add(key, value);
+            }
+            return cached;
+        }
         public static void WriteToStream(this List<Chromosome> chromosomes, BinaryWriter writer)
         {
             var Cnts = chromosomes.Count;
@@ -96,7 +106,44 @@ namespace ThParkingStall.Core.IO
             }
             return chromosomes;
         }
-
+        public static void WriteToStream(this Dictionary<int,List<int>> dic, BinaryWriter writer)
+        {
+            var dicCnt = dic.Count;
+            writer.Write(dicCnt);
+            foreach(var kv in dic)
+            {
+                writer.Write(kv.Key);
+                kv.Value.WriteToStream(writer);
+            }
+        }
+        public static Dictionary<int,List<int>> ReadDicListInt(BinaryReader reader)
+        {
+            var result = new Dictionary<int,List<int>>();
+            var dicCnt = reader.ReadInt32();
+            for (int i = 0; i < dicCnt; ++i)
+            {
+                var key = reader.ReadInt32();
+                var value = ReadInts(reader);
+                result.Add(key, value);
+            }
+            return result;
+        }
+        public static void WriteToStream(this List<BuildingPosGene> genomes, BinaryWriter writer)
+        {
+            var Cnts = genomes.Count;
+            writer.Write(Cnts);
+            genomes.ForEach(g => g.WriteToStream(writer));
+        }
+        public static List<BuildingPosGene> ReadBPGs(BinaryReader reader)
+        {
+            List<BuildingPosGene> BPGs = new List<BuildingPosGene>();
+            var Cnts = reader.ReadInt32();
+            for (int i = 0; i < Cnts; ++i)
+            {
+                BPGs.Add(BuildingPosGene.ReadFromStream(reader));
+            }
+            return BPGs;
+        }
         public static void WriteToStream(this List<double> doubles, BinaryWriter writer)
         {
             writer.Write(doubles.Count);
@@ -112,6 +159,21 @@ namespace ThParkingStall.Core.IO
 
             }
             return Ints;
+        }
+        public static void WriteToStream (this List<LayoutResult> results,BinaryWriter writer)
+        {
+            writer.Write(results.Count);
+            results.ForEach(r => r.WriteToStream(writer));
+        }
+        public static List<LayoutResult> ReadLayoutResults(BinaryReader reader)
+        {
+            var Cnt = reader.ReadInt32();
+            var results = new List<LayoutResult>();
+            for(int i = 0; i < Cnt; i++)
+            {
+                results.Add(LayoutResult.ReadFromStream(reader));
+            }
+            return results;
         }
         public static void WriteToStream(this List<int> intgers, BinaryWriter writer)
         {
@@ -129,7 +191,6 @@ namespace ThParkingStall.Core.IO
             }
             return Ints;
         }
-
         public static void WriteToStream(this List<Int16> intgers, BinaryWriter writer)
         {
             writer.Write(intgers.Count);
@@ -146,6 +207,7 @@ namespace ThParkingStall.Core.IO
             }
             return Ints;
         }
+
 
     }
 }

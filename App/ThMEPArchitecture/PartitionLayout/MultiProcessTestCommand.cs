@@ -127,6 +127,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 InfoCar infoCar = new InfoCar(mcar.Polyline.ToDbPolylines()[0],
                     new Point3d(mcar.Point.X, mcar.Point.Y, 0), new Vector3d(mcar.Vector.X, mcar.Vector.Y, 0));
                 infoCar.CarLayoutMode = mcar.CarLayoutMode;
+                infoCar.TypeTag=mcar.TypeTag;
                 cars.Add(infoCar);
             }
             LayoutOutput.CarLayerName = carLayerName;
@@ -136,6 +137,9 @@ namespace ThMEPArchitecture.PartitionLayout
             LayoutOutput.InitializeLayer();
             LayoutOutput.RefreshBlocks();
             var vertcar = LayoutOutput.VCar;
+            var vertcarCollidedByDoor = LayoutOutput.VCarCollidedByDoor;
+            var vertcarCollidedByStruct = LayoutOutput.VCarCollidedByStruct;
+            var vertcarCollidedByDoorAndStruct = LayoutOutput.VCarCollidedByDoorAndStruct;
             var vertbackcar = LayoutOutput.VBackCar;
             var pcar = LayoutOutput.PCar;
             LayoutOutput layout = new LayoutOutput(cars,

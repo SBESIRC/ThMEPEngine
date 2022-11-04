@@ -21,6 +21,8 @@ using ThMEPArchitecture.MultiProcess;
 using Autodesk.AutoCAD.Geometry;
 using ThParkingStall.Core.InterProcess;
 using Chromosome = ThMEPArchitecture.ParkingStallArrangement.Algorithm.Chromosome;
+using ThParkingStall.Core.Tools;
+
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class ThParkingStallArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -55,12 +57,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public override void SubExecute()
         {
             ParameterStock.Set(ParameterViewModel);
-            Utils.SetSeed();
+            ThParkingStallCoreTools.SetSeed();
             try
             {
                 Logger?.Information($"############################################");
                 Logger?.Information($"手动分割线迭代");
-                Logger?.Information($"Random Seed:{Utils.GetSeed()}");
+                Logger?.Information($"Random Seed:{ThParkingStallCoreTools.GetSeed()}");
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
