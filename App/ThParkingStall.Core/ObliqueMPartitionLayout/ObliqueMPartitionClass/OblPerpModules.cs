@@ -97,7 +97,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         }
 
         public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true
-, Lane specialLane = null, bool check_adj_collision = false, List<Lane> rlanes = null, bool transform_start_edge_for_perp_module = false)
+, Lane specialLane = null, bool check_adj_collision = false, List<Lane> rlanes = null, bool transform_start_edge_for_perp_module = false,bool isSpecailTyoeForShearWall=false)
         {
             var pillarSpatialIndex = new MNTSSpatialIndex(Pillars);
             var lanes = new List<Lane>();
@@ -172,28 +172,36 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             boxcrossed = CarBoxesSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>().ToList();
                         else
                         {
-                            //修改，有的背靠背模块第二模块没有生成carmoudle只生成车道线，对这种背靠背车位的过滤
-                            var carcrossed = CarSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>().ToList();
-                            if (mindistance == DisCarAndHalfLaneBackBack && ScareEnabledForBackBackModule)
+                            if (isSpecailTyoeForShearWall)
                             {
-                                var iniboxpl = PolyFromLines(boxsplit, boxsplittest);
-                                //针对背靠背缩进的情况
-                                foreach (var car_cross in carcrossed)
-                                {
-                                    var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car_cross, iniboxpl, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
-                                    if (g is Polygon)
-                                    {
-                                        var cond_area = Math.Round(g.Area) <= (DisVertCarLength - DisVertCarLengthBackBack) * DisVertCarWidth;
-                                        if (!cond_area)
-                                        {
-                                            boxcrossed.Add(car_cross);
-                                        }
-                                    }
-                                    else boxcrossed.Add(car_cross);
-                                }
+                                boxcrossed=CarSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>().ToList();
                             }
                             else
-                                boxcrossed = carcrossed;
+                            {
+                                //修改，有的背靠背模块第二模块没有生成carmoudle只生成车道线，对这种背靠背车位的过滤
+                                var carcrossed = CarSpatialIndex.SelectCrossingGeometry(boxpl).Cast<Polygon>().ToList();
+                                if (mindistance == DisCarAndHalfLaneBackBack && ScareEnabledForBackBackModule)
+                                {
+                                    var iniboxpl = PolyFromLines(boxsplit, boxsplittest);
+                                    //针对背靠背缩进的情况
+                                    foreach (var car_cross in carcrossed)
+                                    {
+                                        var g = NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(car_cross, iniboxpl, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
+                                        if (g is Polygon)
+                                        {
+                                            var cond_area = Math.Round(g.Area) <= (DisVertCarLength - DisVertCarLengthBackBack) * DisVertCarWidth;
+                                            if (!cond_area)
+                                            {
+                                                boxcrossed.Add(car_cross);
+                                            }
+                                        }
+                                        else boxcrossed.Add(car_cross);
+                                    }
+                                }
+                                else
+                                    boxcrossed = carcrossed;
+                            }
+                         
                         }
                         #endregion
 

@@ -19,7 +19,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
     ref LineSegment line_align_backback_rest,
 bool add_to_car_spacialindex = true, bool judge_carmodulebox = true, bool adjust_pillar_edge = false, bool judge_modulebox = false,
 bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_back = true, bool align_backback_for_align_rest = false, bool judge_in_obstacles = false, bool glastpillar = true, bool judge_intersect_bound = false,
-bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_collision = false)
+bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_collision = false,bool isSpecialTypeCrossShealWall=false)
         {
             int inipillar_count = Pillars.Count;
             bool isBackBackmodule=false;
@@ -100,17 +100,35 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
             #endregion
             var segobjs = new List<LineSegment>();
             LineSegment[] segs;
-            if (GeneratePillars)
+            if (!(isSpecialTypeCrossShealWall))
             {
-                var dividecount = Math.Abs(length_divided - DisVertCarWidth) < 1 ? CountPillarDist : 1;
-                DivideCurveByKindsOfLength(line, ref segobjs, DisPillarLength, 1, DisHalfCarToPillar, 1,
-                    length_divided, dividecount, DisHalfCarToPillar, 1);
+                if (GeneratePillars)
+                {
+                    var dividecount = Math.Abs(length_divided - DisVertCarWidth) < 1 ? CountPillarDist : 1;
+                    DivideCurveByKindsOfLength(line, ref segobjs, DisPillarLength, 1, DisHalfCarToPillar, 1,
+                        length_divided, dividecount, DisHalfCarToPillar, 1);
+                }
+                else
+                {
+                    DivideCurveByLength(line, length_divided, ref segobjs);
+                }
+                segs = segobjs.Where(e => Math.Abs(e.Length - length_divided) < 1).ToArray();
             }
             else
             {
-                DivideCurveByLength(line, length_divided, ref segobjs);
+                if (GeneratePillars)
+                {
+                    var dividecount = 1;
+                    DivideCurveByKindsOfLength(line, ref segobjs, DisPillarLength, 1, DisHalfCarToPillar, 1,
+                        line.Length-DisPillarLength, dividecount, DisHalfCarToPillar, 1);
+                }
+                else
+                {
+                    DivideCurveByLength(line, line.Length, ref segobjs);
+                }
+                segs = segobjs.Where(e => Math.Abs(e.Length - DisPillarLength) > 1).ToArray();
             }
-            segs = segobjs.Where(e => Math.Abs(e.Length - length_divided) < 1).ToArray();
+
             Polygon precar = new Polygon(new LinearRing(new Coordinate[0]));
             int segscount = segs.Count();
             int c = 0;
@@ -235,75 +253,195 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 #endregion
                 if (cond)
                 {
-                    if (add_to_car_spacialindex)
-                        AddToSpatialIndex(car, ref CarBoxesSpatialIndex);
-                    AddToSpatialIndex(car, ref CarSpatialIndex);
-                    CarSpots.Add(car);
-                    var infocar = new InfoCar(car, seg.MidPoint, vec.Normalize());
-                    if (length_offset != DisVertCarLength) infocar.CarLayoutMode = ((int)CarLayoutMode.PARALLEL);
-                    if (found_backback) infocar.CarLayoutMode = ((int)CarLayoutMode.VERTBACKBACK);
-                    Cars?.Add(infocar);
-                    if (Pillars.Count > 0)
+                    var thisCarTypeTag = CarTypeTag.Normal;//针对垂直式剪力墙，车门阻挡、结构转换等类型做特殊标记
+                    var modiSeg = seg;
+                    if (  isSpecialTypeCrossShealWall)
                     {
-                        if (car.Envelope.Contains(Pillars[Pillars.Count - 1].Envelope.Centroid))
+                        thisCarTypeTag = CarTypeTag.CollidedByStruct;
+                        var collidedDoor = false;
+                        var collidedStruct = false;
+                        //往上偏移600 躲开可以剪掉的墙再做判断
+                        double deepWallTol = 600;
+                        var deepSeg = seg.Translation(vec.Normalize() * deepWallTol);
+                        var deepSegExt = deepSeg.Scale(10);
+                        var crossed_deepSegExt_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(deepSegExt.Buffer(1)).Cast<Polygon>().ToList();
+                        var deepSegExt_crossedPts = new List<Coordinate>();
+                        crossed_deepSegExt_obs.ForEach(e => deepSegExt_crossedPts.AddRange(e.IntersectPoint(deepSegExt.ToLineString())));
+                        deepSegExt_crossedPts = SortAlongCurve(deepSegExt_crossedPts, deepSegExt.ToLineString());
+                        var deepSegExt_split = SplitLine(deepSegExt, deepSegExt_crossedPts).OrderBy(e => e.ClosestPoint(deepSeg.MidPoint).Distance(deepSeg.MidPoint)).First();
+                        var deepStart = deepSegExt_split.P0.Distance(deepSeg.MidPoint) < deepSegExt_split.P1.Distance(deepSeg.MidPoint) ? deepSegExt_split.P0 : deepSegExt_split.P1;
+                        var deepEnd = deepStart.Distance(deepSegExt_split.P0) == 0 ? deepSegExt_split.P1 : deepSegExt_split.P0;
+                        var deepDist = deepStart.Distance(deepEnd);
+                        if (deepDist < DisVertCarWidth)
+                            cond = false;
+                        else
                         {
-                            Pillars.RemoveAt(Pillars.Count - 1);
-                        }
-                    }
-                    if (precar.Area == 0)
-                    {
-                        #region 对生成的为车道线第一个车位时，是否需要生成首柱子的场景处理
-                        if (gfirstpillar && GeneratePillars)
-                        {
-                            var ed = seg;
-                            if (adjust_pillar_edge)
+                            //分为车门阻挡和非车门阻挡
+                            var collision = 300;//?后续做一个确认
+                            var movedForCollision = false;
+                            if (deepDist >= DisVertCarWidth + collision)
                             {
-                                ed = s;
-                                vec = -vec;
+                                deepStart = deepStart.Translation(Vector2D.Create(deepStart, deepEnd).Normalize() * collision);
+                                movedForCollision=true;
                             }
-                            var pp = ed.P0.Translation(-Vector(ed).Normalize() * DisPillarLength);
-                            var li = new LineSegment(pp, ed.P0);
-                            var lf = new LineSegment(li);
-                            lf = lf.Translation(vec.Normalize() * DisPillarDepth);
-                            var pillar = PolyFromPoints(new List<Coordinate>() { li.P0, li.P1, lf.P1, lf.P0 });
-                            pillar = pillar.Translation(-Vector(ed).Normalize() * DisHalfCarToPillar);
-                            if (Math.Abs(pillar.Area - DisPillarLength * DisPillarDepth) < 1)
+                            else
                             {
-                                bool condg = true;
-                                if (CarSpots.Count > 1 && CarSpots[CarSpots.Count - 2].IsPointInFast(pillar.Envelope.Centroid.Coordinate))
-                                    condg = false;
-                                if (condg)
+                                //thisCarTypeTag = CarTypeTag.CollidedByCarDoor;
+                                //做不同标记
+                                collidedDoor = true;
+                            }
+                            deepEnd= deepStart.Translation(Vector2D.Create(deepStart, deepEnd).Normalize() * DisVertCarWidth);
+                            deepSeg = new LineSegment(deepStart, deepEnd);
+                            var deepSeg_ini = deepSeg.Translation(-vec.Normalize() * deepWallTol);
+                            car = PolyFromLines(deepSeg_ini, deepSeg_ini.Translation(vec.Normalize() * DisVertCarLength));
+                            modiSeg = deepSeg_ini;
+                            var crossed_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(car.Scale(ScareFactorForCollisionCheck)).Cast<Polygon>().ToList();
+                            var _crossed_obs = crossed_obs.Where(e => e.ClosestPoint(seg.P0).Distance(seg.P0) > 1000 && e.ClosestPoint(seg.P1).Distance(seg.P1) > 1000).ToList();
+                            if (_crossed_obs.Any())
+                            {
+                                cond = false;
+                                //如果是前面挪了车位碰撞检测，得考虑把这个值挪回来再判断一下
+                                if (movedForCollision)
                                 {
-                                    //AddToSpatialIndex(pillar, ref CarSpatialIndex);                           
-                                    if (isin_backback)
-                                        pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplyBackBack - DisPillarDepth / 2));
-                                    else
-                                        pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplySingle - DisPillarDepth / 2));
-                                    Pillars.Add(pillar);
+                                    collidedDoor = true;
+                                    car = car.Translation(-Vector(deepSeg).Normalize() * collision);
+                                    modiSeg = modiSeg.Translation(-Vector(deepSeg).Normalize() * collision);
+                                    crossed_obs = ObstaclesSpatialIndex.SelectCrossingGeometry(car.Scale(ScareFactorForCollisionCheck)).Cast<Polygon>().ToList();
+                                    _crossed_obs = crossed_obs.Where(e => e.ClosestPoint(seg.P0).Distance(seg.P0) > 1000 && e.ClosestPoint(seg.P1).Distance(seg.P1) > 1000).ToList();
+                                    if (!crossed_obs.Any())
+                                    {
+                                        //thisCarTypeTag = CarTypeTag.CollidedByCarDoor;
+                                        cond = true;
+                                    }
+                                    else if (crossed_obs.Any() &&!_crossed_obs.Any())
+                                    {
+                                        collidedStruct = true;
+                                        //thisCarTypeTag = CarTypeTag.CollidedByCarDoorAndStruct;
+                                        cond = true;
+                                    }
                                 }
                             }
-                            if (adjust_pillar_edge)
+                            else if (crossed_obs.Any())
                             {
-                                vec = -vec;
+                                collidedStruct = true;
+                            }
+                            if (cond)
+                            {
+                                if (collidedDoor) thisCarTypeTag = CarTypeTag.CollidedByCarDoor;
+                                if (collidedStruct) thisCarTypeTag = CarTypeTag.CollidedByStruct;
+                                if (collidedDoor && collidedStruct) thisCarTypeTag = CarTypeTag.CollidedByCarDoorAndStruct;
                             }
                         }
-                        precar = car;
-                        #endregion
+                        var car_crossed = CarSpatialIndex.SelectCrossingGeometry(car.Scale(ScareFactorForCollisionCheck)).ToList();
+                        if (car_crossed.Any())
+                            cond = false;
                     }
-                    else
+                    if (cond)
                     {
-                        var dist = car.Envelope.Centroid.Coordinate.Distance(precar.Envelope.Centroid.Coordinate);
-                        if (Math.Abs(dist - length_divided - DisPillarLength - DisHalfCarToPillar * 2) < 1 && GeneratePillars)
+                        if (add_to_car_spacialindex)
+                            AddToSpatialIndex(car, ref CarBoxesSpatialIndex);
+                        AddToSpatialIndex(car, ref CarSpatialIndex);
+                        CarSpots.Add(car);
+                        var infocar = new InfoCar(car, modiSeg.MidPoint, vec.Normalize());
+                        if (length_offset != DisVertCarLength) infocar.CarLayoutMode = ((int)CarLayoutMode.PARALLEL);
+                        if (found_backback) infocar.CarLayoutMode = ((int)CarLayoutMode.VERTBACKBACK);
+                        infocar.TypeTag = ((int)thisCarTypeTag);
+                        Cars?.Add(infocar);
+                        if (Pillars.Count > 0)
                         {
-                            var ed = seg;
+                            if (car.Envelope.Contains(Pillars[Pillars.Count - 1].Envelope.Centroid))
+                            {
+                                Pillars.RemoveAt(Pillars.Count - 1);
+                            }
+                        }
+                        if (precar.Area == 0)
+                        {
+                            #region 对生成的为车道线第一个车位时，是否需要生成首柱子的场景处理
+                            if (gfirstpillar && GeneratePillars)
+                            {
+                                var ed = modiSeg;
+                                if (adjust_pillar_edge)
+                                {
+                                    ed = s;
+                                    vec = -vec;
+                                }
+                                var pp = ed.P0.Translation(-Vector(ed).Normalize() * DisPillarLength);
+                                var li = new LineSegment(pp, ed.P0);
+                                var lf = new LineSegment(li);
+                                lf = lf.Translation(vec.Normalize() * DisPillarDepth);
+                                var pillar = PolyFromPoints(new List<Coordinate>() { li.P0, li.P1, lf.P1, lf.P0 });
+                                pillar = pillar.Translation(-Vector(ed).Normalize() * DisHalfCarToPillar);
+                                if (Math.Abs(pillar.Area - DisPillarLength * DisPillarDepth) < 1)
+                                {
+                                    bool condg = true;
+                                    if (CarSpots.Count > 1 && CarSpots[CarSpots.Count - 2].IsPointInFast(pillar.Envelope.Centroid.Coordinate))
+                                        condg = false;
+                                    if (condg)
+                                    {
+                                        //AddToSpatialIndex(pillar, ref CarSpatialIndex);                           
+                                        if (isin_backback)
+                                            pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplyBackBack - DisPillarDepth / 2));
+                                        else
+                                            pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplySingle - DisPillarDepth / 2));
+                                        Pillars.Add(pillar);
+                                    }
+                                }
+                                if (adjust_pillar_edge)
+                                {
+                                    vec = -vec;
+                                }
+                            }
+                            precar = car;
+                            #endregion
+                        }
+                        else
+                        {
+                            var dist = car.Envelope.Centroid.Coordinate.Distance(precar.Envelope.Centroid.Coordinate);
+                            if (Math.Abs(dist - length_divided - DisPillarLength - DisHalfCarToPillar * 2) < 1 && GeneratePillars)
+                            {
+                                var ed = modiSeg;
+                                if (adjust_pillar_edge)
+                                {
+                                    ed = s;
+                                    vec = -vec;
+                                }
+                                var pp = precar.ClosestPoint(ed.P0);
+                                var li = new LineSegment(pp, ed.P0);
+                                li.P1 = pp.Translation(Vector(li).Normalize() * DisPillarLength);
+                                var lf = new LineSegment(li);
+                                lf = lf.Translation(vec.Normalize() * DisPillarDepth);
+                                var pillar = PolyFromPoints(new List<Coordinate>() { li.P0, li.P1, lf.P1, lf.P0 });
+                                pillar = pillar.Translation(Vector(ed).Normalize() * DisHalfCarToPillar);
+                                if (isin_backback)
+                                    pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplyBackBack - DisPillarDepth / 2));
+                                else
+                                    pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplySingle - DisPillarDepth / 2));
+                                if (Math.Abs(pillar.Area - DisPillarDepth * DisPillarLength) < 1)
+                                {
+                                    if (add_to_car_spacialindex)
+                                        AddToSpatialIndex(pillar, ref CarBoxesSpatialIndex);
+                                    Pillars.Add(pillar);
+                                    AddToSpatialIndex(pillar, ref CarSpatialIndex);
+                                }
+                                if (adjust_pillar_edge)
+                                {
+                                    vec = -vec;
+                                }
+                            }
+                            else { }
+                            precar = car;
+                        }
+                        #region 对是否需要生成最后一颗柱子的场景处理
+                        if (glastpillar && c == segscount && GeneratePillars)
+                        {
+                            var ed = modiSeg;
                             if (adjust_pillar_edge)
                             {
                                 ed = s;
                                 vec = -vec;
                             }
-                            var pp = precar.ClosestPoint(ed.P0);
-                            var li = new LineSegment(pp, ed.P0);
-                            li.P1 = pp.Translation(Vector(li).Normalize() * DisPillarLength);
+                            var pp = ed.P1.Translation(Vector(ed).Normalize() * DisPillarLength);
+                            var li = new LineSegment(pp, ed.P1);
                             var lf = new LineSegment(li);
                             lf = lf.Translation(vec.Normalize() * DisPillarDepth);
                             var pillar = PolyFromPoints(new List<Coordinate>() { li.P0, li.P1, lf.P1, lf.P0 });
@@ -312,56 +450,23 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                                 pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplyBackBack - DisPillarDepth / 2));
                             else
                                 pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplySingle - DisPillarDepth / 2));
-                            if (Math.Abs(pillar.Area - DisPillarDepth * DisPillarLength) < 1)
+                            if (Math.Abs(pillar.Area - DisPillarLength * DisPillarDepth) < 1)
                             {
-                                if (add_to_car_spacialindex)
-                                    AddToSpatialIndex(pillar, ref CarBoxesSpatialIndex);
-                                Pillars.Add(pillar);
-                                AddToSpatialIndex(pillar, ref CarSpatialIndex);
+                                bool condg = true;
+                                if (CarSpots.Count > 1 && CarSpots[CarSpots.Count - 1].IsPointInFast(pillar.Envelope.Centroid.Coordinate))
+                                    condg = false;
+                                if (condg)
+                                {
+                                    Pillars.Add(pillar);
+                                }
                             }
                             if (adjust_pillar_edge)
                             {
                                 vec = -vec;
                             }
                         }
-                        else { }
-                        precar = car;
+                        #endregion
                     }
-                    #region 对是否需要生成最后一颗柱子的场景处理
-                    if (glastpillar && c == segscount && GeneratePillars)
-                    {
-                        var ed = seg;
-                        if (adjust_pillar_edge)
-                        {
-                            ed = s;
-                            vec = -vec;
-                        }
-                        var pp = ed.P1.Translation(Vector(ed).Normalize() * DisPillarLength);
-                        var li = new LineSegment(pp, ed.P1);
-                        var lf = new LineSegment(li);
-                        lf = lf.Translation(vec.Normalize() * DisPillarDepth);
-                        var pillar = PolyFromPoints(new List<Coordinate>() { li.P0, li.P1, lf.P1, lf.P0 });
-                        pillar = pillar.Translation(Vector(ed).Normalize() * DisHalfCarToPillar);
-                        if (isin_backback)
-                            pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplyBackBack - DisPillarDepth / 2));
-                        else
-                            pillar = pillar.Translation(Vector(new LineSegment(li.P0, lf.P0)).Normalize() * (DisPillarMoveDeeplySingle - DisPillarDepth / 2));
-                        if (Math.Abs(pillar.Area - DisPillarLength * DisPillarDepth) < 1)
-                        {
-                            bool condg = true;
-                            if (CarSpots.Count > 1 && CarSpots[CarSpots.Count - 1].IsPointInFast(pillar.Envelope.Centroid.Coordinate))
-                                condg = false;
-                            if (condg)
-                            {
-                                Pillars.Add(pillar);
-                            }
-                        }
-                        if (adjust_pillar_edge)
-                        {
-                            vec = -vec;
-                        }
-                    }
-                    #endregion
                 }
             }
 

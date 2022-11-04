@@ -135,11 +135,19 @@ namespace ThParkingStall.Core.MPartitionLayout
         public Vector2D Vector;
         public Coordinate Point;
         public Polygon Polyline;
+        public int TypeTag=0;
     }
     public enum CarLayoutMode : int
     {
         VERT = 0,
         PARALLEL = 1,
         VERTBACKBACK=2,
+    }
+    public enum CarTypeTag:int
+    {
+        Normal=0,//正常车位
+        CollidedByCarDoor=1,//车门阻挡
+        CollidedByStruct=2,//结构转换
+        CollidedByCarDoorAndStruct=3,//车门阻挡&结构转换
     }
 }

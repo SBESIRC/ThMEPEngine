@@ -31,6 +31,9 @@ namespace ThMEPArchitecture.PartitionLayout
         public static string VCarLayerName = "C-标准车位";
         public static string PCARBLKNAME = "AI-平行式2460";
         public static string VCARBLKNAME = "AI-垂直式车位5324";
+        public static string VCARBLKNAME_CollidedByDoor = "AI-垂直式车位5324-车门阻挡";
+        public static string VCARBLKNAME_CollidedByStruct = "AI-垂直式车位5324-结构转换";
+        public static string VCARBLKNAME_CollidedByDoorAndStruct = "AI-垂直式车位5324-结构转换|车门阻挡";
         public static string VCARBLKNAMEDOUBLEBACK = "AI-背靠背垂直式车位5124";
         public static bool ExistedDashedLineType=false;
         public List<InfoCar> Cars;
@@ -224,9 +227,19 @@ namespace ThMEPArchitecture.PartitionLayout
             ents.Add(dr);
             return ents;
         }
-        private static List<Entity> DrawVertCar()
+        private static List<Entity> DrawVertCar(int typetag)
         {
             int color_darkgreen = 74;
+            int color_yellow = 50;
+            int color_purple = 6;
+            int color_lightRed = 241;
+            int color = color_darkgreen;
+            if (typetag == ((int)CarTypeTag.CollidedByCarDoor))
+                color = color_yellow;
+            else if(typetag == ((int)CarTypeTag.CollidedByStruct))
+                color = color_purple;
+            else if(typetag == ((int)CarTypeTag.CollidedByCarDoorAndStruct))
+                color = color_lightRed;
             int colorgray = 8;
             double CT = 1400;
             var width = Math.Min(VMStock.VerticalSpotLength, VMStock.VerticalSpotWidth);
@@ -250,7 +263,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pt = pt.TransformBy(Matrix3d.Displacement(-new Vector3d(0, 1, 0) * length));
             pts.Add(pt);
             var pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
-            pl.ColorIndex = color_darkgreen;
+            pl.ColorIndex = color;
             pl.Layer = VCarLayerName;
             ents.Add(pl);
             //
@@ -285,7 +298,7 @@ namespace ThMEPArchitecture.PartitionLayout
             pts.Add(pt);
             pl = GeoUtilities.CreatePolyFromPoints(pts.ToArray());
             pl.TransformBy(Matrix3d.Displacement(new Vector3d(0, 1, 0) * (length - 1150)));
-            pl.ColorIndex = color_darkgreen;
+            pl.ColorIndex = color;
             pl.Layer = VCarLayerName;
             ents.Add(pl);
             //
@@ -327,7 +340,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         {
                             BlockTableRecord record = new BlockTableRecord();
                             record.Name = blkname;
-                            var ents = DrawVertCar();
+                            var ents = DrawVertCar(0);
                             ents.ForEach(e => record.AppendEntity(e));
                             bt.UpgradeOpen();
                             bt.Add(record);
@@ -347,6 +360,123 @@ namespace ThMEPArchitecture.PartitionLayout
                     }
                 }
                 return _VCar;
+            }
+        }
+        public static BlockReference _VCarCollidedByDoor = null;
+        public static BlockReference VCarCollidedByDoor
+        {
+            get
+            {
+                if (true)
+                {
+                    var blkname = VCARBLKNAME_CollidedByDoor;
+                    using (AcadDatabase adb = AcadDatabase.Active())
+                    {
+                        if (!adb.Layers.Contains(VCarLayerName))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, VCarLayerName, 0);
+                        BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
+                        try
+                        {
+                            BlockTableRecord record = new BlockTableRecord();
+                            record.Name = blkname;
+                            var ents = DrawVertCar(1);
+                            ents.ForEach(e => record.AppendEntity(e));
+                            bt.UpgradeOpen();
+                            bt.Add(record);
+                            adb.Database.TransactionManager.AddNewlyCreatedDBObject(record, true);
+                            bt.DowngradeOpen();
+                        }
+                        catch { }
+                        BlockTableRecord space = (BlockTableRecord)adb.Database.CurrentSpaceId.GetObject(OpenMode.ForWrite);
+                        BlockReference br = new BlockReference(Point3d.Origin, bt[blkname]);
+                        br.ScaleFactors = new Scale3d(1);
+                        br.Rotation = 0;
+                        br.Layer = CarLayerName;
+                        //space.AppendEntity(br);
+                        //adb.Database.TransactionManager.AddNewlyCreatedDBObject(br, true);
+                        space.DowngradeOpen();
+                        _VCarCollidedByDoor = br;
+                    }
+                }
+                return _VCarCollidedByDoor;
+            }
+        }
+        public static BlockReference _VCarCollidedByStruct = null;
+        public static BlockReference VCarCollidedByStruct
+        {
+            get
+            {
+                if (true)
+                {
+                    var blkname = VCARBLKNAME_CollidedByStruct;
+                    using (AcadDatabase adb = AcadDatabase.Active())
+                    {
+                        if (!adb.Layers.Contains(VCarLayerName))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, VCarLayerName, 0);
+                        BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
+                        try
+                        {
+                            BlockTableRecord record = new BlockTableRecord();
+                            record.Name = blkname;
+                            var ents = DrawVertCar(2);
+                            ents.ForEach(e => record.AppendEntity(e));
+                            bt.UpgradeOpen();
+                            bt.Add(record);
+                            adb.Database.TransactionManager.AddNewlyCreatedDBObject(record, true);
+                            bt.DowngradeOpen();
+                        }
+                        catch { }
+                        BlockTableRecord space = (BlockTableRecord)adb.Database.CurrentSpaceId.GetObject(OpenMode.ForWrite);
+                        BlockReference br = new BlockReference(Point3d.Origin, bt[blkname]);
+                        br.ScaleFactors = new Scale3d(1);
+                        br.Rotation = 0;
+                        br.Layer = CarLayerName;
+                        //space.AppendEntity(br);
+                        //adb.Database.TransactionManager.AddNewlyCreatedDBObject(br, true);
+                        space.DowngradeOpen();
+                        _VCarCollidedByStruct = br;
+                    }
+                }
+                return _VCarCollidedByStruct;
+            }
+        }
+        public static BlockReference _VCarCollidedByDoorAndStruct = null;
+        public static BlockReference VCarCollidedByDoorAndStruct
+        {
+            get
+            {
+                if (true)
+                {
+                    var blkname = VCARBLKNAME_CollidedByDoorAndStruct;
+                    using (AcadDatabase adb = AcadDatabase.Active())
+                    {
+                        if (!adb.Layers.Contains(VCarLayerName))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, VCarLayerName, 0);
+                        BlockTable bt = (BlockTable)adb.Database.BlockTableId.GetObject(OpenMode.ForRead);
+                        try
+                        {
+                            BlockTableRecord record = new BlockTableRecord();
+                            record.Name = blkname;
+                            var ents = DrawVertCar(3);
+                            ents.ForEach(e => record.AppendEntity(e));
+                            bt.UpgradeOpen();
+                            bt.Add(record);
+                            adb.Database.TransactionManager.AddNewlyCreatedDBObject(record, true);
+                            bt.DowngradeOpen();
+                        }
+                        catch { }
+                        BlockTableRecord space = (BlockTableRecord)adb.Database.CurrentSpaceId.GetObject(OpenMode.ForWrite);
+                        BlockReference br = new BlockReference(Point3d.Origin, bt[blkname]);
+                        br.ScaleFactors = new Scale3d(1);
+                        br.Rotation = 0;
+                        br.Layer = CarLayerName;
+                        //space.AppendEntity(br);
+                        //adb.Database.TransactionManager.AddNewlyCreatedDBObject(br, true);
+                        space.DowngradeOpen();
+                        _VCarCollidedByDoorAndStruct = br;
+                    }
+                }
+                return _VCarCollidedByDoorAndStruct;
             }
         }
         public static BlockReference _VBackCar = null;
@@ -460,7 +590,14 @@ namespace ThMEPArchitecture.PartitionLayout
                         if (vec.X > 0) 
                             angle = - angle;
                     }
-                    var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, VCARBLKNAME, car.Point, new Scale3d(1), angle);
+                    var blkName = VCARBLKNAME;
+                    if (car.TypeTag == ((int)CarTypeTag.CollidedByCarDoor))
+                        blkName = VCARBLKNAME_CollidedByDoor;
+                    else if(car.TypeTag == ((int)CarTypeTag.CollidedByStruct))
+                        blkName = VCARBLKNAME_CollidedByStruct;
+                    else if (car.TypeTag == ((int)CarTypeTag.CollidedByCarDoorAndStruct))
+                        blkName = VCARBLKNAME_CollidedByDoorAndStruct;
+                    var brId = adb.CurrentSpace.ObjectId.InsertBlockReference(CarLayerName, blkName, car.Point, new Scale3d(1), angle);
                     var br = adb.Element<BlockReference>(brId);
                     DisplayParkingStall.Add(br);
                 }
