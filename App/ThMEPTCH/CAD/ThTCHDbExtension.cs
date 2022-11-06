@@ -78,7 +78,7 @@ namespace ThMEPTCH.CAD
             // 从XData获取门底高
             var service = new TCHDoorPropertyService();
             var property = service.GetProperty(tch) as TCHDoorProperty;
-            door.Height = property.Height;
+            door.BasePoint = new Point3d(door.BasePoint.X, door.BasePoint.Y, property.BottomHeight);
         }
 
         public static TArchWindow LoadWindowFromDb(this Database database, ObjectId tch, Matrix3d matrix, int uid)
@@ -141,7 +141,7 @@ namespace ThMEPTCH.CAD
             // 从XData获取窗高和底高
             var service = new TCHWindowPropertyService();
             var property = service.GetProperty(tch) as TCHWindowProperty;
-            window.Height = property.Height;
+            window.Height = property.Height == 0 ? window.Height : property.Height;
             window.BasePoint = new Point3d(window.BasePoint.X, window.BasePoint.Y, property.BottomElevation);
         }
 
@@ -233,7 +233,7 @@ namespace ThMEPTCH.CAD
             // 从XData获取墙高和底高
             var service = new TCHWallPropertyService();
             var property = service.GetProperty(tch) as TCHWallProperty;
-            wall.Height = property.Height;
+            wall.Height = property.Height == 0 ? wall.Height : property.Height;
             wall.EndPoint = new Point3d(wall.EndPoint.X, wall.EndPoint.Y, property.BottomElevation);
             wall.StartPoint = new Point3d(wall.StartPoint.X, wall.StartPoint.Y, property.BottomElevation);
             wall.Material = property.EnumMaterial;

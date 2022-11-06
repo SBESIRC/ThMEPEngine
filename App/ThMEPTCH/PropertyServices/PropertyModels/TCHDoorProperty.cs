@@ -13,7 +13,7 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
         /// <summary>
         /// 门高
         /// </summary>
-        public double Height { get; set; }
+        public double BottomHeight { get; set; }
 
         /// <summary>
         /// 编号前缀
@@ -40,7 +40,7 @@ namespace ThMEPTCH.PropertyServices.PropertyModels
             var clone = new TCHDoorProperty(this.ObjId)
             {
                 Statistics = this.Statistics,
-                Height = this.Height,
+                BottomHeight = this.BottomHeight,
                 NumberPrefix = this.NumberPrefix,
                 NumberPostfix = this.NumberPostfix,
                 Entrance = this.Entrance,

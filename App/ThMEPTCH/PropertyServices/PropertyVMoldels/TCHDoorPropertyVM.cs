@@ -26,12 +26,12 @@ namespace ThMEPTCH.PropertyServices.PropertyVMoldels
         }
 
         [DisplayName("底高")]
-        public double A11_Height
+        public double A11_BottomHeight
         {
-            get { return property.Height; }
+            get { return property.BottomHeight; }
             set
             {
-                property.Height = value;
+                property.BottomHeight = value;
                 this.RaisePropertyChanged();
             }
         }

@@ -12,7 +12,7 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
             var property = new TCHDoorProperty(objectId)
             {
                 Statistics = false,
-                Height = 2200,
+                BottomHeight = 2200,
                 NumberPrefix = "M",
                 NumberPostfix = "",
                 Entrance = false,
@@ -25,7 +25,7 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
             TypedValueList valueList = new TypedValueList
             {
                 { (int)DxfCode.ExtendedDataAsciiString, tchDoorProp.Statistics.ToString()},
-                { (int)DxfCode.ExtendedDataAsciiString, tchDoorProp.Height.ToString()},
+                { (int)DxfCode.ExtendedDataAsciiString, tchDoorProp.BottomHeight.ToString()},
                 { (int)DxfCode.ExtendedDataAsciiString, tchDoorProp.NumberPrefix.ToString()},
                 { (int)DxfCode.ExtendedDataAsciiString, tchDoorProp.NumberPostfix.ToString()},
                 { (int)DxfCode.ExtendedDataAsciiString, tchDoorProp.Entrance.ToString()},
@@ -45,7 +45,7 @@ namespace ThMEPTCH.PropertyServices.EntityProperties
                         property.Statistics = strData.Equals("1");
                         break;
                     case 2:
-                        property.Height = double.Parse(strData);
+                        property.BottomHeight = double.Parse(strData);
                         break;
                     case 3:
                         property.NumberPrefix = strData;
