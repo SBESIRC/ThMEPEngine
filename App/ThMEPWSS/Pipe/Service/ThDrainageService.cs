@@ -12389,7 +12389,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
               var eMax = MaxBalconyToBalconyDistance.Runs.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Exists).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Index).Max();
               if (MaxBalconyToBalconyDistance.Runs[eMax].CPSCount > THESAURUSSTAMPEDE)
               {
-                var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs[eMax + THESAURUSHOUSING];
+                var DEFAULT_FIRE_VALVE_WIDTH = MaxBalconyToBalconyDistance.Runs.TryGet(eMax + THESAURUSHOUSING);
                 if (DEFAULT_FIRE_VALVE_WIDTH is not null)
                 {
                   DEFAULT_FIRE_VALVE_WIDTH.Exists = THESAURUSOBSTINACY;
@@ -14253,7 +14253,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
           if (maxToiletToFloordrainDistance2 == THESAURUSWINDFALL)
           {
             dynamic o = maxToiletToCondensepipeDistance.AcadObject;
-            var repeated_point_distance = (string)o.DimStyleText + THESAURUSSPECIFICATION + (string)o.VPipeNum;
+            var repeated_point_distance = (string)o.DimStyleText + (string)o.VPipeFloorNum + THESAURUSSPECIFICATION + (string)o.VPipeNum;
             if (IsDrainageLabel(repeated_point_distance))
             {
               var MAX_TAG_YPOSITION = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
