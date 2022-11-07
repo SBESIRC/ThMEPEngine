@@ -17,6 +17,9 @@ namespace ThParkingStall.ClientUpdate
         static void Main(string[] args)
         {
             var dir = args[0];
+            var version = "16";
+            if (dir.Contains("2018"))
+                version = "18";
             //关闭当前cad应用程序
             Process[] processes = Process.GetProcesses();
             foreach (Process p in processes)
@@ -46,10 +49,13 @@ namespace ThParkingStall.ClientUpdate
             //Console.WriteLine("已移除旧版本");
             //DelectDir(fileDir);
             //从服务器拿到更新文件
+            var buildFileName = "build16.zip";
+            if(version=="18")
+                buildFileName = "build18.zip";
             using (WebClient client = new WebClient())
             {
                 client.Credentials = new NetworkCredential("upload", "Thape123123");
-                client.DownloadFile($"http://172.16.1.84:8089/ServerBuild/build.zip", $"build.zip");
+                client.DownloadFile($"http://172.16.1.84:8089/ServerBuild/{buildFileName}", buildFileName);
             }
             Console.WriteLine("远端资源下载成功");
             //解压缩到temp文件夹
@@ -60,7 +66,7 @@ namespace ThParkingStall.ClientUpdate
                 Directory.CreateDirectory(tmpFileDir);
             }
             DelectDir(tmpFileDir);
-            ZipFile.ExtractToDirectory($"build.zip", tmpFileDir);
+            ZipFile.ExtractToDirectory(buildFileName, tmpFileDir);
             Console.WriteLine("远端资源包解压缩成功");
             //移动到目标文件夹
             var tmpFiles = Directory.GetFiles(tmpFileDir);
