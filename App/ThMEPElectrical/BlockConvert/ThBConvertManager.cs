@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
-using ThCADExtension;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+
+using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -12,6 +12,11 @@ namespace ThMEPElectrical.BlockConvert
         /// 块转换的映射规则
         /// </summary>
         public List<ThBConvertRule> Rules { get; set; }
+
+        /// <summary>
+        /// 块转换的映射规则
+        /// </summary>
+        public List<ThBConvertRule> TCHRules { get; set; }
 
         /// <summary>
         /// 从Excel中读取数据创建对象
@@ -24,6 +29,20 @@ namespace ThMEPElectrical.BlockConvert
             return new ThBConvertManager()
             {
                 Rules = bConvertConfigUrl.Rules(mode),
+            };
+        }
+
+        /// <summary>
+        /// 从TCHExcel中读取数据创建对象
+        /// </summary>
+        /// <param name="tchConvertConfigUrl"></param>
+        /// <param name="mode"></param>
+        /// <returns></returns>
+        public static ThBConvertManager CreateTCHManager(string tchConvertConfigUrl, ConvertMode mode)
+        {
+            return new ThBConvertManager()
+            {
+                TCHRules = tchConvertConfigUrl.TCHRules(mode),
             };
         }
 
@@ -55,6 +74,13 @@ namespace ThMEPElectrical.BlockConvert
             var rule = Rules.First(o =>
                 (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] == block &&
                  ThStringTools.CompareWithChinesePunctuation((string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY], visibility));
+            return rule?.Transformation.Item2;
+        }
+
+        public ThBlockConvertBlock TCHTransformRule(string tch)
+        {
+            var rule = TCHRules.First(o =>
+                (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_TCH_MODEL] == tch);
             return rule?.Transformation.Item2;
         }
     }

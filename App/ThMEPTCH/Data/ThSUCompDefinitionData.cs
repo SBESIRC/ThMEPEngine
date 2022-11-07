@@ -23,15 +23,14 @@ public static partial class ThSUCompDefinitionDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChxUaFNVQ29tcERlZmluaXRpb25EYXRhLnByb3RvGhZUaFNVRmFjZUJyZXBE",
-          "YXRhLnByb3RvGhZUaFNVRmFjZU1lc2hEYXRhLnByb3RvIrIBChZUaFNVQ29t",
-          "cERlZmluaXRpb25EYXRhEhcKD2RlZmluaXRpb25fbmFtZRgBIAEoCRIaChJp",
-          "ZmNfY2xhc3NpZmljYXRpb24YAiABKAkSFQoNaW5zdGFuY2VfbmFtZRgDIAEo",
-          "CRIlCgpicmVwX2ZhY2VzGAQgAygLMhEuVGhTVUZhY2VCcmVwRGF0YRIlCgpt",
-          "ZXNoX2ZhY2VzGAUgAygLMhEuVGhTVUZhY2VNZXNoRGF0YWIGcHJvdG8z"));
+          "YXRhLnByb3RvGhZUaFNVRmFjZU1lc2hEYXRhLnByb3RvIn8KFlRoU1VDb21w",
+          "RGVmaW5pdGlvbkRhdGESFwoPZGVmaW5pdGlvbl9uYW1lGAEgASgJEiUKCmJy",
+          "ZXBfZmFjZXMYAiADKAsyES5UaFNVRmFjZUJyZXBEYXRhEiUKCm1lc2hfZmFj",
+          "ZXMYAyADKAsyES5UaFNVRmFjZU1lc2hEYXRhYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThSUFaceBrepDataReflection.Descriptor, global::ThSUFaceMeshDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUCompDefinitionData), global::ThSUCompDefinitionData.Parser, new[]{ "DefinitionName", "IfcClassification", "InstanceName", "BrepFaces", "MeshFaces" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUCompDefinitionData), global::ThSUCompDefinitionData.Parser, new[]{ "DefinitionName", "BrepFaces", "MeshFaces" }, null, null, null, null)
         }));
   }
   #endregion
@@ -73,8 +72,6 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThSUCompDefinitionData(ThSUCompDefinitionData other) : this() {
     definitionName_ = other.definitionName_;
-    ifcClassification_ = other.ifcClassification_;
-    instanceName_ = other.instanceName_;
     brepFaces_ = other.brepFaces_.Clone();
     meshFaces_ = other.meshFaces_.Clone();
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -98,34 +95,10 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
     }
   }
 
-  /// <summary>Field number for the "ifc_classification" field.</summary>
-  public const int IfcClassificationFieldNumber = 2;
-  private string ifcClassification_ = "";
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public string IfcClassification {
-    get { return ifcClassification_; }
-    set {
-      ifcClassification_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-    }
-  }
-
-  /// <summary>Field number for the "instance_name" field.</summary>
-  public const int InstanceNameFieldNumber = 3;
-  private string instanceName_ = "";
-  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public string InstanceName {
-    get { return instanceName_; }
-    set {
-      instanceName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-    }
-  }
-
   /// <summary>Field number for the "brep_faces" field.</summary>
-  public const int BrepFacesFieldNumber = 4;
+  public const int BrepFacesFieldNumber = 2;
   private static readonly pb::FieldCodec<global::ThSUFaceBrepData> _repeated_brepFaces_codec
-      = pb::FieldCodec.ForMessage(34, global::ThSUFaceBrepData.Parser);
+      = pb::FieldCodec.ForMessage(18, global::ThSUFaceBrepData.Parser);
   private readonly pbc::RepeatedField<global::ThSUFaceBrepData> brepFaces_ = new pbc::RepeatedField<global::ThSUFaceBrepData>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -134,9 +107,9 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
   }
 
   /// <summary>Field number for the "mesh_faces" field.</summary>
-  public const int MeshFacesFieldNumber = 5;
+  public const int MeshFacesFieldNumber = 3;
   private static readonly pb::FieldCodec<global::ThSUFaceMeshData> _repeated_meshFaces_codec
-      = pb::FieldCodec.ForMessage(42, global::ThSUFaceMeshData.Parser);
+      = pb::FieldCodec.ForMessage(26, global::ThSUFaceMeshData.Parser);
   private readonly pbc::RepeatedField<global::ThSUFaceMeshData> meshFaces_ = new pbc::RepeatedField<global::ThSUFaceMeshData>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -160,8 +133,6 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
       return true;
     }
     if (DefinitionName != other.DefinitionName) return false;
-    if (IfcClassification != other.IfcClassification) return false;
-    if (InstanceName != other.InstanceName) return false;
     if(!brepFaces_.Equals(other.brepFaces_)) return false;
     if(!meshFaces_.Equals(other.meshFaces_)) return false;
     return Equals(_unknownFields, other._unknownFields);
@@ -172,8 +143,6 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
   public override int GetHashCode() {
     int hash = 1;
     if (DefinitionName.Length != 0) hash ^= DefinitionName.GetHashCode();
-    if (IfcClassification.Length != 0) hash ^= IfcClassification.GetHashCode();
-    if (InstanceName.Length != 0) hash ^= InstanceName.GetHashCode();
     hash ^= brepFaces_.GetHashCode();
     hash ^= meshFaces_.GetHashCode();
     if (_unknownFields != null) {
@@ -198,14 +167,6 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
       output.WriteRawTag(10);
       output.WriteString(DefinitionName);
     }
-    if (IfcClassification.Length != 0) {
-      output.WriteRawTag(18);
-      output.WriteString(IfcClassification);
-    }
-    if (InstanceName.Length != 0) {
-      output.WriteRawTag(26);
-      output.WriteString(InstanceName);
-    }
     brepFaces_.WriteTo(output, _repeated_brepFaces_codec);
     meshFaces_.WriteTo(output, _repeated_meshFaces_codec);
     if (_unknownFields != null) {
@@ -222,14 +183,6 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
       output.WriteRawTag(10);
       output.WriteString(DefinitionName);
     }
-    if (IfcClassification.Length != 0) {
-      output.WriteRawTag(18);
-      output.WriteString(IfcClassification);
-    }
-    if (InstanceName.Length != 0) {
-      output.WriteRawTag(26);
-      output.WriteString(InstanceName);
-    }
     brepFaces_.WriteTo(ref output, _repeated_brepFaces_codec);
     meshFaces_.WriteTo(ref output, _repeated_meshFaces_codec);
     if (_unknownFields != null) {
@@ -244,12 +197,6 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
     int size = 0;
     if (DefinitionName.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(DefinitionName);
-    }
-    if (IfcClassification.Length != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeStringSize(IfcClassification);
-    }
-    if (InstanceName.Length != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeStringSize(InstanceName);
     }
     size += brepFaces_.CalculateSize(_repeated_brepFaces_codec);
     size += meshFaces_.CalculateSize(_repeated_meshFaces_codec);
@@ -267,12 +214,6 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
     }
     if (other.DefinitionName.Length != 0) {
       DefinitionName = other.DefinitionName;
-    }
-    if (other.IfcClassification.Length != 0) {
-      IfcClassification = other.IfcClassification;
-    }
-    if (other.InstanceName.Length != 0) {
-      InstanceName = other.InstanceName;
     }
     brepFaces_.Add(other.brepFaces_);
     meshFaces_.Add(other.meshFaces_);
@@ -296,18 +237,10 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
           break;
         }
         case 18: {
-          IfcClassification = input.ReadString();
-          break;
-        }
-        case 26: {
-          InstanceName = input.ReadString();
-          break;
-        }
-        case 34: {
           brepFaces_.AddEntriesFrom(input, _repeated_brepFaces_codec);
           break;
         }
-        case 42: {
+        case 26: {
           meshFaces_.AddEntriesFrom(input, _repeated_meshFaces_codec);
           break;
         }
@@ -331,18 +264,10 @@ public sealed partial class ThSUCompDefinitionData : pb::IMessage<ThSUCompDefini
           break;
         }
         case 18: {
-          IfcClassification = input.ReadString();
-          break;
-        }
-        case 26: {
-          InstanceName = input.ReadString();
-          break;
-        }
-        case 34: {
           brepFaces_.AddEntriesFrom(ref input, _repeated_brepFaces_codec);
           break;
         }
-        case 42: {
+        case 26: {
           meshFaces_.AddEntriesFrom(ref input, _repeated_meshFaces_codec);
           break;
         }

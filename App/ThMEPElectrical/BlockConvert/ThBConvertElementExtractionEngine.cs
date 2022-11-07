@@ -1,13 +1,18 @@
 ﻿using System;
-using ThMEPEngineCore.Engine;
 using System.Collections.Generic;
+
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertElementExtractionEngine : ThDistributionElementExtractionEngine
     {
+        /// <summary>
+        /// 块名
+        /// </summary>
         public List<string> NameFilter { get; set; }
 
         /// <summary>
@@ -24,7 +29,7 @@ namespace ThMEPElectrical.BlockConvert
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
-            extractor.Extract(database);   
+            extractor.Extract(database);
             Results = visitor.Results;
         }
 

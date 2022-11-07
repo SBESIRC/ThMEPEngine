@@ -12,6 +12,9 @@ namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertElementExtractionVisitor : ThDistributionElementExtractionVisitor
     {
+        /// <summary>
+        /// 块名
+        /// </summary>
         public List<string> NameFilter { get; set; }
 
         /// <summary>
@@ -97,6 +100,7 @@ namespace ThMEPElectrical.BlockConvert
         {
             if (blockTableRecord.IsFromExternalReference || blockTableRecord.IsFromOverlayReference)
             {
+                // 根据外参前缀进行过滤
                 using (var CurrentDb = Linq2Acad.AcadDatabase.Active())
                 {
                     var xrg = CurrentDb.Database.GetHostDwgXrefGraph(false);

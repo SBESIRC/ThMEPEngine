@@ -10,6 +10,7 @@ namespace TianHua.Mep.UI
     {
         private RoomOutlineUI uiRoomOutline;
         private ThExtractRoomConfigCmd _extractRoomConfigCmd = new ThExtractRoomConfigCmd();
+        private ThExtractArchitectureOutlineCmd _extractArchitectureOutlineCmd = new ThExtractArchitectureOutlineCmd();
 
         public void Initialize()
         {
@@ -24,6 +25,10 @@ namespace TianHua.Mep.UI
             AcadApp.DocumentManager.DocumentActivated += _extractRoomConfigCmd.DocumentActivated;
             AcadApp.DocumentManager.DocumentToBeDestroyed += _extractRoomConfigCmd.DocumentToBeDestroyed;
             AcadApp.DocumentManager.DocumentDestroyed += _extractRoomConfigCmd.DocumentDestroyed;
+
+            AcadApp.DocumentManager.DocumentActivated += _extractArchitectureOutlineCmd.DocumentActivated;
+            AcadApp.DocumentManager.DocumentToBeDestroyed += _extractArchitectureOutlineCmd.DocumentToBeDestroyed;
+            AcadApp.DocumentManager.DocumentDestroyed += _extractArchitectureOutlineCmd.DocumentDestroyed;
         }
 
         
@@ -58,6 +63,18 @@ namespace TianHua.Mep.UI
         public void ThExtractRoomOutlineConfig()
         {
             using (var cmd = new ThExtractRoomConfigCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        /// <summary>
+        /// 构建建筑轮廓线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THJZLKX", CommandFlags.Modal)]
+        public void THJZLKX()
+        {
+            using (var cmd = new ThExtractArchitectureOutlineCmd())
             {
                 cmd.Execute();
             }

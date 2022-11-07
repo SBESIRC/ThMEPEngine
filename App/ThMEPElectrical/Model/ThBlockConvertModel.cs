@@ -12,6 +12,7 @@ namespace ThMEPElectrical.Model
             blkFrame = "标注带边框";
             equipOps = CapitalOP.Strong;
             manualActuatorOps = false;
+            tchConvert = false;
             havcOps = true;
             wssOps = true;
             BlkScales = new ObservableCollection<string>(new List<string> { "1:100", "1:150" });
@@ -73,6 +74,21 @@ namespace ThMEPElectrical.Model
             {
                 manualActuatorOps = value;
                 RaisePropertyChanged("ManualActuatorOps");
+            }
+        }
+
+
+        private bool tchConvert;
+        public bool TCHConvert
+        {
+            get
+            {
+                return tchConvert;
+            }
+            set
+            {
+                tchConvert = value;
+                RaisePropertyChanged("TCHConvert");
             }
         }
 

@@ -256,7 +256,7 @@ namespace ThMEPLighting.ParkingStall.Core
             var blks = _baseElement.GetAreaLights(outPolyline, innerPolylines);
             blks.ForEach(c => _areaLightBlocks.Add(new LightBlockReference(c)));
             _laneLines = _baseElement.GetLaneLines(outPolyline);//获取车道线
-            _trunkingLines = _baseElement.GetLayerLines(outPolyline, "E-UNIV-EL2");//获取线槽线
+            _trunkingLines = _baseElement.GetLayerLines(outPolyline, new List<string>() { "E-UNIV-EL2", "E-LITE-CMTB" });//获取线槽线
             _alBlocks = _baseElement.GetAreaDistributionBox(outPolyline, innerPolylines);
         }
         List<LightGroup> LightPreGroup(Polyline outPolyline,List<Polyline> innerPolylines) 

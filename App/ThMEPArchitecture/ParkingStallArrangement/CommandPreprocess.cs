@@ -21,10 +21,14 @@ using ThMEPEngineCore.CAD;
 using NFox.Cad;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
+using ThParkingStall.Core.Tools;
+using ThParkingStall.Core.LineCleaner;
+using ThParkingStall.Core.OTools;
+using System.Diagnostics;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
-    class ThParkingStallPreprocessCmd : ThMEPBaseCommand, IDisposable
+    public class ThParkingStallPreprocessCmd : ThMEPBaseCommand, IDisposable
     {
         //public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "PreProcessLog.txt");
 
@@ -75,14 +79,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 Active.Editor.WriteMessage("未拿到障碍物块");
                 return;
             }
+            _stopwatch.Restart();
             foreach (BlockReference block in blocks) PreprocessOneBlock(acadDatabase, block, tol);
         }
-        
-        private void PreprocessOneBlock(AcadDatabase acadDatabase,BlockReference block,double tol = 5)
+        private void PreprocessOneBlock(AcadDatabase acadDatabase, BlockReference block, double tol = 5)
         {
             var blocks = new DBObjectCollection { block };
-            var lines = new DBObjectCollection();
-
+            var lines = new List<Line>();
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var t_pre = stopwatch.Elapsed.TotalSeconds;
             while (blocks.Count != 0)// 炸块获取所有的线
             {
                 blocks = ExplodeToLines(blocks, out DBObjectCollection curwalls);
@@ -93,34 +99,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 Active.Editor.WriteMessage("\n块名为" + block.Name + "的块未提取到障碍物");
                 return;// 没有拿到线
             }
+            //Active.Editor.WriteMessage($"炸块用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
 #if (DEBUG)
             foreach (Line l in lines) l.AddToCurrentSpace();// 测试用，把所有拿到的线打出来
 #endif
-            var service = new ThLaneLineCleanService();
-            lines = service.CleanWithTol(lines, tol);// 线清理，处理重复线等
-
-            foreach (Line l in lines) // 线延长操作
-            {
-                var newl = l.ExtendLine(tol);
-                l.StartPoint = newl.StartPoint;
-                l.EndPoint = newl.EndPoint;
-            }
-            var objs = LinesToPline(lines);// 线转换为多段线
-            if(objs.Count == 0)
+            var lsegs = lines.Select(l => l.ToNTSLineSegment()).ToList();
+            t_pre = stopwatch.Elapsed.TotalSeconds;
+            var cleaner = new LineService(lsegs,tol);
+            var polygons = cleaner.GetPolygons(true, false, true);
+            //Active.Editor.WriteMessage($"描边用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
+            var objs = polygons.Select(p =>p.Shell.ToDbPolyline()).ToList();
+            if (objs.Count == 0)
             {
                 Active.Editor.WriteMessage("\n块名为" + block.Name + "的块中的元素不包含闭合区域");
                 return;// 没有拿到线
             }
-            objs = objs.ToNTSMultiPolygon().Union().ToDbCollection();// union操作,获取合并后的多段线
 
+            t_pre = stopwatch.Elapsed.TotalSeconds;
             var walls = new List<Entity>();
-            foreach (Entity obj in objs) 
-            { 
-                if (obj  is Polyline pline)
+            foreach (Entity obj in objs)
+            {
+                if (obj is Polyline pline)
                 {
-                    if(pline.Area > tol) walls.Add(pline);
+                    if (pline.Area > tol) walls.Add(pline);
                 }
-            } 
+            }
             var LayerName = "AI-障碍物";
             if (!acadDatabase.Layers.Contains(LayerName))
                 ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, LayerName, 1);
@@ -128,9 +131,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //获取不重复的块名
             var blockName = acadDatabase.Database.GetBlockName(LayerName);
             // 创建块，并且插入到原位
-            Point3d InsertPoint =acadDatabase.Database.AddBlockTableRecord(blockName, walls);
+            Point3d InsertPoint = acadDatabase.Database.AddBlockTableRecord(blockName, walls);
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference(LayerName, blockName, InsertPoint, new Scale3d(1), 0);
-
+            //Active.Editor.WriteMessage($"输出用时：{stopwatch.Elapsed.TotalSeconds - t_pre}s");
         }
         private DBObjectCollection ExplodeToLines(DBObjectCollection input_blocks, out DBObjectCollection outwalls)
         {
@@ -181,7 +184,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             return ent.Layer.ToUpper().Contains(LayerKeyWord);
         }
         // 线转换到多段线，忽略洞
-        private static DBObjectCollection LinesToPline(DBObjectCollection lines)
+        private static DBObjectCollection _LinesToPline(DBObjectCollection lines)
         {
             var geos = lines.Polygonize();
             var objs = new DBObjectCollection();
@@ -193,7 +196,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             geos = null;
             return objs;
         }
-
+        private DBObjectCollection LinesToPline(List<LineSegment> lines)
+        {
+            var polygons = lines.GetPolygons().Where(p =>p.Area > 30);
+            var objs = new DBObjectCollection();
+            polygons.ForEach(p => objs.Add(p.Shell.ToDbPolyline()));
+            return objs;
+        }
     }
 
     static class PreprocssEx

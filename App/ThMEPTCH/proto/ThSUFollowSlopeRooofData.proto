@@ -1,0 +1,9 @@
+syntax = "proto3";
+import "ThSUCompDefinitionData.proto";
+import "ThSUFollowSlopeElementData.proto";
+
+message ThSUFollowSlopeRooofData {
+    string globalId = 1;
+    repeated ThSUFollowSlopeElementData elements = 2;
+    repeated ThSUCompDefinitionData definitions = 3;
+}

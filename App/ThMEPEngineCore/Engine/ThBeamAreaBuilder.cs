@@ -14,7 +14,7 @@ namespace ThMEPEngineCore.Engine
     {
         // 用于过滤面积很小的Polygon
         private const double SmallAreaTolerance = 1.0;
-        private const double BufferDistance = 300.0;            
+        private const double BufferDistance = 400.0;            
         private const double PolylineClosedTolerance = 5.0;        
         private DBObjectCollection Columns { get; set; } //仅支持Polyline
         private DBObjectCollection Beams  { get; set; } //仅支持Polyline,Line

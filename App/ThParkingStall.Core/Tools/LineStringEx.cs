@@ -81,7 +81,7 @@ namespace ThParkingStall.Core.Tools
         public static bool PartInCommon(this LineString lstr1, Geometry geo)
         {
             if (lstr1 == null || geo == null) return false;
-            var intSection = lstr1.Intersection(geo);
+            var intSection = OverlayNGRobust.Overlay(lstr1, geo, SpatialFunction.Intersection);
             if (intSection.Length > 0) return true;
             else return false;
         }
@@ -97,27 +97,43 @@ namespace ThParkingStall.Core.Tools
             var VaildParts = new List<LineSegment>();
             foreach(var lstr in lstrs)
             {
-                var intSection = lstr.Intersection(area.Shell);
+                var intSection = OverlayNGRobust.Overlay(area.Shell, lstr, SpatialFunction.Intersection);
                 if (intSection.Length > 0)
                 {
-                    var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
+                    var pts = intSection.Coordinates.OrderBy(c => c.X).ThenBy(c => c.Y);
                     VaildParts.Add(new LineSegment(pts.First(), pts.Last()));
                 }
             }
             return VaildParts;
         }
 
-        public static List<LineString> GetVaildLstrs(this IEnumerable<LineString> lstrs, Polygon area)
+        public static List<LineString> GetVaildLstrs(this IEnumerable<LineString> lstrs, Polygon area,bool acruate = true,double tol = 0.1)
         {
             var VaildParts = new List<LineString>();
-            foreach (var lstr in lstrs)
+            if (!acruate)
             {
-                var intSection = lstr.Intersection(area.Shell);
-                if (intSection.Length > 0)
+                var bound = area.Shell.Buffer(tol);
+                foreach (var segLine in lstrs)
                 {
-                    var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
-                    var coors = new Coordinate[] { pts.First(), pts.Last() };
-                    VaildParts.Add(new LineString(coors));
+                    var commonPart = segLine.Intersection(bound);
+                    if (commonPart.Length < 100) continue;
+                    var coors = new Coordinate[] { commonPart.Coordinates.First(), commonPart.Coordinates.Last() };
+                    var vaildPart = new LineString(coors);
+                    if (vaildPart.Length > 100) VaildParts.Add(vaildPart);
+
+                }
+            }
+            else
+            {
+                foreach (var lstr in lstrs)
+                {
+                    var intSection = OverlayNGRobust.Overlay(area.Shell, lstr, SpatialFunction.Intersection);
+                    if (intSection.Length > 0)
+                    {
+                        var pts = intSection.Coordinates.OrderBy(coor => coor.X + coor.Y);
+                        var coors = new Coordinate[] { pts.First(), pts.Last() };
+                        VaildParts.Add(new LineString(coors));
+                    }
                 }
             }
             return VaildParts;

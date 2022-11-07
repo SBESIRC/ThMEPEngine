@@ -16,6 +16,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         public void GeneratePerpModules()
         {
             double mindistance = DisLaneWidth / 2 + DisVertCarWidth * 4;
+            UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             var lanes = GeneratePerpModuleLanes(mindistance, DisBackBackModulus, true, null, true, null, true);
             GeneratePerpModuleBoxes(lanes);
         }
@@ -318,7 +319,7 @@ namespace ThParkingStall.Core.MPartitionLayout
                             //同剔除与其他车道相接的不能排车位的部分
                             if (transform_start_edge_for_perp_module && split.Length > DisLaneWidth / 2 + DisVertCarLength)
                             {
-                                if (ClosestPointInVertLines(split.P0, split, IniLanes.Select(e => e.Line)) < 10)
+                                if (ClosestPointInVertLines(split.P0, split, IniLanes.Select(e => e.Line)) < 10+DisLaneWidth/2)
                                     split.P0 = split.P0.Translation(Vector(split).Normalize() * (DisLaneWidth / 2 + DisVertCarLength));
                             }
                             if (ClosestPointInVertLines(split.P0, split, IniLanes.Select(e => e.Line)) < 10)

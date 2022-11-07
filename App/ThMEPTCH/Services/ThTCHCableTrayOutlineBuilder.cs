@@ -99,8 +99,15 @@ namespace ThMEPTCH.Services
 
         private DBObjectCollection Filter(DBObjectCollection objs,Point3dCollection pts)
         {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            return spatialIndex.SelectCrossingPolygon(pts);
+            if(pts.Count<3)
+            {
+                return objs;
+            }
+            else
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                return spatialIndex.SelectCrossingPolygon(pts);
+            }           
         }
 
         private DBObjectCollection ExtractTCHSegments(Database dabase)

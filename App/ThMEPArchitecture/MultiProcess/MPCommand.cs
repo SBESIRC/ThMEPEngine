@@ -39,6 +39,8 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.PreProcess;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThParkingStall.Core.IO;
+using ThParkingStall.Core.OInterProcess;
+using static ThMEPArchitecture.PartitionLayout.DisplayTools;
 
 namespace ThMEPArchitecture.MultiProcess
 {
@@ -96,14 +98,7 @@ namespace ThMEPArchitecture.MultiProcess
                 DisplayLogger2 = new Serilog.LoggerConfiguration().WriteTo
             .File(DisplayLogFileName2, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null).CreateLogger();
             }
-            //Logger?.Information($"############################################");
-            //Logger?.Information("LayoutScareFactor_Intergral:" + ParameterStock.LayoutScareFactor_Intergral.ToString());
-            //Logger?.Information("LayoutScareFactor_Adjacent:" + ParameterStock.LayoutScareFactor_Adjacent.ToString());
-            //Logger?.Information("LayoutScareFactor_betweenBuilds:" + ParameterStock.LayoutScareFactor_betweenBuilds.ToString());
-            //Logger?.Information("LayoutScareFactor_SingleVert:" + ParameterStock.LayoutScareFactor_SingleVert.ToString());
-            //Logger?.Information("SingleVertModulePlacementFactor:" + ParameterStock.SingleVertModulePlacementFactor.ToString());
-            //Logger?.Information("CutTol:" + ParameterStock.CutTol.ToString());
-            Utils.SetSeed();
+            ThParkingStallCoreTools.SetSeed();
             try
             {
                 using (var docLock = Active.Document.LockDocument())
@@ -211,7 +206,6 @@ namespace ThMEPArchitecture.MultiProcess
                 }
                 ProcessAndDisplay(orgSolution, i,stopWatch);
             }
-            
         }
 
         public void Run(AcadDatabase acadDatabase)
@@ -331,7 +325,6 @@ namespace ThMEPArchitecture.MultiProcess
         {
             Logger?.Information("##################################");
             Logger?.Information("迭代模式：");
-
             int fileSize = 64; // 64Mb
             var nbytes = fileSize * 1024 * 1024;
             DisplayParkingStall.Add(blk.Clone() as BlockReference);
@@ -413,16 +406,21 @@ namespace ThMEPArchitecture.MultiProcess
 #endif
             List<MParkingPartitionPro> mParkingPartitionPros = new List<MParkingPartitionPro>();
             MParkingPartitionPro mParkingPartition = new MParkingPartitionPro();
-            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition, true);
+            Polygon CaledBound = new Polygon(new LinearRing(new Coordinate[0]));
+            var ParkingStallCount = CalculateTheTotalNumOfParkingSpace(subAreas, ref mParkingPartitionPros, ref mParkingPartition,ref CaledBound, true);
+            string Boundlayer = "AI-参考地库轮廓";
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(Boundlayer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, Boundlayer, 141);
+            }
+            Display(CaledBound, 141, Boundlayer);
             var strBest = $"最大车位数{ParkingStallCount}\n";
             Logger?.Information(strBest);
             Active.Editor.WriteMessage(strBest);
             MultiProcessTestCommand.DisplayMParkingPartitionPros(mParkingPartition);
             var layer = "最终分区线";
             var finalSegLines = InterParameter.ProcessToSegLines(solution).Item1;
-            var finalLstrs = finalSegLines.ToLineStrings();
-            InterParameter.Ramps.Where(r => finalLstrs.Any(lstr => !lstr.Intersects(r.Area))).
-                ForEach(p => finalSegLines.Add(p.GetLine()));
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 if (!acad.Layers.Contains(layer))
@@ -579,6 +577,25 @@ namespace ThMEPArchitecture.MultiProcess
     }
     public static class MPEX
     {
+        public static void Display(this OSubArea subArea, string blockName, string layer = "MPDebug")
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                if (!acad.Layers.Contains(layer))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 0);
+            }
+            var entities = new List<Entity>();
+            entities.Add(subArea.Region.ToDbMPolygon());
+            entities[0].Layer = layer;
+            if (subArea.VaildLanes != null)
+                entities.AddRange(subArea.VaildLanes.Select(l => l.ToDbLine(2, layer)));
+            entities.AddRange(subArea.Walls.Select(wall => wall.ToDbPolyline(1, layer)));
+            entities.AddRange(subArea.Buildings.Select(polygon => polygon.ToDbMPolygon(5, layer)));
+            entities.AddRange(subArea.Ramps.Select(ramp => ramp.InsertPt.LineBuffer(1000,ramp.GetVector().RotateByQuarterCircle(1)).ToDbLine(3, layer)));
+            entities.AddRange(subArea.BuildingBounds.Select(polygon => polygon.ToDbMPolygon(4, layer)));
+            entities.ShowBlock(blockName, layer);
+        }
+
         public static void Display(this SubArea subArea,string blockName,string layer = "MPDebug")
         {
             using (AcadDatabase acad = AcadDatabase.Active())
@@ -586,7 +603,6 @@ namespace ThMEPArchitecture.MultiProcess
                 if (!acad.Layers.Contains(layer))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 0);
             }
-
             var entities = new List<Entity>();
             entities.Add(subArea.Area.ToDbMPolygon());
             entities[0].Layer = layer;
@@ -600,7 +616,7 @@ namespace ThMEPArchitecture.MultiProcess
             entities.AddRange(subArea.BoundingBoxes.Select(polygon => polygon.ToDbMPolygon(4, layer)));
             entities.ShowBlock(blockName, layer);
         }
-        private static Polyline ToDbPolyline(this LineString lstr, int coloridx, string layer)
+        public static Polyline ToDbPolyline(this LineString lstr, int coloridx, string layer)
         {
             var pline = lstr.ToDbPolyline();
             pline.Layer = layer;

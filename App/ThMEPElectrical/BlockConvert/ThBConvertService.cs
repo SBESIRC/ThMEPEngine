@@ -19,7 +19,7 @@ namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertService
     {
-        readonly static string BConvertConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "提资转换配置表.xlsx");
+        private readonly static string BConvertConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "提资转换配置表.xlsx");
 
         /// <summary>
         /// 当前database
@@ -99,8 +99,8 @@ namespace ThMEPElectrical.BlockConvert
                 sourceConvertRules.Add(t.Item1);
                 targetConvertRules.Add(t.Item2);
             });
-            ThBConvertBlockReferenceDataExtension.SourceBConvertRules = sourceConvertRules;
-            ThBConvertBlockReferenceDataExtension.TargetBConvertRules = targetConvertRules;
+            ThBConvertBlockReferenceDataExtension.SourceBConvertRules.AddRange(sourceConvertRules);
+            ThBConvertBlockReferenceDataExtension.TargetBConvertRules.AddRange(targetConvertRules);
 
             // 获取目标块图块名，以便后续去重
             manager.Rules.Where(o => (o.Mode & Mode) != 0).ForEach(o =>
@@ -235,17 +235,17 @@ namespace ThMEPElectrical.BlockConvert
                             mapping[o] = true;
 
                             // 获取需要导入的块名、图层，导入目标图块
-                            var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                             var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
-                            string targetBlockLayerSetting;
-                            if (setLayer)
-                            {
-                                targetBlockLayerSetting = targetBlockLayer;
-                            }
-                            else
+                            CurrentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
+                            var targetBlockLayerSetting = targetBlockLayer;
+                            // true表示需要设置图块图层，false表示设置为“AI-提资转换”
+                            if (!setLayer)
                             {
                                 targetBlockLayerSetting = ThBConvertCommon.HIDING_LAYER;
+                                CurrentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThBConvertCommon.HIDING_LAYER), false);
                             }
+
+                            var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                             if (FrameStyle == ThBConvertCommon.LABEL_STYLE_BORDERLESS
                                 && (targetBlockName == ThBConvertCommon.BLOCK_MOTOR_AND_LOAD_DIMENSION || targetBlockName == ThBConvertCommon.BLOCK_LOAD_DIMENSION))
                             {
@@ -257,7 +257,6 @@ namespace ThMEPElectrical.BlockConvert
                             }
 
                             CurrentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
-                            CurrentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayerSetting), false);
 
                             // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
                             // 修正插入动态块的图层顺序
@@ -377,25 +376,27 @@ namespace ThMEPElectrical.BlockConvert
                                 // 设置块引用的数据库属性
                                 refIds.OfType<ObjectId>().ForEach(id =>
                                 {
-                                    if (!id.IsErased)
+                                    if (id.IsErased)
                                     {
-                                        engine.SetDatabaseProperties(targetBlockData, id, targetBlockLayerSetting);
-                                        if (id.GetBlockName().Equals(ThBConvertCommon.BLOCK_NAME_LEVEL_CONTROLLER))
-                                        {
-                                            EntityInfos.Add(new ThBConvertEntityInfos(
-                                            id,
-                                            transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert(),
-                                            ThBConvertCommon.BLOCK_LEVEL_CONTROLLER,
-                                            targetBlockLayer));
-                                        }
-                                        else
-                                        {
-                                            EntityInfos.Add(new ThBConvertEntityInfos(
-                                            id,
-                                            transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert(),
-                                            transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT),
-                                            targetBlockLayer));
-                                        }
+                                        return;
+                                    }
+
+                                    engine.SetDatabaseProperties(targetBlockData, id, targetBlockLayerSetting);
+                                    if (id.GetBlockName().Equals(ThBConvertCommon.BLOCK_NAME_LEVEL_CONTROLLER))
+                                    {
+                                        EntityInfos.Add(new ThBConvertEntityInfos(
+                                        id,
+                                        transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert(),
+                                        ThBConvertCommon.BLOCK_LEVEL_CONTROLLER,
+                                        targetBlockLayer));
+                                    }
+                                    else
+                                    {
+                                        EntityInfos.Add(new ThBConvertEntityInfos(
+                                        id,
+                                        transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_CATEGORY).Convert(),
+                                        transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_EQUIMENT),
+                                        targetBlockLayer));
                                     }
                                 });
                             }

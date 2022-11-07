@@ -315,7 +315,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                             }
                         case StatisticType.Attributes:
                             {
-                                BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Where(x => (GlobleBlockAttInfoDic.First(b => b.Key.Equals(x.Outline))).Value.Count(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value)) > 0).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));
+                                BlockDataReturn.BlockStatistics[o.UniqueName] = Data.Where(x =>
+                                {
+                                    var atts = GlobleBlockAttInfoDic.First(b => b.Key.Equals(x.Outline)).Value;
+                                    return !atts.Any(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Any(att => att[0] == '~' && att.Substring(1) == y.Value)) && 
+                                    atts.Any(y => o.StatisticAttNameValues.ContainsKey(y.Key) && o.StatisticAttNameValues[y.Key].Contains(y.Value));
+                                }).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));
                                 if (o.HasAlias)
                                 {
                                     BlockDataReturn.BlockStatistics[o.UniqueName] += Data.Where(x => o.AliasList.Contains((x.Outline as BlockReference).Name)).Sum(x => ThQuantityMarkExtension.GetQuantity(_database.GetBlockReferenceOBB(x.Outline as BlockReference)));

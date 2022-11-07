@@ -791,9 +791,11 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 if (ProcessedData.RadiatorPipeIdList.Contains(i))
                 {
                     filletPolyList = FilletHelper(WholePipeList[i], pt2, pt3, 1);
+                    ProcessedData.ClearRadiator();
                 }
                 else filletPolyList = FilletHelper(WholePipeList[i], pt2, pt3);
 
+                
 
                 DrawUtils.ShowGeometry(filletPolyList, "l4FilletedPipe", 0, 30);
                 //nowPipePolyList.Add(fillet_poly);
@@ -940,8 +942,8 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
         static public DrawPipeData CreateVOut(Polyline vpl, int pipeId) 
         {
             Point3d focus = vpl.GetMaximumInscribedCircleCenter();
-            return new DrawPipeData(focus, 50, 0, pipeId);
             DrawUtils.ShowGeometry(focus, "l6VCenter", 0, 50, 50);
+            return new DrawPipeData(focus, 50, 0, pipeId);
         }
         public void TransformBy(Matrix3d matrix)
         {

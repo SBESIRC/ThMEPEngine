@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -52,9 +51,11 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                ThBConvertDbUtils.UpdateLayerSettings(layer);
-                var block = acadDatabase.Element<Entity>(objId, true);
-                block.Layer = layer;
+                if (ThBConvertDbUtils.UpdateLayerSettings(layer))
+                {
+                    var block = acadDatabase.Element<Entity>(objId, true);
+                    block.Layer = layer;
+                }
             }
         }
 

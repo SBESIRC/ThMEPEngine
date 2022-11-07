@@ -12,10 +12,21 @@ namespace TianHua.Mep.UI.Data
 {
     internal class ThConfigDataTool
     {
-        public const string  ExtractRoomNamedDictKey = "提取房间配置";
+        //提取房间
+        public const string ExtractRoomNamedDictKey = "提取房间配置";
         public const string WallLayerSearchKey = "墙图层";
         public const string DoorBlkNameConfigSearchKey = "门图块";
         public const string YnExtractShearWallSearchKey = "是否提取剪力墙";
+
+        //图层配置
+        public const string ExtractLayerNamedDictKey = "图层配置";
+        public const string BeamLayerSearchKey = "梁图层";
+        public const string ShearWallLayerSearchKey = "剪力墙图层";
+        public const string BeamEngineOptionSearchKey = "梁识别引擎"; // DB,图层
+        public const string ShearWallOptionSearchKey = "剪力墙图层选项"; //默认，图层
+
+        //建筑轮廓线配置
+        public const string ExtractArchitectureOutlineNamedDictKey = "提取建筑轮廓线配置";
 
         public static DBObjectCollection GetDoorZones(Database database,Point3dCollection pts)
         {

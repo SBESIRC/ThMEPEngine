@@ -13,6 +13,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <LangVersion>preview</LangVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-NET45|AnyCPU'">
@@ -24,6 +25,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -171,6 +173,7 @@
     <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="Command\ThPickRoomCmd.cs" />
     <Compile Include="Command\ThSuperBoundaryCmd.cs" />
+    <Compile Include="Command\ThTotalBoundaryCmd.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
     <Compile Include="Config\ThExtractShearWallConfig.cs" />
     <Compile Include="Config\ThExtractBeamConfig.cs" />
@@ -234,6 +237,12 @@
     <Compile Include="Engine\ThTCHVPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThAIWindowOutlineRecognitionEngine.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
+    <Compile Include="Geom\Extents2dCalculator.cs" />
+    <Compile Include="Geom\GeoAlgorithm.cs" />
+    <Compile Include="Geom\GLineSegment.cs" />
+    <Compile Include="Geom\GRect.cs" />
+    <Compile Include="Geom\PointConvertExtensions.cs" />
+    <Compile Include="Geom\PointExtensions.cs" />
     <Compile Include="GridOperation\CutGridRegionService.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
@@ -274,6 +283,7 @@
     <Compile Include="Model\ThIfcStoreyInfo.cs" />
     <Compile Include="Model\ThIfcTextNodeData.cs" />
     <Compile Include="Service\ThBlockReferenceObbService.cs" />
+    <Compile Include="Service\ThCADImagePlotService.cs" />
     <Compile Include="Service\ThDoorLayerManager.cs" />
     <Compile Include="Service\ThFireCompartmentLayerManager.cs" />
     <Compile Include="Service\ThIniTool.cs" />
@@ -640,6 +650,7 @@
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
     <Compile Include="Service\ThStairDoorService.cs" />
     <Compile Include="Service\ThTesslateService.cs" />
+    <Compile Include="Service\ThTotalBoundaryService.cs" />
     <Compile Include="Service\ThVStructuralElementSimplifier.cs" />
     <Compile Include="Service\ThPolygonalElementSimplifier.cs" />
     <Compile Include="Service\ThCurtainWallLayerManager.cs" />

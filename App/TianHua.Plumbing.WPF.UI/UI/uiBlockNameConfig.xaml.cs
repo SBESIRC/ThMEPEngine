@@ -1,11 +1,16 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.PlottingServices;
+using DotNetARX;
+using ICSharpCode.SharpZipLib.Zip;
 using Linq2Acad;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPWSS.BlockNameConfig;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.ViewModel;
 
@@ -47,6 +52,102 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     viewModel.SetViewModel = oldViewModel;
                     viewModel.BlockNameList[blockName] = viewModel.SetViewModel.ConfigList;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 采用目标检测对整张图片进行识别
+        /// </summary>
+        private async void Cloud_Configuration2(object sender, RoutedEventArgs e)
+        {
+            var cad2Pic = new Cad2Pic();
+            var picInfo = new PicInfo();
+            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
+            var picName = cad2Pic.THDETECT(picInfo);
+            stopwatch.Stop();
+            Active.Editor.WriteLine(PlotFactory.ProcessPlotState.ToString());
+
+            string[] strs = new string[1] { picName };
+            while (true)
+            {
+                if (PlotFactory.ProcessPlotState == ProcessPlotState.NotPlotting)
+                {
+                    break;
+                }
+                Thread.Sleep(1000);
+            }
+            Active.Editor.WriteLine(stopwatch.Elapsed.Minutes + "分" + stopwatch.Elapsed.Seconds + "秒");
+
+            await Program.Run(strs);
+
+            var json2Cad = new Json2Cad();
+            json2Cad.DrawRect(picInfo);
+        }
+
+        /// <summary>
+        /// 采用目标识别，对每个块进行打分
+        /// </summary>
+        private async void Cloud_Configuration(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Reset();
+            stopwatch.Start();
+            var zipFile = Block2Pic.GenerateBlockPic(out Dictionary<string, List<double>> blockSizeDic);
+            stopwatch.Stop();
+            Active.Editor.WriteMessage("生成图片用时: " + stopwatch.Elapsed.Seconds+" s\n");
+            stopwatch.Reset();
+            stopwatch.Start();
+            await Program.Run(new string[1] { zipFile });
+            stopwatch.Stop();
+            Active.Editor.WriteMessage("分类用时: " + stopwatch.Elapsed.Seconds + " s\n");
+            stopwatch.Reset();
+            stopwatch.Start();
+            UpdateBlockList(zipFile, blockSizeDic);
+            stopwatch.Stop();
+            Active.Editor.WriteMessage("写入用时: " + stopwatch.Elapsed.Seconds + " s\n");
+        }
+
+        public void UpdateBlockList(string zipFile,Dictionary<string, List<double>> blockSizeDic)
+        {
+            //var dict = new Dictionary<int, string>() { 
+            //    { 3, "洗脸盆" }, { 4, "洗涤槽" }, { 5, "拖把池" }, 
+            //    { 6, "洗衣机" }, { 8, "淋浴房" }, { 9, "转角淋浴房" }, 
+            //    { 10, "浴缸" }, { 11, "喷头" }, { 0, "坐便器" }, { 1, "小便器" }, 
+            //    { 2, "蹲便器" }, { 7, "地漏" } };
+
+            var dict = new Dictionary<int, string>() {
+                { 0, "坐便器" }, { 1, "小便器" }, { 2, "蹲便器" },
+                { 3, "单盆洗手台" }, { 4, "厨房洗涤盆" }, { 5, "拖把池" },
+                { 6, "洗衣机" }, { 7, "地漏"   }, { 8, "浴缸" }, 
+                { 9, "喷头" }, { 10, "其他" }};
+
+            var lines = File.ReadAllLines(zipFile + ".csv").Where(x => !string.IsNullOrWhiteSpace(x));
+            foreach (var line in lines)
+            {
+                if (line == "error")
+                    break;
+                var arr = line.Split(',');
+                if (!int.TryParse(arr[1], out var typeId)) continue;
+                if (!dict.ContainsKey(typeId)) continue;
+                
+                var blkName = arr[0].Replace(".jpg", "");
+                if (blkName.Contains("Kitchen-4"))
+                    ;
+                if (typeId == 7)
+                {
+                    if (blockSizeDic.ContainsKey(blkName))
+                    {
+                        if (blockSizeDic[blkName].First() >= 200 || blockSizeDic[blkName].First() >= 200)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                if (viewModel.BlockNameList.ContainsKey(dict[typeId]))
+                {
+                    viewModel.BlockNameList[dict[typeId]].Add(new BlockNameConfigViewModel(blkName));
                 }
             }
         }

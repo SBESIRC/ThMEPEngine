@@ -15,4 +15,5 @@
 	<module path="ThMEPElectrical.dll" />
 	<module path="ThMEPWSS.dll" />
 	<module path="ThMEPArchitecture.dll" />
+	<module path="ThParkingStall.Core.exe" />
 </project>

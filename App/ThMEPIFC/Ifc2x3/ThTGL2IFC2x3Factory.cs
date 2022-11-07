@@ -99,7 +99,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public IfcBuildingStorey CreateStorey(IfcStore model, IfcBuilding building, ThTCHBuildingStorey storey)
+        public static IfcBuildingStorey CreateStorey(IfcStore model, IfcBuilding building, ThTCHBuildingStorey storey)
         {
             using (var txn = model.BeginTransaction("Create Storey"))
             {
@@ -164,7 +164,7 @@ namespace ThMEPIFC.Ifc2x3
             return rep;
         }
 
-        static public void relContainWalls2Storey(IfcStore model, List<IfcWall> walls, IfcBuildingStorey Storey)
+        public static void relContainWalls2Storey(IfcStore model, List<IfcWall> walls, IfcBuildingStorey Storey)
         {
             using (var txn = model.BeginTransaction("relContainWalls2Storey"))
             {
@@ -182,7 +182,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public void relContainColumns2Storey(IfcStore model, List<IfcColumn> columns, IfcBuildingStorey Storey)
+        public static void relContainColumns2Storey(IfcStore model, List<IfcColumn> columns, IfcBuildingStorey Storey)
         {
             using (var txn = model.BeginTransaction("relContainColumns2Storey"))
             {
@@ -200,7 +200,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public void relContainBeams2Storey(IfcStore model, List<IfcBeam> beams, IfcBuildingStorey Storey)
+        public static void relContainBeams2Storey(IfcStore model, List<IfcBeam> beams, IfcBuildingStorey Storey)
         {
             using (var txn = model.BeginTransaction("relContainColumns2Storey"))
             {
@@ -218,7 +218,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public void relContainDoors2Storey(IfcStore model, List<IfcDoor> doors, IfcBuildingStorey Storey)
+        public static void relContainDoors2Storey(IfcStore model, List<IfcDoor> doors, IfcBuildingStorey Storey)
         {
             using (var txn = model.BeginTransaction("relContainDoors2Storey"))
             {
@@ -235,7 +235,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public void relContainWindows2Storey(IfcStore model, List<IfcWindow> windows, IfcBuildingStorey Storey)
+        public static void relContainWindows2Storey(IfcStore model, List<IfcWindow> windows, IfcBuildingStorey Storey)
         {
             using (var txn = model.BeginTransaction("relContainWindows2Storey"))
             {
@@ -252,7 +252,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public void relContainSlabs2Storey(IfcStore model, List<IfcSlab> slabs, IfcBuildingStorey Storey)
+        public static void relContainSlabs2Storey(IfcStore model, List<IfcSlab> slabs, IfcBuildingStorey Storey)
         {
             using (var txn = model.BeginTransaction("relContainSlabs2Storey"))
             {
@@ -267,7 +267,7 @@ namespace ThMEPIFC.Ifc2x3
             }
         }
 
-        static public void relContainsRailings2Storey(IfcStore model, List<IfcRailing> railings, IfcBuildingStorey storey)
+        public static void relContainsRailings2Storey(IfcStore model, List<IfcRailing> railings, IfcBuildingStorey storey)
         {
             using (var txn = model.BeginTransaction("relContainsRailings2Storey"))
             {
@@ -281,7 +281,8 @@ namespace ThMEPIFC.Ifc2x3
                 txn.Commit();
             }
         }
-        static public void relContainsRooms2Storey(IfcStore model, List<IfcSpace> rooms, IfcBuildingStorey storey)
+
+        public static void relContainsRooms2Storey(IfcStore model, List<IfcSpace> rooms, IfcBuildingStorey storey)
         {
             using (var txn = model.BeginTransaction("relContainsRooms2Storey"))
             {

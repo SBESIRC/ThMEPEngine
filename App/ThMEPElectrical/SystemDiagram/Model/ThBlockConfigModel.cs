@@ -24,15 +24,16 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 return;
             }
             BlockConfig = new List<ThBlockModel>();
-            #region #1
+            #region 楼层或防火分区线箱
+            #region #1 消防应急广播线
             #endregion
-            #region #2
+            #region #2 消防电话线
             #endregion
-            #region #3
+            #region #3 DC24V电源线
             #endregion
-            #region #4
+            #region #4 报警、联动总线
             #endregion
-            #region #5
+            #region #5 火灾显示盘总线
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "区域显示器/火灾显示盘",
@@ -62,7 +63,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 attNameValues = new Dictionary<string, string>() { { "F", "FI" } }
             });
             #endregion
-            #region #6
+            #region #6 消防应急广播干线
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "短路隔离器",
@@ -112,7 +113,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 DependentStatisticalRule = FireCompartmentParameter.FireBroadcastingCount
             });
             #endregion
-            #region #7
+            #endregion
+            #region 楼层或防火分区火灾自动报警设备
+            #region #7  手报声光/消防电话
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "手动火灾报警按钮(带消防电话插座)",
@@ -150,7 +153,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(1850, 450, 0)
             });
             #endregion
-            #region #8
+            #region #8  消防应急广播
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "火灾应急广播扬声器-2",
@@ -191,7 +194,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 attNameValues = new Dictionary<string, string>() { { "F", "W" } }
             });
             #endregion
-            #region #9
+            #region #9  火灾探测器
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "感烟火灾探测器",
@@ -217,7 +220,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 Position = new Point3d(2250, 1500, 0)
             });
             #endregion
-            #region #10
+            #region #10 火灾探测器
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "红外光束感烟火灾探测器发射器",
@@ -422,7 +425,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(0, 1150, 0)
             });
             #endregion
-            #region #11
+            #region #11 非消防电源切除
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "强电间总线控制模块",
@@ -441,7 +444,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 TextPosition = new Point3d(1500, 450, 0)
             });
             #endregion
-            #region #12
+            #region #12 弱电系统消防联动
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "弱电间总线控制模块",
@@ -462,7 +465,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 TextPosition = new Point3d(1500, 450, 0)
             });
             #endregion
-            #region #13
+            #region #13 消防联动设备
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "防火卷帘模块",
@@ -500,7 +503,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 CoefficientOfExpansion = 5
             });
             #endregion
-            #region #14
+            #region #14 防火阀
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "70℃防火阀+输入模块",
@@ -515,7 +518,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(1100, 1150, 0),
                 attNameValues = new Dictionary<string, string>() { { "F", "70℃" } },
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "F", new List<string>() { "70℃" } } },
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "F", new List<string>() { "70℃" , "~E" } } },
             });
             BlockConfig.Add(new ThBlockModel()
             {
@@ -547,10 +550,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 QuantityPosition = new Point3d(2600, 1150, 0),
                 attNameValues = new Dictionary<string, string>() { { "F", "280℃" } },
                 StatisticMode = StatisticType.Attributes,
-                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "F", new List<string>() { "280℃" } } }
+                StatisticAttNameValues = new Dictionary<string, List<string>>() { { "F", new List<string>() { "280℃", "~E" } } }
             });
             #endregion
-            #region #15
+            #region #15 电动防火阀
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "电动防火阀",
@@ -612,7 +615,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             });
             #endregion
-            #region #16
+            #region #16 防排烟风机
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "防排抽烟机",
@@ -688,7 +691,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             });
             #endregion
-            #region #17
+            #region #17 消火栓系统联动
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "消火栓按钮",
@@ -740,7 +743,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             });
             #endregion
-            #region #18
+            #region #18 喷淋系统联动
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "水流指示器",
@@ -824,7 +827,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             });
             #endregion
-            #region #19
+            #region #19 消防水泵联动-1
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "消火栓泵",
@@ -869,7 +872,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             });
             #endregion
-            #region #20
+            #region #20 消防水泵联动-2
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "喷淋泵",
@@ -912,7 +915,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             });
             #endregion
-            #region #21
+            #region #21 消防给水联动
             BlockConfig.Add(new ThBlockModel()
             {
                 UniqueName = "消防水池",
@@ -943,6 +946,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     }
                 }
             });
+            #endregion
             #endregion
             InitConfig();
         }

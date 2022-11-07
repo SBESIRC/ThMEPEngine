@@ -1,12 +1,14 @@
 ﻿using System;
-using Linq2Acad;
-using DotNetARX;
-using ThCADExtension;
-using ThMEPEngineCore.Engine;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+
+using DotNetARX;
+using Linq2Acad;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -35,9 +37,11 @@ namespace ThMEPElectrical.BlockConvert
         {
             using (var acadDatabase = AcadDatabase.Use(targetBlockData.Database))
             {
-                ThBConvertDbUtils.UpdateLayerSettings(layer);
-                var block = acadDatabase.Element<Entity>(objId, true);
-                block.Layer = layer;
+                if (ThBConvertDbUtils.UpdateLayerSettings(layer))
+                {
+                    var block = acadDatabase.Element<Entity>(objId, true);
+                    block.Layer = layer;
+                }
             }
         }
 

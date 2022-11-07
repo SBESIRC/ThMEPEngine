@@ -12,10 +12,12 @@ namespace ThMEPEngineCore.Config
         internal ThExtractShearWallConfig()
         {
             LayerInfos = new List<ThLayerInfo>();
+            ShearWallLayerOption = ShearwallLayerConfigOps.Default;
         }
         static ThExtractShearWallConfig()
         {
         }
+        public ShearwallLayerConfigOps ShearWallLayerOption { get; set; }
         public List<ThLayerInfo> LayerInfos { get; set; }        
         public List<string> GetSelectLayers(Database db)
         {
@@ -27,5 +29,10 @@ namespace ThMEPEngineCore.Config
                     .Select(o => o.Layer).ToList();
             }
         }
+    }
+    public enum ShearwallLayerConfigOps
+    {
+        Default = 0,
+        LayerConfig = 1,
     }
 }

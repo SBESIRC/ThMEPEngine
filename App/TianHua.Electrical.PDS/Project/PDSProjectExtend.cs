@@ -810,6 +810,10 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     return componentFactory.CreatCPS();
                 }
+                else if (type.Equals(typeof(Conductor)))
+                {
+                    return componentFactory.CreatConductor();
+                }
                 else
                 {
                     //暂未支持的元器件类型

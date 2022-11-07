@@ -13,6 +13,8 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
+using NetTopologySuite.Mathematics;
+using NetTopologySuite.Algorithm;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -263,6 +265,96 @@ namespace ThMEPEngineCore.CAD
             }
             var nFrame = ThMEPFrameService.Normalize(frame);
             return nFrame.Vertices();
+        }
+
+public static List<T> Slice<T>(this List<T> list, IEnumerable<int> idxs)
+        {
+            var result = new List<T>();
+            foreach (var idx in idxs)
+            {
+                result.Add(list[idx]);
+            }
+            return result;
+        }
+
+        public static bool ParallelTo(this LineSegment lineSegment, LineSegment other, double tol = 0.01)
+        {
+            var dirThis = lineSegment.DirVector();
+            var dirOther = other.DirVector();
+
+            return dirThis.Distance(dirOther) < tol || dirThis.Distance(dirOther.Negate()) < tol;
+        }
+
+        //方向向量
+        public static Vector2D DirVector(this LineSegment lineSegment, bool normalize = true)
+        {
+            if (normalize) return new Vector2D(lineSegment.P0, lineSegment.P1).Normalize();
+            else return new Vector2D(lineSegment.P0, lineSegment.P1);
+        }
+
+        public static LineSegment Merge(this List<LineSegment> lineSegments)//找到输入线中最远两点作为输出线
+        {
+            if (lineSegments.Count == 0) return null;
+            if (lineSegments.Count == 1) return lineSegments.First();
+            var coors = new List<Coordinate>();
+            foreach (var l in lineSegments)
+            {
+                coors.Add(l.P0);
+                coors.Add(l.P1);
+            }
+            var mbc = new MinimumBoundingCircle(new MultiPoint(coors.Select(c => c.ToPoint()).ToArray()));
+            var diameter = mbc.GetMaximumDiameter();
+            if (diameter.IsEmpty) return lineSegments.First();
+            //var ordered = coors.PositiveOrder();
+            return new LineSegment(diameter.Coordinates.First(), diameter.Coordinates.Last());
+        }
+    
+        public static List<T> Get<T>(this Geometry geometry, bool removeHoles = true)
+        {
+            var objs = new List<T>();
+            if (typeof(T) == null) return objs;
+            var typeToGet = typeof(T);
+            var geoType = typeof(Geometry);
+            if (!(typeToGet.IsSubclassOf(geoType) || typeToGet == geoType)) throw new NotSupportedException();
+            if (geometry.IsEmpty)
+            {
+                return objs;
+            }
+            if (geometry is T t)
+            {
+                if (t is Polygon polygon && removeHoles) objs.Add((T)System.
+                    Convert.ChangeType(polygon.RemoveHoles(), typeToGet));
+                else objs.Add(t);
+            }
+            else if (geometry is MultiLineString lineStrings)
+            {
+                foreach (var geo in lineStrings.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
+            }
+            else if (geometry is MultiPolygon polygons)
+            {
+                foreach (var geo in polygons.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
+            }
+            else if (geometry is GeometryCollection geometries)
+            {
+                foreach (var geo in geometries.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
+            }
+            else if (geometry is MultiPoint points)
+            {
+                foreach (var geo in points.Geometries) objs.AddRange(geo.Get<T>(removeHoles));
+            }
+            return objs;
+        }
+        public static Polygon RemoveHoles(this Polygon polygon)
+        {
+            return new Polygon(polygon.Shell);
+        }
+        public static Point ToPoint(this Coordinate coordinate)
+        {
+            return new Point(coordinate);
+        }
+        public static LineSegment Clone(this LineSegment lineSegment)
+        {
+            return new LineSegment(lineSegment.P0.Copy(), lineSegment.P1.Copy());
         }
     }
 }

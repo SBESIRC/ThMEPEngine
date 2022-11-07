@@ -71,6 +71,18 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure
         public string RCDCharacteristics { get; set; }
 
         /// <summary>
+        /// 额定极限分断能力级别
+        /// </summary>
+        public string IcuLevel { get; set; }
+
+        /// <summary>
+        /// 额定极限分断能力
+        /// </summary>
+        public string Icu { get; set; }
+
+        public string IcuConfig { get { return $"{IcuLevel}:{Icu}KA"; } }
+
+        /// <summary>
         /// 宽度
         /// </summary>
         public string Width { get; set; }

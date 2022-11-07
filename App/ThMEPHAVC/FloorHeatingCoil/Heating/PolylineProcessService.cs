@@ -162,8 +162,10 @@ namespace ThMEPHVAC.FloorHeatingCoil.Heating
                 double dProduct = line1.DotProduct(line3);
 
                 double angle = line0.GetAngleTo(line1, Vector3d.ZAxis);
+                double angle2 = line0.GetNormal().DotProduct(line2.GetNormal());
 
-                if (angle < 1.5 * Math.PI + 0.1 && angle > 1.5 * Math.PI - 0.1)   //逆时针情况，外凸，因此转270度
+                if (angle < 1.5 * Math.PI + 0.1 && angle > 1.5 * Math.PI - 0.1  &&
+                    angle2 > 0)   //逆时针情况，外凸，因此转270度
                 {
                     if (line1.Length < value && line3.Length < value && dProduct < 0) 
                     {

@@ -26,6 +26,7 @@ using NetTopologySuite.Operation.Buffer;
 using JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 using ThMEPEngineCore.Algorithm;
 using ThMEPArchitecture.MultiProcess;
+using ThCADExtension;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
 {
@@ -259,7 +260,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
         }
         private void UpdateSegLines()
         {
-            SegLines = CAD_SegLines.Select(segLine => segLine.ExtendLineEx(1, 3)).Select(l => l.ToNTSLineSegment()).ToList();
+            SegLines = CAD_SegLines.Select(segLine => segLine.ExtendLine(1)).Select(l => l.ToNTSLineSegment()).ToList();
             //RemoveSortSegLine();
         }
         private void RemoveSortSegLine()
@@ -378,7 +379,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
             result = result.Intersection(WallLine);
             //ObstacleBoundaries = result.Get<Polygon>(true);
             var mmtoM = 0.001 * 0.001;
-            ParameterStock.TotalArea = WallLine.Area*mmtoM;
+            ParameterStock.TotalArea = WallLine.Buffer(ParameterStock.WallLineThickness,bufferParameters).Area*mmtoM;
+            ParkingStallArrangementViewModel.TotalArea= WallLine.Buffer(ParameterStock.WallLineThickness, bufferParameters).Area * mmtoM;
             ParameterStock.BuildingArea = result.Area * mmtoM; 
             Logger?.Information($"地库总面积:"+ string.Format("{0:N1}", ParameterStock.TotalArea) + "m" + Convert.ToChar(0x00b2) );
             Logger?.Information($"地库内部建筑物总面积:" + string.Format("{0:N1}", ParameterStock.BuildingArea) + "m" + Convert.ToChar(0x00b2) );

@@ -1,6 +1,7 @@
 ﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
+using NetTopologySuite.Operation.OverlayNG;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,12 @@ namespace ThParkingStall.Core.MPartitionLayout
             vec = new Vector2D(vec.X, vec.Y);
             return vec;
         }
+        public static bool IsAdverseVector(Vector2D a, Vector2D b,double tol=0.000001)
+        {
+            var value = a.X + b.X + a.Y + b.Y;
+            if (Math.Abs(value) < tol) return true;
+            else return false;
+        }
         public static bool IsHorizontalLine(LineSegment line, double degreetol = 1)
         {
             double angle = Math.Abs(Vector(line).AngleTo(Vector2D.Create(0, 1)));
@@ -33,9 +40,18 @@ namespace ThParkingStall.Core.MPartitionLayout
             double angle = Math.Abs(a.AngleTo(b));
             return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
         }
+        public static bool IsPerpOrParallelVector(Vector2D a, Vector2D b, double degreetol = 1)
+        {
+            return IsPerpVector(a, b, degreetol) || IsParallelVector(a, b, degreetol);
+        }
         public static bool IsParallelLine(LineSegment a, LineSegment b, double degreetol = 1)
         {
             double angle = Math.Abs(Vector(a).AngleTo(Vector(b)));
+            return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
+        }
+        public static bool IsParallelVector(Vector2D a, Vector2D b, double degreetol = 1)
+        {
+            double angle = Math.Abs(a.AngleTo(b));
             return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
         }
         public static bool IsPerpLine(LineSegment a, LineSegment b, double degreetol = 1)
@@ -99,6 +115,35 @@ namespace ThParkingStall.Core.MPartitionLayout
             }
             return results;
         }
+        public static LineString[] SplitCurve(LineString curve, List<LineString> splitters)
+        {
+            List<Coordinate> points = new List<Coordinate>();
+            foreach(var splitter in splitters)
+                points.AddRange(curve.IntersectPoint(splitter));
+            points = RemoveDuplicatePts(points, 1);
+            points = SortAlongCurve(points, curve);
+            if (points.Count > 0 && curve.Length > 1)
+            {
+                var ps = points.Select(e => curve.ClosestPoint(e)).ToList();
+                ps = RemoveDuplicatePts(ps, 1);
+                ps = SortAlongCurve(ps, curve);
+                var splited = curve.GetSplitCurves(ps);
+                return splited.Where(e => e.Length > 10).Where(e =>
+                {
+                    var mid = e.GetMidPoint();
+                    foreach (var ls in splitters)
+                    {
+                        if (ls.ClosestPoint(mid).Distance(mid) < 1)
+                            return false;
+                    }
+                    return true;
+                }).ToArray();
+            }
+            else
+            {
+                return new LineString[] { curve };
+            }
+        }
         public static LineString[] SplitCurve(LineString curve, LineString splitter)
         {
             List<Coordinate> points = new List<Coordinate>();
@@ -108,6 +153,7 @@ namespace ThParkingStall.Core.MPartitionLayout
             if (points.Count > 0 && curve.Length > 1)
             {
                 var ps = points.Select(e => curve.ClosestPoint(e)).ToList();
+                ps = SortAlongCurve(ps, curve);
                 var splited = curve.GetSplitCurves(ps);
                 return splited.Where(e => e.Length > 1).ToArray();
             }
@@ -115,6 +161,15 @@ namespace ThParkingStall.Core.MPartitionLayout
             {
                 return new LineString[] { curve };
             }
+        }
+        public static LineString[] SplitCurveByNTS(Polygon curve, Polygon splitter)
+        {
+            var g = OverlayNGRobust.Overlay(curve, splitter, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+            if (g is MultiPolygon)
+            {
+                return ((MultiPolygon)g).Geometries.Select(e => new LineString(e.Coordinates)).ToArray();
+            }
+            return new LineString[] { };
         }
         public static LineString[] SplitCurve(Polygon curve, Polygon splitter)
         {
@@ -124,7 +179,13 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static List<LineSegment> SplitLine(LineSegment line, Polygon splitter)
         {
-            var linestring = SplitCurve(new LineString(new List<Coordinate>() { line.P0, line.P1 }.ToArray()), new LineString(splitter.Coordinates));
+            //has bug
+            var tol = 1;
+            var linestring = SplitCurve(new LineString(new List<Coordinate>() { line.P0, line.P1 }.ToArray()), new LineString(splitter.Coordinates.Select(p =>
+            {
+                if (line.ClosestPoint(p).Distance(p) <= tol && line.ClosestPoint(p).Distance(p) > 0) return line.ClosestPoint(p);
+                return p;
+            }).ToArray()));
             return linestring.Select(e => new LineSegment(e.StartPoint.Coordinate, e.EndPoint.Coordinate)).ToList();
         }
         public static LineSegment[] SplitLine(LineSegment curve, List<Polygon> cutters, double length_filter = 1,
@@ -254,6 +315,50 @@ namespace ThParkingStall.Core.MPartitionLayout
                         else if (lines[i].P1.Distance(lines[j].P1) < tol)
                         {
                             lines[j] = new LineSegment(lines[i].P0, lines[j].P0);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        public static void JoinLanes(List<Lane> lines)
+        {
+            double tol = 0.001;
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if (!ObliqueMPartitionLayout.ObliqueMPartition.IsSameVector(lines[i].Vec, lines[j].Vec))
+                        continue;
+                    if (IsParallelLine(lines[i].Line, lines[j].Line) && !IsSubLine(lines[i].Line, lines[j].Line))
+                    {
+                        if (lines[i].Line.P0.Distance(lines[j].Line.P0) < tol)
+                        {
+                            lines[j].Line = new LineSegment(lines[i].Line.P1, lines[j].Line.P1);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].Line.P0.Distance(lines[j].Line.P1) < tol)
+                        {
+                            lines[j].Line = new LineSegment(lines[i].Line.P1, lines[j].Line.P0);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].Line.P1.Distance(lines[j].Line.P0) < tol)
+                        {
+                            lines[j].Line = new LineSegment(lines[i].Line.P0, lines[j].Line.P1);
+                            lines.RemoveAt(i);
+                            i--;
+                            break;
+                        }
+                        else if (lines[i].Line.P1.Distance(lines[j].Line.P1) < tol)
+                        {
+                            lines[j].Line = new LineSegment(lines[i].Line.P0, lines[j].Line.P0);
                             lines.RemoveAt(i);
                             i--;
                             break;
@@ -523,7 +628,15 @@ namespace ThParkingStall.Core.MPartitionLayout
             var ntsPt = new Point(pt.X, pt.Y);
             var selectedBoxes = polygonStrTree.Query(ntsPt.EnvelopeInternal);
             if (selectedBoxes.Count == 0) return false;
-            if (true_on_edge) return true;
+            if (true_on_edge)
+            { 
+            foreach (var crossed in selectedBoxes)
+                {
+                    if (crossed.ClosestPoint(pt).Distance(pt) < 1)
+                        return true;
+                }
+                    return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
+            }
             else return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
         }
         public static bool IsInAnyBoxes(Coordinate pt, List<Polygon> boxes, bool true_on_edge = false)
@@ -534,12 +647,32 @@ namespace ThParkingStall.Core.MPartitionLayout
             var selectedBoxes = polygonStrTree.Query(ntsPt.EnvelopeInternal);
             polygonStrTree = null;
             if (selectedBoxes.Count == 0) return false;
-            if (true_on_edge) return true;
+            if (true_on_edge)
+            {
+                foreach(var bx in selectedBoxes)
+                {
+                    if(bx.ClosestPoint(pt).Distance(pt)<1)return true;
+                }
+                return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
+            }
             else return selectedBoxes.Select(b => b.Scale(0.99999)).Any(b => b.Contains(pt));
         }
         public static double ClosestPointInVertLines(Coordinate pt, LineSegment line, IEnumerable<LineSegment> lines, bool returninfinity = true)
         {
             var ls = lines.Where(e => IsPerpLine(line, e));
+            if (!returninfinity)
+                if (ls.Count() == 0) return -1;
+            var res = double.PositiveInfinity;
+            foreach (var l in ls)
+            {
+                var dis = l.ClosestPoint(pt).Distance(pt);
+                if (res > dis) res = dis;
+            }
+            return res;
+        }
+        public static double ClosestPointInLines(Coordinate pt, LineSegment line, IEnumerable<LineSegment> lines, bool returninfinity = true)
+        {
+            var ls = lines;
             if (!returninfinity)
                 if (ls.Count() == 0) return -1;
             var res = double.PositiveInfinity;
@@ -612,7 +745,7 @@ namespace ThParkingStall.Core.MPartitionLayout
         {
             var project_a = new LineSegment(b.ClosestPoint(a.P0), b.ClosestPoint(a.P1));
             var buffer = project_a.Buffer(1);
-            var splits = SplitLine(b, buffer).Where(e => buffer.Contains(e.MidPoint)).ToList();
+            var splits = SplitCurve(b.ToLineString(), new LineString(buffer.Coordinates)).Where(e => buffer.Contains(e.GetMidPoint())).ToList();
             var length = 0.0;
             splits.ForEach(e => length += e.Length);
             return length;

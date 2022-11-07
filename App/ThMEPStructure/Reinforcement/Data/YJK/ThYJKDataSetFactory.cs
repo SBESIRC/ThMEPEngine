@@ -99,11 +99,10 @@ namespace ThMEPStructure.Reinforcement.Data.YJK
             leaderMarks.Item1.ForEach(o => leaderObjs = leaderObjs.Union(o.Value));
             leaderMarks.Item2.ForEach(o => leaderObjs = leaderObjs.Union(o.Value));
             leaderObjs.DisposeEx();
-            var restWallColumns = wallColumns.Difference(Results.Select(o=>o.EdgeComponent).ToCollection());
-            restWallColumns.DisposeEx();
-
+            var restWallColumns = wallColumns.Difference(Results.Select(o=>o.EdgeComponent).ToCollection());            
             // 还原到近似原点
             transformer.Reset(wallColumns);
+            restWallColumns.DisposeEx();
         }
 
         private void GetOutlineSpecAndLinkWallPos(EdgeComponentExtractInfo componentInf,DBObjectCollection walls)

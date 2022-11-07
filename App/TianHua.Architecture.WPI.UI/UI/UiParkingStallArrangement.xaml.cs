@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPArchitecture;
 using ThMEPArchitecture.MultiProcess;
 using ThMEPArchitecture.ParkingStallArrangement;
 using ThMEPArchitecture.ViewModel;
@@ -26,8 +28,21 @@ namespace TianHua.Architecture.WPI.UI.UI
     public partial class UiParkingStallArrangement : ThCustomWindow
     {
         static ParkingStallArrangementViewModel _ViewModel = null;
+        private static string _Version = null;
+        public static string Version
+        {
+            get { return _Version; }
+            set
+            {
+                FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                string AssmblyVersion = myFileVersionInfo.FileVersion;
+                _Version = AssmblyVersion;
+            }
+        }
+        public static bool DebugLocal = false;
         public UiParkingStallArrangement()
         {
+            ParkingStallArrangementViewModel.DebugLocal = DebugLocal;
             if (_ViewModel == null)
             {
                 _ViewModel = new ParkingStallArrangementViewModel();
@@ -59,7 +74,14 @@ namespace TianHua.Architecture.WPI.UI.UI
             //                    thread.IsBackground = true;
             //                    thread.Start();
             //                });
-
+            if (_ViewModel.ObliqueMode)
+            {
+                using (var cmd = new ThOArrangementCmd(_ViewModel))
+                {
+                    cmd.Execute();
+                    return;
+                }
+            }
 
             if (_ViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
             {
@@ -118,6 +140,22 @@ namespace TianHua.Architecture.WPI.UI.UI
         private void btnShowLog_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void preprocess_Click(object sender, RoutedEventArgs e)
+        {
+            using (var cmd = new ThParkingStallPreprocessCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        private void oIteration_Click(object sender, RoutedEventArgs e)
+        {
+            _ViewModel.CommandType = CommandTypeEnum.RunWithIteration;
+            using (var cmd = new ThOArrangementCmd(_ViewModel))
+            {
+                cmd.Execute();
+            }
         }
     }
 }

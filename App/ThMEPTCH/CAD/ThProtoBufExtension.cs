@@ -86,6 +86,7 @@ namespace ThMEPTCH.CAD
             tchPolyline.Points.Add(polyline.StartPoint.ToTCHPoint());
             var segments = new PolylineSegmentCollection(polyline);
             uint ptIndex = 0;
+            var elevation = polyline.Elevation;
             for (int k = 0; k < segments.Count; k++)
             {
                 var segment = segments[k];
@@ -101,7 +102,7 @@ namespace ThMEPTCH.CAD
                     else if (segment.IsLinear)
                     {
                         // 直线段
-                        tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint());
+                        tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint(elevation));
                         tchSegment.Index.Add(++ptIndex);
                         tchPolyline.Segments.Add(tchSegment);
                     }
@@ -114,10 +115,10 @@ namespace ThMEPTCH.CAD
                         double p2 = arc.GetParameterOf(arc.EndPoint);
                         var midPoint = arc.EvaluatePoint(p1 + (p2 - p1) / 2.0);
 
-                        tchPolyline.Points.Add(midPoint.ToTCHPoint());
+                        tchPolyline.Points.Add(midPoint.ToTCHPoint(elevation));
                         tchSegment.Index.Add(++ptIndex);
 
-                        tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint());
+                        tchPolyline.Points.Add(segment.EndPoint.ToTCHPoint(elevation));
                         tchSegment.Index.Add(++ptIndex);
                         tchPolyline.Segments.Add(tchSegment);
                     }
@@ -207,6 +208,11 @@ namespace ThMEPTCH.CAD
         public static ThTCHPoint3d ToTCHPoint(this Point2d point)
         {
             return new ThTCHPoint3d() { X = point.X, Y = point.Y, Z = 0 };
+        }
+        
+        public static ThTCHPoint3d ToTCHPoint(this Point2d point, double elevation)
+        {
+            return new ThTCHPoint3d() { X = point.X, Y = point.Y, Z = elevation };
         }
 
         public static Point2d ToPoint2d(this ThTCHPoint3d point)

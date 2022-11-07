@@ -283,6 +283,11 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "SuperBoundaryConfig.ini");
         }
 
+        public static string TotalBoundaryIniPath()
+        {
+            return Path.Combine(SupportPath(), "TotalBoundaryConfig.ini");
+        }
+
         // 运行时根目录
         private static string RootPath()
         {

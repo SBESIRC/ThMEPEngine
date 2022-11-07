@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPHVAC.FloorHeatingCoil.Heating;
 
 namespace ThMEPHVAC.FloorHeatingCoil
 {
@@ -167,7 +168,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 {
                     if (diff.Count() > 1)
                         diff = diff.OrderBy(o => o.Distance(pipe_inputs[index].pin)).ToList();
-                    intersect_region = diff.First();
+                    if (index == main_index && ProcessedData.HaveVirtualPipe)
+                        intersect_region = diff.Last();
+                    else
+                        intersect_region = diff.First();
                 }
 
                 else
@@ -887,6 +891,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
             var dp_3 = PassageWayUtils.GetDirBetweenTwoPoint(p_4, p_3);
             if (dp_3 != dp_1) return;
             if (dp_3 != dp_1) return;
+            if (p_1.DistanceTo(p_2) > buffer / 2 + room_buffer + 1e-3) return;
             // 找到出口所在边
             points = PassageWayUtils.GetPolyPoints(region);
             var pre = PassageWayUtils.GetSegIndexOnPolygon(p_1, points);

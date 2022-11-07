@@ -113,6 +113,7 @@ namespace ThAnalytics
         {
             ThCybrosService.Instance.Initialize();
             ThAcsSystemService.Instance.Initialize();
+            ThCADDocumentService.Instance.Initialize();
             AcadApp.Idle += new EventHandler(Application_OnIdle);
         }
 
@@ -144,6 +145,7 @@ namespace ThAnalytics
             if (e.Document != null)
             {
                 ThAcsSystemService.Instance.Reset();
+                ThCADDocumentService.Instance.Reset();
             }
         }
 

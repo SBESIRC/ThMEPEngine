@@ -47,12 +47,13 @@ namespace ThMEPWSS.SprinklerDim.Service
                     newDim.XLine2Point = p2;
                     newDim.DimLinePoint = dimBasePt;
                     newDim.Rotation = rotation;
-                    newDim.Dimtxt = 350;
-                    if (scale==150)
-                    {
-                        newDim.Dimtxt = 450;
-                    }
-                    newDim.Dimscale = 1;
+                    //newDim.Dimtxt = 350;
+                    //if (scale==150)
+                    //{
+                    //    newDim.Dimtxt = 450;
+                    //}
+                    //newDim.Dimscale = 1;
+                    newDim.Dimscale = scale;
                     cadDim.Add(newDim);
                 }
             }

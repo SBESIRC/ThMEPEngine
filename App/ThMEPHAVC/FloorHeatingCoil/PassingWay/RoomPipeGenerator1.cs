@@ -26,7 +26,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
         // output
         public PipeOutput output;
-        public List<Point3d> output_coords = new List<Point3d>();
+
+        List<Point3d> output_coords = new List<Point3d>();
+        List<Point3d> oppo_output_coords = new List<Point3d>();
         // inner structure
         BufferTreeNode buffer_tree = null;
         List<Polyline> skeleton = new List<Polyline>();             // 临时骨架线
@@ -37,8 +39,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
         double buffer_threshold = 150;                                     // 最小间距
 
         // 移动到原点
-        bool if_move_to_origin = true;
+        bool if_move_to_origin = false;
         Vector3d transform_vector = new Vector3d(0, 0, 0);
+        // 反方向盘管折角数量判断
+        bool oppo_direction_judge = true;
+        bool oppo_direction = false;
 
         RoomPipeGenerator1() { }
 
@@ -58,8 +63,14 @@ namespace ThMEPHVAC.FloorHeatingCoil
         }
         public void CalculatePipeline()
         {
+            oppo_direction = false;
             buffer_tree = GetBufferTree(room,0);
-
+            if (oppo_direction_judge)
+            {
+                oppo_direction = true;
+                buffer_tree.Dispose();
+                buffer_tree = GetBufferTree(room, 0);
+            }
             AddInputSegment();
             RecoverMove(if_move_to_origin);
         }
@@ -117,8 +128,6 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 }
 
                 DealWithOutShell(node, next_buffers);
-
-
             }
             // 第二层以上：先处理框线，后生成内层轮廓
             if(depth>=2)
@@ -172,7 +181,10 @@ namespace ThMEPHVAC.FloorHeatingCoil
             var pre = PassageWayUtils.GetSegIndexOnPolygon(point, points);
             var next = (pre + 1) % points.Count;
             var dir = (points[next] - points[pre]).GetNormal().RotateBy(-Math.PI / 2, Vector3d.ZAxis);
-            if (output_coords.Count == 0)
+            var priout = output_coords;
+            if (oppo_direction_judge && oppo_output_coords.Count < output_coords.Count)
+                priout = oppo_output_coords;
+            if (priout.Count == 0)
             {
                 // 仅输出入口
                 var le = pipe_input.pin + dir * room_buffer;
@@ -186,9 +198,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
             else
             {
                 // 合并主要管线和入口
-                if (output_coords.Last() != output_coords.First())
-                    output_coords.Add(output_coords.First());
-                var main_pipe = PassageWayUtils.BuildPolyline(output_coords);
+                if (priout.Last() != priout.First())
+                    priout.Add(priout.First());
+                var main_pipe = PassageWayUtils.BuildPolyline(priout);
                 var dis = main_pipe.GetClosePoint(pipe_input.pin).DistanceTo(pipe_input.pin);
                 var le = pipe_input.pin + dir * (dis + pipe_width);
                 var line = new Line(pipe_input.pin, le);
@@ -202,7 +214,7 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 {
                     var ls = line.EndPoint;
                     le = main_pipe.GetClosePoint(ls);
-                    var fixed_le = output_coords.OrderBy(o => o.DistanceTo(le)).First();
+                    var fixed_le = priout.OrderBy(o => o.DistanceTo(le)).First();
                     fixed_le += (le - fixed_le).GetNormal() * pipe_width;
                     var dp = fixed_le - le;
                     ls += dp;
@@ -315,6 +327,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
                     is_clockwise *= -1;
                 }
             }
+            // 如果加入了另一方向判断
+            if (oppo_direction)
+            {
+                coords.Reverse(1, coords.Count - 1);
+                is_clockwise *= -1;
+            }
             if (next_buffers.Count != 0)
             {
                 // 计算断点last_point、对应的child和child_point
@@ -385,8 +403,9 @@ namespace ThMEPHVAC.FloorHeatingCoil
             node.IsCW = is_clockwise;
 
             node.SetShell(PassageWayUtils.BuildPolyline(coords));
-            output_coords.AddRange(coords);
-            output_coords = SmoothUtils.SmoothPoints(output_coords);
+            var priout = oppo_direction ? oppo_output_coords : output_coords;
+            priout.AddRange(coords);
+            SmoothUtils.SmoothPoints(priout);
         }
         void DealWithDeepShell(BufferTreeNode node)
         {
@@ -473,7 +492,8 @@ namespace ThMEPHVAC.FloorHeatingCoil
                 node.SetShell(PassageWayUtils.BuildPolyline(coords));
                 //PassageShowUtils.ShowEntity(node.shell);
                 // 将当前轮廓加入到整条管道中
-                index = PassageWayUtils.GetPointIndex(last_point, output_coords);
+                var priout = oppo_direction ? oppo_output_coords : output_coords;
+                index = PassageWayUtils.GetPointIndex(last_point, priout);
                 if (node.depth % 2 == 0)
                 {
                     coords.Reverse();
@@ -481,25 +501,27 @@ namespace ThMEPHVAC.FloorHeatingCoil
 
                 if (index == 0)
                 {
-                    output_coords.AddRange(coords);
+                    priout.AddRange(coords);
                 }
                 else if (index != -1)
                 {
                     if (node.depth % 2 == 0)
                     {
-                        output_coords.InsertRange(index, coords);
+
+                        priout.InsertRange(index, coords);
+
                     }
                     else
                     {
-                        output_coords.InsertRange(index + 1, coords);
+                        priout.InsertRange(index + 1, coords);
                     }
                 }
                 else
                 {
-                    index = PassageWayUtils.GetSegIndexOnPolyline(last_point, output_coords);
-                    output_coords.InsertRange(index + 1, coords);
+                    index = PassageWayUtils.GetSegIndexOnPolyline(last_point, priout);
+                    priout.InsertRange(index + 1, coords);
                 }
-                output_coords = SmoothUtils.SmoothPoints(output_coords);
+                SmoothUtils.SmoothPoints(priout);
             }
         }
         void DealWithLeaveShell(BufferTreeNode node)
@@ -556,11 +578,12 @@ namespace ThMEPHVAC.FloorHeatingCoil
                                     inner_coords[3] += dp.GetNormal() * buffer / 2;
                                 }
                             }
-                            var index = PassageWayUtils.GetPointIndex(inner_coords[0], output_coords);
+                            var priout = oppo_direction ? oppo_output_coords : output_coords;
+                            var index = PassageWayUtils.GetPointIndex(inner_coords[0], priout);
                             if (index != -1)
                             {
-                                output_coords.InsertRange(index + 1, inner_coords);
-                                output_coords = SmoothUtils.SmoothPoints(output_coords);
+                                priout.InsertRange(index + 1, inner_coords);
+                                SmoothUtils.SmoothPoints(priout);
                             }
                         }
                         else
@@ -602,12 +625,13 @@ namespace ThMEPHVAC.FloorHeatingCoil
                                     inner_coords[1] += dp.GetNormal() * buffer / 2;
                                 }
                             }
-                            var index = PassageWayUtils.GetPointIndex(inner_coords[0], output_coords);
+                            var priout = oppo_direction ? oppo_output_coords : output_coords;
+                            var index = PassageWayUtils.GetPointIndex(inner_coords[0], priout);
                             if (index != -1)
                             {
                                 inner_coords.RemoveAt(0);
-                                output_coords.InsertRange(index, inner_coords);
-                                output_coords = SmoothUtils.SmoothPoints(output_coords);
+                                priout.InsertRange(index, inner_coords);
+                                SmoothUtils.SmoothPoints(priout);
                             }
 
                         }
@@ -642,10 +666,11 @@ namespace ThMEPHVAC.FloorHeatingCoil
                             if (!inner_poly.ToNTSLineString().Intersects(shell_poly.ToNTSLineString()))
                             {
                                 inner_coords.RemoveAt(inner_coords.Count - 1);
-                                var index = PassageWayUtils.GetPointIndex(inner_coords[0], output_coords);
+                                var priout = oppo_direction ? oppo_output_coords : output_coords;
+                                var index = PassageWayUtils.GetPointIndex(inner_coords[0], priout);
                                 if (index != -1)
                                 {
-                                    output_coords.InsertRange(index + 1, inner_coords);
+                                    priout.InsertRange(index + 1, inner_coords);
                                 }
                             }
                         }

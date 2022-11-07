@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ThAnalytics.SDK;
+﻿using ThAnalytics.SDK;
 using ThMEPIdentity;
 
 namespace ThAnalytics
@@ -71,6 +69,7 @@ namespace ThAnalytics
             thsegmentation.Add("功能", eventName);
             thsegmentation.Add("用户", ThAcsSystemService.Instance.UserId);
             thsegmentation.Add("项目", ThAcsSystemService.Instance.ProjectNumber);
+            thsegmentation.Add("图纸", ThCADDocumentService.Instance.Name);
             THRecordingService.RecordEvent("天华命令使用", (int)duration, thsegmentation);
         }
     }

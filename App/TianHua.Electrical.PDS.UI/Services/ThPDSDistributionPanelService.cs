@@ -3868,14 +3868,11 @@ namespace TianHua.Electrical.PDS.UI.WpfServices
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("RCDType", true);
                     ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("ResidualCurrent", true);
                 }
-                if (breaker.ComponentType == ComponentType.组合式RCD)
-                {
-                    ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSBreakerModel>("Appendix", true);
-                }
-                else
-                {
-                    ThPDSPropertyDescriptorHelper.SetReadOnlyProperty<ThPDSBreakerModel>("Appendix", false);
-                }
+                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("STAppendix", breaker.IsSTAppendixEnabled);
+                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("ALAppendix", breaker.IsALAppendixEnabled);
+                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("URAppendix", breaker.IsURAppendixEnabled);
+                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("AXAppendix", breaker.IsAXAppendixEnabled);
+                ThPDSPropertyDescriptorHelper.SetBrowsableProperty<ThPDSBreakerModel>("RCDAppendix", breaker.IsRCDAppendixEnabled);
             }
             if (vm is ThPDSDistributionBoxModel target)
             {

@@ -6,8 +6,8 @@
                     xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
                     xmlns:converters="clr-namespace:TianHua.Electrical.UI.BlockConvert"
                     SizeToContent="WidthAndHeight" mc:Ignorable="d" ResizeMode="NoResize" Title="天华提资转换"
-                    Width="520" Height="415" HorizontalContentAlignment="Left" 
-                    MinWidth="520" MinHeight="425" MaxHeight="425" MaxWidth="600" >
+                    Width="520" Height="450" HorizontalContentAlignment="Left" 
+                    MinWidth="520" MinHeight="460" MaxHeight="460" MaxWidth="600" >
     <Window.Resources>
         <ResourceDictionary>
             <converters:CapitalOpsBooleanConverter x:Key="CapitalOpsConverter"/>
@@ -107,13 +107,19 @@
             </Border>
             <Border Margin="5,3,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
                 <StackPanel >
-                    <CheckBox x:Name="convertManualActuator" Margin="3,5" Content="转换排烟阀手动执行机构" IsThreeState="False"
+                    <CheckBox x:Name="convertManualActuator" Margin="3,5" Height="15" Content="转换排烟阀手动执行机构" IsThreeState="False"
                       IsChecked="{Binding Parameter.ManualActuatorOps,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                 </StackPanel>
             </Border>
             <Border Margin="5,3,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
+                <StackPanel >
+                    <CheckBox x:Name="tchConvert" Margin="3,5" Height="15" Content="转换天正元素" IsThreeState="False"
+                      IsChecked="{Binding Parameter.TCHConvert,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                </StackPanel>
+            </Border>
+            <Border Margin="5,3,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="负载标注样式" Height="24"></Label>
+                    <Label Content="负载标注样式" Height="25"></Label>
                     <ComboBox Margin="5,0" Name="cbBlkFrame" Width="90" Height="20" HorizontalAlignment = "Right"
                       ItemsSource="{Binding Parameter.BlkFrames,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                       Text="{Binding Parameter.BlkFrame,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
@@ -121,7 +127,7 @@
             </Border>
             <Border Margin="5,3,5,0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
                 <StackPanel Orientation="Horizontal">
-                    <Label Content="图块比例    " Height="24"></Label>
+                    <Label Content="图块比例    " Height="25"></Label>
                     <ComboBox Margin="5,0" Name="cbBlkScale" Width="90" Height="20" HorizontalAlignment = "Right"
                       ItemsSource="{Binding Parameter.BlkScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                       Text="{Binding Parameter.BlkScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>

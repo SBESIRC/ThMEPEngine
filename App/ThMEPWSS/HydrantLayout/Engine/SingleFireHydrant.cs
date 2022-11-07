@@ -170,10 +170,21 @@ namespace ThMEPWSS.HydrantLayout.Engine
                     //if (j == 6 || j == 7) continue;
                     if (FeasibilityCheck.IsFireFeasible(fireObbList[j], LeanWall.Shell()))   //如果消防栓可行
                     {
+
+                        if (j == 3)
+                        {
+                            int stop0 = 0;
+                        }
+
                         List<Polyline> doorAreaList = fireHydrant0.GetDoorAreaObbList(j);
                         //doorAreaList.OfType<Entity>().ForEachDbObject(x => DrawUtils.ShowGeometry(x, "l1doorarea", 10));
                         for (int k = 0; k < doorAreaList.Count; k++)
                         {
+                            //if (j == 3 && k == 0) 
+                            //{
+                            //    int stop = 0;
+                            //}
+
                             if (!Info.AllowDoorInPaking) 
                             {
                                 if (!FeasibilityCheck.IsFireFeasible(doorAreaList[k], LeanWall.Shell())) 
@@ -200,7 +211,7 @@ namespace ThMEPWSS.HydrantLayout.Engine
                                 bool doorGood = FeasibilityCheck.IsBoundaryOK(doorAreaList[k], LeanWall.Shell(), ProcessedData.ParkingIndex);
                                 FireCompareModel fireCompareModeltmp = new FireCompareModel(basePointList[i], dirList[i], fireCenter, fireDir, k, distance, againstWallLength, j, doorGood);
                                 fireCompareModels0.Add(fireCompareModeltmp);
-                                break;
+                                break;         //此处是否应当跳出？
                             }
                         }
                     }

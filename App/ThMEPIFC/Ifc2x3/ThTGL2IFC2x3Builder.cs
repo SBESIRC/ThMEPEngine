@@ -11,12 +11,12 @@ namespace ThMEPIFC.Ifc2x3
 {
     public class ThTGL2IFC2x3Builder
     {
-        static public void BuildIfcModel(IfcStore Model, ThTCHProject project)
+        public static void BuildIfcModel(IfcStore model, ThTCHProject project)
         {
-            if (Model != null)
+            if (model != null)
             {
-                var site = ThTGL2IFC2x3Factory.CreateSite(Model, project.Site);
-                var building = ThTGL2IFC2x3Factory.CreateBuilding(Model, site, project.Site.Building);
+                var site = ThTGL2IFC2x3Factory.CreateSite(model, project.Site);
+                var building = ThTGL2IFC2x3Factory.CreateBuilding(model, site, project.Site.Building);
                 foreach (var thtchstorey in project.Site.Building.Storeys)
                 {
                     var walls = new List<IfcWall>();
@@ -28,64 +28,64 @@ namespace ThMEPIFC.Ifc2x3
                     var railings = new List<IfcRailing>();
                     var rooms = new List<IfcSpace>();
                     var floor_origin = thtchstorey.Origin;
-                    var storey = ThTGL2IFC2x3Factory.CreateStorey(Model, building, thtchstorey);
+                    var storey = ThTGL2IFC2x3Factory.CreateStorey(model, building, thtchstorey);
                     foreach (var thtchwall in thtchstorey.Walls)
                     {
-                        var wall = ThTGL2IFC2x3Factory.CreateWall(Model, thtchwall, floor_origin);
+                        var wall = ThTGL2IFC2x3Factory.CreateWall(model, thtchwall, floor_origin);
                         walls.Add(wall);
                         foreach (var thtchdoor in thtchwall.Doors)
                         {
-                            doors.Add(SetupDoor(Model, wall, thtchwall, thtchdoor, floor_origin));
+                            doors.Add(SetupDoor(model, wall, thtchwall, thtchdoor, floor_origin));
                         }
                         foreach (var thtchwindow in thtchwall.Windows)
                         {
-                            windows.Add(SetupWindow(Model, wall, thtchwall,thtchwindow, floor_origin));
+                            windows.Add(SetupWindow(model, wall, thtchwall, thtchwindow, floor_origin));
                         }
                         foreach (var thtchhole in thtchwall.Openings)
                         {
-                            SetupHole(Model, wall, thtchhole, floor_origin);
+                            SetupHole(model, wall, thtchhole, floor_origin);
                         }
                     }
                     foreach (var thtchcolumn in thtchstorey.Columns)
                     {
-                        var column = ThTGL2IFC2x3Factory.CreateColumn(Model, thtchcolumn, floor_origin);
+                        var column = ThTGL2IFC2x3Factory.CreateColumn(model, thtchcolumn, floor_origin);
                         columns.Add(column);
                     }
                     foreach (var thtchbeam in thtchstorey.Beams)
                     {
-                        var beam = ThTGL2IFC2x3Factory.CreateBeam(Model, thtchbeam, floor_origin);
+                        var beam = ThTGL2IFC2x3Factory.CreateBeam(model, thtchbeam, floor_origin);
                         beams.Add(beam);
                     }
                     foreach (var thtchslab in thtchstorey.Slabs)
                     {
-                        var slab = ThTGL2IFC2x3Factory.CreateMeshSlab(Model, thtchslab, floor_origin);
-                        if(null !=slab)
+                        var slab = ThTGL2IFC2x3Factory.CreateMeshSlab(model, thtchslab, floor_origin);
+                        if (null != slab)
                             slabs.Add(slab);
                     }
                     foreach (var thtchrailing in thtchstorey.Railings)
                     {
-                        var railing = ThTGL2IFC2x3Factory.CreateRailing(Model, thtchrailing, floor_origin);
+                        var railing = ThTGL2IFC2x3Factory.CreateRailing(model, thtchrailing, floor_origin);
                         railings.Add(railing);
                     }
                     //遍历，造房间
                     foreach (var thtchRoom in thtchstorey.Rooms)
                     {
-                        var room = ThTGL2IFC2x3Factory.CreateRoom(Model, thtchRoom, floor_origin);
+                        var room = ThTGL2IFC2x3Factory.CreateRoom(model, thtchRoom, floor_origin);
                         rooms.Add(room);
                     }
-                    ThTGL2IFC2x3Factory.relContainSlabs2Storey(Model, slabs, storey);
-                    ThTGL2IFC2x3Factory.relContainWalls2Storey(Model, walls, storey);
-                    ThTGL2IFC2x3Factory.relContainColumns2Storey(Model, columns, storey);
-                    ThTGL2IFC2x3Factory.relContainBeams2Storey(Model, beams, storey);
-                    ThTGL2IFC2x3Factory.relContainDoors2Storey(Model, doors, storey);
-                    ThTGL2IFC2x3Factory.relContainWindows2Storey(Model, windows, storey);
-                    ThTGL2IFC2x3Factory.relContainsRailings2Storey(Model, railings, storey);
-                    ThTGL2IFC2x3Factory.relContainsRooms2Storey(Model, rooms, storey);
+                    ThTGL2IFC2x3Factory.relContainSlabs2Storey(model, slabs, storey);
+                    ThTGL2IFC2x3Factory.relContainWalls2Storey(model, walls, storey);
+                    ThTGL2IFC2x3Factory.relContainColumns2Storey(model, columns, storey);
+                    ThTGL2IFC2x3Factory.relContainBeams2Storey(model, beams, storey);
+                    ThTGL2IFC2x3Factory.relContainDoors2Storey(model, doors, storey);
+                    ThTGL2IFC2x3Factory.relContainWindows2Storey(model, windows, storey);
+                    ThTGL2IFC2x3Factory.relContainsRailings2Storey(model, railings, storey);
+                    ThTGL2IFC2x3Factory.relContainsRooms2Storey(model, rooms, storey);
                 }
             }
         }
 
-        static public IfcDoor SetupDoor(IfcStore model, IfcWall ifcWall, ThTCHWall wall, ThTCHDoor door, Point3d floor_origin)
+        public static IfcDoor SetupDoor(IfcStore model, IfcWall ifcWall, ThTCHWall wall, ThTCHDoor door, Point3d floor_origin)
         {
             var ifcDoor = ThTGL2IFC2x3Factory.CreateDoor(model, door, floor_origin);
             var ifcHole = ThTGL2IFC2x3Factory.CreateHole(model, wall, door, floor_origin);
@@ -93,7 +93,7 @@ namespace ThMEPIFC.Ifc2x3
             return ifcDoor;
         }
 
-        static public IfcWindow SetupWindow(IfcStore model, IfcWall ifcWall, ThTCHWall wall, ThTCHWindow window, Point3d floor_origin)
+        public static IfcWindow SetupWindow(IfcStore model, IfcWall ifcWall, ThTCHWall wall, ThTCHWindow window, Point3d floor_origin)
         {
             var ifcWindow = ThTGL2IFC2x3Factory.CreateWindow(model, window, floor_origin);
             var ifcHole = ThTGL2IFC2x3Factory.CreateHole(model, wall, window, floor_origin);
@@ -101,14 +101,14 @@ namespace ThMEPIFC.Ifc2x3
             return ifcWindow;
         }
 
-        static public IfcOpeningElement SetupHole(IfcStore model, IfcWall ifcWall, ThTCHOpening hole, Point3d floor_origin)
+        public static IfcOpeningElement SetupHole(IfcStore model, IfcWall ifcWall, ThTCHOpening hole, Point3d floor_origin)
         {
             var ifcHole = ThTGL2IFC2x3Factory.CreateHole(model, hole, floor_origin);
             ThTGL2IFC2x3Factory.BuildRelationship(model, ifcWall, ifcHole);
             return ifcHole;
         }
 
-        static public void SaveIfcModel(IfcStore Model, string filepath)
+        public static void SaveIfcModel(IfcStore Model, string filepath)
         {
             if (Model != null)
             {

@@ -1,0 +1,12 @@
+syntax = "proto3";
+import "ThTCHRootData.proto";
+import "ThSUBuildingElementData.proto";
+
+message ThSUBuildingStoreyData {
+    ThTCHRootData root = 1;
+    repeated ThSUBuildingElementData buildings = 2;
+    int32 number = 3;
+    double height = 4;
+    double elevation = 5;
+    int32 stdFlr_no = 6;
+}

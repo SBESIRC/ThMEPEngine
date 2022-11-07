@@ -30,7 +30,7 @@ namespace ThMEPElectrical.ViewModel
 
         private readonly ThBConvertTransientService TransientService = new ThBConvertTransientService();
 
-        private readonly int MaxLineNumber = 16;
+        private readonly int MaxLineNumber = 18;
 
         public ThBlockConvertVM()
         {
@@ -198,6 +198,7 @@ namespace ThMEPElectrical.ViewModel
                 Scale = Parameter.BlkScaleValue,
                 FrameStyle = Parameter.BlkFrameValue,
                 ConvertManualActuator = Parameter.ManualActuatorOps,
+                TCHConvert = Parameter.TCHConvert,
             };
             if (Parameter.HavcOps && Parameter.WssOps)
             {

@@ -23,13 +23,14 @@ public static partial class ThSUComponentDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChdUaFNVQ29tcG9uZW50RGF0YS5wcm90bxoTVGhUQ0hHZW9tZXRyeS5wcm90",
-          "byJWChFUaFNVQ29tcG9uZW50RGF0YRIYChBkZWZpbml0aW9uX2luZGV4GAEg",
-          "ASgFEicKD3RyYW5zZm9ybWF0aW9ucxgCIAEoCzIOLlRoVENITWF0cml4M2Ri",
-          "BnByb3RvMw=="));
+          "byKJAQoRVGhTVUNvbXBvbmVudERhdGESGAoQZGVmaW5pdGlvbl9pbmRleBgB",
+          "IAEoBRIaChJpZmNfY2xhc3NpZmljYXRpb24YAiABKAkSFQoNaW5zdGFuY2Vf",
+          "bmFtZRgDIAEoCRInCg90cmFuc2Zvcm1hdGlvbnMYBCABKAsyDi5UaFRDSE1h",
+          "dHJpeDNkYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHGeometryReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUComponentData), global::ThSUComponentData.Parser, new[]{ "DefinitionIndex", "Transformations" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUComponentData), global::ThSUComponentData.Parser, new[]{ "DefinitionIndex", "IfcClassification", "InstanceName", "Transformations" }, null, null, null, null)
         }));
   }
   #endregion
@@ -71,6 +72,8 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThSUComponentData(ThSUComponentData other) : this() {
     definitionIndex_ = other.definitionIndex_;
+    ifcClassification_ = other.ifcClassification_;
+    instanceName_ = other.instanceName_;
     transformations_ = other.transformations_ != null ? other.transformations_.Clone() : null;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
@@ -93,8 +96,32 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     }
   }
 
+  /// <summary>Field number for the "ifc_classification" field.</summary>
+  public const int IfcClassificationFieldNumber = 2;
+  private string ifcClassification_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string IfcClassification {
+    get { return ifcClassification_; }
+    set {
+      ifcClassification_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "instance_name" field.</summary>
+  public const int InstanceNameFieldNumber = 3;
+  private string instanceName_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string InstanceName {
+    get { return instanceName_; }
+    set {
+      instanceName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
   /// <summary>Field number for the "transformations" field.</summary>
-  public const int TransformationsFieldNumber = 2;
+  public const int TransformationsFieldNumber = 4;
   private global::ThTCHMatrix3d transformations_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -121,6 +148,8 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
       return true;
     }
     if (DefinitionIndex != other.DefinitionIndex) return false;
+    if (IfcClassification != other.IfcClassification) return false;
+    if (InstanceName != other.InstanceName) return false;
     if (!object.Equals(Transformations, other.Transformations)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
@@ -130,6 +159,8 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
   public override int GetHashCode() {
     int hash = 1;
     if (DefinitionIndex != 0) hash ^= DefinitionIndex.GetHashCode();
+    if (IfcClassification.Length != 0) hash ^= IfcClassification.GetHashCode();
+    if (InstanceName.Length != 0) hash ^= InstanceName.GetHashCode();
     if (transformations_ != null) hash ^= Transformations.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
@@ -153,8 +184,16 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
       output.WriteRawTag(8);
       output.WriteInt32(DefinitionIndex);
     }
-    if (transformations_ != null) {
+    if (IfcClassification.Length != 0) {
       output.WriteRawTag(18);
+      output.WriteString(IfcClassification);
+    }
+    if (InstanceName.Length != 0) {
+      output.WriteRawTag(26);
+      output.WriteString(InstanceName);
+    }
+    if (transformations_ != null) {
+      output.WriteRawTag(34);
       output.WriteMessage(Transformations);
     }
     if (_unknownFields != null) {
@@ -171,8 +210,16 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
       output.WriteRawTag(8);
       output.WriteInt32(DefinitionIndex);
     }
-    if (transformations_ != null) {
+    if (IfcClassification.Length != 0) {
       output.WriteRawTag(18);
+      output.WriteString(IfcClassification);
+    }
+    if (InstanceName.Length != 0) {
+      output.WriteRawTag(26);
+      output.WriteString(InstanceName);
+    }
+    if (transformations_ != null) {
+      output.WriteRawTag(34);
       output.WriteMessage(Transformations);
     }
     if (_unknownFields != null) {
@@ -187,6 +234,12 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     int size = 0;
     if (DefinitionIndex != 0) {
       size += 1 + pb::CodedOutputStream.ComputeInt32Size(DefinitionIndex);
+    }
+    if (IfcClassification.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(IfcClassification);
+    }
+    if (InstanceName.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(InstanceName);
     }
     if (transformations_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Transformations);
@@ -205,6 +258,12 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
     }
     if (other.DefinitionIndex != 0) {
       DefinitionIndex = other.DefinitionIndex;
+    }
+    if (other.IfcClassification.Length != 0) {
+      IfcClassification = other.IfcClassification;
+    }
+    if (other.InstanceName.Length != 0) {
+      InstanceName = other.InstanceName;
     }
     if (other.transformations_ != null) {
       if (transformations_ == null) {
@@ -232,6 +291,14 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
           break;
         }
         case 18: {
+          IfcClassification = input.ReadString();
+          break;
+        }
+        case 26: {
+          InstanceName = input.ReadString();
+          break;
+        }
+        case 34: {
           if (transformations_ == null) {
             Transformations = new global::ThTCHMatrix3d();
           }
@@ -258,6 +325,14 @@ public sealed partial class ThSUComponentData : pb::IMessage<ThSUComponentData>
           break;
         }
         case 18: {
+          IfcClassification = input.ReadString();
+          break;
+        }
+        case 26: {
+          InstanceName = input.ReadString();
+          break;
+        }
+        case 34: {
           if (transformations_ == null) {
             Transformations = new global::ThTCHMatrix3d();
           }
