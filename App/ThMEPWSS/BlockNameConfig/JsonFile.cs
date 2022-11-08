@@ -10,7 +10,7 @@ namespace ThMEPWSS.BlockNameConfig
         /// </summary>
         public static void WriteJsonFile(string path, string jsonConents)
         {
-            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, System.IO.FileAccess.ReadWrite, FileShare.ReadWrite))
+            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
             {
                 fs.SetLength(0);
                 using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))

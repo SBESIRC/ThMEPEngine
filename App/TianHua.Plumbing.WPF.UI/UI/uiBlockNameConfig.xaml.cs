@@ -91,22 +91,27 @@ namespace TianHua.Plumbing.WPF.UI.UI
         /// </summary>
         private async void Cloud_Configuration(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-            stopwatch.Reset();
-            stopwatch.Start();
-            var zipFile = Block2Pic.GenerateBlockPic(out Dictionary<string, List<double>> blockSizeDic);
-            stopwatch.Stop();
-            Active.Editor.WriteMessage("生成图片用时: " + stopwatch.Elapsed.Seconds+" s\n");
-            stopwatch.Reset();
-            stopwatch.Start();
-            await Program.Run(new string[1] { zipFile });
-            stopwatch.Stop();
-            Active.Editor.WriteMessage("分类用时: " + stopwatch.Elapsed.Seconds + " s\n");
-            stopwatch.Reset();
-            stopwatch.Start();
-            UpdateBlockList(zipFile, blockSizeDic);
-            stopwatch.Stop();
-            Active.Editor.WriteMessage("写入用时: " + stopwatch.Elapsed.Seconds + " s\n");
+            try
+            {
+                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
+                var zipFile = Block2Pic.GenerateBlockPic(out Dictionary<string, List<double>> blockSizeDic);
+                stopwatch.Stop();
+                Active.Editor.WriteMessage("生成图片用时: " + stopwatch.Elapsed.Seconds + " s\n");
+                stopwatch.Reset();
+                stopwatch.Start();
+                await Program.Run(new string[1] { zipFile });
+                stopwatch.Stop();
+                Active.Editor.WriteMessage("分类用时: " + stopwatch.Elapsed.Seconds + " s\n");
+                stopwatch.Reset();
+                stopwatch.Start();
+                UpdateBlockList(zipFile, blockSizeDic);
+                stopwatch.Stop();
+                Active.Editor.WriteMessage("写入用时: " + stopwatch.Elapsed.Seconds + " s\n");
+            }
+            catch
+            {
+            }
         }
 
         public void UpdateBlockList(string zipFile,Dictionary<string, List<double>> blockSizeDic)
@@ -116,6 +121,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             //    { 6, "洗衣机" }, { 8, "淋浴房" }, { 9, "转角淋浴房" }, 
             //    { 10, "浴缸" }, { 11, "喷头" }, { 0, "坐便器" }, { 1, "小便器" }, 
             //    { 2, "蹲便器" }, { 7, "地漏" } };
+            foreach(var key in viewModel.BlockNameList.Keys)
+            {
+                viewModel.BlockNameList[key].Clear();
+            }
 
             var dict = new Dictionary<int, string>() {
                 { 0, "坐便器" }, { 1, "小便器" }, { 2, "蹲便器" },
