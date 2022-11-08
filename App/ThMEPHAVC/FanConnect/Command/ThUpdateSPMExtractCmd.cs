@@ -107,7 +107,8 @@ namespace ThMEPHVAC.FanConnect.Command
                         ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu);
                     }
                     //检查末端断管图块方向
-                    ThCheckUpdateEndBlkDir.UpdateEndBlkDir(treeModel.RootNode);
+                    var linesForFcu = treeModel.RootNode.GetAllTreeNode().Select(x => x.Item.PLine).ToList();
+                    ThCheckUpdateEndBlkDir.UpdateEndBlkDir(linesForFcu, fcus);
 
                     if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                     {
