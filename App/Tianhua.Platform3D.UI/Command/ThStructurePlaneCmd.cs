@@ -143,17 +143,20 @@ namespace Tianhua.Platform3D.UI.Command
                 var flag2 = Mutex.TryOpenExisting("fileMutex", out FileMutex);
                 if (!flag2) return "";
                 InitMutex();
+                //FileMutex.WaitOne();
                 FileMutex.WaitOne(3000);
+                string getName = "";
                 using (MemoryMappedFile mmf = MemoryMappedFile.OpenExisting("getFileName"))
                 {
                     using (MemoryMappedViewStream stream = mmf.CreateViewStream(0L, 0L, MemoryMappedFileAccess.Read))
                     {
                         IFormatter formatter = new BinaryFormatter();
-                        return (string)formatter.Deserialize(stream);
+                        getName = (string)formatter.Deserialize(stream);
                     }
                 }
                 CadMutex.ReleaseMutex();
                 ViewerMutex.WaitOne();
+                return getName;
             }
             catch(Exception ex)
             {
