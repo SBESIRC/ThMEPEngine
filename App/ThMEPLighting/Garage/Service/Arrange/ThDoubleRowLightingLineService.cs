@@ -85,10 +85,6 @@ namespace ThMEPLighting.Garage.Service.Arrange
             });
             lightingLines = ThLaneLineMergeExtension.Merge(lightingLines.ToCollection()).OfType<Line>().ToList();
 
-            // 延伸非灯线，缩进单排线槽线
-            regionBorder.FdxCenterLines = Extend(regionBorder.FdxCenterLines, lightingLines);
-            Shorten(regionBorder.SingleRowLines, lightingLines);
-
             // 在交叉处对线进行延伸
             var extendLines = new List<Line>();
             lightingLines.ForEach(l =>
@@ -109,6 +105,10 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 lightingLines = ThLaneLineMergeExtension.Merge(lightingLines.ToCollection()).OfType<Line>().ToList();
                 afterNumer = lightingLines.Count;
             }
+
+            // 延伸非灯线，缩进单排线槽线
+            regionBorder.FdxCenterLines = Extend(regionBorder.FdxCenterLines, lightingLines);
+            Shorten(regionBorder.SingleRowLines, lightingLines);
 
             // 检测连通性添加非灯线
             AddNonLightingLine(lightingLines, regionBorder.FdxCenterLines, regionBorder.DxCenterLines, extendLines);
@@ -282,8 +282,12 @@ namespace ThMEPLighting.Garage.Service.Arrange
 
         private void AddNonLightingLine(List<Line> lightingLines, List<Line> nonLightingLines, List<Line> centerLines, List<Line> extendLines)
         {
+            var objs = new DBObjectCollection();
+            lightingLines.ForEach(o => objs.Add(o));
+            nonLightingLines.ForEach(o => objs.Add(o));
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+
             var searchedLine = new List<Line>();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(lightingLines.ToCollection());
             var graphFrames = new List<Polyline>();
             lightingLines.ForEach(line =>
             {
@@ -359,31 +363,11 @@ namespace ThMEPLighting.Garage.Service.Arrange
                             nonLightingLines[i].EndPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
                         extends.Add(endNewLine);
                     }
-                    else
-                    {
-                        pointSquare = endNewLine.BufferSquare(10.0);
-                        endExtendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
-                        if (endExtendSearch.Count > 0)
-                        {
-                            nonLightingLines[i] = new Line(nonLightingLines[i].StartPoint,
-                                nonLightingLines[i].EndPoint - nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
-                        }
-                    }
                     if (startExtendSearch.Count > 0)
                     {
                         nonLightingLines[i] = new Line(nonLightingLines[i].EndPoint,
                             nonLightingLines[i].StartPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
                         extends.Add(startNewLine);
-                    }
-                    else
-                    {
-                        pointSquare = startNewLine.BufferSquare(10.0);
-                        startExtendSearch = pointSquare.SelectCrossingEntities(spatialIndex);
-                        if (startExtendSearch.Count > 0)
-                        {
-                            nonLightingLines[i] = new Line(nonLightingLines[i].EndPoint,
-                                nonLightingLines[i].StartPoint + nonLightingLines[i].LineDirection() * DoubleRowOffsetDis / 2);
-                        }
                     }
                 }
             }
@@ -403,6 +387,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             }
 
             results.AddRange(nonLightingLines);
+            results.RemoveAll(o => o.Length < 1.0);
             return results;
         }
 
