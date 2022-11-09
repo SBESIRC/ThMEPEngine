@@ -23,13 +23,14 @@ public static partial class ThTCHProjectDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChZUaFRDSFByb2plY3REYXRhLnByb3RvGhNUaFRDSFJvb3REYXRhLnByb3Rv",
-          "GhNUaFRDSFNpdGVEYXRhLnByb3RvIk4KEFRoVENIUHJvamVjdERhdGESHAoE",
-          "cm9vdBgBIAEoCzIOLlRoVENIUm9vdERhdGESHAoEc2l0ZRgCIAEoCzIOLlRo",
-          "VENIU2l0ZURhdGFiBnByb3RvMw=="));
+          "GhNUaFRDSFNpdGVEYXRhLnByb3RvIpMBChBUaFRDSFByb2plY3REYXRhEhwK",
+          "BHJvb3QYASABKAsyDi5UaFRDSFJvb3REYXRhEh0KBXNpdGVzGAIgAygLMg4u",
+          "VGhUQ0hTaXRlRGF0YRISCgpwcm9qZWN0X2lkGAMgASgJEhgKEHByb2plY3Rf",
+          "Y2hpbGRfaWQYBCABKAkSFAoMcHJvamVjdF9wYXRoGAUgASgJYgZwcm90bzM="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHSiteDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHProjectData), global::ThTCHProjectData.Parser, new[]{ "Root", "Site" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHProjectData), global::ThTCHProjectData.Parser, new[]{ "Root", "Sites", "ProjectId", "ProjectChildId", "ProjectPath" }, null, null, null, null)
         }));
   }
   #endregion
@@ -71,7 +72,10 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public ThTCHProjectData(ThTCHProjectData other) : this() {
     root_ = other.root_ != null ? other.root_.Clone() : null;
-    site_ = other.site_ != null ? other.site_.Clone() : null;
+    sites_ = other.sites_.Clone();
+    projectId_ = other.projectId_;
+    projectChildId_ = other.projectChildId_;
+    projectPath_ = other.projectPath_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -93,15 +97,50 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     }
   }
 
-  /// <summary>Field number for the "site" field.</summary>
-  public const int SiteFieldNumber = 2;
-  private global::ThTCHSiteData site_;
+  /// <summary>Field number for the "sites" field.</summary>
+  public const int SitesFieldNumber = 2;
+  private static readonly pb::FieldCodec<global::ThTCHSiteData> _repeated_sites_codec
+      = pb::FieldCodec.ForMessage(18, global::ThTCHSiteData.Parser);
+  private readonly pbc::RepeatedField<global::ThTCHSiteData> sites_ = new pbc::RepeatedField<global::ThTCHSiteData>();
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public global::ThTCHSiteData Site {
-    get { return site_; }
+  public pbc::RepeatedField<global::ThTCHSiteData> Sites {
+    get { return sites_; }
+  }
+
+  /// <summary>Field number for the "project_id" field.</summary>
+  public const int ProjectIdFieldNumber = 3;
+  private string projectId_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string ProjectId {
+    get { return projectId_; }
     set {
-      site_ = value;
+      projectId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "project_child_id" field.</summary>
+  public const int ProjectChildIdFieldNumber = 4;
+  private string projectChildId_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string ProjectChildId {
+    get { return projectChildId_; }
+    set {
+      projectChildId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "project_path" field.</summary>
+  public const int ProjectPathFieldNumber = 5;
+  private string projectPath_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string ProjectPath {
+    get { return projectPath_; }
+    set {
+      projectPath_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
     }
   }
 
@@ -121,7 +160,10 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
       return true;
     }
     if (!object.Equals(Root, other.Root)) return false;
-    if (!object.Equals(Site, other.Site)) return false;
+    if(!sites_.Equals(other.sites_)) return false;
+    if (ProjectId != other.ProjectId) return false;
+    if (ProjectChildId != other.ProjectChildId) return false;
+    if (ProjectPath != other.ProjectPath) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -130,7 +172,10 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
   public override int GetHashCode() {
     int hash = 1;
     if (root_ != null) hash ^= Root.GetHashCode();
-    if (site_ != null) hash ^= Site.GetHashCode();
+    hash ^= sites_.GetHashCode();
+    if (ProjectId.Length != 0) hash ^= ProjectId.GetHashCode();
+    if (ProjectChildId.Length != 0) hash ^= ProjectChildId.GetHashCode();
+    if (ProjectPath.Length != 0) hash ^= ProjectPath.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -153,9 +198,18 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
       output.WriteRawTag(10);
       output.WriteMessage(Root);
     }
-    if (site_ != null) {
-      output.WriteRawTag(18);
-      output.WriteMessage(Site);
+    sites_.WriteTo(output, _repeated_sites_codec);
+    if (ProjectId.Length != 0) {
+      output.WriteRawTag(26);
+      output.WriteString(ProjectId);
+    }
+    if (ProjectChildId.Length != 0) {
+      output.WriteRawTag(34);
+      output.WriteString(ProjectChildId);
+    }
+    if (ProjectPath.Length != 0) {
+      output.WriteRawTag(42);
+      output.WriteString(ProjectPath);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -171,9 +225,18 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
       output.WriteRawTag(10);
       output.WriteMessage(Root);
     }
-    if (site_ != null) {
-      output.WriteRawTag(18);
-      output.WriteMessage(Site);
+    sites_.WriteTo(ref output, _repeated_sites_codec);
+    if (ProjectId.Length != 0) {
+      output.WriteRawTag(26);
+      output.WriteString(ProjectId);
+    }
+    if (ProjectChildId.Length != 0) {
+      output.WriteRawTag(34);
+      output.WriteString(ProjectChildId);
+    }
+    if (ProjectPath.Length != 0) {
+      output.WriteRawTag(42);
+      output.WriteString(ProjectPath);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -188,8 +251,15 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     if (root_ != null) {
       size += 1 + pb::CodedOutputStream.ComputeMessageSize(Root);
     }
-    if (site_ != null) {
-      size += 1 + pb::CodedOutputStream.ComputeMessageSize(Site);
+    size += sites_.CalculateSize(_repeated_sites_codec);
+    if (ProjectId.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectId);
+    }
+    if (ProjectChildId.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectChildId);
+    }
+    if (ProjectPath.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectPath);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -209,11 +279,15 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
       }
       Root.MergeFrom(other.Root);
     }
-    if (other.site_ != null) {
-      if (site_ == null) {
-        Site = new global::ThTCHSiteData();
-      }
-      Site.MergeFrom(other.Site);
+    sites_.Add(other.sites_);
+    if (other.ProjectId.Length != 0) {
+      ProjectId = other.ProjectId;
+    }
+    if (other.ProjectChildId.Length != 0) {
+      ProjectChildId = other.ProjectChildId;
+    }
+    if (other.ProjectPath.Length != 0) {
+      ProjectPath = other.ProjectPath;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -238,10 +312,19 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
           break;
         }
         case 18: {
-          if (site_ == null) {
-            Site = new global::ThTCHSiteData();
-          }
-          input.ReadMessage(Site);
+          sites_.AddEntriesFrom(input, _repeated_sites_codec);
+          break;
+        }
+        case 26: {
+          ProjectId = input.ReadString();
+          break;
+        }
+        case 34: {
+          ProjectChildId = input.ReadString();
+          break;
+        }
+        case 42: {
+          ProjectPath = input.ReadString();
           break;
         }
       }
@@ -267,10 +350,19 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
           break;
         }
         case 18: {
-          if (site_ == null) {
-            Site = new global::ThTCHSiteData();
-          }
-          input.ReadMessage(Site);
+          sites_.AddEntriesFrom(ref input, _repeated_sites_codec);
+          break;
+        }
+        case 26: {
+          ProjectId = input.ReadString();
+          break;
+        }
+        case 34: {
+          ProjectChildId = input.ReadString();
+          break;
+        }
+        case 42: {
+          ProjectPath = input.ReadString();
           break;
         }
       }

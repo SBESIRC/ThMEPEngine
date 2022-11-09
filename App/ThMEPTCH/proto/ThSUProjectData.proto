@@ -8,4 +8,5 @@ message ThSUProjectData {
     repeated ThSUCompDefinitionData definitions = 2;
     ThSUBuildingData building = 3;
     bool is_face_mesh = 4;
+    string project_path = 5;
 }

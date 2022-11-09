@@ -12,6 +12,10 @@ Task Ruby {
     $script:out= "ruby"
 }
 
+Task C++ {
+    $script:out= "c++"
+}
+
 Task Compile {
     $protoc = Get-ProtocLocation
     $path = "$PSScriptRoot\ThMEPTCH\proto"
@@ -22,6 +26,8 @@ Task Compile {
                 & $protoc --csharp_out="..\Data\" (Get-Item $proto).Name
             } elseif ($script:out -eq "ruby") {
                 & $protoc --ruby_out=".\" (Get-Item $proto).Name
+            }elseif ($script:out -eq "c++") {
+                & $protoc --cpp_out=".\" (Get-Item $proto).Name
             }
         }
     }

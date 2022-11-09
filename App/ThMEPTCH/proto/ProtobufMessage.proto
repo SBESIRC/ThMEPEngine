@@ -1,0 +1,10 @@
+syntax = "proto3";
+import "MessageHeader.proto";
+import "ThTCHProjectData.proto";
+import "ThSUProjectData.proto";
+
+message ProtobufMessage {
+    MessageHeader header = 1;
+    repeated ThTCHProjectData cad_projects = 2;
+    repeated ThSUProjectData su_projects = 3;
+}
