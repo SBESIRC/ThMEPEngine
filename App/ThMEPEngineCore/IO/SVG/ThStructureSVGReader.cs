@@ -45,114 +45,126 @@ namespace ThMEPEngineCore.IO.SVG
             }
             foreach (var children in doc.Children)
             {
-                if (children is SvgUnknownElement svgUnknownElement)
+                try
                 {
-                    var floorInfo = svgUnknownElement.CustomAttributes.ParseFloorInfo();
-                    if(floorInfo!=null)
+                    if (children is SvgUnknownElement svgUnknownElement)
                     {
-                        floorInfos.Add(floorInfo);
-                    }
-                    continue;
-                }
-                var properties = new Dictionary<string, object>();
-                if (children.Stroke != null)
-                {
-                    //var strokecolor = (children.Stroke as SvgColourServer).Colour; // 轮廓颜色
-                    //var acadColor = Autodesk.AutoCAD.Colors.Color.FromRgb(strokecolor.R, strokecolor.G, strokecolor.B);
-                    //properties.Add(ThSvgPropertyNameManager.OutlineColorIndexPropertyName, acadColor.ColorIndex);
-                }
-                if (children.Fill != null)
-                {
-                    //var fillColor = (children.Fill as SvgColourServer).Colour;
-                    //var acadFillColor = Autodesk.AutoCAD.Colors.Color.FromRgb(fillColor.R, fillColor.G, fillColor.B);
-                    //properties.Add(ThSvgPropertyNameManager.FillColorIndexPropertyName, acadFillColor.ColorIndex);
-                    properties.Add(ThSvgPropertyNameManager.FillColorPropertyName, children.Fill.ToString());
-                }
-                if (children.StrokeDashArray != null && children.StrokeDashArray.Count > 0)
-                {
-                    properties.Add(ThSvgPropertyNameManager.LineTypePropertyName, "DASH");
-                }
-                else
-                {
-                    properties.Add(ThSvgPropertyNameManager.LineTypePropertyName, "CONTINUOUS");
-                }
-                if (children.CustomAttributes != null)
-                {
-                    foreach (var attribute in children.CustomAttributes)
-                    {
-                        if (attribute.Key.GetType() == typeof(string))
+                        var floorInfo = svgUnknownElement.CustomAttributes.ParseFloorInfo();
+                        if (floorInfo != null)
                         {
-                            properties.Add(attribute.Key, attribute.Value);
+                            floorInfos.Add(floorInfo);
                         }
-                        else
-                        {
-                            properties.Add(attribute.Key.ToString(), attribute.Value);
-                        }
+                        continue;
                     }
-                }
-                if (children is SvgPath svgPath)
-                {
-                    var curves = svgPath.ParseSvgPath();
-                    if (properties["type"].ToString() == "IfcSlab" && curves.Count > 1)
+                    var properties = new Dictionary<string, object>();
+                    if (children.Stroke != null)
                     {
-                        var polygons = BuildArea(curves.ToCollection());
-                        polygons.OfType<Entity>().ForEach(e => results.Add(CreateThGeometry(e, properties)));
+                        //var strokecolor = (children.Stroke as SvgColourServer).Colour; // 轮廓颜色
+                        //var acadColor = Autodesk.AutoCAD.Colors.Color.FromRgb(strokecolor.R, strokecolor.G, strokecolor.B);
+                        //properties.Add(ThSvgPropertyNameManager.OutlineColorIndexPropertyName, acadColor.ColorIndex);
+                    }
+                    if (children.Fill != null)
+                    {
+                        //var fillColor = (children.Fill as SvgColourServer).Colour;
+                        //var acadFillColor = Autodesk.AutoCAD.Colors.Color.FromRgb(fillColor.R, fillColor.G, fillColor.B);
+                        //properties.Add(ThSvgPropertyNameManager.FillColorIndexPropertyName, acadFillColor.ColorIndex);
+                        properties.Add(ThSvgPropertyNameManager.FillColorPropertyName, children.Fill.ToString());
+                    }
+                    if (children.StrokeDashArray != null && children.StrokeDashArray.Count > 0)
+                    {
+                        properties.Add(ThSvgPropertyNameManager.LineTypePropertyName, "DASH");
                     }
                     else
                     {
-                        curves.ForEach(c => results.Add(CreateThGeometry(c, properties)));
+                        properties.Add(ThSvgPropertyNameManager.LineTypePropertyName, "CONTINUOUS");
                     }
-                }
-                else if (children is SvgRectangle svgRect)
-                {
-                    var poly = svgRect.CreateRectangle();
-                    results.Add(CreateThGeometry(poly, properties));
-                }
-                else if (children is SvgLine svgLine)
-                {
-                    var line = svgLine.CreateLine();
-                    results.Add(CreateThGeometry(line, properties));
-                }
-                else if (children is SvgCircle svgCircle)
-                {
-                    var circle = svgCircle.CreateCircle();
-                    results.Add(CreateThGeometry(circle, properties));
-                }
-                else if (children is SvgEllipse sgvEllipse)
-                {
-                    var ellipse = sgvEllipse.CreateEllipse();
-                    results.Add(CreateThGeometry(ellipse, properties));
-                }
-                else if (children is SvgPolygon svgPolygon)
-                {
-                    var polygon = svgPolygon.CreatePolygon();
-                    if (polygon.Length > 0.0)
+                    if (children.CustomAttributes != null)
                     {
-                        results.Add(CreateThGeometry(polygon, properties));
+                        foreach (var attribute in children.CustomAttributes)
+                        {
+                            if (attribute.Key.GetType() == typeof(string))
+                            {
+                                properties.Add(attribute.Key, attribute.Value);
+                            }
+                            else
+                            {
+                                properties.Add(attribute.Key.ToString(), attribute.Value);
+                            }
+                        }
                     }
-                }
-                else if (children is SvgPolyline svgPolyline)
-                {
-                    var poly = svgPolyline.CreatePolyline();
-                    if (poly.Length > 0.0)
-                    {
-                        results.Add(CreateThGeometry(poly, properties));
-                    }
-                }
-                else if (children is SvgText svgText)
-                {
-                    // 创建文字
                     if (!properties.ContainsKey("type"))
                     {
-                        properties.Add("type", "IfcAnnotation");
+                        continue;
                     }
-                    var dbText = svgText.CreateDBText();
-                    results.Add(CreateThGeometry(dbText, properties));
-                }                
-                else
-                {
-                    throw new NotSupportedException();
+                    if (children is SvgPath svgPath)
+                    {
+                        var curves = svgPath.ParseSvgPath();
+                        if (properties["type"].ToString() == "IfcSlab" && curves.Count > 1)
+                        {
+                            var polygons = BuildArea(curves.ToCollection());
+                            polygons.OfType<Entity>().ForEach(e => results.Add(CreateThGeometry(e, properties)));
+                        }
+                        else
+                        {
+                            curves.ForEach(c => results.Add(CreateThGeometry(c, properties)));
+                        }
+                    }
+                    else if (children is SvgRectangle svgRect)
+                    {
+                        var poly = svgRect.CreateRectangle();
+                        results.Add(CreateThGeometry(poly, properties));
+                    }
+                    else if (children is SvgLine svgLine)
+                    {
+                        var line = svgLine.CreateLine();
+                        results.Add(CreateThGeometry(line, properties));
+                    }
+                    else if (children is SvgCircle svgCircle)
+                    {
+                        var circle = svgCircle.CreateCircle();
+                        results.Add(CreateThGeometry(circle, properties));
+                    }
+                    else if (children is SvgEllipse sgvEllipse)
+                    {
+                        var ellipse = sgvEllipse.CreateEllipse();
+                        results.Add(CreateThGeometry(ellipse, properties));
+                    }
+                    else if (children is SvgPolygon svgPolygon)
+                    {
+                        var polygon = svgPolygon.CreatePolygon();
+                        if (polygon.Length > 0.0)
+                        {
+                            results.Add(CreateThGeometry(polygon, properties));
+                        }
+                    }
+                    else if (children is SvgPolyline svgPolyline)
+                    {
+                        var poly = svgPolyline.CreatePolyline();
+                        if (poly.Length > 0.0)
+                        {
+                            results.Add(CreateThGeometry(poly, properties));
+                        }
+                    }
+                    else if (children is SvgText svgText)
+                    {
+                        // 创建文字
+                        if (!properties.ContainsKey("type"))
+                        {
+                            properties.Add("type", "IfcAnnotation");
+                        }
+                        var dbText = svgText.CreateDBText();
+                        results.Add(CreateThGeometry(dbText, properties));
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
                 }
+                catch
+                {
+
+                }
+                
             }
             // 收集结果
             ParseInfo.Geos = results;
