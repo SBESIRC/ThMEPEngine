@@ -116,11 +116,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         public void UpdateBlockList(string zipFile,Dictionary<string, List<double>> blockSizeDic)
         {
-            //var dict = new Dictionary<int, string>() { 
-            //    { 3, "洗脸盆" }, { 4, "洗涤槽" }, { 5, "拖把池" }, 
-            //    { 6, "洗衣机" }, { 8, "淋浴房" }, { 9, "转角淋浴房" }, 
-            //    { 10, "浴缸" }, { 11, "喷头" }, { 0, "坐便器" }, { 1, "小便器" }, 
-            //    { 2, "蹲便器" }, { 7, "地漏" } };
             foreach(var key in viewModel.BlockNameList.Keys)
             {
                 viewModel.BlockNameList[key].Clear();
@@ -135,15 +130,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var lines = File.ReadAllLines(zipFile + ".csv").Where(x => !string.IsNullOrWhiteSpace(x));
             foreach (var line in lines)
             {
-                if (line == "error")
-                    break;
+                if (line == "error") break;
                 var arr = line.Split(',');
                 if (!int.TryParse(arr[1], out var typeId)) continue;
                 if (!dict.ContainsKey(typeId)) continue;
-                
                 var blkName = arr[0].Replace(".jpg", "");
-                if (blkName.Contains("Kitchen-4"))
-                    ;
                 if (typeId == 7)
                 {
                     if (blockSizeDic.ContainsKey(blkName))
