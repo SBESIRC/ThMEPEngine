@@ -17,5 +17,16 @@ namespace ThParkingStall.Core.Tools
             }
             return result;  
         }
+        public static List<T> SliceExcept<T>(this List<T> list, IEnumerable<int> idxs)
+        {
+            var excludeSet = idxs.ToHashSet();
+            var result = new List<T>();
+            for(int i = 0; i < list.Count; i++)
+            {
+                if(excludeSet.Contains(i)) continue;
+                result.Add(list[i]);
+            }
+            return result;
+        }
     }
 }

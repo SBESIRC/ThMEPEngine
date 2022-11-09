@@ -48,7 +48,8 @@ using System.Reflection;
 using System.Net;
 using ThMEPIdentity;
 using System.Windows;
-
+using InfoCar = ThParkingStall.Core.MPartitionLayout.InfoCar;
+using ThMEPArchitecture.FireZone;
 namespace ThMEPArchitecture.MultiProcess
 {
     public class ThOArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -111,7 +112,8 @@ namespace ThMEPArchitecture.MultiProcess
                         if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithoutIteration)
                         {
                             saveDoc = false;
-                            RunDirect(currentDb);
+                            //RunDirect(currentDb);
+                            FireZoneTest2(currentDb);
                         }
                         else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
                         {
@@ -165,6 +167,30 @@ namespace ThMEPArchitecture.MultiProcess
             InterParameter.Init(dataWraper);
             InterParameter.MultiThread = false;
             ProcessAndDisplay(genome);
+        }
+        public void FireZoneTest2(AcadDatabase acadDatabase)//防火分区测试
+        {
+            var blks = InputData.SelectBlocks(acadDatabase);
+            //var block = InputData.SelectBlock(acadDatabase);//提取地库对象
+            var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
+            //var MultiSolutionList = new List<int> { 0 };
+            if (blks == null) return;
+            foreach (var blk in blks)
+            {
+                var blkName = blk.GetEffectiveName();
+                UpdateLogger(blkName);
+                Logger?.Information("块名：" + blkName);
+                Logger?.Information("文件名：" + DrawingName);
+                Logger?.Information("用户名：" + Environment.UserName);
+                for (int i = 0; i < MultiSolutionList.Count; i++)
+                {
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    var creator = new FireZoneCreator(blk, Logger);
+                    var map = creator.GetFireZoneMap();
+                    //map.FindBest();
+                }
+            }
         }
         public void RunDirect(AcadDatabase acadDatabase)
         {

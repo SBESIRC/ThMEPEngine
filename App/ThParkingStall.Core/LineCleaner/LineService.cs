@@ -25,8 +25,9 @@ namespace ThParkingStall.Core.LineCleaner
             Delta = delta;
         }
         #region 线清理，碎线合并，节点化，相邻线连接
-        public List<LineSegment> Clean()
+        public List<LineSegment> Clean(bool clust = true)
         {
+            if(!clust) return Clean(InitLines);
             var clusters = ClusterByIndex(InitLines);
             var result = new List<LineSegment>();
             foreach (var cluster in clusters)

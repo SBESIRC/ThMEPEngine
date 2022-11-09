@@ -61,6 +61,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FireZone\FireZoneEdge.cs" />
+    <Compile Include="FireZone\FireZoneMap.cs" />
+    <Compile Include="FireZone\FireZoneNode.cs" />
+    <Compile Include="FireZone\FireZonePath.cs" />
+    <Compile Include="FireZone\FireZoneTranslator.cs" />
     <Compile Include="InterProcess\DataWraper.cs" />
     <Compile Include="InterProcess\ParameterStock.cs" />
     <Compile Include="InterProcess\Ramp.cs" />

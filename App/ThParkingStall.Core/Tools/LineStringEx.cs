@@ -27,8 +27,8 @@ namespace ThParkingStall.Core.Tools
             var LineStrings = new List<LineString>();
             for (int i = 0; i < lstr.Coordinates.Count() - 1; i++)
             {
-                var coor1 = lstr.Coordinates[i].Copy();
-                var coor2 = lstr.Coordinates[i + 1].Copy();
+                var coor1 = lstr.Coordinates[i];
+                var coor2 = lstr.Coordinates[i + 1];
                 var coors = new Coordinate[] { coor1, coor2 };
                 LineStrings.Add(new LineString(coors));
             }
