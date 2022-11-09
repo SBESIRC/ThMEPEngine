@@ -54,7 +54,7 @@ namespace ThMEPArchitecture.MultiProcess
         {
 
         }
-        public Genome GetGenome(DataWraper dataWraper, string guid)
+        public Genome GetGenome(DataWraper dataWraper, string guid,ref string msg)
         {
             var solution = new Genome();
 
@@ -90,7 +90,13 @@ namespace ThMEPArchitecture.MultiProcess
             }).Wait(-1);
             pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
             if (!pageHtml.Contains("success"))
+            {
+                if (pageHtml.Contains("服务器繁忙"))
+                {
+                    msg = "服务器繁忙";
+                }
                 return solution;
+            }
             //返回数据
             using (WebClient client = new WebClient())
             {

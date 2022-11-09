@@ -2,6 +2,7 @@
 using Serilog.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
@@ -51,6 +52,7 @@ namespace ThParkingStallProgramDisplay
         }
         static void readfromserver(List<string> contents, string end, Logger Logger)
         {
+            var contentCount = contents.Count;
             var guid = readGuidFromMemory(Logger);
             if (guid == "")
             {
@@ -61,8 +63,15 @@ namespace ThParkingStallProgramDisplay
             var filename = $"DisplayLog_{guid}.txt";
             Logger.Information(guid);
             var quit = false;
+            var cycleCount = 0;
             while (true)
             {
+                cycleCount++;
+                if (cycleCount > 10 && contents.Count == contentCount)
+                {
+                    Console.WriteLine("未读取到服务器数据。");
+                    return;
+                }
                 try
                 {
                     using (WebClient client = new WebClient())

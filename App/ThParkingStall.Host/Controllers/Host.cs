@@ -68,14 +68,16 @@ namespace ThParkingStall.Host.Controllers
                     }
                     else
                     {
-                        if (curWaitServerTime > waitServerTime)
-                        {
-                            GlobalParas.FILES.Dequeue();
-                            curWaitServerTime = -1;
-                            break;
-                        }
-                        Thread.Sleep(2 * 1000);
-                        curWaitServerTime += 10;
+                        GlobalParas.FILES.Dequeue();
+                        return "服务器繁忙中，等待超时,请稍候再试。";
+                        //if (curWaitServerTime > waitServerTime)
+                        //{
+                        //    GlobalParas.FILES.Dequeue();
+                        //    curWaitServerTime = -1;
+                        //    break;
+                        //}
+                        //Thread.Sleep(2 * 1000);
+                        //curWaitServerTime += 10;
                     }
                 }
             }
@@ -83,7 +85,6 @@ namespace ThParkingStall.Host.Controllers
             {
                 return "服务器繁忙中，等待超时,请稍候再试。";
             }
-
 
             //把文件发送到对应服务器
             var data_dir = @"C:\AIIIS\DATAIIS";

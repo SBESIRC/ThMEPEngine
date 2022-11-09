@@ -212,7 +212,16 @@ namespace ThMEPArchitecture.MultiProcess
             DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
             foreach (var blk in blks)
             {
-                ProcessTheBlock(blk, autoMode);
+                var msg = "";
+                ProcessTheBlock(blk,ref msg, autoMode);
+                if (msg != "")
+                {
+                    if (msg.Contains("服务器繁忙"))
+                    {
+                        DisplayLogger.Information("服务器繁忙中，请稍后再试");
+                        continue;
+                    }
+                }
             }
             ShowDisplayInfo(blks.Count());
         }
@@ -300,7 +309,7 @@ namespace ThMEPArchitecture.MultiProcess
                 entities.ShowBlock("障碍物移位结果", "障碍物移位结果");
             }
         }
-        private void ProcessTheBlock(BlockReference block, bool autoMode = false, bool definePriority = true)
+        private void ProcessTheBlock(BlockReference block,ref string msg, bool autoMode = false, bool definePriority = true)
         {
             var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
             //var MultiSolutionList = new List<int> { 0 };
@@ -367,7 +376,11 @@ namespace ThMEPArchitecture.MultiProcess
                 else
                 {
                     DisplayLogger.Information("发送至服务器计算;");
-                    Solution = GetGenomeFromServer(dataWraper, guid);
+                    Solution = GetGenomeFromServer(dataWraper, guid,ref msg);
+                    if (msg != "")
+                    {
+                        return;
+                    }
                     DisplayLogger.Information("接受到服务器计算结果;");
                 }
                 ProcessAndDisplay(Solution, i, stopWatch);
@@ -409,10 +422,10 @@ namespace ThMEPArchitecture.MultiProcess
                 return Solution;
             }
         }
-        Genome GetGenomeFromServer(DataWraper dataWraper,string guid)
+        Genome GetGenomeFromServer(DataWraper dataWraper,string guid,ref string msg)
         {
             ServerGenerationService serverGenerationService = new ServerGenerationService();
-            var gene = serverGenerationService.GetGenome(dataWraper,guid);
+            var gene = serverGenerationService.GetGenome(dataWraper,guid,ref msg);
             return gene;
         }
 
