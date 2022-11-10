@@ -52,6 +52,7 @@ namespace ThParkingStallProgramDisplay
         }
         static void readfromserver(List<string> contents, string end, Logger Logger)
         {
+            Thread.Sleep(3 * 1000);
             var contentCount = contents.Count;
             var guid = readGuidFromMemory(Logger);
             if (guid == "")
