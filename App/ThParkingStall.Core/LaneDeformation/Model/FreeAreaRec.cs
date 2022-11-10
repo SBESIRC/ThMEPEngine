@@ -21,6 +21,12 @@ namespace ThParkingStall.Core.LaneDeformation
         public double FreeLength = 0;
         public double Width = 0;
 
+
+        public FreeAreaRec() 
+        {
+        
+        }
+
         public FreeAreaRec(Coordinate leftDown,  Coordinate rightDown, Coordinate rightUp, Coordinate leftUp) 
         {
             LeftDownPoint = leftDown;

@@ -42,6 +42,8 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             DrawTmpOutPut0 = LDOutput.DrawTmpOutPut0;
 
+
+
             Result = Data;
         }
     }

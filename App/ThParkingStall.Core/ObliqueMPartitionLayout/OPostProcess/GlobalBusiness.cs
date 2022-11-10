@@ -198,11 +198,15 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public List<Polygon> LaneNodes = new List<Polygon>();
         public List<Polygon> SpotNodes = new List<Polygon>();
 
+        public List<Polygon> BlockShow = new List<Polygon>();
         public List<Polygon> TmpCutRecs = new List<Polygon>();
-
+        public List<Polygon> UpCut = new List<Polygon>();
+        public List<Polygon> BoundaryRecs = new List<Polygon>();
         //增加要打印的东西
         public DrawTmpOutPut() 
         {
+
+
 
         }
     }

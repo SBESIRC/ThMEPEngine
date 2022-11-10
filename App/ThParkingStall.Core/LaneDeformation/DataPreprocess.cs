@@ -53,7 +53,7 @@ namespace ThParkingStall.Core.LaneDeformation
             GeometryCollection differenceObjs = new GeometryCollection(geometries.ToArray());
             var freeAreeResult = OverlayNGRobust.Overlay(LaneDeformationParas.Boundary, differenceObjs, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
 
-
+            
             
             if (freeAreeResult is Polygon a)
             {
@@ -119,9 +119,9 @@ namespace ThParkingStall.Core.LaneDeformation
             //        }
             //    }
             //}
+            LDOutput.DrawTmpOutPut0.BlockShow = VehicleLane.Blocks;
 
 
-            
             if (tmpG is GeometryCollection collection)
             {
                 foreach (var e in collection)

@@ -22,6 +22,8 @@ namespace ThParkingStall.Core.LaneDeformation
 
         public List<List<FreeAreaRec>> FreeAreaRecsList = new List<List<FreeAreaRec>>();
 
+        //外墙Poly
+        public List<FreeAreaRec> BoundaryFreeAreaRecs = new List<FreeAreaRec>();
 
         //单个Area临时变量
         double maxY = 0;
@@ -29,6 +31,7 @@ namespace ThParkingStall.Core.LaneDeformation
         List<FreeAreaRec> tmpRecs = new List<FreeAreaRec>();
         List<List<FreeAreaRec>> tmpRecsX = new List<List<FreeAreaRec>>();
         List<List<FreeAreaRec>> clearedTmpRecsX = new List<List<FreeAreaRec>>(); //只取上下两个矩形的tmpRecsX
+        List<FreeAreaRec> CombinedFreeAreaRec = new List<FreeAreaRec>();
         Polygon nowBoundary;
 
         public BuildFreeArea(List<Polygon> originalFreeAreaList,Vector2D dir) 
@@ -48,6 +51,9 @@ namespace ThParkingStall.Core.LaneDeformation
                 nowBoundary = OriginalFreeAreaList[i];
                 FromSingleFreeArea(OriginalFreeAreaList[i]);
             }
+
+            GetBoundaryFreeAreaRecs();
+
         }
 
         public void FromSingleFreeArea(Polygon singleFreeArea) 
@@ -60,16 +66,16 @@ namespace ThParkingStall.Core.LaneDeformation
             minY = yList.First();
 
             List<double> xList = GetXList(obbPointList);
+            //增加人为切割
+            xList = AddEquidistantX(xList,500);
 
             //清除部分重合点
-            xList = IgnoreSmall(xList);
+            xList = IgnoreSmall(xList,50);
 
 
             //两种切分方式
             //GetCutRecs0(singleFreeArea, xList);
             GetCutRecs1(singleFreeArea, xList);
-
-
 
             FreeAreaRecsList.Add(tmpRecs);
             tmpRecs = new List<FreeAreaRec>();
@@ -93,6 +99,25 @@ namespace ThParkingStall.Core.LaneDeformation
                 yList.Add(pointList[i].Y);
             }
             return yList.OrderBy(x => x).ToList();
+        }
+
+        public List<double> AddEquidistantX(List<double> xList, double dis = 500) 
+        {
+            List<double> newXList = new List<double>();
+
+            double nowMaxX = xList.Last();
+            double nowMinX = xList.First();
+
+            for (int i = 1; nowMinX + i * dis < nowMaxX; i++) 
+            {
+                double tmpX = nowMinX + i * dis;
+                newXList.Add(tmpX);
+            }
+
+            newXList.AddRange(xList);
+            newXList = newXList.OrderBy(x => x).ToList();
+
+            return newXList;
         }
 
         public List<double> IgnoreSmall(List<double> numberList, double threshold = 50)
@@ -307,11 +332,12 @@ namespace ThParkingStall.Core.LaneDeformation
             GetUsefulRecs();
 
             //修改数值
-            //ModifiedRecs();
+            ModifiedRecs();
 
 
             //展平
-            List<FreeAreaRec> flatten = clearedTmpRecsX.SelectMany(x => x).ToList();
+            //List<FreeAreaRec> flatten = clearedTmpRecsX.SelectMany(x => x).ToList();
+            List<FreeAreaRec> flatten = CombinedFreeAreaRec;
             tmpRecs = flatten;
         }
 
@@ -374,7 +400,7 @@ namespace ThParkingStall.Core.LaneDeformation
             double deltay = ylist.Last() - ylist.First();
             double deltax = xlist.Last() - xlist.First();
             double recArea = deltax * deltay;
-            //if (maybeRec.Area > recArea * 0.1 && deltax > 50) 
+            if (maybeRec.Area > recArea * 0.5) 
             if(true)
             {
                 coordinates.Add(new Coordinate(xlist.First(),ylist.First()));
@@ -408,13 +434,294 @@ namespace ThParkingStall.Core.LaneDeformation
             }
         }
 
-        //public void ModifiedRecs(double threshold = 5) 
-        //{
-        //    for (int i = 0; i < tmpRecs.Count; i++) 
-        //    {
-        //        if (tmpRecs[i].Width < )
+        public void ModifiedRecs(double threshold = 600)
+        {
+            CombinedFreeAreaRec = new List<FreeAreaRec>();
 
-        //    }
-        //}
+            List<FreeAreaRec> upFreeAreaRecs = new List<FreeAreaRec>();
+            List<FreeAreaRec> downFreeAreaRecs = new List<FreeAreaRec>();
+            List<Polygon> drawUp = new List<Polygon>();
+
+            //for up
+            double nowWidth = 0;
+            double leftX = 0;
+            double rightX = 0;
+            double nowMaxY = 0;
+            double nowMinY = 0;
+            double count = 0;
+            for (int i = 0; i < clearedTmpRecsX.Count; i++)
+            {
+                FreeAreaRec nowRec = new FreeAreaRec();
+                if (clearedTmpRecsX[i].Count > 0)
+                {
+                    nowRec = clearedTmpRecsX[i].Last();
+                    //drawUp.Add(nowRec.Obb);
+                }
+                else continue;
+
+                //是否回收记录创建block
+                bool retrieve = false;
+                bool nowBlockCreate = false;
+                if (count == 0)
+                {
+                    if (nowRec.Width < threshold)
+                    {
+                        leftX = nowRec.LeftDownPoint.X;
+                        rightX = nowRec.RightDownPoint.X;
+                        count = 1;
+                        nowWidth = nowRec.Width;
+                        nowMinY = nowRec.LeftDownPoint.Y;
+                        nowMaxY = nowRec.LeftUpPoint.Y;
+                        
+                    }
+                    else
+                    {
+                        upFreeAreaRecs.Add(nowRec);
+                    }
+                }
+                else if(count > 0)
+                {
+                    //同底同高合并
+                    if (Math.Abs(nowRec.LeftDownPoint.Y - nowMinY) < 10 && Math.Abs(nowRec.LeftUpPoint.Y - nowMaxY) < 10)
+                    {
+                        count++;
+                        nowWidth = nowRec.Width + nowWidth;
+                        rightX = nowRec.RightDownPoint.X;
+                    }
+                    //小块合并，同高
+                    else if (nowRec.Width < threshold &&
+                        Math.Abs(nowRec.LeftUpPoint.Y - nowMaxY) < 10 &&
+                        nowRec.LeftDownPoint.Y < nowMinY)
+                    {
+                        count++;
+                        nowWidth = nowRec.Width + nowWidth;
+                        rightX = nowRec.RightDownPoint.X;
+                    }
+                    //大块合并
+                    else if (nowRec.Width >= threshold &&
+                        nowWidth < threshold &&
+                         Math.Abs(nowRec.LeftUpPoint.Y - nowMaxY) < 10 &&
+                          nowRec.LeftDownPoint.Y > nowMinY)
+                    {
+                        nowMinY = nowRec.LeftDownPoint.Y;
+                        count++;
+                        nowWidth = nowWidth + nowRec.Width;
+                        rightX = nowRec.RightDownPoint.X;
+                    }
+                    
+                    //不合并
+                    else 
+                    {
+                        //旧block回收
+                        retrieve = true;
+
+                        //新block处理
+                        nowBlockCreate = true;
+                    }
+                }
+
+                //遍历到最后必然回收
+                if (i == clearedTmpRecsX.Count - 1)
+                {
+                    retrieve = true;
+                }
+
+                if (retrieve) 
+                {
+                    List<Coordinate> coordinates = new List<Coordinate>();
+                    coordinates.Add(new Coordinate(leftX, nowMinY));
+                    coordinates.Add(new Coordinate(rightX, nowMinY));
+                    coordinates.Add(new Coordinate(rightX, nowMaxY));
+                    coordinates.Add(new Coordinate(leftX, nowMaxY));
+                    upFreeAreaRecs.Add(new FreeAreaRec(coordinates[0], coordinates[1],coordinates[2],coordinates[3]));
+
+                    //回收后变量置零
+                    nowWidth = 0;
+                    leftX = 0;
+                    rightX = 0;
+                    nowMaxY = 0;
+                    nowMinY = 0;
+                    count = 0;
+                }
+
+                if (nowBlockCreate) 
+                {
+                    if (nowRec.Width < threshold)
+                    {
+                        leftX = nowRec.LeftDownPoint.X;
+                        rightX = nowRec.RightDownPoint.X;
+                        count = 1;
+                        nowWidth = nowRec.Width;
+                        nowMinY = nowRec.LeftDownPoint.Y;
+                        nowMaxY = nowRec.LeftUpPoint.Y;
+                    }
+                    else
+                    {
+                        upFreeAreaRecs.Add(nowRec);
+                    }
+                }
+
+            }
+
+            //for down
+            nowWidth = 0;
+            leftX = 0;
+            rightX = 0;
+            nowMaxY = 0;
+            nowMinY = 0;
+            count = 0;
+            for (int i = 0; i < clearedTmpRecsX.Count; i++)
+            {
+                FreeAreaRec nowRec = new FreeAreaRec();
+                if (clearedTmpRecsX[i].Count > 0)
+                {
+                    nowRec = clearedTmpRecsX[i].First();
+                    drawUp.Add(nowRec.Obb);
+                }
+                else continue;
+
+                //是否回收记录创建block
+                bool retrieve = false;
+                bool nowBlockCreate = false;
+                if (count == 0)
+                {
+                    if (nowRec.Width < threshold)
+                    {
+                        leftX = nowRec.LeftDownPoint.X;
+                        rightX = nowRec.RightDownPoint.X;
+                        count = 1;
+                        nowWidth = nowRec.Width;
+                        nowMinY = nowRec.LeftDownPoint.Y;
+                        nowMaxY = nowRec.LeftUpPoint.Y;
+                    }
+                    else
+                    {
+                        downFreeAreaRecs.Add(nowRec);
+                    }
+                }
+                else if (count > 0)
+                {
+                    //同底同高合并
+                    if (Math.Abs(nowRec.LeftDownPoint.Y - nowMinY) < 10 && Math.Abs(nowRec.LeftUpPoint.Y - nowMaxY) < 10)
+                    {
+                        count++;
+                        nowWidth = nowRec.Width + nowWidth;
+                        rightX = nowRec.RightDownPoint.X;
+                    }
+                    //小块合并，同高
+                    else if (nowRec.Width < threshold &&
+                        Math.Abs(nowRec.LeftDownPoint.Y - nowMinY) < 10 &&
+                        nowRec.LeftUpPoint.Y > nowMaxY)
+                    {
+                        count++;
+                        nowWidth = nowRec.Width + nowWidth;
+                        rightX = nowRec.RightDownPoint.X;
+                    }
+                    //大块合并
+                    else if (nowRec.Width >= threshold &&
+                        nowWidth < threshold &&
+                         Math.Abs(nowRec.LeftDownPoint.Y - nowMinY) < 10 &&
+                          nowRec.LeftUpPoint.Y > nowMaxY)
+                    {
+                        nowMaxY = nowRec.LeftUpPoint.Y;
+                        count++;
+                        nowWidth = nowWidth + nowRec.Width;
+                        rightX = nowRec.RightDownPoint.X;
+                    }
+
+                    //不合并
+                    else
+                    {
+                        //旧block回收
+                        retrieve = true;
+
+                        //新block处理
+                        nowBlockCreate = true;
+                    }
+                }
+
+                //遍历到最后必然回收
+                if (i == clearedTmpRecsX.Count - 1)
+                {
+                    retrieve = true;
+                }
+
+                if (retrieve)
+                {
+                    List<Coordinate> coordinates = new List<Coordinate>();
+                    coordinates.Add(new Coordinate(leftX, nowMinY));
+                    coordinates.Add(new Coordinate(rightX, nowMinY));
+                    coordinates.Add(new Coordinate(rightX, nowMaxY));
+                    coordinates.Add(new Coordinate(leftX, nowMaxY));
+                    downFreeAreaRecs.Add(new FreeAreaRec(coordinates[0], coordinates[1], coordinates[2], coordinates[3]));
+
+                    //回收后变量置零
+                    nowWidth = 0;
+                    leftX = 0;
+                    rightX = 0;
+                    nowMaxY = 0;
+                    nowMinY = 0;
+                    count = 0;
+                }
+
+                if (nowBlockCreate)
+                {
+                    if (nowRec.Width < threshold)
+                    {
+                        leftX = nowRec.LeftDownPoint.X;
+                        rightX = nowRec.RightDownPoint.X;
+                        count = 1;
+                        nowWidth = nowRec.Width;
+                        nowMinY = nowRec.LeftDownPoint.Y;
+                        nowMaxY = nowRec.LeftUpPoint.Y;
+                    }
+                    else
+                    {
+                        downFreeAreaRecs.Add(nowRec);
+                    }
+                }
+
+            }
+
+
+            CombinedFreeAreaRec.AddRange(upFreeAreaRecs);
+            CombinedFreeAreaRec.AddRange(downFreeAreaRecs);
+            LDOutput.DrawTmpOutPut0.UpCut.AddRange(drawUp);
+
+        }
+
+        void GetBoundaryFreeAreaRecs(double length = 20) 
+        {
+            Polygon boundary = VehicleLane.Boundary.Clone();
+            List<Coordinate> points = VehicleLane.Boundary.Coordinates.ToList();
+
+            for (int i = 0; i < points.Count; i++) 
+            {
+                Coordinate pt0 = points[i];
+                Coordinate pt1 = points[(i + 1) % points.Count];
+                Vector2D vecDir0 = new Vector2D(1, 0);
+                Vector2D vecDir1 = new Vector2D(-1, 0);
+
+                Vector2D vec0 = new Vector2D(pt0,pt1).Normalize();
+
+                if (vec0.Dot(vecDir1) > 0.95)
+                {
+                    FreeAreaRec tmpRecs = new FreeAreaRec(pt1, pt0, new Coordinate(pt0.X, pt0.Y + 10), new Coordinate(pt1.X, pt1.Y + 10));
+                    tmpRecs.FreeLength = 0;
+                    BoundaryFreeAreaRecs.Add(tmpRecs);
+                }
+                else if (vec0.Dot(vecDir0) > 0.95)
+                {
+                    FreeAreaRec tmpRecs = new FreeAreaRec(pt0, pt1, new Coordinate(pt1.X, pt1.Y - 10), new Coordinate(pt0.X, pt0.Y - 10));
+                    tmpRecs.FreeLength = 0;
+                    BoundaryFreeAreaRecs.Add(tmpRecs);
+                }
+            }
+
+            for (int i = 0; i < BoundaryFreeAreaRecs.Count; i++) 
+            {
+                LDOutput.DrawTmpOutPut0.BoundaryRecs.Add(BoundaryFreeAreaRecs[i].Obb);
+            }
+        }
     }
 }

@@ -34,6 +34,8 @@ namespace ThMEPHVAC
                 var room_result = Active.Editor.GetEntity("get room region");
                 if (room_result.Status != PromptStatus.OK) return;
                 Polyline room = acadDatabase.Element<Polyline>(room_result.ObjectId).Clone() as Polyline;
+
+
                 // input pipe in
                 var pipein_result = Active.Editor.GetEntity("get pipein point");
                 if (pipein_result.Status != PromptStatus.OK) return;
@@ -43,6 +45,10 @@ namespace ThMEPHVAC
                 // input room_buffer
                 double buffer = 500;
                 double room_buffer = 100;
+
+
+
+
                 // core process
                 RoomPipeGenerator1 roomPipeGenerator = new RoomPipeGenerator1(room, pipe_in, buffer, room_buffer);
                 roomPipeGenerator.CalculatePipeline();

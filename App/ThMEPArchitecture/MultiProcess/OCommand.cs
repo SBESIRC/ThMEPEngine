@@ -636,6 +636,25 @@ namespace ThMEPArchitecture.MultiProcess
                 DrawUtils.ShowGeometry(ma, "l0CutRecs", 2);
             }
 
+            foreach (Polygon a in drawTmpOutPut.BlockShow)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l0BlockShow", 5);
+            }
+
+            foreach (Polygon a in drawTmpOutPut.UpCut)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l0UpCut", 6);
+            }
+
+            foreach (Polygon a in drawTmpOutPut.BoundaryRecs)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l0BoundaryRecs", 0);
+            }
+
+
             //foreach (Polygon a in drawTmpOutPut.LaneNodes)
             //{
             //    MPolygon ma = a.ToDbMPolygon();
