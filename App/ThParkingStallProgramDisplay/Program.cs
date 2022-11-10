@@ -82,6 +82,8 @@ namespace ThParkingStallProgramDisplay
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("进程显示出错: "+ex.Message);
+                    Console.WriteLine("进程显示出错: " + ex.StackTrace);
                     Logger.Information(ex.Message);
                     Logger.Information(ex.StackTrace);
                 }
@@ -110,7 +112,7 @@ namespace ThParkingStallProgramDisplay
                 }
                 if (quit)
                     break;
-                Thread.Sleep(1 * 1000);
+                Thread.Sleep(2 * 1000);
             }
         }
         static string readGuidFromMemory(Logger Logger)

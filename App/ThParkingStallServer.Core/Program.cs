@@ -113,7 +113,7 @@ namespace ThParkingStallServer.Core
         public static string DisplayLogFileName = Path.Combine(LogDir, $"DisplayLog_{guid}.txt");
         public static void LogDisplayLog(string info)
         {
-            FileStream fs = new FileStream(DisplayLogFileName, FileMode.Append);
+            FileStream fs = new FileStream(DisplayLogFileName, FileMode.Append,FileAccess.Write,FileShare.ReadWrite);
             StreamWriter sw = new StreamWriter(fs);
             sw.WriteLine(System.DateTime.Now.ToString() + info);
             sw.Close();

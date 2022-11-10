@@ -219,7 +219,7 @@ namespace ThMEPArchitecture.MultiProcess
                     if (msg.Contains("服务器繁忙"))
                     {
                         DisplayLogger.Information("服务器繁忙中，请稍后再试");
-                        continue;
+                        break;
                     }
                 }
             }
@@ -363,6 +363,8 @@ namespace ThMEPArchitecture.MultiProcess
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
                 var guid = (Guid.NewGuid()).ToString();
+                var userName = System.Environment.UserName;
+                guid = userName + "_" + guid;
                 WriteGuidToMemoryFile(guid);
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
