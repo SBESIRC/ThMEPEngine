@@ -400,8 +400,11 @@ namespace ThPlatform3D.StructPlane.Print
                         {
                             textMoveDir = o.Properties.GetDirection().ToVector();
                         }
-                        dbText.TextString = dbText.TextString + "（" + i++ + "）";                        
-                        beamIds.AddRange(ThAnnotationPrinter.Print(acadDb, dbText, _beamTextConfig));                       
+                        dbText.TextString = dbText.TextString + "（" + i++ + "）";  
+                        if(dbText.ObjectId==ObjectId.Null)
+                        {
+                            beamIds.AddRange(ThAnnotationPrinter.Print(acadDb, dbText, _beamTextConfig));
+                        }                     
                     }
                 });
                 if(textMoveDir.Length <= 1e-6 && g.Count>0)

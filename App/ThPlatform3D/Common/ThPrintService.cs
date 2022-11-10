@@ -29,16 +29,23 @@ namespace ThPlatform3D.Common
 
         public static ObjectId Print(this Entity entity, AcadDatabase acadDb, PrintConfig config)
         {
-            var objId = acadDb.ModelSpace.Add(entity);
-            entity.Layer = config.LayerName;
-            entity.Linetype = config.LineType;
-            entity.LineWeight = config.LineWeight;
-            entity.ColorIndex = config.Color;
-            if (config.LineTypeScale.HasValue)
+            if(entity.ObjectId==ObjectId.Null)
             {
-                entity.LinetypeScale = config.LineTypeScale.Value;
+                var objId = acadDb.ModelSpace.Add(entity);
+                entity.Layer = config.LayerName;
+                entity.Linetype = config.LineType;
+                entity.LineWeight = config.LineWeight;
+                entity.ColorIndex = config.Color;
+                if (config.LineTypeScale.HasValue)
+                {
+                    entity.LinetypeScale = config.LineTypeScale.Value;
+                }
+                return objId;
             }
-            return objId;
+            else
+            {
+                return entity.ObjectId;
+            }
         }
 
         public static ObjectId Print(this DBText dbText, Database db, AnnotationPrintConfig config)
@@ -52,14 +59,22 @@ namespace ThPlatform3D.Common
         public static ObjectId Print(this DBText dbText, AcadDatabase acadDb, AnnotationPrintConfig config)
         {
             // 事务在外部开启
-            // 传入的文字几何位置已经确定了，这儿只设置相关属性                
-            var objId = acadDb.ModelSpace.Add(dbText);
-            dbText.Layer = config.LayerName;
-            dbText.Height = config.Height;
-            dbText.WidthFactor = config.WidthFactor;
-            dbText.ColorIndex = config.Color;
-            dbText.TextStyleId = config.TextStyleId;
-            return objId;
+            // 传入的文字几何位置已经确定了，这儿只设置相关属性
+            if(dbText.ObjectId==ObjectId.Null)
+            {
+                var objId = acadDb.ModelSpace.Add(dbText);
+                dbText.Layer = config.LayerName;
+                dbText.Height = config.Height;
+                dbText.WidthFactor = config.WidthFactor;
+                dbText.ColorIndex = config.Color;
+                dbText.TextStyleId = config.TextStyleId;
+                return objId;
+                
+            }
+            else
+            {
+                return dbText.ObjectId;
+            }
         }
 
         public static ObjectId Print(this ObjectIdCollection objIds, Database db,  HatchPrintConfig config)

@@ -80,6 +80,7 @@ namespace ThPlatform3D.StructPlane.Service
                 var envelope = CreateEnvelope(item.Value, ClosestDistanceTolerance, ClosestDistanceTolerance);
                 var objs = Query(SpatialIndex, envelope);
                 objs = objs.OfType<DBText>()
+                    .Where(o=> !IsGrouped(o))
                     .Where(o => item.Key.Rotation.IsRadianParallel(o.Rotation, TextParallelTolerance))
                     .ToCollection();
                 Groups.Add(objs);
