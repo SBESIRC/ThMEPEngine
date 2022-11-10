@@ -15,9 +15,20 @@ namespace ThParkingStall.Core.FireZone
         public FireZoneNode Root;//代表边界的节点
 
         private Dictionary<Coordinate, FireZoneNode> NodeDic = new Dictionary<Coordinate, FireZoneNode>();
-        public List<FireZoneNode> NodeList = new List<FireZoneNode>();
-        public List<FireZoneEdge> Edges = new List<FireZoneEdge>();
 
+        private Dictionary<int, FireZoneNode> IdToNode = new Dictionary<int, FireZoneNode>();
+        //public List<FireZoneNode> NodeList = new List<FireZoneNode>();
+        //public List<FireZoneEdge> Edges = new List<FireZoneEdge>();
+        private Dictionary<int, FireZoneEdge> IdToEdge = new Dictionary<int, FireZoneEdge>();
+
+        private List<FireZonePath> PathsToExplore = new List<FireZonePath> ();//当前需要探索的路径
+        private List<FireZonePath> PathsToSocre = new List<FireZonePath>();//需要打分的路径
+        private Dictionary<FireZonePath, (Polygon, double)> ScoredPaths = new Dictionary<FireZonePath, (Polygon, double)>();//打过分的的路径
+        private double BestScore = double.MaxValue;//当前最优得分
+        private FireZonePath BestPath;//当前最优路径
+
+
+        private int ObjId = 0;
         public Stopwatch _stopwatch = new Stopwatch();
         public Serilog.Core.Logger Logger = null;
         private double t_pre;
@@ -36,7 +47,10 @@ namespace ThParkingStall.Core.FireZone
         }
         public void Add(FireZoneNode node)
         {
-            NodeList.Add(node);
+            //NodeList.Add(node);
+            IdToNode.Add(ObjId, node);
+            node.ObjId = ObjId;
+            ObjId += 1;
             if (node.Type == 0) NodeDic.Add(node.Coordinates.First(), node);
             else
             {
@@ -49,7 +63,10 @@ namespace ThParkingStall.Core.FireZone
         }
         public void Add(FireZoneEdge edge)
         {
-            Edges.Add(edge);
+            //Edges.Add(edge);
+            IdToEdge.Add(ObjId, edge);
+            edge.ObjId = ObjId;
+            ObjId += 1;
             var node0 = NodeDic[edge.P0];
             var node1 = NodeDic[edge.P1];
             node0.AddBranch(edge, node1);
@@ -60,72 +77,50 @@ namespace ThParkingStall.Core.FireZone
         {
             MinArea = minArea * multiplier* multiplier;
             MaxArea = maxArea * multiplier* multiplier;
-            var rootPath = new FireZonePath();
-            var pathsToExplore = new HashSet<FireZonePath> { rootPath };
-            var EndPaths = new HashSet<FireZonePath>();
-            var minCost = double.MaxValue;
-            Polygon optPoly = null;
             var t_start = _stopwatch.Elapsed.TotalSeconds;
+            PathsToExplore.Add(new FireZonePath());
             for (int i = 0; i < StepSize; i++)
             {
-                if (pathsToExplore.Count == 0) break;
+                if (PathsToExplore.Count == 0) break;
                 Logger?.Information($"第{i}步:");
-                Logger?.Information($"节点个数:{pathsToExplore.Count}");
-                t_pre = _stopwatch.Elapsed.TotalSeconds;
-                var nextLevelPaths = Step(pathsToExplore, minCost);
-                pathsToExplore.Clear();
-                EndPaths.Clear();
-                foreach (var path in nextLevelPaths)
-                {
-                    if (path.Ended) EndPaths.Add(path);
-                    else pathsToExplore.Add(path);
-                }
-                Logger?.Information($"遍历用时:{_stopwatch.Elapsed.TotalSeconds - t_pre}s");
-                t_pre = _stopwatch.Elapsed.TotalSeconds;
-
-                var polyCnt = 0;
-                foreach (var path in EndPaths)
-                {
-                    var cost = path.Cost;
-                    var poly = Split(path);
-                    if (poly == null) continue;
-                    polyCnt += 1;
-                    FireZones.Add(poly);
-                    if (cost < minCost)
-                    {
-                        minCost = cost;
-                        optPoly = poly;
-                        Logger?.Information($"最短距离：{cost * 0.001}m");
-                    }
-                }
-                Logger?.Information($"方案个数：{EndPaths.Count}");
-                Logger?.Information($"有效个数：{polyCnt}");
-                Logger?.Information($"计算用时:{_stopwatch.Elapsed.TotalSeconds - t_pre}s\n");
+                Logger?.Information($"节点个数:{PathsToExplore.Count}");
+                Step();
+                Score();
             }
-            return optPoly;
+            Logger?.Information($"当前防火分区用时:{_stopwatch.Elapsed.TotalSeconds - t_start}s\n");
+            return ScoredPaths [BestPath].Item1;
         }
-        private HashSet<FireZonePath> Step(HashSet<FireZonePath> initPath, double minCost)//获取下一层路径
+        private void Step()//获取下一层路径
         {
-            var nextLevelPath = new HashSet<FireZonePath>();
-
-            foreach (var path in initPath)
+            t_pre = _stopwatch.Elapsed.TotalSeconds;
+            var nextLevelPaths = new List<FireZonePath>();
+            foreach(var path in PathsToExplore)
             {
-                Step(path, minCost).ForEach(p => nextLevelPath.Add(p));
+                var stepedPaths = Step(path,BestScore);
+                foreach(var stepedPath in stepedPaths)
+                {
+                    if(stepedPath.Ended)
+                    {
+                        if(!ScoredPaths.ContainsKey(stepedPath)) PathsToSocre.Add(stepedPath);
+                    }
+                    else nextLevelPaths.Add(stepedPath);
+                }
             }
-            return nextLevelPath;
+            PathsToExplore = nextLevelPaths;
+            Logger?.Information($"遍历用时:{_stopwatch.Elapsed.TotalSeconds - t_pre}s");
         }
         private List<FireZonePath> Step(FireZonePath initPath, double minCost)
         {
             var nextLevelPath = new List<FireZonePath>();
             if (initPath.Ended) return nextLevelPath;
             FireZoneNode initNode;
-            if (initPath.Edges.Count == 0)//初始节点，未添加路径
+            if (initPath.Path.Count == 0)//初始节点，未添加路径
             {
                 initNode = Root;
             }
             else
             {
-                initNode = initPath.Nodes.Last();
+                initNode =IdToNode[initPath.Path.Last()];
             }
             foreach (var branch in initNode.Branches)
             {
@@ -139,17 +134,49 @@ namespace ThParkingStall.Core.FireZone
             }
             return nextLevelPath;
         }
-
+        private void Score()//打分
+        {
+            var polyCnt = 0;
+            var planCnt = 0;
+            foreach (var path in PathsToSocre)
+            {
+                if (ScoredPaths.ContainsKey(path)) continue;
+                planCnt += 1;
+                var cost = path.Cost;
+                var poly = Split(path);
+                ScoredPaths.Add(path,(poly,cost));
+                if (poly == null) continue;
+                polyCnt += 1;
+                FireZones.Add(poly);
+                if (cost < BestScore)
+                {
+                    BestScore = cost;
+                    BestPath = path;
+                    Logger?.Information($"最短距离：{cost * 0.001}m");
+                }
+            }
+            Logger?.Information($"方案个数：{planCnt}");
+            Logger?.Information($"有效个数：{polyCnt}");
+            Logger?.Information($"计算用时:{_stopwatch.Elapsed.TotalSeconds - t_pre}s\n");
+            PathsToSocre.Clear();
+        }
         private Polygon Split(FireZonePath path)//基于path对图形切割
         {
             var polygonizer = new Polygonizer();
             polygonizer.Add(Root.Segments);
-            path.Edges.ForEach(e => polygonizer.Add(e.Path));
+            var Path = path.Path;
             var nodePolys = new HashSet<Polygon>();
-            foreach(var node in path.Nodes)
+            for (int i = 0; i < Path.Count; i++)
             {
-                if(node.Type == 1)
+                var objId = Path[i];
+                if (i % 2 == 0)
                 {
+                    polygonizer.Add(IdToEdge[objId].Path);
+                }
+                else
+                {
+                    var node = IdToNode[objId];
+                    if (node.Type != 1) continue;
                     nodePolys.Add(node.polygon);
                     polygonizer.Add(node.Segments);
                 }

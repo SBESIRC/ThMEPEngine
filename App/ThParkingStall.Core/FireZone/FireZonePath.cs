@@ -6,95 +6,82 @@ using System.Threading.Tasks;
 
 namespace ThParkingStall.Core.FireZone
 {
-    public class FireZonePath//以root为起点，经过edge-node-edge-node ... 定义为path
+    public class FireZonePath//从边界节点到达另一node定义为一个path
     {
-        public List<FireZoneEdge> Edges = new List<FireZoneEdge>();
-        private HashSet<FireZoneEdge> _edges = null;
-        public HashSet<FireZoneEdge> edgeSet
+        public List<int> Path = new List<int>();//路径
+        public double Cost;
+        public bool Ended//奇数个则最后一个node为边界
         {
             get
             {
-                if(_edges == null) _edges = Edges.ToHashSet();
-                return _edges;  
+                return Path.Count % 2 == 1;
             }
         }
-        public List<FireZoneNode> Nodes =new List<FireZoneNode>();
-        private HashSet<FireZoneNode> _nodes = null;
-        public HashSet<FireZoneNode> nodeSet
-        {
-            get
-            {
-                if (_nodes == null)_nodes = Nodes.ToHashSet();
-                return _nodes;
-            }
-        }
-        public bool Ended { get { return Edges.Count > Nodes.Count; } }
-
-        public double Cost = 0;
         public FireZonePath Step(FireZoneEdge edge,FireZoneNode node)
         {
+            return Step(edge.ObjId,node.ObjId,edge.Cost);
+        }
+        public FireZonePath Step(int edgeId, int nodeId, double cost)
+        {
             var clone = new FireZonePath();
-            clone.Edges.AddRange(Edges);
-            clone.Nodes.AddRange(Nodes);
-            clone.Edges.Add(edge);
-            if(node.Type!= -1)clone.Nodes.Add(node);
-            clone.Cost = Cost + edge.Cost;
+            clone.Cost = Cost + cost;
+            clone.Path = Path.ToList();
+            clone.Path.Add(edgeId);
+            if (nodeId != 0) clone.Path.Add(nodeId);
             return clone;
-        }
-        public bool Contains(FireZoneEdge edge)
-        {
-            return edgeSet.Contains(edge);
-        }
-        public bool Contains(FireZoneNode node)
-        {
-            return nodeSet.Contains(node);
         }
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
             if (obj is FireZonePath other)
             {
-                if(this.Edges.Count!=other.Edges.Count) return false;
+                if (this.Path.Count != other.Path.Count) return false;
                 var PosEqual = PosEquals(other);
                 if (!Ended) return PosEqual;
-                else
-                {
-                    return PosEqual || NegEquals(other);
-                }
+                return PosEqual || NegEquals(other);
             }
             return false;
         }
+        public bool Contains(FireZoneNode node)
+        {
+            return Contains(node.ObjId);
+        }
+        public bool Contains(FireZoneEdge edge)
+        {
+            return Contains(edge.ObjId);
+        }
+        public bool Contains(int Id)
+        {
+            return Path.Contains(Id);
+        }
         private bool PosEquals(FireZonePath other)
         {
-            for(int i = 0; i < Edges.Count; i++)
+            var count = this.Path.Count;
+            for (int i = 0; i < count; i++)
             {
-                if(!Edges[i].Equals(other.Edges[i])) return false;  
-            }
-            for(int j = 0;j < Nodes.Count; j++)
-            {
-                if(!Nodes[j].Equals(other.Nodes[j])) return false;
+                if (this.Path[i] != other.Path[i])
+                {
+                    return false;
+                }
             }
             return true;
         }
         private bool NegEquals(FireZonePath other)
         {
-            var ECount = Edges.Count;
-            for (int i = 0; i < ECount; i++)
+            var count = this.Path.Count;
+            for (int i = 0; i < count; i++)
             {
-                if (!Edges[ECount -1 -i].Equals(other.Edges[i])) return false;
-            }
-            var NCount = Nodes.Count;
-            for (int j = 0; j < NCount; j++)
-            {
-                if (!Nodes[NCount - 1 - j].Equals(other.Nodes[j])) return false;
+                if (this.Path[count - 1 - i] != other.Path[i])
+                {
+                    return false;
+                }
             }
             return true;
         }
         public override int GetHashCode()
         {
             var hashCodeToReturn = 0x56E5EEC8;
-            Edges.ForEach(p => hashCodeToReturn ^= p.GetHashCode());
-            Nodes.ForEach(p => hashCodeToReturn ^= p.GetHashCode());
+            Path.ForEach(p => hashCodeToReturn ^= p.GetHashCode());
             return hashCodeToReturn;
         }
     }

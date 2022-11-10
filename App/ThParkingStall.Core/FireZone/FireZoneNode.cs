@@ -11,6 +11,7 @@ namespace ThParkingStall.Core.FireZone
     public class FireZoneNode//边界也为一个node
     {
         public Polygon polygon;
+        public int ObjId = -1;
         private List<Geometry> _Segments = null;
         public List<Geometry> Segments
         {

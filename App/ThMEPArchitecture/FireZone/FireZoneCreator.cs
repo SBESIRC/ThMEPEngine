@@ -133,7 +133,7 @@ namespace ThMEPArchitecture.FireZone
             map.Root.polygon.ToDbMPolygon().AddToCurrentSpace();
 
             //translator.Paths.ForEach(l => l.ToDbPolyline().AddToCurrentSpace());
-            map.Edges.ForEach(e => e.Path.ToDbPolyline().AddToCurrentSpace());
+            //map.Edges.ForEach(e => e.Path.ToDbPolyline().AddToCurrentSpace());
             var poly = map.FindBestFireZone(3800, 4000);
             poly.ToDbMPolygon().AddToCurrentSpace();
             return null;

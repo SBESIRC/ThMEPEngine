@@ -12,6 +12,7 @@ namespace ThParkingStall.Core.FireZone
         public LineString Path;
         public Coordinate P0 { get { return Path.StartPoint.Coordinate; } }
         public Coordinate P1 { get { return Path.EndPoint.Coordinate; } }
+        public int ObjId = -1;
         public double Cost;
         public FireZoneEdge(LineString path, double cost = -1)
         {

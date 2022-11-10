@@ -57,6 +57,10 @@ namespace TianHua.Architecture.WPI.UI
         }
         bool Validate()
         {
+#if DEBUG
+            return true;
+#endif
+            //return true;
             if (!ValidateIdentity())
                 return false;
             if (!ValidateVersion())
@@ -136,9 +140,7 @@ namespace TianHua.Architecture.WPI.UI
                 pageData = MyWebClient.DownloadData(appHttp).ToList();
             }).Wait(-1);
             romoteVersion = Encoding.UTF8.GetString(pageData.ToArray());
-#if DEBUG
-            return true;
-#endif
+
             if (romoteVersion != curVersion)
             {
                 var dialogResult = MessageBox.Show($"您当前的地库版本过低，点击升级自动更新为最新版：(请先保存CAD文件数据)\n当前版本{curVersion}\n最新版本{romoteVersion}", "版本提示", MessageBoxButton.OKCancel);
