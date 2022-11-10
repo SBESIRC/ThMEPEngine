@@ -119,7 +119,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
         /// <summary>
         /// 在判断生成车道的优先级时记载上一条生成车道的方向，法向，用于提高相同车道方向生成的优先级
         /// </summary>
-        private Vector2D ParentDir = Vector2D.Zero;
+        public Vector2D ParentDir = Vector2D.Zero;
 
         public static bool AllowLaneDeformation=true;//允许车道微动
         public bool AccurateCalculate = true;

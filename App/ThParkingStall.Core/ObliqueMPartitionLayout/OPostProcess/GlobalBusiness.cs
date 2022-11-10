@@ -56,10 +56,54 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public List<LineString> walls = new List<LineString>();
         public List<Coordinate> obsVertices = new List<Coordinate>();
         public List<VehicleLane> VehicleLanes = new List<VehicleLane>();
-        public Polygon BOUND { get; set; }
-
-
+        public static Polygon BOUND { get; set; }
+        
         public DrawTmpOutPut drawTmpOutPut0 = new DrawTmpOutPut();
+
+        /// <summary>
+        /// 单根车道线生成车位
+        /// </summary>
+        /// <param name="_line"></param>车道线
+        /// <param name="_vec"></param>车道线生成车位的方向
+        /// <param name="_obstacles"></param>车道线生成方向的障碍物
+        /// <param name="_cars"></param>生成的车位
+        /// <param name="_columns"></param>生成的柱子
+        public static void GenerateCars(LineSegment _line, Vector2D _vec, List<Polygon> _obstacles, ref List<Polygon> _cars, ref List<Polygon> _columns)
+        {
+            #region 构造MParkingPartitionPro调用车位生成方法
+            ObliqueMPartition tmpro = new ObliqueMPartition();
+            tmpro.Walls = new List<LineString>();
+            tmpro.Boundary = BOUND;
+            var tmpro_lane = new LineSegment(_line);
+            tmpro.IniLanes.Add(new Lane(tmpro_lane, _vec.Normalize()));
+            tmpro.Obstacles = _obstacles;
+            tmpro.ObstaclesSpatialIndex = new MNTSSpatialIndex(_obstacles);
+            var vertlanes = tmpro.GeneratePerpModuleLanes(ObliqueMPartition.DisVertCarLength + ObliqueMPartition.DisLaneWidth / 2, ObliqueMPartition.DisVertCarWidth, false, null, true);
+            foreach (var k in vertlanes)
+            {
+                var vl = k.Line;
+                var line = new LineSegment(vl);
+                line = line.Translation(k.Vec.Normalize() * ObliqueMPartition.DisLaneWidth / 2);
+                var line_align_backback_rest = new LineSegment();
+                tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), ObliqueMPartition.DisVertCarWidth, ObliqueMPartition.DisVertCarLength
+                    , ref line_align_backback_rest, true, false, false, false, true, true, false, false, false, true, false, false, false, true);
+            }
+            tmpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
+            vertlanes = tmpro.GeneratePerpModuleLanes(ObliqueMPartition.DisParallelCarWidth + ObliqueMPartition.DisLaneWidth / 2, ObliqueMPartition.DisParallelCarLength, false);
+            ObliqueMPartition.SortLaneByDirection(vertlanes, ObliqueMPartition.LayoutMode, Vector2D.Zero);
+            foreach (var k in vertlanes)
+            {
+                var vl = k.Line;
+                //UnifyLaneDirection(ref vl, IniLanes);
+                var line = new LineSegment(vl);
+                line = line.Translation(k.Vec.Normalize() * ObliqueMPartition.DisLaneWidth / 2);
+                var line_align_backback_rest = new LineSegment();
+                tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec, ObliqueMPartition.DisParallelCarLength, ObliqueMPartition.DisParallelCarWidth
+                    , ref line_align_backback_rest, true, false, false, false, true, true, false);
+            }
+            #endregion
+        }
+
         public void DeformLanes()
         {
             //return;

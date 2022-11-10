@@ -90,7 +90,7 @@ namespace ThParkingStallProgramDisplay
                                 Console.WriteLine(line);
                                 if (line.Contains(end))
                                 {
-                                    Logger.Information("end:______"+end);
+                                    Logger.Information("end:______" + end);
                                     quit = true;
                                     break;
                                 }
