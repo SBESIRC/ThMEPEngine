@@ -11,10 +11,10 @@ namespace ThParkingStall.Core.LaneDeformation
 
     public class BlockNode
     {
-        public BlockType Type;
         public Vector2D Dir;
         public Polygon Obb;
         public double SelfTolerance;
+        public bool IsAnchor;
         public Coordinate LeftDownPoint;
         public Coordinate RightUpPoint;
         public List<List<BlockNode>> NeighborNodes;
@@ -24,19 +24,42 @@ namespace ThParkingStall.Core.LaneDeformation
         {
 
         }
-        public BlockNode(BlockType type, Vector2D dir, Polygon obb, Coordinate leftDown, Coordinate rightUp, double selfTolerance = 0)  //此处freeLength设置了默认值
+        public BlockNode(Vector2D dir, Polygon obb, Coordinate leftDown, Coordinate rightUp, double selfTolerance = 0)  //此处freeLength设置了默认值
         {
-            Type = type;
             Dir = dir;
             Obb = obb;
             LeftDownPoint = leftDown;
             RightUpPoint = rightUp;
             SelfTolerance = selfTolerance;
+            IsAnchor = false;
+            InitBase();
+            InitCoordinates();
+        }
+        protected void InitBase()
+        {
             NeighborNodes = new List<List<BlockNode>>();
             NeighborNodes.Add(new List<BlockNode>());
             NeighborNodes.Add(new List<BlockNode>());
             MoveTolerances = new List<double> { 0, 0 };
             InDegrees = new List<int> { 0, 0 };
+        }
+        protected virtual void InitCoordinates()
+        {
+            // TODO：根据方向进行旋转
+            this.LeftDownPoint = Obb.Coordinates[0].Copy();
+            this.RightUpPoint = Obb.Coordinates[0].Copy();
+            for (int i = 1; i < Obb.Coordinates.Count(); i++)
+            {
+                Coordinate coord = Obb.Coordinates[i];
+                if (coord.X < LeftDownPoint.X)
+                    LeftDownPoint.X = coord.X;
+                if (coord.Y < LeftDownPoint.Y)
+                    LeftDownPoint.Y = coord.Y;
+                if (coord.X > RightUpPoint.X)
+                    RightUpPoint.X = coord.X;
+                if (coord.Y > RightUpPoint.Y)
+                    RightUpPoint.Y = coord.Y;
+            }
         }
         public List<BlockNode> NextNodes(PassDirection dir)
         {
@@ -49,6 +72,12 @@ namespace ThParkingStall.Core.LaneDeformation
         public double Tolerance(PassDirection dir)
         {
             return MoveTolerances[(int)dir] + SelfTolerance;
+        }
+        public virtual double ToleranceForChild(PassDirection dir, double left, double right)
+        {
+            if (left > RightUpPoint.X || right < LeftDownPoint.X)
+                return -1;
+            return Tolerance(dir);
         }
         public double MoveTolerance(PassDirection dir)
         {
@@ -74,6 +103,14 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             InDegrees[(int)dir] = degree;
         }
+        public static double MinToler(double t1, double t2)
+        {
+            if (t1 < 0)
+                return t2;
+            if (t2 < 0)
+                return t1;
+            return Math.Min(t1, t2);
+        }
     }
     public class SpotBlock : BlockNode
     {
@@ -87,70 +124,188 @@ namespace ThParkingStall.Core.LaneDeformation
         }
         private void UpdateBase()
         {
-            InitCoordinates();
-            this.Type = BlockType.SPOT;
             this.SelfTolerance = 0;
-            this.NeighborNodes = new List<List<BlockNode>>();
-            NeighborNodes.Add(new List<BlockNode>());
-            NeighborNodes.Add(new List<BlockNode>());
-            this.MoveTolerances = new List<double> { 0, 0 };
-            this.InDegrees = new List<int> { 0, 0 };
-        }
-        private void InitCoordinates()
-        {
-            // TODO：根据方向进行旋转
-            this.LeftDownPoint = this.RightUpPoint = Spot.ParkingPlaceObb.Coordinates[0];
-            for (int i = 1; i < Spot.ParkingPlaceObb.Coordinates.Count(); i++)
-            {
-                Coordinate coord = Spot.ParkingPlaceObb.Coordinates[i];
-                if (coord.CompareTo(LeftDownPoint) is -1)
-                    LeftDownPoint = coord;
-                if (coord.CompareTo(RightUpPoint) is 1)
-                    RightUpPoint = coord;
-            }
+            this.IsAnchor = false;
+            InitCoordinates();
+            InitBase();
         }
     }
-    public class LaneBlock : BlockNode
+    public class ParkBlock : BlockNode
+    {
+        public ParkingPlaceBlock Park;
+        public ParkBlock(ParkingPlaceBlock park, Vector2D dir, bool isAnchor)
+        {
+            Park = park;
+            this.Dir = dir;
+            this.IsAnchor = isAnchor;
+            this.Obb = park.ParkingPlaceBlockObb;
+            UpdateBase();
+        }
+        private void UpdateBase()
+        {
+            this.SelfTolerance = 0;
+            InitCoordinates();
+            InitBase();
+        }
+    }
+    public class BreakableBlock : BlockNode
+    {
+        public BreakableBlock() 
+        {
+
+        }
+        public class MarkPoint
+        {
+            public double ValueRight;
+            public double Coord;
+            public MarkPoint(double coord, double tolerance)
+            {
+                Coord = coord;
+                ValueRight = tolerance;
+            }
+        }
+        public List<MarkPoint> ToleranceTable = null;
+        // 接口
+        public void InitTolerances(PassDirection passDir, bool narrow = false)
+        {
+            InitTable(passDir, narrow);
+            MergeTable();
+        }
+        public override double ToleranceForChild(PassDirection passDir, double left, double right)
+        {
+            left = Math.Max(left, LeftDownPoint.X);
+            right = Math.Min(right, RightUpPoint.X);
+            if (left >= right)
+                return -1;
+
+            if (ToleranceTable is null)
+                return Tolerance(passDir);
+
+            int cur = 0;
+            while (cur < ToleranceTable.Count && ToleranceTable[cur].Coord <= left)
+                cur++;
+            double res = ToleranceTable[cur - 1].ValueRight;
+            while (cur < ToleranceTable.Count && ToleranceTable[cur].Coord < right)
+            {
+                res = MinToler(res, ToleranceTable[cur].ValueRight);
+                cur++;
+            }
+
+            return res;
+        }
+        private void InitTable(PassDirection passDir, bool narrow = false)
+        {
+            ToleranceTable = new List<MarkPoint>
+            {
+                new MarkPoint(LeftDownPoint.X, -1),
+                new MarkPoint(RightUpPoint.X, 0)
+            };
+            if (LastNodes(passDir).Count == 0)
+            {
+                ToleranceTable[0].ValueRight = SelfTolerance;
+                return;
+            }
+            var segList = new List<ValueTuple<double, double, double>>();
+            foreach (var node in this.LastNodes(passDir))
+            {
+                if (node is BreakableBlock bb && bb.ToleranceTable != null)
+                {
+                    for (int i = 0; i < bb.ToleranceTable.Count - 1; i++)
+                    {
+                        segList.Add((bb.ToleranceTable[i].Coord, bb.ToleranceTable[i + 1].Coord, bb.ToleranceTable[i].ValueRight));
+                    }
+                }
+                else
+                {
+                    segList.Add((node.LeftDownPoint.X, node.RightUpPoint.X, node.Tolerance(passDir)));
+                }
+            }
+            foreach (var seg in segList)
+            {
+                var left = Math.Max(seg.Item1 - (narrow ? VehicleLane.VehicleLaneWidth : 0), LeftDownPoint.X);
+                var right = Math.Min(seg.Item2 + (narrow ? VehicleLane.VehicleLaneWidth : 0), RightUpPoint.X);
+                var value = seg.Item3 + SelfTolerance;
+                if (left >= right) continue;
+
+                int cur = 0;
+                while (cur < ToleranceTable.Count && ToleranceTable[cur].Coord <= left)
+                    cur++;
+                int lm = cur - 1;
+                while (cur < ToleranceTable.Count && ToleranceTable[cur].Coord < right)
+                    cur++;
+                int rm = cur;
+
+                var leftMark = new MarkPoint(left, MinToler(value, ToleranceTable[lm].ValueRight));
+                var rightMark = new MarkPoint(right, ToleranceTable[rm - 1].ValueRight);
+
+                for (int i = lm + 1; i < rm; i++)
+                    ToleranceTable[i].ValueRight = MinToler(value, ToleranceTable[i].ValueRight);
+
+                if (right < ToleranceTable[rm].Coord)
+                    ToleranceTable.Insert(rm, rightMark);
+                if (left == ToleranceTable[lm].Coord)
+                    ToleranceTable[lm] = leftMark;
+                else
+                    ToleranceTable.Insert(lm + 1, leftMark);
+            }
+        }
+        private void MergeTable()
+        {
+            var deleteList = new List<int>();
+            // 去掉值为-1的区域
+            // ** 连续-1情况未考虑，若之前的逻辑正确应该不会出现
+            if (ToleranceTable[0].ValueRight < 0)
+                ToleranceTable[0].ValueRight = ToleranceTable[1].ValueRight;
+            for (int i = 1; i < ToleranceTable.Count - 1; i++)
+            {
+                if (ToleranceTable[i].ValueRight < 0)
+                    ToleranceTable[i].ValueRight = Math.Max(ToleranceTable[i - 1].ValueRight, ToleranceTable[i + 1].ValueRight);
+            }
+            // 合并值相同的区域
+            for (int i = 1; i < ToleranceTable.Count - 1; i++)
+            {
+                if (ToleranceTable[i].ValueRight == ToleranceTable[i - 1].ValueRight)
+                    deleteList.Add(i);
+            }
+            for (int i = deleteList.Count - 1; i >= 0; i--)
+                ToleranceTable.RemoveAt(deleteList[i]);
+        }
+    }
+    public class LaneBlock : BreakableBlock
     {
         public VehicleLane Lane;
+
         public bool IsVerticle;
+        public bool IsHorizontal;
+        public List<bool> IsFtherLane = new List<bool> { false, false };
+
         public LaneBlock(VehicleLane lane, Vector2D dir)
         {
             Lane = lane;
             this.Dir = dir;
             this.Obb = lane.LaneObb;
-            IsVerticle = Dir.Dot(new Vector2D(Lane.CenterLine.P0, Lane.CenterLine.P1)).Equals(0);
+            var laneVec = new Vector2D(Lane.CenterLine.P0, Lane.CenterLine.P1);
+            var cos = Math.Abs(Dir.Normalize().Dot(laneVec.Normalize()));
+            double eps = 1e-4;
+            IsVerticle = cos > (1 - eps);
+            IsHorizontal = cos < eps;
             UpdateBase();
+        }
+        public bool isOblique()
+        {
+            return !IsVerticle && !IsHorizontal; 
         }
         private void UpdateBase()
         {
-            InitCoordinates();
-            this.Type = BlockType.LANE;
             this.SelfTolerance = 0;
-            this.NeighborNodes = new List<List<BlockNode>>();
-            NeighborNodes.Add(new List<BlockNode>());
-            NeighborNodes.Add(new List<BlockNode>());
-            this.MoveTolerances = new List<double> { 0, 0 };
-            this.InDegrees = new List<int> { 0, 0 };
-        }
-        private void InitCoordinates()
-        {
-            // TODO：根据方向进行旋转
-            this.LeftDownPoint = this.RightUpPoint = Lane.LaneObb.Coordinates[0];
-            for (int i = 1; i < Lane.LaneObb.Coordinates.Count(); i++)
-            {
-                Coordinate coord = Lane.LaneObb.Coordinates[i];
-                if (coord.CompareTo(LeftDownPoint) is -1)
-                    LeftDownPoint = coord;
-                if (coord.CompareTo(RightUpPoint) is 1)
-                    RightUpPoint = coord;
-            }
+            this.IsAnchor = Lane.IsAnchorLane || this.isOblique();
+            InitCoordinates();
+            InitBase();
         }
     }
-    public class FreeBlock : BlockNode
+    public class FreeBlock : BreakableBlock
     {
         public FreeAreaRec Area;
-        public bool IsVerticle;
         public FreeBlock(FreeAreaRec area, Vector2D dir)
         {
             Area = area;
@@ -160,27 +315,16 @@ namespace ThParkingStall.Core.LaneDeformation
         }
         private void UpdateBase()
         {
-            InitCoordinates();
-            this.Type = BlockType.FREE;
             this.SelfTolerance = Area.FreeLength;
-            this.NeighborNodes = new List<List<BlockNode>>();
-            NeighborNodes.Add(new List<BlockNode>());
-            NeighborNodes.Add(new List<BlockNode>());
-            this.MoveTolerances = new List<double> { 0, 0 };
-            this.InDegrees = new List<int> { 0, 0 };
+            InitCoordinates();
+            InitBase();
         }
-        private void InitCoordinates()
+        protected override void InitCoordinates()
         {
             // TODO：根据方向进行旋转
             this.LeftDownPoint = Area.LeftDownPoint;
             this.RightUpPoint = Area.RightUpPoint;
         }
-    }
-    public enum BlockType : int
-    {
-        FREE = 0,
-        LANE = 1,
-        SPOT = 2,
     }
     public enum PassDirection : int
     {

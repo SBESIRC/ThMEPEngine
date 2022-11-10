@@ -32,6 +32,10 @@ namespace ThParkingStall.Core.LaneDeformation
             // 得到ProcessedData.BlockNodeList
             DataPreprocess2 dataPreprocess2 = new DataPreprocess2();
             dataPreprocess2.Pipeline();
+
+            // 计算容差值
+            ToleranceCalculator toleranceCalculator = new ToleranceCalculator(ProcessedData.BlockNodeList);
+            toleranceCalculator.Pipeline();
             
             //
             GetResult();

@@ -617,7 +617,46 @@ namespace ThMEPArchitecture.MultiProcess
 
         public void PrintTmpOutPut(DrawTmpOutPut drawTmpOutPut) 
         {
-            //打印到CAD
+
+            //Wu
+            foreach (Polygon a in drawTmpOutPut.FreeAreaRecs2)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l0FreeAreaRecs2", 2);
+            }
+
+            foreach (Polygon a in drawTmpOutPut.LaneNodes)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l0LaneRecs", 3);
+            }
+
+            foreach (Polygon a in drawTmpOutPut.SpotNodes)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l0SpotRecs", 4);
+            }
+
+            foreach (LineSegment a in drawTmpOutPut.NeighborRelations)
+            {
+                Line la = a.ToDbLine();
+                DrawUtils.ShowGeometry(la, "l0NeighborRelations", 5);
+            }
+
+            for (int i = 0; i < drawTmpOutPut.ToleranceResults.Count; i++)
+            {
+                string value = ((int)drawTmpOutPut.ToleranceResults[i]).ToString();
+                Point3d pos = drawTmpOutPut.TolerancePositions[i].ToAcGePoint3d();
+                DrawUtils.ShowGeometry(pos, value, "l0Tolerances", 0, hight: 500);
+            }
+
+
+
+
+
+
+
+            //luoyun7
             foreach (Polygon a in drawTmpOutPut.OriginalFreeAreaList) 
             {
                 MPolygon ma = a.ToDbMPolygon();
@@ -653,21 +692,6 @@ namespace ThMEPArchitecture.MultiProcess
                 MPolygon ma = a.ToDbMPolygon();
                 DrawUtils.ShowGeometry(ma, "l0BoundaryRecs", 0);
             }
-
-
-            //foreach (Polygon a in drawTmpOutPut.LaneNodes)
-            //{
-            //    MPolygon ma = a.ToDbMPolygon();
-            //    DrawUtils.ShowGeometry(ma, "l0LaneRecs", 2);
-            //}
-
-            //foreach (Polygon a in drawTmpOutPut.SpotNodes)
-            //{
-            //    MPolygon ma = a.ToDbMPolygon();
-            //    DrawUtils.ShowGeometry(ma, "l0SpotRecs", 3);
-            //}
-
-
         }
     }
 }

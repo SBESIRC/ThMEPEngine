@@ -237,10 +237,20 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
 
     public class DrawTmpOutPut 
     {
-        public List<Polygon> OriginalFreeAreaList =new List<Polygon>();
-        public List<Polygon> FreeAreaRecs = new List<Polygon>();
+
+        //Wu
+        public List<Polygon> FreeAreaRecs2 = new List<Polygon>();
         public List<Polygon> LaneNodes = new List<Polygon>();
         public List<Polygon> SpotNodes = new List<Polygon>();
+
+        public List<LineSegment> NeighborRelations = new List<LineSegment>();
+        public List<double> ToleranceResults = new List<double>();
+        public List<Point> TolerancePositions = new List<Point>();
+
+
+        //luoyun7
+        public List<Polygon> OriginalFreeAreaList =new List<Polygon>();
+        public List<Polygon> FreeAreaRecs = new List<Polygon>();
 
         public List<Polygon> BlockShow = new List<Polygon>();
         public List<Polygon> TmpCutRecs = new List<Polygon>();

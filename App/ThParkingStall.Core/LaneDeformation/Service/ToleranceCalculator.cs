@@ -33,51 +33,42 @@ namespace ThParkingStall.Core.LaneDeformation
             while (WaitQueue.Count > 0)
             {
                 BlockNode node = WaitQueue.Dequeue();
-                if (node.Type is BlockType.FREE || node.Type is BlockType.SPOT)
+                if (node is FreeBlock free)
                 {
-                    // 更新容差值
-                    GetMinTolerance(node);
-
-                    // 更新后继的入度,为0则入队
-                    UpdateNextNodes(node);
+                    free.InitTolerances(Dir);
                 }
-                else if (node.Type is BlockType.LANE)
+                else if (node is SpotBlock spot)
                 {
-                    LaneBlock laneBlock = (LaneBlock)node;
-
+                    GetMinTolerance(spot);
+                }
+                else if (node is ParkBlock park)
+                {
+                    if (park.IsAnchor)
+                        park.SetMoveTolerance(Dir, 0);
+                    else
+                        GetMinTolerance(park);
+                }
+                else if (node is LaneBlock lane)
+                {
                     // 不可动车道
-                    if (laneBlock.Lane.IsAnchorLane)
+                    if (lane.IsAnchor)
                     {
-                        // 更新容差值
-                        node.SetMoveTolerance(Dir, 0);
-
-                        // 更新后继的入度,为0则入队
-                        UpdateNextNodes(node);
+                        lane.SetMoveTolerance(Dir, 0);
                     }
-                    // 垂直车道
-                    else if (laneBlock.IsVerticle)
+                    // 横向车道
+                    else if (lane.IsHorizontal)
                     {
-                        GetMinTolerance(node);
-                        UpdateNextNodes(node);
-                        /*if (node.LastNodes(Dir).Count is 0)
-                            node.SetMoveTolerance(Dir, 0);
-                        else
-                        {
-                            List<Coordinate> coords = new List<Coordinate>();
-                            List<double> values;
-                            foreach (BlockNode n in node.LastNodes(Dir))
-                            {
-                                coords.Add(n.LeftDownPoint);
-                            }
-                        }*/
+                        lane.InitTolerances(Dir, lane.IsFtherLane[(int)Dir]);
                     }
                     // 其余车道
                     else
                     {
-                        GetMinTolerance(node);
-                        UpdateNextNodes(node);
+                        GetMinTolerance(lane);
                     }
                 }
+
+                // 更新后继的入度,为0则入队
+                UpdateNextNodes(node);
             }
         }
         private void UpdateNextNodes(BlockNode node)
@@ -97,14 +88,42 @@ namespace ThParkingStall.Core.LaneDeformation
             {
                 double min = double.PositiveInfinity;
                 foreach (BlockNode n in node.LastNodes(Dir))
-                    min = Math.Min(n.Tolerance(Dir), min);
+                {
+/*                    if (n.Type is BlockType.LANE &&
+                        ((LaneBlock) n).)*/
+                    min = BlockNode.MinToler(n.ToleranceForChild(Dir, node.LeftDownPoint.X, node.RightUpPoint.X), min);
+                }
                 node.SetMoveTolerance(Dir, min);
             }
         }
         public void Pipeline()
         {
             Run(PassDirection.FORWARD);
-            Run(PassDirection.BACKWARD);
+            //Run(PassDirection.BACKWARD);
+
+            // Draw
+            var pointsToDraw = new List<Point>();
+            var valuesToDraw = new List<double>();
+            foreach (var node in ProcessedData.BlockNodeList)
+            {
+                if (node is BreakableBlock bb && bb.ToleranceTable != null)
+                {
+                    for (int i = 0; i < bb.ToleranceTable.Count - 1; i++)
+                    {
+                        Point p = new Point(bb.ToleranceTable[i].Coord, node.Obb.Centroid.Y);
+                        pointsToDraw.Add(p);
+                        valuesToDraw.Add(bb.ToleranceTable[i].ValueRight);
+                    }
+                }
+                else
+                {
+                    Point p = new Point(node.Obb.Centroid.X - 800, node.Obb.Centroid.Y);
+                    pointsToDraw.Add(p);
+                    valuesToDraw.Add(node.Tolerance(PassDirection.FORWARD));
+                }
+            }
+            LDOutput.DrawTmpOutPut0.TolerancePositions = pointsToDraw;
+            LDOutput.DrawTmpOutPut0.ToleranceResults = valuesToDraw;
         }
 
     }
