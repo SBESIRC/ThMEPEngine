@@ -229,6 +229,17 @@
     <Compile Include="PressureDrainageSystem\Service\HorizontalPipeCollection.cs" />
     <Compile Include="PressureDrainageSystem\Utils\BusinessDebug.cs" />
     <Compile Include="PressureDrainageSystem\Utils\GeoExtension.cs" />
+    <Compile Include="PumpSectionalView\Cmd\ThPumpSectionalCmd.cs" />
+    <Compile Include="PumpSectionalView\Cmd\ThPumpSectionalCmdEntrance.cs" />
+    <Compile Include="PumpSectionalView\Model\ThPumpSectionalViewModel.cs" />
+    <Compile Include="PumpSectionalView\Service\ThFirePumpService.cs" />
+    <Compile Include="PumpSectionalView\Service\ThLifePumpService.cs" />
+    <Compile Include="PumpSectionalView\Service\ThHighFireWaterTankService.cs" />
+    <Compile Include="PumpSectionalView\Utils\LifePumpCalculator.cs" />
+    <Compile Include="PumpSectionalView\Utils\ThFirePumpCommon.cs" />
+    <Compile Include="PumpSectionalView\Utils\ThPumpAttributeCommon.cs" />
+    <Compile Include="PumpSectionalView\Utils\ThLifePumpCommon.cs" />
+    <Compile Include="PumpSectionalView\Utils\ThHighFireWaterTankCommon.cs" />
     <Compile Include="Service\ThVerticalPipeExtractService.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmd.cs" />
     <Compile Include="SprinklerDim\Cmd\ThSprinklerDimCmdEntrance.THPLBZ.cs" />
@@ -1128,8 +1139,6 @@
     <Content Include="bin\Release-NET45\TianHua.FanSelection.pdb" />
     <Content Include="bin\Release-NET45\TianHua.Publics.BaseCode.dll" />
   </ItemGroup>
-  <ItemGroup />
-  <ItemGroup />
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSDY.cs" />
   </ItemGroup>

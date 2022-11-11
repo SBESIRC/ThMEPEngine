@@ -14,6 +14,9 @@
     <Deterministic>true</Deterministic>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -121,6 +124,9 @@
     </Compile>
     <Compile Include="UI\uiSprinklerDim.xaml.cs">
       <DependentUpon>uiSprinklerDim.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiPumpSectionalView.xaml.cs">
+      <DependentUpon>uiPumpSectionalView.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiStoreyFrame.xaml.cs">
       <DependentUpon>uiStoreyFrame.xaml</DependentUpon>
@@ -237,7 +243,10 @@
       <DependentUpon>WaterSupplyHalfPlatformSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="Validations\AboveBeamRule.cs" />
+    <Compile Include="Validations\StringNotNullVlidationRule.cs" />
+    <Compile Include="Validations\AboveZeroVlidationRule.cs" />
     <Compile Include="Validations\AreaDensityRule.cs" />
+    <Compile Include="Validations\AboveZeroAndHalfVlidationRule.cs" />
     <Compile Include="Validations\NearbyDistanceRule.cs" />
     <Compile Include="Validations\SelfLengthRule.cs" />
     <Compile Include="Validations\HoseLengthRule.cs" />
@@ -295,6 +304,10 @@
     <Page Include="UI\uiSprinklerDim.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiPumpSectionalView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\uiStoreyFrame.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -448,6 +461,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Images\jianshao-xian.png" />
+    <Resource Include="Images\xinzeng-xian.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

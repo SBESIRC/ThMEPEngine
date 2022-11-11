@@ -123,6 +123,7 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "地上给水排水平面图模板.dwg");
         }
 
+
         /// <summary>
         /// 电力配电系统图元素
         /// </summary>
@@ -293,6 +294,24 @@ namespace ThCADExtension
         {
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 @"Autodesk\ApplicationPlugins\ThMEPPlugin.bundle");
+        }
+
+        /// <summary>
+        /// 消防泵查询表
+        /// </summary>
+        /// <returns></returns>
+        public static string FirePumpDataTablePath()
+        {
+            return Path.Combine(SupportPath(), "消防泵查询表.xlsx");
+        }
+
+        /// <summary>
+        /// 生活泵查询表
+        /// </summary>
+        /// <returns></returns>
+        public static string LifePumpDataTablePath()
+        {
+            return Path.Combine(SupportPath(), "生活变频泵选泵.xlsx");
         }
     }
 }

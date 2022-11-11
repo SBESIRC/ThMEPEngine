@@ -464,5 +464,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(uiSprinklerDim.Instance);
         }
+
+        /// <summary>
+        /// 泵房剖面图
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THBFPMT", CommandFlags.Modal)]
+        public void THPumpSectionalView()
+        {
+            var ui = new uiPumpSectionalView();
+            AcadApp.ShowModelessWindow(ui);
+        }
     }
 }

@@ -1,0 +1,84 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiDrainageSysAboveGroundSet"
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    Title="参数设置"
+                    WindowStartupLocation="CenterOwner"
+                    xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    mc:Ignorable="d" SizeToContent="WidthAndHeight">
+    <Window.Resources>
+        <Style TargetType="Label">
+            <Setter Property="Width" Value="80"></Setter>
+            <Setter Property="VerticalAlignment" Value="Center"></Setter>
+            <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+        </Style>
+       
+    </Window.Resources>
+    <Grid Margin="5">
+        <WrapPanel Orientation="Vertical">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="图纸比例："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding ScaleListItems}" SelectedItem="{Binding ScaleSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <Border BorderThickness="0,1,0,0" Margin="0,5,0,0"></Border>
+            <Label Width="Auto" Content="排水方式(污废合流)"></Label>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="污废立管："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding WSWPipeDiameterListItems}" SelectedItem="{Binding WSWPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="通气立管："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding WSVPipeDiameterListItems}" SelectedItem="{Binding WSVPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="沉箱立管："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding CaissonRiserListItems}" SelectedItem="{Binding CaissonRiseSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <CheckBox Content="卫生间沉箱" Margin="5,5,0,0" Visibility="Collapsed" VerticalContentAlignment="Center" IsChecked="{Binding ToiletIsCaisson,Mode=TwoWay,NotifyOnSourceUpdated=True}"></CheckBox>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="阳台废水："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding BWWPipeDiameterListItems}" SelectedItem="{Binding BWWPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <Border BorderThickness="0,1,0,0" Margin="0,5,0,0"></Border>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="屋顶雨水："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding RPipeDiameterListItems}" SelectedItem="{Binding RPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="阳台立管："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding BPipeDiameterListItems}" SelectedItem="{Binding BPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <Border BorderThickness="0,1,0,0" Margin="0,5,0,0"></Border>
+            <StackPanel Orientation="Horizontal">
+                <Label  Content="冷凝立管："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding CPipeDiameterListItems}" SelectedItem="{Binding CPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <Border BorderThickness="0,1,0,0" Margin="0,5,0,0"></Border>
+            <Label Width="Auto" Content="大屋面雨水斗"></Label>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="重力雨水斗："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding MRGPipeDiameterListItems}" SelectedItem="{Binding MRGPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="侧排雨水斗："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding MRSPipeDiameterListItems}" SelectedItem="{Binding MRSPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <Border BorderThickness="0,1,0,0" Margin="0,5,0,0"></Border>
+            <Label Width="Auto" Content="小屋面雨水斗"></Label>
+            <StackPanel Orientation="Horizontal">
+                <Label  Content="重力雨水斗："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding MIRGPipeDiameterListItems}" SelectedItem="{Binding MIRGPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="侧排雨水斗："></Label>
+                <ComboBox Width="70" Height="22" VerticalContentAlignment="Center" ItemsSource="{Binding MIRSPipeDiameterListItems}" SelectedItem="{Binding MIRSPipeDiameterSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,10">
+                <cus:ImageButton Content="确定" Height="22" Width="50" Name="btnOk" Click="btnOk_Click"></cus:ImageButton>
+                <cus:ImageButton Content="取消" Height="22" Width="50" Name="btnCancel" Margin="30,0,0,0" Click="btnCancel_Click"></cus:ImageButton>
+            </StackPanel>
+        </WrapPanel>
+    </Grid>
+</cus:ThCustomWindow>
