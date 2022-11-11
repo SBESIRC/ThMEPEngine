@@ -22,6 +22,14 @@ namespace ThPlatform3D.StructPlane.Print
             config.ScaleHeight(drawingScale);
             return config;
         }
+
+        public static AnnotationPrintConfig GetMarkTextConfig(string drawingScale)
+        {
+            var config = GetMarkTextConfig();
+            config.ScaleHeight(drawingScale);
+            return config;
+        }
+
         private static AnnotationPrintConfig GetHeadTextConfig()
         {
             return new AnnotationPrintConfig
@@ -30,6 +38,17 @@ namespace ThPlatform3D.StructPlane.Print
                 Height = 8,
                 WidthFactor = 0.8,
                 TextStyleName = "TH-STYLE2",
+            };
+        }
+
+        private static AnnotationPrintConfig GetMarkTextConfig()
+        {
+            return new AnnotationPrintConfig
+            {
+                LayerName = ThPrintLayerManager.DefpointsLayerName,
+                Height = 2.5,
+                WidthFactor = 0.8,
+                TextStyleName = "TH-STYLE3",
             };
         }
 

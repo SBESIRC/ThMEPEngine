@@ -534,7 +534,8 @@ namespace ThPlatform3D.StructPlane.Print
             {
                 return new ObjectIdCollection();
             }
-            return PrintHeadText(acadDb, flrRange);
+            var stdFlrInfo = _floorInfos.GetStdFlrInfo(_flrBottomEle);
+            return PrintHeadText(acadDb, flrRange, stdFlrInfo);
         }
     }
 }

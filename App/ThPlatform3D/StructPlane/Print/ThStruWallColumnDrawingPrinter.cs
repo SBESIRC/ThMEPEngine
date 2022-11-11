@@ -90,8 +90,9 @@ namespace ThPlatform3D.StructPlane.Print
             if (string.IsNullOrEmpty(flrRange))
             {
                 return;
-            }            
-            Append(PrintHeadText(acadDb, flrRange)); // 把结果存到ObjIds中
+            }
+            var stdFlrInfo = _floorInfos.GetStdFlrInfo(_flrBottomEle);
+            Append(PrintHeadText(acadDb, flrRange, stdFlrInfo)); // 把结果存到ObjIds中
         }
     }
 }

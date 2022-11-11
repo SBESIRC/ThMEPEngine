@@ -7,6 +7,7 @@ using ThPlatform3D.Common;
 using ThMEPEngineCore.IO.SVG;
 using ThPlatform3D.StructPlane.Service;
 using System.Linq;
+using System;
 
 namespace ThPlatform3D.StructPlane.Print
 {
@@ -105,8 +106,9 @@ namespace ThPlatform3D.StructPlane.Print
             }
         }
 
-        protected ObjectIdCollection PrintHeadText(AcadDatabase acadDb,string flrRange)
+        protected ObjectIdCollection PrintHeadText(AcadDatabase acadDb,string flrRange,Tuple<string,string,string> stdFlrInfo)
         {
+            //stdFlrInfo->Start楼层编号，End楼层编号,标准层
             var extents = GetPrintObjsExtents(acadDb);
             var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
                 extents.MinPoint.Y - _printParameter.HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
@@ -115,6 +117,7 @@ namespace ThPlatform3D.StructPlane.Print
                 Head = flrRange,
                 DrawingSacle = _printParameter.DrawingScale,
                 BasePt = textCenter,
+                StdFlrInfo = stdFlrInfo
             };
             return printService.Print(acadDb);
         }

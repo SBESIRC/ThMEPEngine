@@ -312,6 +312,56 @@ namespace ThPlatform3D.StructPlane.Service
             }
             return result;
         }
+        public static Tuple<string,string,string> GetStdFlrInfo(this List<ThFloorInfo> floorInfos, double flrBottomEle)
+        {
+            var startFloorNo = "";
+            var endFloorNo = "";
+            var stdFlrNo = "";
+            var stdFloors = floorInfos.GetFloors(flrBottomEle);
+            if (stdFloors.Count() == 1)
+            {
+                var stdFlr = stdFloors.First().StdFlrNo;
+                var floors = floorInfos.Where(o => o.StdFlrNo == stdFlr);
+                if (floors.Count() == 1)
+                {
+                    var floorNo = floors.First().FloorNo.ToUpper();
+                    if (floorNo.EndsWith("F"))
+                    {
+                        startFloorNo = floorNo;
+                        endFloorNo = floorNo;
+                    }
+                    else
+                    {
+                        startFloorNo = floorNo+"F";
+                        endFloorNo = floorNo + "F";
+                    }
+                    stdFlrNo = floors.First().StdFlrNo;                    
+                }
+                else if (floors.Count() > 1)
+                {
+                    var startFloorNo1 = floors.First().FloorNo.ToUpper();
+                    var endFloorNo1 = floors.Last().FloorNo.ToUpper();
+                    if(startFloorNo1.EndsWith("F"))
+                    {
+                        startFloorNo = startFloorNo1;
+                    }
+                    else
+                    {
+                        startFloorNo = startFloorNo1 + "F";
+                    }
+                    if (endFloorNo1.EndsWith("F"))
+                    {
+                        endFloorNo = endFloorNo1;
+                    }
+                    else
+                    {
+                        endFloorNo = endFloorNo1 + "F";
+                    }
+                    stdFlrNo = floors.First().StdFlrNo;
+                }
+            }
+            return Tuple.Create(startFloorNo, endFloorNo, stdFlrNo);
+        }
         public static string GetFloorHeightRange(this List<ThFloorInfo> floorInfos, double flrBottomEle)
         {
             // 获取楼层标高范围
