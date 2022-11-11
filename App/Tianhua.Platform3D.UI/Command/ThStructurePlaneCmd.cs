@@ -52,6 +52,10 @@ namespace Tianhua.Platform3D.UI.Command
             generator.Convert();
             ThStopWatchService.Stop();
             ThStopWatchService.Print("IfcToSvg解析时间：");
+            if(!generator.IsSuccessedBuildSvgFiles)
+            {
+                return;
+            }
 
             // 查找 storeys.json
             var storeyFile = GetStoreyFileName(fileName);

@@ -46,6 +46,12 @@ namespace ThPlatform3D.StructPlane
             PrintParameter = printParameter;
             DrawingType = ThStructurePlaneCommon.StructurePlanName;
         }
+
+        /// <summary>
+        /// Covert之后会生成Svg文件
+        /// </summary>
+        public bool IsSuccessedBuildSvgFiles => GetGeneratedSvgFiles().Count > 0;
+
         /// <summary>
         /// 转成Svg,附加：Storey.txt
         /// </summary>
@@ -311,10 +317,12 @@ namespace ThPlatform3D.StructPlane
         private void SetLayerOrder(List<ObjectIdCollection> floorObjIds)
         {
             // 按照图层设置DrawOrder
-            var layerPriority1 = new List<string> { ThPrintLayerManager.ColumnHatchLayerName, ThPrintLayerManager.BelowColumnHatchLayerName};
-            var layerPriority2 = new List<string> { ThPrintLayerManager.ShearWallHatchLayerName, ThPrintLayerManager.BelowShearWallHatchLayerName };
-            floorObjIds.SetLayerOrder(layerPriority1);
-            floorObjIds.SetLayerOrder(layerPriority2);
+            var layerPriorities = new List<string> { 
+                ThPrintLayerManager.ShearWallHatchLayerName, 
+                ThPrintLayerManager.ColumnHatchLayerName, 
+                ThPrintLayerManager.BelowShearWallHatchLayerName,
+                ThPrintLayerManager.BelowColumnHatchLayerName};
+            floorObjIds.SetLayerOrder(layerPriorities);
         }
 
         private ThStruDrawingPrinter PrintWallColumnDrawing(string svgFile, int flrNaturalNumber)
