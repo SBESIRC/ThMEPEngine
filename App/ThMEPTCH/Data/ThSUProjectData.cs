@@ -24,15 +24,16 @@ public static partial class ThSUProjectDataReflection {
         string.Concat(
           "ChVUaFNVUHJvamVjdERhdGEucHJvdG8aE1RoVENIUm9vdERhdGEucHJvdG8a",
           "HFRoU1VDb21wRGVmaW5pdGlvbkRhdGEucHJvdG8aFlRoU1VCdWlsZGluZ0Rh",
-          "dGEucHJvdG8irgEKD1RoU1VQcm9qZWN0RGF0YRIcCgRyb290GAEgASgLMg4u",
+          "dGEucHJvdG8i8AEKD1RoU1VQcm9qZWN0RGF0YRIcCgRyb290GAEgASgLMg4u",
           "VGhUQ0hSb290RGF0YRIsCgtkZWZpbml0aW9ucxgCIAMoCzIXLlRoU1VDb21w",
           "RGVmaW5pdGlvbkRhdGESIwoIYnVpbGRpbmcYAyABKAsyES5UaFNVQnVpbGRp",
           "bmdEYXRhEhQKDGlzX2ZhY2VfbWVzaBgEIAEoCBIUCgxwcm9qZWN0X3BhdGgY",
-          "BSABKAliBnByb3RvMw=="));
+          "BSABKAkSEgoKcHJvamVjdF9pZBgGIAEoCRIWCg5wcm9qZWN0X3N1Yl9pZBgH",
+          "IAEoCRIUCgxiaW5kaW5nX25hbWUYCCABKAliBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThSUCompDefinitionDataReflection.Descriptor, global::ThSUBuildingDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUProjectData), global::ThSUProjectData.Parser, new[]{ "Root", "Definitions", "Building", "IsFaceMesh", "ProjectPath" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUProjectData), global::ThSUProjectData.Parser, new[]{ "Root", "Definitions", "Building", "IsFaceMesh", "ProjectPath", "ProjectId", "ProjectSubId", "BindingName" }, null, null, null, null)
         }));
   }
   #endregion
@@ -78,6 +79,9 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     building_ = other.building_ != null ? other.building_.Clone() : null;
     isFaceMesh_ = other.isFaceMesh_;
     projectPath_ = other.projectPath_;
+    projectId_ = other.projectId_;
+    projectSubId_ = other.projectSubId_;
+    bindingName_ = other.bindingName_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -146,6 +150,42 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     }
   }
 
+  /// <summary>Field number for the "project_id" field.</summary>
+  public const int ProjectIdFieldNumber = 6;
+  private string projectId_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string ProjectId {
+    get { return projectId_; }
+    set {
+      projectId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "project_sub_id" field.</summary>
+  public const int ProjectSubIdFieldNumber = 7;
+  private string projectSubId_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string ProjectSubId {
+    get { return projectSubId_; }
+    set {
+      projectSubId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "binding_name" field.</summary>
+  public const int BindingNameFieldNumber = 8;
+  private string bindingName_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string BindingName {
+    get { return bindingName_; }
+    set {
+      bindingName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -166,6 +206,9 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     if (!object.Equals(Building, other.Building)) return false;
     if (IsFaceMesh != other.IsFaceMesh) return false;
     if (ProjectPath != other.ProjectPath) return false;
+    if (ProjectId != other.ProjectId) return false;
+    if (ProjectSubId != other.ProjectSubId) return false;
+    if (BindingName != other.BindingName) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -178,6 +221,9 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     if (building_ != null) hash ^= Building.GetHashCode();
     if (IsFaceMesh != false) hash ^= IsFaceMesh.GetHashCode();
     if (ProjectPath.Length != 0) hash ^= ProjectPath.GetHashCode();
+    if (ProjectId.Length != 0) hash ^= ProjectId.GetHashCode();
+    if (ProjectSubId.Length != 0) hash ^= ProjectSubId.GetHashCode();
+    if (BindingName.Length != 0) hash ^= BindingName.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -213,6 +259,18 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
       output.WriteRawTag(42);
       output.WriteString(ProjectPath);
     }
+    if (ProjectId.Length != 0) {
+      output.WriteRawTag(50);
+      output.WriteString(ProjectId);
+    }
+    if (ProjectSubId.Length != 0) {
+      output.WriteRawTag(58);
+      output.WriteString(ProjectSubId);
+    }
+    if (BindingName.Length != 0) {
+      output.WriteRawTag(66);
+      output.WriteString(BindingName);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -240,6 +298,18 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
       output.WriteRawTag(42);
       output.WriteString(ProjectPath);
     }
+    if (ProjectId.Length != 0) {
+      output.WriteRawTag(50);
+      output.WriteString(ProjectId);
+    }
+    if (ProjectSubId.Length != 0) {
+      output.WriteRawTag(58);
+      output.WriteString(ProjectSubId);
+    }
+    if (BindingName.Length != 0) {
+      output.WriteRawTag(66);
+      output.WriteString(BindingName);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -262,6 +332,15 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     }
     if (ProjectPath.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectPath);
+    }
+    if (ProjectId.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectId);
+    }
+    if (ProjectSubId.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectSubId);
+    }
+    if (BindingName.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(BindingName);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -293,6 +372,15 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
     }
     if (other.ProjectPath.Length != 0) {
       ProjectPath = other.ProjectPath;
+    }
+    if (other.ProjectId.Length != 0) {
+      ProjectId = other.ProjectId;
+    }
+    if (other.ProjectSubId.Length != 0) {
+      ProjectSubId = other.ProjectSubId;
+    }
+    if (other.BindingName.Length != 0) {
+      BindingName = other.BindingName;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -335,6 +423,18 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
           ProjectPath = input.ReadString();
           break;
         }
+        case 50: {
+          ProjectId = input.ReadString();
+          break;
+        }
+        case 58: {
+          ProjectSubId = input.ReadString();
+          break;
+        }
+        case 66: {
+          BindingName = input.ReadString();
+          break;
+        }
       }
     }
   #endif
@@ -374,6 +474,18 @@ public sealed partial class ThSUProjectData : pb::IMessage<ThSUProjectData>
         }
         case 42: {
           ProjectPath = input.ReadString();
+          break;
+        }
+        case 50: {
+          ProjectId = input.ReadString();
+          break;
+        }
+        case 58: {
+          ProjectSubId = input.ReadString();
+          break;
+        }
+        case 66: {
+          BindingName = input.ReadString();
           break;
         }
       }

@@ -23,14 +23,15 @@ public static partial class ThTCHProjectDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChZUaFRDSFByb2plY3REYXRhLnByb3RvGhNUaFRDSFJvb3REYXRhLnByb3Rv",
-          "GhNUaFRDSFNpdGVEYXRhLnByb3RvIpMBChBUaFRDSFByb2plY3REYXRhEhwK",
+          "GhNUaFRDSFNpdGVEYXRhLnByb3RvIqcBChBUaFRDSFByb2plY3REYXRhEhwK",
           "BHJvb3QYASABKAsyDi5UaFRDSFJvb3REYXRhEh0KBXNpdGVzGAIgAygLMg4u",
-          "VGhUQ0hTaXRlRGF0YRISCgpwcm9qZWN0X2lkGAMgASgJEhgKEHByb2plY3Rf",
-          "Y2hpbGRfaWQYBCABKAkSFAoMcHJvamVjdF9wYXRoGAUgASgJYgZwcm90bzM="));
+          "VGhUQ0hTaXRlRGF0YRISCgpwcm9qZWN0X2lkGAMgASgJEhYKDnByb2plY3Rf",
+          "c3ViX2lkGAQgASgJEhQKDHByb2plY3RfcGF0aBgFIAEoCRIUCgxiaW5kaW5n",
+          "X25hbWUYBiABKAliBnByb3RvMw=="));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThTCHSiteDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHProjectData), global::ThTCHProjectData.Parser, new[]{ "Root", "Sites", "ProjectId", "ProjectChildId", "ProjectPath" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThTCHProjectData), global::ThTCHProjectData.Parser, new[]{ "Root", "Sites", "ProjectId", "ProjectSubId", "ProjectPath", "BindingName" }, null, null, null, null)
         }));
   }
   #endregion
@@ -74,8 +75,9 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     root_ = other.root_ != null ? other.root_.Clone() : null;
     sites_ = other.sites_.Clone();
     projectId_ = other.projectId_;
-    projectChildId_ = other.projectChildId_;
+    projectSubId_ = other.projectSubId_;
     projectPath_ = other.projectPath_;
+    bindingName_ = other.bindingName_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -120,15 +122,15 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     }
   }
 
-  /// <summary>Field number for the "project_child_id" field.</summary>
-  public const int ProjectChildIdFieldNumber = 4;
-  private string projectChildId_ = "";
+  /// <summary>Field number for the "project_sub_id" field.</summary>
+  public const int ProjectSubIdFieldNumber = 4;
+  private string projectSubId_ = "";
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-  public string ProjectChildId {
-    get { return projectChildId_; }
+  public string ProjectSubId {
+    get { return projectSubId_; }
     set {
-      projectChildId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      projectSubId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
     }
   }
 
@@ -141,6 +143,18 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     get { return projectPath_; }
     set {
       projectPath_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+    }
+  }
+
+  /// <summary>Field number for the "binding_name" field.</summary>
+  public const int BindingNameFieldNumber = 6;
+  private string bindingName_ = "";
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public string BindingName {
+    get { return bindingName_; }
+    set {
+      bindingName_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
     }
   }
 
@@ -162,8 +176,9 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     if (!object.Equals(Root, other.Root)) return false;
     if(!sites_.Equals(other.sites_)) return false;
     if (ProjectId != other.ProjectId) return false;
-    if (ProjectChildId != other.ProjectChildId) return false;
+    if (ProjectSubId != other.ProjectSubId) return false;
     if (ProjectPath != other.ProjectPath) return false;
+    if (BindingName != other.BindingName) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -174,8 +189,9 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     if (root_ != null) hash ^= Root.GetHashCode();
     hash ^= sites_.GetHashCode();
     if (ProjectId.Length != 0) hash ^= ProjectId.GetHashCode();
-    if (ProjectChildId.Length != 0) hash ^= ProjectChildId.GetHashCode();
+    if (ProjectSubId.Length != 0) hash ^= ProjectSubId.GetHashCode();
     if (ProjectPath.Length != 0) hash ^= ProjectPath.GetHashCode();
+    if (BindingName.Length != 0) hash ^= BindingName.GetHashCode();
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -203,13 +219,17 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
       output.WriteRawTag(26);
       output.WriteString(ProjectId);
     }
-    if (ProjectChildId.Length != 0) {
+    if (ProjectSubId.Length != 0) {
       output.WriteRawTag(34);
-      output.WriteString(ProjectChildId);
+      output.WriteString(ProjectSubId);
     }
     if (ProjectPath.Length != 0) {
       output.WriteRawTag(42);
       output.WriteString(ProjectPath);
+    }
+    if (BindingName.Length != 0) {
+      output.WriteRawTag(50);
+      output.WriteString(BindingName);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
@@ -230,13 +250,17 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
       output.WriteRawTag(26);
       output.WriteString(ProjectId);
     }
-    if (ProjectChildId.Length != 0) {
+    if (ProjectSubId.Length != 0) {
       output.WriteRawTag(34);
-      output.WriteString(ProjectChildId);
+      output.WriteString(ProjectSubId);
     }
     if (ProjectPath.Length != 0) {
       output.WriteRawTag(42);
       output.WriteString(ProjectPath);
+    }
+    if (BindingName.Length != 0) {
+      output.WriteRawTag(50);
+      output.WriteString(BindingName);
     }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
@@ -255,11 +279,14 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     if (ProjectId.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectId);
     }
-    if (ProjectChildId.Length != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectChildId);
+    if (ProjectSubId.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectSubId);
     }
     if (ProjectPath.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(ProjectPath);
+    }
+    if (BindingName.Length != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeStringSize(BindingName);
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -283,11 +310,14 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
     if (other.ProjectId.Length != 0) {
       ProjectId = other.ProjectId;
     }
-    if (other.ProjectChildId.Length != 0) {
-      ProjectChildId = other.ProjectChildId;
+    if (other.ProjectSubId.Length != 0) {
+      ProjectSubId = other.ProjectSubId;
     }
     if (other.ProjectPath.Length != 0) {
       ProjectPath = other.ProjectPath;
+    }
+    if (other.BindingName.Length != 0) {
+      BindingName = other.BindingName;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -320,11 +350,15 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
           break;
         }
         case 34: {
-          ProjectChildId = input.ReadString();
+          ProjectSubId = input.ReadString();
           break;
         }
         case 42: {
           ProjectPath = input.ReadString();
+          break;
+        }
+        case 50: {
+          BindingName = input.ReadString();
           break;
         }
       }
@@ -358,11 +392,15 @@ public sealed partial class ThTCHProjectData : pb::IMessage<ThTCHProjectData>
           break;
         }
         case 34: {
-          ProjectChildId = input.ReadString();
+          ProjectSubId = input.ReadString();
           break;
         }
         case 42: {
           ProjectPath = input.ReadString();
+          break;
+        }
+        case 50: {
+          BindingName = input.ReadString();
           break;
         }
       }

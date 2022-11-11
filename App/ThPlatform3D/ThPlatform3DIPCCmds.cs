@@ -24,9 +24,8 @@ namespace ThPlatform3D
             sw.Start();
             var service = new ThDWGToIFCService("");
             var project = service.DWGToProjectData(true, false);
-            project.ProjectId = "QRJ2023K_DWF测试项目";
-            project.ProjectChildId = "TEN25IWL_1#";
-            if (project != null)
+            var message = BuildProtobufMessage(project);
+            if (message != null)
             {
                 sw.Stop();
                 Active.Editor.WriteLine($"读入并解析图纸完成，耗时{sw.ElapsedMilliseconds}毫秒。");
@@ -35,12 +34,6 @@ namespace ThPlatform3D
                 Active.Editor.WriteLine($"开始传输数据。");
                 sw.Start();
 
-                ProtobufMessage message = new ProtobufMessage();
-                MessageHeader header = new MessageHeader();
-                header.Major = "建筑";
-                header.Source = MessageSourceEnum.Cad;
-                message.Header = header;
-                message.CadProjects.Add(project);
                 using (var pipeClient = new NamedPipeClientStream(".",
                     "THCAD2P3DPIPE",
                     PipeDirection.Out,
@@ -87,21 +80,13 @@ namespace ThPlatform3D
         {
             var service = new ThDWGToIFCService("");
             var project = service.DWGToProjectData(true, true);
-            project.ProjectId = "QRJ2023K_DWF测试项目";
-            project.ProjectChildId = "TEN25IWL_1#";
-            if (project == null)
+            var message = BuildProtobufMessage(project);
+            if (message == null)
             {
                 return;
             }
             try
             {
-                ProtobufMessage message = new ProtobufMessage();
-                MessageHeader header = new MessageHeader();
-                header.Major = "建筑";
-                header.Source = MessageSourceEnum.Cad;
-                message.Header = header;
-                message.CadProjects.Add(project);
-
                 CancellationTokenSource CTS = new CancellationTokenSource();
                 CancellationToken Token = CTS.Token;
                 //这里有一个小坑，只有设置了PipeOptions.Asynchronous，管道才会接受取消令牌的取消请求，不然不会生效
@@ -145,6 +130,26 @@ namespace ThPlatform3D
             {
                 Active.Database.GetEditor().WriteMessage("Server 异常\r\n");
             }
+        }
+
+        private ProtobufMessage BuildProtobufMessage(ThTCHProjectData project)
+        {
+            if (project == null)
+            {
+                return null;
+            }
+            project.ProjectId = ConfigService.ConfigInstance.BindingPrjId;
+            project.ProjectSubId = ConfigService.ConfigInstance.BindingSubPrjId;
+            project.BindingName = ConfigService.ConfigInstance.BindingName;
+
+            ProtobufMessage message = new ProtobufMessage();
+            MessageHeader header = new MessageHeader();
+            header.Major = ConfigService.ConfigInstance.BindingMajor;
+            header.Source = MessageSourceEnum.Cad;
+            message.Header = header;
+            message.CadProjects.Add(project);
+
+            return message;
         }
     }
 }
