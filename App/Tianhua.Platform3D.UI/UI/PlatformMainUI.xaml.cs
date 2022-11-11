@@ -4,9 +4,12 @@ using Autodesk.AutoCAD.ApplicationServices;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using ThPlatform3D;
+using ThPlatform3D.Model.Project;
 using Tianhua.Platform3D.UI.Interfaces;
 using Tianhua.Platform3D.UI.UControls;
 using Tianhua.Platform3D.UI.ViewModels;
+using CADApplication = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace Tianhua.Platform3D.UI.UI
 {
@@ -33,9 +36,13 @@ namespace Tianhua.Platform3D.UI.UI
         private void InitMainViewModel() 
         {
             mainViewModel = new MainFunctionViewModel();
+            mainViewModel.UserName = "未登录";
+            mainViewModel.ProjectName = "未绑定";
+            mainViewModel.SubProjectName = "未绑定";
+            mainViewModel.MajorName = "未绑定";
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("楼层", new StoreyElevationSetUI()));
             mainViewModel.FunctionTableItems.Add(new FunctionTabItem("设计", new DesignUControl()));
-            tabTopFunction.DataContext = mainViewModel;
+            this.DataContext = mainViewModel;
             tabTopFunction.SelectedIndex = 1;
             cacheFuctionPages = AllTablePage();
         }
@@ -130,6 +137,50 @@ namespace Tianhua.Platform3D.UI.UI
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private void btnLogin_Click(object sender, RoutedEventArgs e)
+        {
+            var login = new Login();
+            var res = CADApplication.ShowModalWindow(CADApplication.MainWindow.Handle, login, false);
+            if (res != true)
+                return;
+            //登录成功
+            var loginUser = login.UserLoginInfo();
+            ConfigService.ConfigInstance.LoginUser = loginUser;
+            mainViewModel.UserName = loginUser.ChineseName;
+        }
+
+        private void btnProject_Click(object sender, RoutedEventArgs e)
+        {
+            var user = ConfigService.ConfigInstance.LoginUser;
+#if DEBUG
+            if (null == user)
+            {
+                user = new ThPlatform3D.Model.User.UserInfo();
+                user.UserLogin = new ThPlatform3D.Model.User.UserLoginRes();
+                user.UserLogin.Username = "thtestuser";
+                user.PreSSOId = "TU1909XQ";
+                user.ChineseName = "测试用户";
+            }
+#endif
+            if(null == user) 
+            {
+                MessageBox.Show("没有登录，无法进行绑定操作,请登录后在进行相应的相应的操作。", "提醒", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            var hisPrjId = ConfigService.ConfigInstance.BindingPrjId;
+            var hisSubPrjId = ConfigService.ConfigInstance.BindingSubPrjId;
+            var hisMajor = ConfigService.ConfigInstance.BindingMajor;
+            var bindingPrj = new BindingProject(user, hisPrjId, hisSubPrjId, hisMajor);
+            var res = CADApplication.ShowModalWindow(CADApplication.MainWindow.Handle, bindingPrj, false);
+            if (res != true)
+                return;
+            var majorName = bindingPrj.GetBindingResult(out DBProject dbProject, out DBSubProject subProject);
+            ConfigService.ConfigInstance.BindingProjectMajor(dbProject, subProject, majorName);
+            mainViewModel.ProjectName = dbProject.PrjName;
+            mainViewModel.SubProjectName = subProject.SubEntryName;
+            mainViewModel.MajorName = majorName;
         }
     }
 }

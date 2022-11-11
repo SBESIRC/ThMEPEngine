@@ -29,16 +29,32 @@
             </Grid.ColumnDefinitions>
             <StackPanel Style="{x:Null}" Orientation="Vertical">
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                    <Image Source="../Resources/Images/catalogue.png" Height="16" Width="16" Margin="5,0,5,0"></Image>
-                    <Label Style="{x:Null}" Content="项目"></Label>
+                    <tControl:ImageButton NormalImage="../Resources/Images/catalogue.png" 
+                                          ImageHeight="16" ImageWidth="16"
+                                          Background="Transparent"
+                                          MouseOverBackground ="Transparent"
+                                          BorderThickness="0"
+                                          x:Name="btnProject"
+                                          Cursor="Hand"
+                                          Height="16" Width="16"
+                                          Margin="5,0,5,0"
+                                          Click="btnProject_Click" ToolTip="绑定项目"/>
+                    <Label Style="{x:Null}" Content="{Binding ProjectName,Mode=OneWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"></Label>
                     <Label Style="{x:Null}" Content=">"></Label>
-                    <Label Style="{x:Null}" Content="子项"></Label>
+                    <Label Style="{x:Null}" Content="{Binding SubProjectName,Mode=OneWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"></Label>
                     <Label Style="{x:Null}" Content=">"></Label>
-                    <Label Style="{x:Null}" Content="专业"></Label>
+                    <Label Style="{x:Null}" Content="{Binding MajorName,Mode=OneWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"></Label>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                    <Image Source="../Resources/Images/user.png" Height="20" Width="20" Margin="5,0,5,0"></Image>
-                    <Label Style="{x:Null}" Content="未登录"></Label>
+                    <tControl:ImageButton Height="20" Width="20" ImageHeight="20" ImageWidth="20"
+                                          x:Name="btnLogin"
+                                          BorderThickness="0"
+                                          Cursor="Hand"
+                                          Background="Transparent"
+                                          MouseOverBackground ="Transparent"
+                                          NormalImage="../Resources/Images/user.png"  Margin="5,0,5,0"
+                                          Click="btnLogin_Click" ToolTip="用户登录"></tControl:ImageButton>
+                    <Label Style="{x:Null}" Content="{Binding UserName,Mode=OneWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"></Label>
                 </StackPanel>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Horizontal">

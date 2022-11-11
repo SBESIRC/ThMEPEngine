@@ -51,6 +51,9 @@
     <Compile Include="UControls\DesignUControl.xaml.cs">
       <DependentUpon>DesignUControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\BindingProject.xaml.cs">
+      <DependentUpon>BindingProject.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\BuildingStoreyTableUI.xaml.cs">
       <DependentUpon>BuildingStoreyTableUI.xaml</DependentUpon>
     </Compile>
@@ -63,11 +66,17 @@
     <Compile Include="UI\InsertStoreyUI.xaml.cs">
       <DependentUpon>InsertStoreyUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\Login.xaml.cs">
+      <DependentUpon>Login.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\PlatformMainUI.xaml.cs">
       <DependentUpon>PlatformMainUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\RelatePaperUI.xaml.cs">
       <DependentUpon>RelatePaperUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\SelectProject.xaml.cs">
+      <DependentUpon>SelectProject.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\StoreyNameInputUI.xaml.cs">
       <DependentUpon>StoreyNameInputUI.xaml</DependentUpon>
@@ -103,6 +112,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="UI\BindingProject.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UI\BuildingStoreyTableUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -119,6 +132,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\Login.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\PlatformMainUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -126,6 +143,10 @@
     <Page Include="UI\RelatePaperUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\SelectProject.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\StoreyNameInputUI.xaml">
       <Generator>MSBuild:Compile</Generator>
