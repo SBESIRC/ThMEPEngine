@@ -229,6 +229,12 @@ namespace ThMEPArchitecture.MultiProcess
         {
             var blks = InputData.SelectBlocks(acadDatabase);
             if (blks == null) return;
+            var displayPro = ProcessForDisplay.CreateSubProcess();
+            if (ParameterViewModel.ShowLogs)
+            {
+                displayPro.Start();
+                displayInfos = new List<DisplayInfo>();
+            }
             foreach (var blk in blks)
             {
                 var blkName = blk.GetEffectiveName();
@@ -256,6 +262,7 @@ namespace ThMEPArchitecture.MultiProcess
                 //var lanes = OInterParameter.GetBoundLanes();
                 var BPA = new BuildingPosAnalysis(ParameterViewModel);
                 BPA.Logger = Logger;
+                BPA.DisplayLogger = DisplayLogger;
                 int fileSize = 64; // 64Mb
                 var nbytes = fileSize * 1024 * 1024;
                 if (ParameterViewModel.UseGA)
@@ -497,7 +504,7 @@ namespace ThMEPArchitecture.MultiProcess
                         OInterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
                     TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
                 }
-                if (displayInfos != null)
+                if (displayInfos != null && displayInfos.Count>0)
                 {
                     displayInfos.Last().FinalStalls = $"最大车位数: {ParkingStallCount} ";
                     displayInfos.Last().FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";
