@@ -27,6 +27,7 @@ namespace ThMEPArchitecture.FireZone
         public List<LineSegment> FireLines;
         public List<Polygon> BuildingBounds;
 
+        private FireZoneTranslator Translator;
         static BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
         public Serilog.Core.Logger Logger = null;
         private Stopwatch _stopwatch = new Stopwatch();
@@ -124,19 +125,38 @@ namespace ThMEPArchitecture.FireZone
             }
         }
         #endregion
-        #region 数据转译
-        public FireZoneMap GetFireZoneMap()
+        #region 找到最优分区
+        public List<Polygon> GetBestZones(double minArea,double maxArea)
         {
-            var translator =new FireZoneTranslator(Basement,FireLines,Logger);
-            //translator.Clean();
-            var map = translator.Map;
-            map.Root.polygon.ToDbMPolygon().AddToCurrentSpace();
-
-            //translator.Paths.ForEach(l => l.ToDbPolyline().AddToCurrentSpace());
-            //map.Edges.ForEach(e => e.Path.ToDbPolyline().AddToCurrentSpace());
-            var poly = map.FindBestFireZone(3800, 4000);
-            poly.ToDbMPolygon().AddToCurrentSpace();
-            return null;
+            t_pre = _stopwatch.Elapsed.TotalSeconds;
+            Translator = new FireZoneTranslator(Basement, FireLines, Logger);
+            Logger?.Information($"翻译器初始化用时{_stopwatch.Elapsed.TotalSeconds - t_pre}s");
+            var zones = new List<Polygon>();
+            Polygon newShell = null;
+            double totalCost = 0.0;
+            while (true)
+            {
+                var result = FindNextBest(minArea, maxArea, newShell);
+                if (result.Item2 == null)
+                {
+                    zones.Add(newShell);
+                    break;
+                }
+                newShell = result.Item2;
+                zones.Add(result.Item1);
+                totalCost += result.Item3;
+            }
+            Logger?.Information($"总用时{_stopwatch.Elapsed.TotalSeconds - t_pre}s");
+            Logger?.Information($"防火墙长度{totalCost/1000}m");
+            return zones;
+        }
+        private (Polygon,Polygon,double) FindNextBest(double minArea,double maxArea,Polygon newShell)
+        {
+            if (newShell != null &&newShell.Area <= maxArea*1000*1000) return (null,null,-1);
+            if(newShell != null) minArea = Math.Min(minArea, newShell.Area * 0.001 * 0.001 / 2);
+            var map = Translator.CreateMap(newShell);
+            var zone = map.FindBestFireZone(minArea, maxArea);
+            return zone;
         }
         #endregion
     }

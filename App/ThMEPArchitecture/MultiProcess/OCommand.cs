@@ -187,8 +187,8 @@ namespace ThMEPArchitecture.MultiProcess
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
                     var creator = new FireZoneCreator(blk, Logger);
-                    var map = creator.GetFireZoneMap();
-                    //map.FindBest();
+                    var zones = creator.GetBestZones(3900, 4000);
+                    zones.ForEach(z => z.ToDbMPolygon().AddToCurrentSpace());
                 }
             }
         }

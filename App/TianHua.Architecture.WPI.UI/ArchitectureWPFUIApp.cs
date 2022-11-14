@@ -60,7 +60,7 @@ namespace TianHua.Architecture.WPI.UI
 #if DEBUG
             return true;
 #endif
-            //return true;
+            return true;
             if (!ValidateIdentity())
                 return false;
             if (!ValidateVersion())

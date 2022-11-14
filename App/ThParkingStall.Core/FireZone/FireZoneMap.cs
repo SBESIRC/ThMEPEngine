@@ -17,15 +17,14 @@ namespace ThParkingStall.Core.FireZone
         private Dictionary<Coordinate, FireZoneNode> NodeDic = new Dictionary<Coordinate, FireZoneNode>();
 
         private Dictionary<int, FireZoneNode> IdToNode = new Dictionary<int, FireZoneNode>();
-        //public List<FireZoneNode> NodeList = new List<FireZoneNode>();
-        //public List<FireZoneEdge> Edges = new List<FireZoneEdge>();
         private Dictionary<int, FireZoneEdge> IdToEdge = new Dictionary<int, FireZoneEdge>();
 
         private List<FireZonePath> PathsToExplore = new List<FireZonePath> ();//当前需要探索的路径
         private List<FireZonePath> PathsToSocre = new List<FireZonePath>();//需要打分的路径
-        private Dictionary<FireZonePath, (Polygon, double)> ScoredPaths = new Dictionary<FireZonePath, (Polygon, double)>();//打过分的的路径
+        private Dictionary<FireZonePath, (Polygon,Polygon, double)> ScoredPaths = 
+            new Dictionary<FireZonePath, (Polygon,Polygon, double)>();//打过分的的路径
         private double BestScore = double.MaxValue;//当前最优得分
-        private FireZonePath BestPath;//当前最优路径
+        private FireZonePath BestPath = null;//当前最优路径
 
 
         private int ObjId = 0;
@@ -45,6 +44,8 @@ namespace ThParkingStall.Core.FireZone
             Add(root);
             Logger = logger;    
         }
+
+
         public void Add(FireZoneNode node)
         {
             //NodeList.Add(node);
@@ -63,17 +64,17 @@ namespace ThParkingStall.Core.FireZone
         }
         public void Add(FireZoneEdge edge)
         {
-            //Edges.Add(edge);
+            var node0 = NodeDic[edge.P0];
+            var node1 = NodeDic[edge.P1];
+            if (node0.ObjId == node1.ObjId) return;//接到相同节点，跳过
             IdToEdge.Add(ObjId, edge);
             edge.ObjId = ObjId;
             ObjId += 1;
-            var node0 = NodeDic[edge.P0];
-            var node1 = NodeDic[edge.P1];
             node0.AddBranch(edge, node1);
             node1.AddBranch(edge, node0);
         }
 
-        public Polygon FindBestFireZone(double minArea ,double maxArea ,int StepSize = 15)
+        public (Polygon,Polygon,double) FindBestFireZone(double minArea ,double maxArea ,int StepSize = 13)
         {
             MinArea = minArea * multiplier* multiplier;
             MaxArea = maxArea * multiplier* multiplier;
@@ -84,24 +85,25 @@ namespace ThParkingStall.Core.FireZone
                 if (PathsToExplore.Count == 0) break;
                 Logger?.Information($"第{i}步:");
                 Logger?.Information($"节点个数:{PathsToExplore.Count}");
-                Step();
-                Score();
+                Branch();//探索
+                Score();//打分
             }
             Logger?.Information($"当前防火分区用时:{_stopwatch.Elapsed.TotalSeconds - t_start}s\n");
-            return ScoredPaths [BestPath].Item1;
+            if(BestPath != null) return ScoredPaths [BestPath];
+            else return (null,null,-1);
         }
-        private void Step()//获取下一层路径
+        private void Branch()//获取下一层路径
         {
             t_pre = _stopwatch.Elapsed.TotalSeconds;
             var nextLevelPaths = new List<FireZonePath>();
             foreach(var path in PathsToExplore)
             {
-                var stepedPaths = Step(path,BestScore);
-                foreach(var stepedPath in stepedPaths)
+                var searchedPaths = Search(path,BestScore);
+                foreach(var stepedPath in searchedPaths)
                 {
                     if(stepedPath.Ended)
                     {
-                        if(!ScoredPaths.ContainsKey(stepedPath)) PathsToSocre.Add(stepedPath);
+                        PathsToSocre.Add(stepedPath);
                     }
                     else nextLevelPaths.Add(stepedPath);
                 }
@@ -109,7 +111,7 @@ namespace ThParkingStall.Core.FireZone
             PathsToExplore = nextLevelPaths;
             Logger?.Information($"遍历用时:{_stopwatch.Elapsed.TotalSeconds - t_pre}s");
         }
-        private List<FireZonePath> Step(FireZonePath initPath, double minCost)
+        private List<FireZonePath> Search(FireZonePath initPath, double minCost)
         {
             var nextLevelPath = new List<FireZonePath>();
             if (initPath.Ended) return nextLevelPath;
@@ -134,7 +136,7 @@ namespace ThParkingStall.Core.FireZone
             }
             return nextLevelPath;
         }
-        private void Score()//打分
+        private void Score()//打分,后面工作的重点
         {
             var polyCnt = 0;
             var planCnt = 0;
@@ -143,8 +145,11 @@ namespace ThParkingStall.Core.FireZone
                 if (ScoredPaths.ContainsKey(path)) continue;
                 planCnt += 1;
                 var cost = path.Cost;
-                var poly = Split(path);
-                ScoredPaths.Add(path,(poly,cost));
+                var splitted = Split(path);
+                ScoredPaths.Add(path,(splitted.Item1, splitted.Item2, cost));
+                Polygon poly = null;
+                if (AreaVaild(splitted.Item1)) poly = splitted.Item1;
+                else if(AreaVaild(splitted.Item2)) poly = splitted.Item2;
                 if (poly == null) continue;
                 polyCnt += 1;
                 FireZones.Add(poly);
@@ -160,7 +165,7 @@ namespace ThParkingStall.Core.FireZone
             Logger?.Information($"计算用时:{_stopwatch.Elapsed.TotalSeconds - t_pre}s\n");
             PathsToSocre.Clear();
         }
-        private Polygon Split(FireZonePath path)//基于path对图形切割
+        private (Polygon,Polygon) Split(FireZonePath path)//基于path对图形切割
         {
             var polygonizer = new Polygonizer();
             polygonizer.Add(Root.Segments);
@@ -181,12 +186,13 @@ namespace ThParkingStall.Core.FireZone
                     polygonizer.Add(node.Segments);
                 }
             }
-            var polys = polygonizer.GetPolygons().OfType<Polygon>().Except(nodePolys);
-            foreach(var poly in polys)
-            {
-                if (poly.Area > MinArea && poly.Area <= MaxArea) return poly;
-            }
-            return null;
+            var polys = polygonizer.GetPolygons().OfType<Polygon>().Except(nodePolys).OrderBy(p =>p.Area);
+            if (polys.Count() != 2) throw new Exception($"Splitted {polys.Count()} Areas!");
+            return (polys.First(), polys.Last());
+        }
+        private bool AreaVaild(Polygon polygon)
+        {
+            return polygon.Area<=MaxArea && polygon.Area>=MinArea;
         }
     }
 }
