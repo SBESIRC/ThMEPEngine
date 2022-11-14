@@ -636,8 +636,12 @@ namespace TianHua.Electrical.PDS.Service
 
         private void StructureForAddEdge(ThPDSProjectGraphEdge edgeB, PDSGraph graphA)
         {
-            var newEdge = CreateEdge(IdToNodes[edgeB.Source.Load.ID.CircuitNumber].First().Item1, IdToNodes[edgeB.Target.Load.ID.CircuitNumber].First().Item1,
-                edgeB.Circuit.ID.CircuitIDList, edgeB.Circuit.ID.CircuitNumber);
+            if (!IdToNodes.ContainsKey(edgeB.Source.Load.ID.CircuitNumber) || !IdToNodes.ContainsKey(edgeB.Target.Load.ID.CircuitNumber))
+            {
+                return;
+            }
+
+            var newEdge = CreateEdge(IdToNodes[edgeB.Source.Load.ID.CircuitNumber].First().Item1, IdToNodes[edgeB.Target.Load.ID.CircuitNumber].First().Item1, edgeB.Circuit.ID.CircuitIDList, edgeB.Circuit.ID.CircuitNumber);
             newEdge.Tag = new ThPDSProjectGraphEdgeAddTag();
             graphA.AddEdge(newEdge);
         }

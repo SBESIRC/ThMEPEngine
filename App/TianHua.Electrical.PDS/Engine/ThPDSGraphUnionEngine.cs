@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using QuikGraph;
@@ -208,6 +209,51 @@ namespace TianHua.Electrical.PDS.Engine
                 && !edge.Source.Loads[0].InstalledCapacity.IsDualPower)
                 {
                     edge.Source.Loads[0].InstalledCapacity.IsDualPower = true;
+                }
+            });
+        }
+
+        public void CopyAttributes()
+        {
+            UnionGraph.Vertices.ForEach(o =>
+            {
+                if (o.Loads.Count > 0)
+                {
+                    var edgeList = UnionGraph.OutEdges(o).ToList();
+                    var attributesCopy = edgeList
+                        .Where(e => !string.IsNullOrEmpty(e.Target.Loads[0].AttributesCopy))
+                        .Select(e => e.Target.Loads[0].AttributesCopy)
+                        .FirstOrDefault();
+                    if (attributesCopy.IsNull())
+                    {
+                        return;
+                    }
+                    edgeList = edgeList.Where(e => e.Target.Loads.Count > 0 && e.Target.Loads[0].ID.BlockName == attributesCopy).ToList();
+                    var targetEdge = edgeList.Where(e => e.Target.Loads[0].InstalledCapacity.HighPower == 0).ToList();
+                    var sourceEdge = edgeList.Except(targetEdge).FirstOrDefault();
+                    if (sourceEdge == null)
+                    {
+                        return;
+                    }
+
+                    targetEdge.ForEach(e =>
+                    {
+                        e.Target.Loads[0].InstalledCapacity = sourceEdge.Target.Loads[0].InstalledCapacity;
+                        e.Target.Loads[0].LoadTypeCat_3 = sourceEdge.Target.Loads[0].LoadTypeCat_3;
+                        if (sourceEdge.Target.Loads[0].PrimaryAvail != 0)
+                        {
+                            e.Target.Loads[0].PrimaryAvail = sourceEdge.Target.Loads[0].PrimaryAvail;
+                        }
+                        if (sourceEdge.Target.Loads[0].SpareAvail != 0)
+                        {
+                            e.Target.Loads[0].SpareAvail = sourceEdge.Target.Loads[0].SpareAvail;
+                        }
+                        if (!string.IsNullOrEmpty(sourceEdge.Target.Loads[0].ID.Description)
+                            && string.IsNullOrEmpty(e.Target.Loads[0].ID.Description) || e.Target.Loads[0].ID.Description.Equals(e.Target.Loads[0].ID.DefaultDescription))
+                        {
+                            e.Target.Loads[0].ID.Description = sourceEdge.Target.Loads[0].ID.Description;
+                        }
+                    });
                 }
             });
         }
