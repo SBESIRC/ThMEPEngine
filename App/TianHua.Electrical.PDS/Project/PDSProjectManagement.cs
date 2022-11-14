@@ -234,6 +234,11 @@ namespace TianHua.Electrical.PDS.Project
             BinaryFormatter bf = new BinaryFormatter();
             string data = bf.Deserialize(GlobalConfigurationFileBuffer).ToString();
             _project.projectGlobalConfiguration = JsonConvert.DeserializeObject<ProjectGlobalConfiguration>(data);
+
+            //在项目导入的时候，新增了一步全局配置更新操作
+            //这样做的好处：全局所有的配置包括元器件的选型都会重刷一遍，可以通过重刷元器件解决反序列化导致的属性丢失问题；并且理论如果无属性变化/版本变化，重刷的元器件属性和之前理论上是一致的
+            //这样做的坏处: 导入时会额外的增加一些时间(几乎无感，且导入项目不属于高频操作，这个可以忽略)；元器件毕竟重刷了，对象本质上已经不再是原来的对象
+            PDSProjectExtend.GlobalConfigurationUpdate();
         }
 
         public static void ImportGlobalConfiguration(string filePath)

@@ -357,6 +357,10 @@ namespace TianHua.Electrical.PDS.Project
                 {
                     newBreaker.SetRatedCurrent(breaker.RatedCurrent);
                 }
+                if (newBreaker.Icu != breaker.Icu && newBreaker.GetIcus().Contains(breaker.Icu))
+                {
+                    newBreaker.SetIcu(breaker.Icu);
+                }
             }
             else if (component is ThermalRelay thermalRelay && newComponent is ThermalRelay newThermalRelay)
             {

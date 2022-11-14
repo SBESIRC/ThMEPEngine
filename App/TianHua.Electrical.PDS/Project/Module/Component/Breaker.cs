@@ -155,6 +155,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             PolesNum =breaker.Poles;
             RatedCurrent =breaker.Amps.ToString();
             TripUnitType =breaker.TripDevice;
+            Icu = breaker.IcuConfig;
 
             Characteristics = "";
             Breakers = breakers;
@@ -200,6 +201,7 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
             PolesNum =breaker.Poles;
             RatedCurrent =breaker.Amps.ToString();
             TripUnitType =breaker.TripDevice;
+            Icu = breaker.IcuConfig;
 
             Characteristics = characteristics;
             Breakers = breakers;
