@@ -227,7 +227,7 @@ namespace ThPlatform3D.StructPlane
                     {
                         var blkId  = InsertBlock(acadDb,"0", blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
                         var blkEntity = acadDb.Element<Entity>(blkId, true);
-                        ThHyperLinkTool.Add(blkEntity,"Major:Structure", "info");
+                        ThHyperLinkTool.Add(blkEntity,"Major:Structure", "Info");
                         Erase(acadDb,blkIds);
                     }
                     o.OfType<ObjectId>().Where(x => !x.IsErased && x.IsValid).ForEach(x =>
