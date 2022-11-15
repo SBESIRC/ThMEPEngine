@@ -124,8 +124,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var dict = new Dictionary<int, string>() {
                 { 0, "坐便器" }, { 1, "小便器" }, { 2, "蹲便器" },
                 { 3, "单盆洗手台" }, { 4, "厨房洗涤盆" }, { 5, "拖把池" },
-                { 6, "洗衣机" }, { 7, "地漏"   }, { 8, "浴缸" }, 
-                { 9, "喷头" }, { 10, "其他" }};
+                { 6, "洗衣机" }, { 7, "地漏"   }, { 8, "淋浴器" }, 
+                { 9, "其他" }};
 
             var lines = File.ReadAllLines(zipFile + ".csv").Where(x => !string.IsNullOrWhiteSpace(x));
             foreach (var line in lines)
