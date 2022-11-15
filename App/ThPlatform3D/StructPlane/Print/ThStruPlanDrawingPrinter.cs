@@ -78,12 +78,7 @@ namespace ThPlatform3D.StructPlane.Print
                 dwgExistedElements = GetAllObjsInRange(acadDb, geoExtents); // 获取Dwg此范围内的所有对象
                 var dwgExistedBeamMarkBlks = GetBeamMarks(dwgExistedElements); // 图纸上已存在的梁标注(块)
 
-                // 打印对象
-                // 记录梁文字原始位置
-                var beamMarkOriginTextPos = new Dictionary<DBText, Point3d>();
-                // 用于把打印的文字转成块,最后把梁文字删除掉  
-                var beamTextGroupObjIds = new List<ObjectIdCollection>();
-
+                // 打印对象            
                 // 打印楼梯板对角线及标注
                 Append(PrintStairSlabCorner(acadDb, stairSlabCorners));
 
@@ -95,11 +90,14 @@ namespace ThPlatform3D.StructPlane.Print
                 beamTexts.OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));
 
                 // 打印双梁标注
+                // 用于把打印的文字转成块,最后把梁文字删除掉  
+                var beamTextGroupObjIds = new List<ObjectIdCollection>();
                 var dblRowBeamMarkIds = PrintDoubleRowBeams(acadDb, dblRowBeamMarks);
                 dblRowBeamMarkIds.ForEach(o => Append(o.Item1));
                 dblRowBeamMarkIds.ForEach(o => beamTextGroupObjIds.Add(o.Item1));
 
                 // 记录梁标注文字的原始位置
+                var beamMarkOriginTextPos = new Dictionary<DBText, Point3d>();
                 _geos.GetBeamMarks()
                     .Select(o => o.Boundary)
                     .OfType<DBText>()

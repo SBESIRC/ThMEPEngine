@@ -221,20 +221,19 @@ namespace ThPlatform3D.StructPlane
                     var blkName = GetDrawingBlkName();
                     var blkIds = FilterBlockObjIds(acadDb,o); // 要打块的元素
                     var blkObjs = Clone(acadDb,blkIds);
-                    blkObjs.OfType<Entity>().ForEach(e => ThHyperLinkTool.Add(e, "Major:Structure"));
+                    blkObjs.OfType<Entity>().ForEach(e => ThHyperLinkTool.Add(e, "Major:Structure","Info"));
                     var blockId = BuildBlock(acadDb,blkObjs, blkName);
                     if (blockId != ObjectId.Null)
                     {
                         var blkId  = InsertBlock(acadDb,"0", blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
                         var blkEntity = acadDb.Element<Entity>(blkId, true);
-                        ThHyperLinkTool.Add(blkEntity,"Major:Structure");
+                        ThHyperLinkTool.Add(blkEntity,"Major:Structure", "info");
                         Erase(acadDb,blkIds);
                     }
                     o.OfType<ObjectId>().Where(x => !x.IsErased && x.IsValid).ForEach(x =>
                       {
                           var entity = acadDb.Element<Entity>(x, true);
-                          ThCADExtension.ThHyperLinkTool.Clear(entity); 
-                          ThCADExtension.ThHyperLinkTool.Add(entity, "Major: Structure");
+                          ThCADExtension.ThHyperLinkTool.Add(entity, "Major:Structure", "Info");
                       });
                 });
             }
