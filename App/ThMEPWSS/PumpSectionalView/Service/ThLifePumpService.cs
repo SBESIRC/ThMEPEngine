@@ -17,6 +17,7 @@ using System.Web.Routing;
 using Autodesk.AutoCAD.EditorInput;
 using ExCSS;
 using System.Security.Cryptography;
+using NPOI.SS.Formula.Functions;
 
 namespace ThMEPWSS.PumpSectionalView.Service.Impl
 {
@@ -33,13 +34,12 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         {
             this.acadDatabase = acadDatabase;
         }
-        public void CallLifePump()
+
+        /// <summary>
+        /// 泵房剖面图
+        /// </summary>
+        public void CallLifePump(string button)
         {
-            //用户输入 待改 固定输入
-            //string block = ThLifePumpCommon.BlkName;
-            //string layer = ThLifePumpCommon.Layer;
-            //var blkList = new List<string> { block };//块列表
-            //var layerList = new List<string> { layer };//层
             var blkList = ThLifePumpCommon.BlkName;//块列表
             var layerList = ThLifePumpCommon.Layer;//层
 
@@ -50,8 +50,20 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             if (ppo.Status == PromptStatus.OK)
             {
                 var wcsPt = ppo.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);//插入点位置？
-                                                                                             //var suggestDict = vm.SuggestDist;
 
+                if (button == "生成剖面图")
+                {
+                    DrawLifePump(wcsPt);
+                }
+                else if (button == "生成说明")
+                {
+                    DrawWord(wcsPt);
+                }
+                else if (button == "生成材料表")
+                {
+                    DrawGraph(wcsPt);
+                }
+                /*
                 BlockTable bt = (BlockTable)acadDatabase.Database.BlockTableId.GetObject(OpenMode.ForRead);
                 var blk = new BlockReference(wcsPt, bt[ThLifePumpCommon.BlkName[0]]);
                 var obj = new DBObjectCollection();
@@ -114,6 +126,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
 
                 setOutFrame(hList, frame);//混凝土
 
+                
                 //多行文字
                 MTextLifePump m = new MTextLifePump(wcsPt);
                 MText mw = m.WriteIntro();
@@ -160,12 +173,146 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
                 DBText t3 = getText("旋流防止器顶标高距水箱最低有效水位大于200mm", new Point3d(wcsPt.X, wcsPt.Y - 10000 - 373.3 * (ThLifePumpCommon.Input_PumpList.Count + 2) - 295, 0), 120, 0.7);
                 t3.TransformBy(rotaM);
                 acadDatabase.ModelSpace.Add(t3);
-                
+                */
 
 
             }
-  
+
         }
+
+        public void DrawLifePump(Point3d wcsPt)
+        {
+            BlockTable bt = (BlockTable)acadDatabase.Database.BlockTableId.GetObject(OpenMode.ForRead);
+            var blk = new BlockReference(wcsPt, bt[ThLifePumpCommon.BlkName[0]]);
+            var obj = new DBObjectCollection();
+            blk.Explode(obj);//炸开
+
+            var plList = obj.OfType<Polyline>().ToList();//所有polyline 14
+            plList = getSortedPolylineByLocate(plList);//根据minX、minY排序
+
+            var lList = obj.OfType<Line>().ToList();//所有Line 14
+            var bList = obj.OfType<BlockReference>().ToList();//所有block 14            
+            var tList = obj.OfType<DBText>().ToList();//所有文字 7
+            var aList = obj.OfType<AlignedDimension>().ToList();//对齐标注 9
+            var hList = obj.OfType<Hatch>().ToList();//混凝土 1
+
+            List<Polyline> frame = calLifePumpList(plList, lList, bList, tList, aList);//改大小并且得到外框
+
+
+            //加入图纸
+            var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+            var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);//旋转角度
+            var rotaM = Matrix3d.Rotation(angle, Vector3d.ZAxis, blk.Position);
+            foreach (var p in plList)
+            {
+                //先转到用户坐标系
+                p.TransformBy(rotaM);
+
+                //在插入
+                acadDatabase.ModelSpace.Add(p);
+            }
+
+            foreach (var p in lList)
+            {
+                p.TransformBy(rotaM);
+
+                acadDatabase.ModelSpace.Add(p);
+            }
+
+            foreach (var p in bList)
+            {
+                p.TransformBy(rotaM);
+
+                acadDatabase.ModelSpace.Add(p);
+            }
+
+            foreach (var p in tList)
+            {
+                p.TransformBy(rotaM);
+
+                acadDatabase.ModelSpace.Add(p);
+            }
+
+            foreach (var p in aList)
+            {
+                p.TransformBy(rotaM);
+
+                acadDatabase.ModelSpace.Add(p);
+            }
+
+            modefyData(bList, tList, aList);//修改块的数据
+
+            setOutFrame(hList, frame);//混凝土
+        }
+
+        /// <summary>
+        /// 生成说明
+        /// </summary>
+        public void DrawWord(Point3d wcsPt)
+        {
+            //以多行文字为旋转基点
+            var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+            var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+            
+            MTextLifePump m = new MTextLifePump(wcsPt);
+            MText mw = m.WriteIntro();
+
+            var rotaM = Matrix3d.Rotation(angle, Vector3d.ZAxis, mw.Location);
+            mw.TransformBy(rotaM);
+
+            acadDatabase.ModelSpace.Add(mw);
+        }
+
+        /// <summary>
+        /// 生成材料表
+        /// 以材料表头为基点旋转
+        /// </summary>
+        public void DrawGraph(Point3d wcsPt)
+        {
+            var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+            var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+
+            //材料表头
+            var attri = new Dictionary<string, string>();
+            attri.Add("", "");
+            var Id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", ThLifePumpCommon.BlkName[1], new Point3d(wcsPt.X, wcsPt.Y, 0), new Scale3d(1), 0, attri);
+            BlockReference b = (BlockReference)Id.GetObject(OpenMode.ForRead);
+            var rotaM = Matrix3d.Rotation(angle, Vector3d.ZAxis, b.Position);
+            b.UpgradeOpen();
+            b.TransformBy(rotaM);
+            b.DowngradeOpen();
+
+            //材料表格
+            List<ObjectId> blkM = new List<ObjectId>();
+            for (int i = 0; i < ThLifePumpCommon.Input_PumpList.Count + 2; i++)//做出相应数量的块
+            {
+                var att = new Dictionary<string, string>() { { "", "" } };
+                var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", ThLifePumpCommon.BlkName[2], new Point3d(wcsPt.X, wcsPt.Y - 373.3 * (i + 1), 0), new Scale3d(1), 0, att);
+
+                BlockReference bl = (BlockReference)id.GetObject(OpenMode.ForRead);
+                bl.UpgradeOpen();
+                bl.TransformBy(rotaM);
+                bl.DowngradeOpen();
+
+                blkM.Add(id);
+            }
+            modefyMaterial(blkM);
+
+
+            //表格文字
+            DBText t1 = getText("住宅生活水泵房主要设备表：", new Point3d(wcsPt.X, wcsPt.Y + 400, 0), 262.5, 0.8);
+            t1.TransformBy(rotaM);
+            acadDatabase.ModelSpace.Add(t1);
+
+            DBText t2 = getText("注：水泵吸水管与吸水母管应管顶平接", new Point3d(wcsPt.X, wcsPt.Y  - 373.3 * (ThLifePumpCommon.Input_PumpList.Count + 2) - 165, 0), 120, 0.7);
+            t2.TransformBy(rotaM);
+            acadDatabase.ModelSpace.Add(t2);
+
+            DBText t3 = getText("旋流防止器顶标高距水箱最低有效水位大于200mm", new Point3d(wcsPt.X, wcsPt.Y  - 373.3 * (ThLifePumpCommon.Input_PumpList.Count + 2) - 295, 0), 120, 0.7);
+            t3.TransformBy(rotaM);
+            acadDatabase.ModelSpace.Add(t3);
+        }
+
 
         /// <summary>
         /// 生活泵房所有构件转换位置

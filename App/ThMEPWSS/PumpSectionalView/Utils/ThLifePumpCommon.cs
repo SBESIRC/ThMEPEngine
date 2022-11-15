@@ -15,6 +15,7 @@ namespace ThMEPWSS.PumpSectionalView.Utils
     
     public class ThLifePumpCommon
     {
+        public static string Button_Name = "生成剖面图";//被统计的按钮名字
         //以下为输入
         public static double Input_Length = 5;
         public static double Input_Width = 2;

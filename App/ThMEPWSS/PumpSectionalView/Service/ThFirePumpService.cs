@@ -7,11 +7,14 @@ using Linq2Acad;
 using NetTopologySuite.Algorithm;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Routing;
+using System.Windows;
 using ThCADExtension;
+using ThMEPEngineCore.IO.ExcelService;
 using ThMEPWSS.PumpSectionalView.Utils;
 
 
@@ -107,6 +110,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
 
         }
 
+
         //获得消防泵房1的属性
         private static Dictionary<string, string> GetFirePumpAttr_1(Dictionary<string, string> ess)
         {
@@ -171,14 +175,14 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             attNameValues.Add(ThFirePumpCommon.PoolTopHeight, Convert.ToString(ThFirePumpCommon.Input_RoofHeight));
             attNameValues.Add(ThFirePumpCommon.HighPumpFoundation, Convert.ToString(ThFirePumpCommon.Input_BasicHeight));
             //attNameValues.Add(ThFirePumpCommon.AirVentHeight, Convert.ToString(ThFirePumpCommon.Input_BasicHeight)+"+"+ ThFirePumpCommon.Input_PumpList[ThFirePumpCommon.PumpOutletHorizontalPipeDiameterChoice-1].Hole / 1000);
-            attNameValues.Add(ThFirePumpCommon.AirVentHeight, Convert.ToString(ThFirePumpCommon.Input_BasicHeight) + "+" + ThFirePumpCommon.Input_PumpList[ThFirePumpCommon.choice - 1].Hole / 1000);
-            attNameValues.Add(ThFirePumpCommon.MinimumAlarmWaterLevel, "1.35+" +Convert.ToString(ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.MaximumEffectiveWaterLevel, "1.40+" + Convert.ToString(ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.MaximumAlarmWaterLevel, "1.45+" + Convert.ToString(ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.OverflowWaterLevel, "1.50+" + Convert.ToString(ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.CrossTubeHeight, "1.70+" + Convert.ToString(ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.InletPipeHeight, "1.80+" + Convert.ToString(ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.SnorkelHeight, "2+" + Convert.ToString(ThFirePumpCommon.Input_EffectiveDepth));
+            attNameValues.Add(ThFirePumpCommon.AirVentHeight, "h+"+ThFirePumpCommon.Input_BasicHeight+ ThFirePumpCommon.Input_PumpList[ThFirePumpCommon.choice - 1].Hole / 1000 );
+            attNameValues.Add(ThFirePumpCommon.MinimumAlarmWaterLevel,Convert.ToString(1.35 + ThFirePumpCommon.Input_EffectiveDepth));
+            attNameValues.Add(ThFirePumpCommon.MaximumEffectiveWaterLevel,  Convert.ToString(1.40 + ThFirePumpCommon.Input_EffectiveDepth));
+            attNameValues.Add(ThFirePumpCommon.MaximumAlarmWaterLevel,  Convert.ToString(1.45 + ThFirePumpCommon.Input_EffectiveDepth));
+            attNameValues.Add(ThFirePumpCommon.OverflowWaterLevel,  Convert.ToString(1.50 + ThFirePumpCommon.Input_EffectiveDepth));
+            attNameValues.Add(ThFirePumpCommon.CrossTubeHeight,  Convert.ToString(1.70 + ThFirePumpCommon.Input_EffectiveDepth));
+            attNameValues.Add(ThFirePumpCommon.InletPipeHeight,Convert.ToString(1.80 + ThFirePumpCommon.Input_EffectiveDepth));
+            attNameValues.Add(ThFirePumpCommon.SnorkelHeight, Convert.ToString(2 + ThFirePumpCommon.Input_EffectiveDepth));
 
             return attNameValues;
         }
@@ -395,12 +399,12 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             //水泵
             for (; i < ThFirePumpCommon.Input_PumpList.Count; i++)
             {
-                string s = String.Format("Q={0}L%%1403%%141/s，h={1}m，N={2}kW", ThFirePumpCommon.Input_PumpList[i].Flow_Info, ThFirePumpCommon.Input_PumpList[i].Head, ThFirePumpCommon.Input_PumpList[i].Power);
+                string s = String.Format("Q={0}L/s，h={1}m，N={2}kW", ThFirePumpCommon.Input_PumpList[i].Flow_Info, ThFirePumpCommon.Input_PumpList[i].Head, ThFirePumpCommon.Input_PumpList[i].Power);
                 string n = "";
                 if (!String.IsNullOrEmpty(ThFirePumpCommon.Input_PumpList[i].Note))
                     n +="，"+ ThFirePumpCommon.Input_PumpList[i].Note;
                 var value = new Dictionary<string, string>() { { "序号", (i+1).ToString() }, { "设备名称", ThFirePumpCommon.Input_PumpList[i].No },
-                    { "规格型号",s},{ "单位","台"},{ "数量",ThFirePumpCommon.Input_PumpList[i].Num.ToString()},{ "放气孔高度", ThFirePumpCommon.Input_PumpList[i].Hole+"m"},{ "备注",ThFirePumpCommon.Input_PumpList[i].NoteSelect+","+ThFirePumpCommon.Input_PumpList[i].Type+n} };
+                    { "规格型号",s},{ "单位","台"},{ "数量",ThFirePumpCommon.Input_PumpList[i].Num.ToString()},{ "放气孔高度", ThFirePumpCommon.Input_PumpList[i].Hole+"mm"},{ "备注",ThFirePumpCommon.Input_PumpList[i].NoteSelect+","+ThFirePumpCommon.Input_PumpList[i].Type+n} };
                 
                
                 blkM[i].UpdateAttributesInBlock(value);
@@ -412,9 +416,8 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             blkM[i].UpdateAttributesInBlock(v);
         }
        
+        
 
-       
-       
         //刷新图纸
         public static void LoadBlockLayerToDocument(Database database, List<string> blockNames, List<string> layerNames)
         {

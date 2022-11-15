@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Routing;
+using System.Windows.Input;
 using ThCADExtension;
 using ThMEPWSS.PumpSectionalView.Utils;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
@@ -51,9 +52,17 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         */
 
 
-        //插入动态块，先插入再修改
-        //插入点，块名称，自定义属性
-        public static void InsertBlockWithDynamic(Point3d insertPt, string insertBlkName, Dictionary<string, object> dynValue)
+
+        /// <summary>
+        /// 插入动态块，先插入再修改
+        /// 插入点，块名称，自定义属性
+        /// </summary>
+        /// <param name="insertPt"></param>
+        /// <param name="insertBlkName"></param>
+        /// <param name="dynValue"></param>
+        /// <param name="type"></param>
+        /// <returns>旋转角</returns>
+        public static Matrix3d InsertBlockWithDynamic(Point3d insertPt, string insertBlkName, Dictionary<string, object> dynValue, string type, Matrix3d rotaM)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -65,10 +74,10 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
                 //double rotateAngle = angle;
                 double rotateAngle = 0;
                 var scale = 1;
-                var layerName = ThHighFireWaterTankCommon.BlkToLayer[insertBlkName];
+                var layerName = ThHighFireWaterTankCommon.Layer;
                 //var attNameValues = new Dictionary<string, string>();
 
-                var attNameValues = GetHighFireWaterTankAttr(ThHighFireWaterTankCommon.Input_Type);
+                var attNameValues = GetHighFireWaterTankAttr(type);
 
                 var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                                           layerName,
@@ -86,10 +95,16 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
 
                 //旋转一下
                 BlockReference blk = (BlockReference)objId.GetObject(OpenMode.ForRead);
-                var rotaM = Matrix3d.Rotation(angle, Vector3d.ZAxis, blk.Position);
+                if (type == ThHighFireWaterTankCommon.Input_Type1)//以第一个图块为中心旋转
+                {
+                    rotaM = Matrix3d.Rotation(angle, Vector3d.ZAxis, blk.Position);
+                }
+
+
                 blk.UpgradeOpen();
                 blk.TransformBy(rotaM);
                 blk.DowngradeOpen();
+                return rotaM;
             }
 
         }
@@ -110,7 +125,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             {
                 return GetWithRoofWithPumpAttr(calValues);
             }
-            else if(ThHighFireWaterTankCommon.Type_WithRoofNoPump == type)
+            else if (ThHighFireWaterTankCommon.Type_WithRoofNoPump == type)
             {
                 return GetWithRoofNoPumpAttr(calValues);
             }
@@ -141,7 +156,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         private static Dictionary<string, string> GetWithRoofWithPumpAttr(Dictionary<string, string> calValues)
         {
             var attNameValues = new Dictionary<string, string>();
-            
+
 
             attNameValues.Add(ThHighFireWaterTankCommon.EffectiveWaterDepth, calValues[ThHighFireWaterTankCommon.EffectiveWaterDepth]);
             attNameValues.Add(ThHighFireWaterTankCommon.BottomHeight, calValues[ThHighFireWaterTankCommon.BottomHeight]);
@@ -153,7 +168,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             attNameValues.Add(ThHighFireWaterTankCommon.OverflowWaterLevel, calValues[ThHighFireWaterTankCommon.OverflowWaterLevel]);
             attNameValues.Add(ThHighFireWaterTankCommon.ClearHeight, calValues[ThHighFireWaterTankCommon.ClearHeight]);
             attNameValues.Add(ThHighFireWaterTankCommon.EffectiveVolume, Convert.ToString(ThHighFireWaterTankCommon.Input_Volume));
-       
+
             return attNameValues;
         }
 
@@ -161,7 +176,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         private static Dictionary<string, string> GetWithRoofNoPumpAttr(Dictionary<string, string> calValues)
         {
             var attNameValues = new Dictionary<string, string>();
-            
+
 
             attNameValues.Add(ThHighFireWaterTankCommon.EffectiveWaterDepth, calValues[ThHighFireWaterTankCommon.EffectiveWaterDepth]);
             attNameValues.Add(ThHighFireWaterTankCommon.BottomHeight, calValues[ThHighFireWaterTankCommon.BottomHeight]);
@@ -206,7 +221,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         private static Dictionary<string, string> GetNoRoofNoPumpAttr(Dictionary<string, string> calValues)
         {
             var attNameValues = new Dictionary<string, string>();
-    
+
 
             attNameValues.Add(ThHighFireWaterTankCommon.EffectiveWaterDepth, calValues[ThHighFireWaterTankCommon.EffectiveWaterDepth]);
             attNameValues.Add(ThHighFireWaterTankCommon.BottomHeight, calValues[ThHighFireWaterTankCommon.BottomHeight]);
@@ -225,7 +240,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         private static Dictionary<string, string> GetWithRoofAttr(Dictionary<string, string> calValues)
         {
             var attNameValues = new Dictionary<string, string>();
-     
+
 
             attNameValues.Add(ThHighFireWaterTankCommon.MaximumWaterLevel, calValues[ThHighFireWaterTankCommon.MaximumWaterLevel]);
             attNameValues.Add(ThHighFireWaterTankCommon.MinimumAlarmWaterLevel, calValues[ThHighFireWaterTankCommon.MinimumAlarmWaterLevel]);
@@ -234,13 +249,13 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             attNameValues.Add(ThHighFireWaterTankCommon.Snorkel_1, calValues[ThHighFireWaterTankCommon.Snorkel_1]);
             attNameValues.Add(ThHighFireWaterTankCommon.Snorkel_2, calValues[ThHighFireWaterTankCommon.Snorkel_2]);
             attNameValues.Add(ThHighFireWaterTankCommon.TankTopHeight, calValues[ThHighFireWaterTankCommon.TankTopHeight]);
-            attNameValues.Add(ThHighFireWaterTankCommon.ClearHeight, calValues[ThHighFireWaterTankCommon.ClearHeight]);
+            attNameValues.Add("水箱间净高", calValues[ThHighFireWaterTankCommon.ClearHeight]);
             attNameValues.Add(ThHighFireWaterTankCommon.BottomHeight, calValues[ThHighFireWaterTankCommon.BottomHeight]);
             attNameValues.Add(ThHighFireWaterTankCommon.BaseHeight, calValues[ThHighFireWaterTankCommon.BaseHeight]);
             attNameValues.Add(ThHighFireWaterTankCommon.TankHeight, calValues[ThHighFireWaterTankCommon.TankHeight]);
             attNameValues.Add(ThHighFireWaterTankCommon.LevelGaugeHeight, calValues[ThHighFireWaterTankCommon.LevelGaugeHeight]);
             attNameValues.Add(ThHighFireWaterTankCommon.OverflowWaterLevel, calValues[ThHighFireWaterTankCommon.OverflowWaterLevel]);
-            attNameValues.Add(ThHighFireWaterTankCommon.OverflowWaterLevel+"1", calValues[ThHighFireWaterTankCommon.OverflowWaterLevel]);
+            attNameValues.Add(ThHighFireWaterTankCommon.OverflowWaterLevel + "1", calValues[ThHighFireWaterTankCommon.OverflowWaterLevel]);
 
             return attNameValues;
         }
@@ -276,24 +291,24 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         }
 
         //计算高位消防水箱属性
-        private static Dictionary<string, string> CalHighFireWaterTankAttr(double l,double w,double hs,double v,double h0)
+        private static Dictionary<string, string> CalHighFireWaterTankAttr(double l, double w, double hs, double v, double h0)
         {
             var attNameValues = new Dictionary<string, string>();
-            attNameValues.Add(ThHighFireWaterTankCommon.LevelGaugeHeight, ((hs-0.2)*1000).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.MinimumAlarmWaterLevel, "H+"+(hs -0.45).ToString("0.00"));
+            attNameValues.Add(ThHighFireWaterTankCommon.LevelGaugeHeight, ((hs - 0.2) * 1000).ToString());
+            attNameValues.Add(ThHighFireWaterTankCommon.MinimumAlarmWaterLevel, "H+" + (hs - 0.45).ToString("0.00"));
             attNameValues.Add(ThHighFireWaterTankCommon.MaximumWaterLevel, "H+" + (hs - 0.35).ToString("0.00"));
             attNameValues.Add(ThHighFireWaterTankCommon.ElectricValveClosingWaterLevel, "H+" + (hs - 0.30).ToString("0.00"));
             attNameValues.Add(ThHighFireWaterTankCommon.OverflowWaterLevel, "H+" + (hs - 0.25).ToString("0.00"));
             attNameValues.Add(ThHighFireWaterTankCommon.BottomOfWaterInletPipe, "H+" + (hs - 0.10).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.TankTopHeight, "H+" +(hs).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.WaterInletHorizontalPipe, "H+" + (hs+0.2).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.Snorkel_1, "H+" + (hs+0.3).ToString("0.00"));
+            attNameValues.Add(ThHighFireWaterTankCommon.TankTopHeight, "H+" + (hs).ToString("0.00"));
+            attNameValues.Add(ThHighFireWaterTankCommon.WaterInletHorizontalPipe, "H+" + (hs + 0.2).ToString("0.00"));
+            attNameValues.Add(ThHighFireWaterTankCommon.Snorkel_1, "H+" + (hs + 0.3).ToString("0.00"));
             attNameValues.Add(ThHighFireWaterTankCommon.Snorkel_2, "H+" + (hs + 0.6).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.BaseHeight, (h0*1000).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.BottomHeight, ((h0+0.1)*1000).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.EffectiveWaterDepth, ((hs - 0.7)*1000).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.TankHeight, (hs*1000).ToString("0.00"));
-            attNameValues.Add(ThHighFireWaterTankCommon.ClearHeight, "≥" + ((hs +h0+0.9)*1000).ToString("0.00"));
+            attNameValues.Add(ThHighFireWaterTankCommon.BaseHeight, (h0 * 1000).ToString());
+            attNameValues.Add(ThHighFireWaterTankCommon.BottomHeight, ((h0 + 0.1) * 1000).ToString());
+            attNameValues.Add(ThHighFireWaterTankCommon.EffectiveWaterDepth, ((hs - 0.7) * 1000).ToString());
+            attNameValues.Add(ThHighFireWaterTankCommon.TankHeight, (hs * 1000).ToString());
+            attNameValues.Add(ThHighFireWaterTankCommon.ClearHeight, "≥" + ((hs + h0 + 0.9) * 1000).ToString());
 
             return attNameValues;
         }
