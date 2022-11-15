@@ -412,7 +412,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
 
             //消防水池
             var v = new Dictionary<string, string>() { { "序号", (i+1).ToString() }, { "设备名称", "消防水池" },
-                    { "规格型号",String.Format("钢筋混凝土，有效容积{0}m%%1403%%141，面积为{1}m%%1402%%141",ThFirePumpCommon.Input_Volume,ThFirePumpCommon.Input_PoolArea)},{ "单位","座"},{ "数量","1"}};
+                    { "规格型号",String.Format("钢筋混凝土，有效容积{0}m%%1403%%141，面积为{1}m%%1402%%141",ThFirePumpCommon.Input_Volume,ThFirePumpCommon.Input_PoolArea)},{ "单位","座"},{ "数量","1"},{ "放气孔高度", ""}};
             blkM[i].UpdateAttributesInBlock(v);
         }
        
