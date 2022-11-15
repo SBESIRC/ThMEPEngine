@@ -18,7 +18,8 @@ namespace ThMEPWSS.PumpSectionalView.Utils
         public static double Input_Volume = 1;
         public static double Input_BasicHeight = 1;
 
-        public static string Input_Type = "有顶有稳压泵";
+        public static string Input_Type1 = "有顶有稳压泵";
+        public static string Input_Type2 = "有顶";
 
         public static string Type_WithRoofWithPump = "有顶有稳压泵";
         public static string Type_WithRoofNoPump = "有顶无稳压泵";
@@ -30,14 +31,9 @@ namespace ThMEPWSS.PumpSectionalView.Utils
         public static string BlkName_HighFireWaterTank_1 = "消防水箱剖面1";
         public static string BlkName_HighFireWaterTank_2 = "消防水箱剖面2";
 
-        public static string Layer_HighFireWaterTank_1 = "0";
-        public static string Layer_HighFireWaterTank_2 = "0";
+        public static string Layer = "0";
+       
 
-
-        public static Dictionary<string, string> BlkToLayer = new Dictionary<string, string>() {
-                                            {BlkName_HighFireWaterTank_1,Layer_HighFireWaterTank_1 },
-                                            {BlkName_HighFireWaterTank_2,Layer_HighFireWaterTank_2 },
-                                                                };
 
         public static Dictionary<string, string> TypeToBlk = new Dictionary<string, string>() {
                                             {Type_WithRoofWithPump,BlkName_HighFireWaterTank_1 },

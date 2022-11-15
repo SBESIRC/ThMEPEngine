@@ -31,6 +31,7 @@ using System.Windows.Controls.Primitives;
 using ThMEPEngineCore.IO.ExcelService;
 using ThCADExtension;
 using System.Globalization;
+using Match = System.Text.RegularExpressions.Match;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -55,10 +56,24 @@ namespace TianHua.Plumbing.WPF.UI.UI
             Regex re = new Regex("[^0-9.]+");//只能输入非负小数，小数点
             e.Handled = re.IsMatch(e.Text);
         }
+        private void AllowNegativeDecimals_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            //Regex re = new Regex("[^0-9.]+");//只能输入小数，小数点
+            //Regex re = new Regex("[^0-9.]-");//只能输入非负小数，小数点
+            //e.Handled = re.IsMatch(e.Text);
+            double a;
+            bool b= double.TryParse(e.Text,out a);
+            if (b||e.Text=="."||e.Text=="-")
+            {
+                e.Handled = false;//正确输入，不阻止
+            }
+            else
+                e.Handled = true;
+        }
 
         private void NotNegativeInteger_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex re = new Regex("[^0-9]+");//只能输入非负小数，小数点
+            Regex re = new Regex("[^0-9]+");//只能输入非负整数，小数点
             e.Handled = re.IsMatch(e.Text);
         }
 

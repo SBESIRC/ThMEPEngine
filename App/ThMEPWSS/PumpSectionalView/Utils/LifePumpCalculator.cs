@@ -1635,7 +1635,7 @@ namespace ThMEPWSS.PumpSectionalView.Utils
 
         public MTextLifePump(Point3d pt)
         {
-            this.pt = new Point3d(pt.X, pt.Y - 3500, 0);
+            this.pt = new Point3d(pt.X, pt.Y, 0);
         }
 
         public MText WriteIntro()
@@ -1702,7 +1702,10 @@ namespace ThMEPWSS.PumpSectionalView.Utils
             double totalQ = 0.0;
             for (int j = 0; j <ThLifePumpCommon.Input_PumpList.Count; j++)
             {
-                totalQ += ThLifePumpCommon.Input_PumpList[j].Flow_Info;
+                int n = ThLifePumpCommon.Input_PumpList[j].Num;
+                if (ThLifePumpCommon.Input_PumpList[j].NoteSelect.Contains("一备"))
+                    n--;
+                totalQ += ThLifePumpCommon.Input_PumpList[j].Flow_Info* n;
             }
 
             int i = 1;
@@ -1721,7 +1724,7 @@ namespace ThMEPWSS.PumpSectionalView.Utils
 
             //水箱
             var v = new Dictionary<string, string>() { { "序号", i.ToString() }, { "设备名称", ThLifePumpCommon.Input_No },
-                    { "规格型号",String.Format("组合式SUS304不锈钢生活水箱，有效容积{0}m%%1403%%141/h。",ThLifePumpCommon.Input_Volume)},{ "单位","座"},{ "数量",ThLifePumpCommon.Input_Num.ToString()},{ "备注",ThLifePumpCommon.Input_Note} };
+                    { "规格型号",String.Format("组合式SUS304不锈钢生活水箱，有效容积{0}m%%1403",ThLifePumpCommon.Input_Volume)},{ "单位","座"},{ "数量",ThLifePumpCommon.Input_Num.ToString()},{ "备注",ThLifePumpCommon.Input_Note} };
             blkM[i - 1].UpdateAttributesInBlock(v);
             i++;
 

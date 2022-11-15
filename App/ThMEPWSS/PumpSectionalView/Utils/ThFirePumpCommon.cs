@@ -13,6 +13,7 @@ namespace ThMEPWSS.PumpSectionalView.Utils
     /// </summary>
     public class ThFirePumpCommon
     {
+        public static string Button_Name="生成剖面图";//被统计的按钮名字
         //以下为输入
         public static double Input_BuildingFinishHeight = 1;//建筑完成面高度H1
         public static double Input_RoofHeight = 1;//顶板高度H2
