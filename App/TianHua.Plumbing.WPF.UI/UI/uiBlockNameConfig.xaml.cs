@@ -145,6 +145,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
                         }
                     }
                 }
+                if (typeId == 8)
+                {
+                    if (blockSizeDic.ContainsKey(blkName))
+                    {
+                        if (blockSizeDic[blkName].First() >= 400 || blockSizeDic[blkName].First() >= 400)
+                        {
+                            continue;
+                        }
+                    }
+                }
                 if (viewModel.BlockNameList.ContainsKey(dict[typeId]))
                 {
                     viewModel.BlockNameList[dict[typeId]].Add(new BlockNameConfigViewModel(blkName));
