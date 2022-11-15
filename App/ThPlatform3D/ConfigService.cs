@@ -39,7 +39,7 @@ namespace ThPlatform3D
         /// <summary>
         /// 当前图纸绑定的单体名称/楼栋名称
         /// </summary>
-        public string BindingName { get; protected set; }
+        public string BindingName { get; protected set; } = "";
 
         /// <summary>
         /// 清除当前图纸绑定的数据（本地缓存非数据库数据）
