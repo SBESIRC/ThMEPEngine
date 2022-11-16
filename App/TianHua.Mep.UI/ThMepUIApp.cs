@@ -103,5 +103,14 @@ namespace TianHua.Mep.UI
                 WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(config);
         }
+
+        [CommandMethod("TIANHUACAD", "THFJMCTQ", CommandFlags.Modal)]
+        public void THFJMCTQ()
+        {
+            using (var cmd = new ThInsertRoomNameCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }
