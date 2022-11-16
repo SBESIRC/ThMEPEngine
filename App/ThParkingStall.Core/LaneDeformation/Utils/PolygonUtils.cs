@@ -83,11 +83,23 @@ namespace ThParkingStall.Core.LaneDeformation
             return result;
         }
 
+
         static public Polygon BufferShell(Polygon pl) 
         {
             Polygon newPl;
             return pl;
+
         }
+
+
+
+        //wu
+
+
+
+
+
+
 
         ////清理polyline
         //static public Polygon Regularization2(Polyline originPl, double value)

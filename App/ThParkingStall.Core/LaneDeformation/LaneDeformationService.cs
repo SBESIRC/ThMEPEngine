@@ -1,4 +1,4 @@
-﻿using NetTopologySuite.Geometries;
+﻿    using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Mathematics;
 using System;
@@ -36,6 +36,10 @@ namespace ThParkingStall.Core.LaneDeformation
             // 计算容差值
             ToleranceCalculator toleranceCalculator = new ToleranceCalculator(ProcessedData.BlockNodeList);
             toleranceCalculator.Pipeline();
+
+
+            //车位排布
+            
             
             //
             GetResult();

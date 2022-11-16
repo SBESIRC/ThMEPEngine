@@ -26,6 +26,12 @@ namespace ThParkingStall.Core.LaneDeformation
         //临时做个示例
         static public List<List<FreeAreaRec>> FreeBlockList = new List<List<FreeAreaRec>>();
         static public List<BlockNode> BlockNodeList = new List<BlockNode>();
+        
+        //
+        static public List<Polygon> 
+        static public List<LineSegment>
+        static public List<LineSegment>
+
         public ProcessedData() { }
 
 
