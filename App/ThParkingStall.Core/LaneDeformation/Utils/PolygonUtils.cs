@@ -431,5 +431,51 @@ namespace ThParkingStall.Core.LaneDeformation
         //        }
         //    }
         //}
+
+        // Wu
+        static public List<Polygon> GetPolygonsFromGeometry(Geometry g)
+        {
+            var res = new List<Polygon>();
+            if (g is Polygon a)
+            {
+                if (!a.IsEmpty)
+                    res.Add(a);
+            }
+            else if (g is GeometryCollection collection)
+            {
+                foreach (var geo in collection.Geometries)
+                {
+                    if (geo is Polygon pl)
+                    {
+                        if (!pl.IsEmpty)
+                            res.Add(pl);
+                    }
+                }
+            }
+            return res;
+        }
+
+        static public void GetBoundaryBoxCoords(Geometry p, ref double minX, ref double minY, ref double maxX, ref double maxY)
+        {
+            if (p.IsEmpty)
+                return;
+
+            minX = p.Coordinates[0].X;
+            maxX = p.Coordinates[0].X;
+            minY = p.Coordinates[0].Y;
+            maxY = p.Coordinates[0].Y;
+            for (int i = 1; i < p.Coordinates.Count(); i++)
+            {
+                Coordinate coord = p.Coordinates[i];
+                if (coord.X < minX)
+                    minX = coord.X;
+                if (coord.Y < minY)
+                    minY = coord.Y;
+                if (coord.X > maxX)
+                    maxX = coord.X;
+                if (coord.Y > maxY)
+                    maxY = coord.Y;
+            }
+        }
     }
 }

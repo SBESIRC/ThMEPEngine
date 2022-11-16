@@ -34,48 +34,45 @@ namespace ThParkingStall.Core.LaneDeformation
                 geometries.Add(plot.ParkingPlaceObb);
             }
             GeometryCollection differenceObjs = new GeometryCollection(geometries.ToArray());
-            var freeAreeResult = OverlayNGRobust.Overlay(parkingPlace.ParkingPlaceBlockObb, differenceObjs, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+            var freeAreaResult = OverlayNGRobust.Overlay(parkingPlace.ParkingPlaceBlockObb, differenceObjs, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
 
-            var polyList = new List<Polygon>();
-            if (freeAreeResult is Polygon a)
+            var polyListOrigin = new List<Polygon>();
+            foreach (Polygon pl in PolygonUtils.GetPolygonsFromGeometry(freeAreaResult))
             {
-                List<Polygon> polygons = PolygonUtils.ClearBufferHelper(a, -1, 1);
-                polyList.AddRange(polygons);
+                List<Polygon> polygons = PolygonUtils.ClearBufferHelper(pl, -1, 1);
+                polyListOrigin.AddRange(polygons);
             }
-            else if (freeAreeResult is GeometryCollection collection)
+
+            // Diff掉障碍物
+            var obstables = obstableSpatialIndex.SelectCrossingGeometry(parkingPlace.ParkingPlaceBlockObb);
+            var polyList = new List<Polygon>();
+            foreach (var p in polyListOrigin)
             {
-                foreach (var geo in collection.Geometries)
+                double minX = 0, maxX = 0, minY = 0, maxY = 0;
+                PolygonUtils.GetBoundaryBoxCoords(p, ref minX, ref minY, ref maxX, ref maxY);
+                Geometry tmpG = PolygonUtils.CreatePolygonRec(minX, maxX, minY, maxY);
+
+                foreach (var ob in obstables.Where(ob => tmpG.Intersects(ob)))
                 {
-                    if (geo is Polygon pl)
-                    {
-                        List<Polygon> polygons = PolygonUtils.ClearBufferHelper(pl, -1, 1);
-                        polyList.AddRange(polygons);
-                    }
+                    double minXO = 0, maxXO = 0, minYO = 0, maxYO = 0;
+                    PolygonUtils.GetBoundaryBoxCoords(ob, ref minXO, ref minYO, ref maxXO, ref maxYO);
+                    Polygon diff = PolygonUtils.CreatePolygonRec(minX - 100, maxX + 100, minYO, maxYO);
+                    tmpG = OverlayNGRobust.Overlay(tmpG, diff, NetTopologySuite.Operation.Overlay.SpatialFunction.Difference);
+
+                }
+                foreach (Polygon pl in PolygonUtils.GetPolygonsFromGeometry(tmpG))
+                {
+                    polyList.Add(pl);
                 }
             }
 
-            var obstables = obstableSpatialIndex.SelectCrossingGeometry(parkingPlace.ParkingPlaceBlockObb);
-
+            // 转为FreeAreaRec
             var freeList = new List<FreeAreaRec>();
             foreach (var p in polyList)
             {
                 LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add(p);
-                var minX = p.Coordinates[0].X;
-                var maxX = p.Coordinates[0].X;
-                var minY = p.Coordinates[0].Y;
-                var maxY = p.Coordinates[0].Y;
-                for (int i = 1; i < p.Coordinates.Count(); i++)
-                {
-                    Coordinate coord = p.Coordinates[i];
-                    if (coord.X < minX)
-                        minX = coord.X;
-                    if (coord.Y < minY)
-                        minY = coord.Y;
-                    if (coord.X > maxX)
-                        maxX = coord.X;
-                    if (coord.Y > maxY)
-                        maxY = coord.Y;
-                }
+                double minX = 0, maxX = 0, minY = 0, maxY = 0;
+                PolygonUtils.GetBoundaryBoxCoords(p, ref minX, ref minY, ref maxX, ref maxY);
                 var area = new FreeAreaRec(
                     new Coordinate(minX, minY), new Coordinate(maxX, minY),
                     new Coordinate(maxX, maxY), new Coordinate(minX, maxY)
@@ -161,15 +158,7 @@ namespace ThParkingStall.Core.LaneDeformation
             {
                 var leftDown = node.LeftDownPoint;
                 var rightUp = node.RightUpPoint;
-                List<Coordinate> pointList = new List<Coordinate>
-                {
-                    leftDown,
-                    new Coordinate(rightUp.X, leftDown.Y),
-                    new Coordinate(rightUp.X, leftDown.Y - 5),
-                    new Coordinate(leftDown.X, leftDown.Y - 5),
-                    leftDown
-                };
-                var query = new Polygon(new LinearRing(pointList.ToArray()));
+                var query = PolygonUtils.CreatePolygonRec(leftDown.X, rightUp.X, leftDown.Y - 5, leftDown.Y);
                 var result = polygonSpatialIndex.SelectCrossingGeometry(query);
                 foreach (BlockNode child in result)
                 {
@@ -181,15 +170,20 @@ namespace ThParkingStall.Core.LaneDeformation
                     {
                         node.NeighborNodes[(int)PassDirection.FORWARD].Add(child);
                         child.NeighborNodes[(int)PassDirection.BACKWARD].Add(node);
-                        if (node is LaneBlock fa && child is LaneBlock ch)
+                        if (node is LaneBlock faLane && child is LaneBlock chLane)
                         {
-                            if (fa.IsHorizontal && ch.IsHorizontal)
+                            if (faLane.IsHorizontal && chLane.IsHorizontal)
                             {
-                                fa.IsFtherLane[(int)PassDirection.FORWARD] = true;
-                                fa.IsFtherLane[(int)PassDirection.BACKWARD] = false;
-                                ch.IsFtherLane[(int)PassDirection.FORWARD] = false;
-                                ch.IsFtherLane[(int)PassDirection.BACKWARD] = false;
+                                faLane.IsFtherLane[(int)PassDirection.FORWARD] = true;
+                                faLane.IsFtherLane[(int)PassDirection.BACKWARD] = false;
+                                chLane.IsFtherLane[(int)PassDirection.FORWARD] = false;
+                                chLane.IsFtherLane[(int)PassDirection.BACKWARD] = false;
                             }
+                        }
+                        else if (node is SpotBlock faSpot && child is SpotBlock chSpot)
+                        {
+                            faSpot.Spot.Type = 2;
+                            chSpot.Spot.Type = 2;
                         }
 
                         // Draw

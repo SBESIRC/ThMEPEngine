@@ -52,7 +52,6 @@ namespace ThParkingStall.Core.LaneDeformation
             {
                 if (node is LaneBlock laneBlock && laneBlock.IsHorizontal && !laneBlock.IsFtherLane[(int)PassDir])
                 {
-                    bool isPotential = true;
                     if (laneBlock.Lane.ParkingPlaceBlockList.Count == 1)
                     {
                         var parkObb = laneBlock.Lane.ParkingPlaceBlockList[0].ParkingPlaceBlockObb;
@@ -65,17 +64,18 @@ namespace ThParkingStall.Core.LaneDeformation
                         }
                         continue;
                     }
+                    bool isPotential = false;
                     foreach (var park in laneBlock.Lane.ParkingPlaceBlockList)
                     {
                         foreach (var spot in park.Cars)
                         {
-                            if (spot.Type == 2)
+                            if (spot.Type != 2)
                             {
-                                isPotential = false;
+                                isPotential = true;
                                 break;
                             }
                         }
-                        if (!isPotential)
+                        if (isPotential)
                             break;
                     }
                     if (isPotential)
@@ -105,7 +105,7 @@ namespace ThParkingStall.Core.LaneDeformation
                         continue;
                 }
 
-                children.Add(node.Obb.Buffer(50, PolygonUtils.MitreParam));
+                children.AddRange(PolygonUtils.GetBufferedPolygons(node.Obb, 50));
 
                 foreach (var ch in node.NextNodes(PassDir))
                     q.Enqueue(ch);
