@@ -207,13 +207,13 @@ namespace ThPlatform3D.StructPlane
             }
             printers.ForEach(o => o.ClearObjIds());
             var floorObjIds = printers.Select(o => o.ObjIds).ToList();
-            InsertBasePoint();
+            InsertBasePoint(svgFiles.Count,PrintParameter.FloorSpacing);
 
             // 设置DrawOrder
             SetLayerOrder(floorObjIds);
             bool hasHatch = floorObjIds.IsIncludeHatch();
 
-            // 成块
+            // 成块zze
             using (var acadDb = AcadDatabase.Active())
             {
                 floorObjIds.ForEach(o =>
@@ -495,7 +495,7 @@ namespace ThPlatform3D.StructPlane
             }  
             return strs[strs.Length - 3].IsInteger();
         }
-        private void InsertBasePoint()
+        private void InsertBasePoint(int floorCount,double floorSpacing)
         {
             using (var acadDb = AcadDatabase.Active())
             {
@@ -503,12 +503,16 @@ namespace ThPlatform3D.StructPlane
                     acadDb.Layers.Contains(ThPrintLayerManager.DefpointsLayerName))
                 {
                     DbHelper.EnsureLayerOn(ThPrintLayerManager.DefpointsLayerName);
-                    acadDb.ModelSpace.ObjectId.InsertBlockReference(
+                    for(int i=0;i<floorCount;i++)
+                    {
+                        var basePoint = new Point3d(0, i * floorSpacing, 0);
+                        acadDb.ModelSpace.ObjectId.InsertBlockReference(
                                        ThPrintLayerManager.DefpointsLayerName,
                                        ThPrintBlockManager.BasePointBlkName,
-                                       Point3d.Origin,
+                                       basePoint,
                                        new Scale3d(1.0),
                                        0.0);
+                    }
                 }
             }
         }

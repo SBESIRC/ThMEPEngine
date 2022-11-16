@@ -18,6 +18,29 @@ namespace ThMEPEngineCore.IO.SVG
         {
             return ThGeometry.Create(boundary, properties);
         }
+
+        public static string ParseOrginOffset(this SvgCustomAttributeCollection svgCustomAttributes)
+        {
+            if(svgCustomAttributes.Count==1)
+            {
+                var offset = "";
+                foreach (var item in svgCustomAttributes)
+                {
+                    switch (item.Key.ToUpper())
+                    {
+                        case "OFFSET":
+                            offset = item.Value;
+                            break;
+                    }
+                }
+                return offset;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public static ThFloorInfo ParseFloorInfo(this SvgCustomAttributeCollection svgCustomAttributes)
         {
             if (svgCustomAttributes == null || svgCustomAttributes.Count == 0)

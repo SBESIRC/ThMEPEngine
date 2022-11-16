@@ -11,7 +11,7 @@ namespace ThPlatform3D.Common
         public static void MoveToOrigin(this ThSvgParseInfo parseInfo)
         {
             var originOffset = parseInfo.DocProperties.GetOriginOffset();
-            var vector = originOffset.OffsetVector();
+            var vector = originOffset.OffsetVector().Negate();
             if(vector.Length==0.0)
             {
                 return;

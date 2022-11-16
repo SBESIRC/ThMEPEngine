@@ -49,6 +49,12 @@ namespace ThMEPEngineCore.IO.SVG
                 {
                     if (children is SvgUnknownElement svgUnknownElement)
                     {
+                        var originOffset = svgUnknownElement.CustomAttributes.ParseOrginOffset();
+                        if(!string.IsNullOrEmpty(originOffset))
+                        {
+                            docProperties.Add(ThSvgPropertyNameManager.OriginOffsetPropertyName, originOffset);
+                            continue;
+                        }
                         var floorInfo = svgUnknownElement.CustomAttributes.ParseFloorInfo();
                         if (floorInfo != null)
                         {
