@@ -61,7 +61,6 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="THKJZX" Global="THKJZX" />
-                <Command Local="THKJMCTQ" Global="THKJMCTQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
                 <Command Local="THSELGROUP" Global="THSELGROUP" />
                 <Command Local="THPPARTITION" Global="THPPARTITION" />
@@ -86,7 +85,6 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="THKJZX" Global="THKJZX" />
-                <Command Local="THKJMCTQ" Global="THKJMCTQ" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
                 <Command Local="THSELGROUP" Global="THSELGROUP" />
                 <Command Local="THPPARTITION" Global="THPPARTITION" />
@@ -317,6 +315,7 @@
                 <Command Local="THFJKX2" Global="THFJKX2" />
                 <Command Local="THKXBD" Global="THKXBD" />
                 <Command Local="THEROC" Global="THEROC" />
+                <Command Local="THFJMCTQ" Global="THFJMCTQ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -329,6 +328,7 @@
                 <Command Local="THFJKX2" Global="THFJKX2" />
                 <Command Local="THKXBD" Global="THKXBD" />
                 <Command Local="THEROC" Global="THEROC" />
+                <Command Local="THFJMCTQ" Global="THFJMCTQ" />
             </Commands>
         </ComponentEntry>
     </Components>

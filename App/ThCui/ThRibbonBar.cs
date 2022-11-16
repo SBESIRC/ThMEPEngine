@@ -1178,7 +1178,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("房间名称",
                     "天华房间名称",
-                    "THKJMCTQ",
+                    "THFJMCTQ",
                     "天华房间名称",
                     "IDI_THCAD_THKJMCTQ_SMALL",
                     "IDI_THCAD_THKJMCTQ_LARGE",

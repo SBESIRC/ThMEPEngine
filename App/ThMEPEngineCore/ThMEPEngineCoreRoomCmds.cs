@@ -71,48 +71,6 @@ namespace ThMEPEngineCore
         }
 
         /// <summary>
-        /// 空间名称提取
-        /// </summary>
-        [CommandMethod("TIANHUACAD", "THKJMCTQ", CommandFlags.Modal)]
-        public void THKJMCTQ()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return;
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-                var engine = new ThDB3RoomMarkRecognitionEngine();
-                engine.Recognize(acadDatabase.Database, frame.Vertices());
-                var markLayerId = acadDatabase.Database.CreateAIRoomMarkLayer();
-                var textStyleId = acadDatabase.Database.ImportTextStyle("TH-STYLE3");
-                engine.Elements.Cast<ThIfcTextNote>().ForEach(o =>
-                {
-                    var dbText = new DBText
-                    {
-                        TextString = o.Text,
-                        TextStyleId = textStyleId,
-                        Height = 300,
-                        WidthFactor = 0.7,
-                        Justify = AttachmentPoint.MiddleCenter,
-                        LayerId = markLayerId,
-                    };
-                    dbText.AlignmentPoint = o.Geometry.GetMaximumInscribedCircleCenter();
-                    acadDatabase.ModelSpace.Add(dbText);
-                });
-            }
-        }
-
-        /// <summary>
         /// 空间拾取
         /// </summary>
         [CommandMethod("TIANHUACAD", "THKJSQ", CommandFlags.Modal)]
