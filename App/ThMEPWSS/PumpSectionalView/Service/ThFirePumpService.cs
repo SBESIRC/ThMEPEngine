@@ -171,18 +171,18 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         private static Dictionary<string, string> CalFirePumpEssentialAttr()
         {
             var attNameValues = new Dictionary<string, string>();
-            attNameValues.Add(ThFirePumpCommon.BuildingFinish, Convert.ToString(ThFirePumpCommon.Input_BuildingFinishHeight));
-            attNameValues.Add(ThFirePumpCommon.PoolTopHeight, Convert.ToString(ThFirePumpCommon.Input_RoofHeight));
-            attNameValues.Add(ThFirePumpCommon.HighPumpFoundation, Convert.ToString(ThFirePumpCommon.Input_BasicHeight));
+            attNameValues.Add(ThFirePumpCommon.BuildingFinish,  ThFirePumpCommon.Input_BuildingFinishHeight.ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.PoolTopHeight,  ThFirePumpCommon.Input_RoofHeight.ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.HighPumpFoundation, "h+" + ThFirePumpCommon.Input_BasicHeight.ToString("0.00"));
             //attNameValues.Add(ThFirePumpCommon.AirVentHeight, Convert.ToString(ThFirePumpCommon.Input_BasicHeight)+"+"+ ThFirePumpCommon.Input_PumpList[ThFirePumpCommon.PumpOutletHorizontalPipeDiameterChoice-1].Hole / 1000);
-            attNameValues.Add(ThFirePumpCommon.AirVentHeight, "h+"+ThFirePumpCommon.Input_BasicHeight+ ThFirePumpCommon.Input_PumpList[ThFirePumpCommon.choice - 1].Hole / 1000 );
-            attNameValues.Add(ThFirePumpCommon.MinimumAlarmWaterLevel,Convert.ToString(1.35 + ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.MaximumEffectiveWaterLevel,  Convert.ToString(1.40 + ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.MaximumAlarmWaterLevel,  Convert.ToString(1.45 + ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.OverflowWaterLevel,  Convert.ToString(1.50 + ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.CrossTubeHeight,  Convert.ToString(1.70 + ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.InletPipeHeight,Convert.ToString(1.80 + ThFirePumpCommon.Input_EffectiveDepth));
-            attNameValues.Add(ThFirePumpCommon.SnorkelHeight, Convert.ToString(2 + ThFirePumpCommon.Input_EffectiveDepth));
+            attNameValues.Add(ThFirePumpCommon.AirVentHeight, "h+"+(ThFirePumpCommon.Input_BasicHeight+ ThFirePumpCommon.Input_PumpList[ThFirePumpCommon.choice - 1].Hole / 1000).ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.MinimumAlarmWaterLevel,"h+"+(1.35 + ThFirePumpCommon.Input_EffectiveDepth).ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.MaximumEffectiveWaterLevel, "h+"+(1.40 + ThFirePumpCommon.Input_EffectiveDepth).ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.MaximumAlarmWaterLevel, "h+" + (1.45 + ThFirePumpCommon.Input_EffectiveDepth).ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.OverflowWaterLevel, "h+" + (1.50 + ThFirePumpCommon.Input_EffectiveDepth).ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.CrossTubeHeight, "h+" + (1.70 + ThFirePumpCommon.Input_EffectiveDepth).ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.InletPipeHeight ,"h+" + (1.80 + ThFirePumpCommon.Input_EffectiveDepth).ToString("0.00"));
+            attNameValues.Add(ThFirePumpCommon.SnorkelHeight, "h+" +( 2 + ThFirePumpCommon.Input_EffectiveDepth).ToString("0.00"));
 
             return attNameValues;
         }

@@ -471,8 +471,20 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THBFPMT", CommandFlags.Modal)]
         public void THPumpSectionalView()
         {
-            var ui = new uiPumpSectionalView();
-            AcadApp.ShowModelessWindow(ui);
+           
+
+            if (uiPumpSectionalView.Instance != null && uiPumpSectionalView.Instance.IsLoaded)
+            {
+                if (!uiPumpSectionalView.Instance.IsVisible)
+                {
+                    uiPumpSectionalView.Instance.Show();
+                }
+                return;
+            }
+
+            uiPumpSectionalView.Instance.WindowStartupLocation =
+                System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(uiPumpSectionalView.Instance);
         }
     }
 }

@@ -42,11 +42,24 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
 
         PumpSectionalViewModel pumpSectionalViewModel;
+        public static uiPumpSectionalView Instance;
 
+        static uiPumpSectionalView()
+        {
+            if (Instance == null)
+            {
+                Instance = new uiPumpSectionalView();
+            }
+        }
         public uiPumpSectionalView()
         {
             InitializeComponent();
-            pumpSectionalViewModel = new PumpSectionalViewModel();
+            this.MutexName = "THBFPMT";
+           
+            if (pumpSectionalViewModel == null)
+            {
+                pumpSectionalViewModel = new PumpSectionalViewModel();
+            }
             DataContext = pumpSectionalViewModel;
         }
 
