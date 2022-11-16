@@ -38,9 +38,9 @@
                                  IsChecked="{Binding BeamEngineOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
                                  Converter={StaticResource beamEngineOpsConverter},ConverterParameter=1}" Checked="rbDB_Checked">
                         </RadioButton>
-                        <RadioButton Margin="3,6" x:Name="rbBeamArea" Content="图层识别" GroupName="CheckObject" IsThreeState="False"
+                        <RadioButton Margin="3,6" x:Name="rbLayer" Content="图层识别" GroupName="CheckObject" IsThreeState="False"
                                  IsChecked="{Binding BeamEngineOption,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,
-                                 Converter={StaticResource beamEngineOpsConverter},ConverterParameter=2}" Checked="rbBeamArea_Checked">
+                                 Converter={StaticResource beamEngineOpsConverter},ConverterParameter=2}" Checked="rbLayer_Checked">
                         </RadioButton>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal">
