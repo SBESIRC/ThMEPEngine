@@ -39,8 +39,6 @@ namespace ThMEPWSS.PumpSectionalView.Model
     {
         public PumpSectionalViewModel()
         {
-            canContinue = true;//
-            //屋顶水箱
             Length = 0;
             Width = 0;
             High = 0;
@@ -95,7 +93,7 @@ namespace ThMEPWSS.PumpSectionalView.Model
         }
 
 
-        private bool canContinue { get; set; }//是否继续
+
         //高位消防水箱 输入
         private double? _Length { get; set; }
         public double? Length
@@ -203,78 +201,49 @@ namespace ThMEPWSS.PumpSectionalView.Model
         public ICommand CallHighWaterTankCmd => new RelayCommand(CallHighWaterTank);
         public void CallHighWaterTank()
         {
-            Dictionary<int, string> dic = new Dictionary<int, string>();
+
             bool flag = true;
             if (!IsValue1(Length ?? 0.0))
             {
                 Length = 0;
-                dic.Add(1, "屋顶水箱长须大于0");
                 flag = false;
             }
             if (!IsValue1(Width ?? 0.0))
             {
                 Width = 0;
-                dic.Add(2, "屋顶水箱宽须大于0");
                 flag = false;
             }
             if (!IsValue1(High ?? 0.0))
             {
                 High = 0;
-                dic.Add(3, "屋顶水箱高须大于0");
                 flag = false;
             }
             if (!IsValue2(BaseHigh ?? 0.0))
             {
                 BaseHigh = 0;
-                dic.Add(4, "屋顶水箱基础高度须大于0");
                 flag = false;
             }
             if (!IsValue2(Volume ?? 0.0))
             {
                 Volume = 0;
-                dic.Add(5, "有效容积须大于0");
+                flag = false;
+            }
+            if (Width * High * Length < Volume)
+            {
                 flag = false;
             }
 
 
-            double l = Length ?? 0.0;
-            double w = Width ?? 0.0;
-            double h = High ?? 0.0;
-            double v = l * w * (h - 0.8);
-            if (v < Volume)
+            if (flag)
             {
-                dic.Add(6, "消防水箱尺寸不满足有效容积要求，是否继续？ ");
-            }
-
-            if (dic.Count > 0)//有错误
-            {
-                string message = "";
-                foreach (var i in dic)//汇总错误信息
-                {
-                    message += i.Value + "\n";
-                }
-
-                if (flag)//不需要终止
-                {
-                    MessageBoxResult result = MessageBox.Show(message, "", MessageBoxButton.OKCancel);
-                    switch (result)
-                    {
-                        case MessageBoxResult.OK:
-
-                            Draw();
-                            break;
-                        case MessageBoxResult.Cancel:
-                            break;
-                    }
-                }
-                else
-                    MessageBox.Show(message);
-            }
-            else
-            {
-
+                SetType1();
+                SetType2();
                 Draw();
             }
+            else
+                MessageBox.Show("请检查您的输入！");
+
+
         }
 
         /// <summary>
@@ -282,15 +251,13 @@ namespace ThMEPWSS.PumpSectionalView.Model
         /// </summary>
         private void Draw()
         {
-            SetType1();
-            SetType2();
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 using (var cmd = new ThHighFireWaterTankCmd())
                 {
                     //double[]length=new double[2] {}
-                    cmd.setInput(Length ?? 0.0, Width ?? 0.0, High ?? 0.0, Volume ?? 0.0, BaseHigh ?? 0.0, Type1, Type2);
+                    cmd.setInput(Length ?? 0.0, Width ?? 0.0, High ?? 0.0, Volume ?? 0.0, BaseHigh ?? 0.0, Type1,Type2);
                     cmd.Execute();
 
                     //cmd.setInput(Length ?? 0.0, Width ?? 0.0, High ?? 0.0, Volume ?? 0.0, BaseHigh ?? 0.0, Type2);
@@ -442,21 +409,21 @@ namespace ThMEPWSS.PumpSectionalView.Model
                     cmd.Execute();//只进入统计而已
                 }
             }
-
+            
             string path = ThCADCommon.LifePumpDataTablePath();
-
+            
             var errMsg = ReadFileDataLife(path);
             if (errMsg.Count > 0)
             {
-                string message = "";
-                foreach (var i in errMsg)
-                {
-                    message += i.Value + "\n";
-                }
-                MessageBox.Show(message);
-
+                 string message = "";
+                 foreach (var i in errMsg)
+                 {
+                     message += i.Value + "\n";
+                 }
+                 MessageBox.Show(message);
+                  
             }
-
+            
         }
 
 
@@ -466,50 +433,33 @@ namespace ThMEPWSS.PumpSectionalView.Model
         public ICommand CallLifePumpCmd => new RelayCommand(CallLifePump);
         public void CallLifePump()
         {
-            Dictionary<int, string> dic = isRightInputLifePump();
             if (LifePumpInfoList.Count == 0 || LifeBaseInfoList.Count == 0)
             {
                 MessageBox.Show("生活泵组和生活水箱请至少输入一组数据！");
             }
-            else if (dic.Count > 0)//有错误
+            else if (isRightInputLifePump().Count > 0)
             {
+                Dictionary<int, string> dic = isRightInputLifePump();
                 string message = "";
-                foreach (var i in dic)//汇总错误信息
+                foreach (var i in dic)
                 {
                     message += i.Value + "\n";
                 }
+                MessageBox.Show(message);
 
-                if (canContinue)//不需要终止
-                {
-                    MessageBoxResult result = MessageBox.Show(message, "", MessageBoxButton.OKCancel);
-                    switch (result)
-                    {
-                        case MessageBoxResult.OK:
-                            drawLifePump("生成剖面图");
-                            break;
-                        case MessageBoxResult.Cancel:
-                            break;
-                    }
-                }
-                else
-                    MessageBox.Show(message);
             }
             else
-                drawLifePump("生成剖面图");
-
-        }
-
-        private void drawLifePump(string name)
-        {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                ThLifePumpCommon.Button_Name = name;
-                using (var cmd = new ThLifePumpCmd())
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 {
+                    ThLifePumpCommon.Button_Name = "生成剖面图";
+                    using (var cmd = new ThLifePumpCmd())
+                    {
 
-                    setInputLifePump();
-                    cmd.Execute();
+                        setInputLifePump();
+                        cmd.Execute();
+                    }
                 }
             }
         }
@@ -579,98 +529,47 @@ namespace ThMEPWSS.PumpSectionalView.Model
         private Dictionary<int, string> isRightInputLifePump()
         {
             Dictionary<int, string> dic = new Dictionary<int, string>();
-            canContinue = true;
 
             if (BaseHigh_Life == null || BaseHigh_Life <= 0)
-            {
-                dic.Add(1, "基础高度须大于0");
-                canContinue = false;
-            }
+                dic.Add(1, "基础高度应大于0");
 
             foreach (var i in LifeBaseInfoList)
             {
                 if (i.No == null || i.No.Trim() == "")
-                {
                     if (!dic.ContainsKey(2))
                         dic.Add(2, "水箱名称不能为空");
-                    canContinue = false;
-                }
-
                 if (!isAboveZeroAndHalf(i.Length ?? 0.0) || !isAboveZeroAndHalf(i.Width ?? 0.0) || !isAboveZeroAndHalf(i.Height ?? 0.0))
-                {
                     if (!dic.ContainsKey(3))
-                        dic.Add(3, "水箱尺寸须为0.5的倍数");
-                    canContinue = false;
-                }
-
-                if (i.Volume == null || i.Volume <= 0)
-                {
+                        dic.Add(3, "水箱尺寸应为0.5的倍数");
+                if (i.Volume == null || i.Volume <= 0||i.Volume>i.Length*i.Width*i.Height)
                     if (!dic.ContainsKey(4))
-                        dic.Add(4, "水箱有效容积须大于0");
-                    canContinue = false;
-                }
-                else
-                {
-                    //避免精度丢失
-                    double l = i.Length ?? 0.0;
-                    double w = i.Width ?? 0.0;
-                    double h = i.Height ?? 0.0;
-                    double v = i.Volume ?? 0.0;
-                    if (v > l * w * (h - 0.85))
-                        dic.Add(0 - (int)i.CheckNo, i.No + "尺寸不满足有效容积要求，是否继续？");
-                }
-
+                        dic.Add(4, "水箱有效容积输入错误");
                 if (i.Num == null || i.Num <= 0)
-                {
                     if (!dic.ContainsKey(5))
-                        dic.Add(5, "水箱数量须大于0");
-                    canContinue = false;
-                }
+                        dic.Add(5, "水箱数量应大于0");
+
             }
 
             foreach (var i in LifePumpInfoList)
             {
                 if (i.No == null || i.No.Trim() == "")
-                {
                     if (!dic.ContainsKey(11))
                         dic.Add(11, "泵组编号不能为空");
-                    canContinue = false;
-                }
-
                 if (i.Flow_Info == null || i.Flow_Info <= 0)
-                {
                     if (!dic.ContainsKey(12))
-                        dic.Add(12, "水泵扬程须大于0 ");
-                    canContinue = false;
-                }
-
+                        dic.Add(12, "水泵扬程应大于0 ");
                 if (i.Head == null || i.Head <= 0)
-                {
                     if (!dic.ContainsKey(13))
-                        dic.Add(13, "水泵流量须大于0");
-                    canContinue = false;
-                }
-
+                        dic.Add(13, "水泵流量应大于0");
                 if (i.Power == null || i.Power <= 0)
-                {
                     if (!dic.ContainsKey(14))
                         dic.Add(14, "水泵功率应大于0");
-                    canContinue = false;
-                }
-
                 if (i.Num == null || i.Num <= 0)
-                {
                     if (!dic.ContainsKey(15))
                         dic.Add(15, "水泵数量应大于0");
-                    canContinue = false;
-                }
-
                 if (i.NoteSelect == null || i.NoteSelect.Trim() == "")
-                {
                     if (!dic.ContainsKey(16))
                         dic.Add(16, "备注1不能为空");
-                    canContinue = false;
-                }
             }
             return dic;
         }
@@ -690,36 +589,35 @@ namespace ThMEPWSS.PumpSectionalView.Model
         public ICommand CallLifePumpWordCmd => new RelayCommand(CallLifePumpWord);
         public void CallLifePumpWord()
         {
-            Dictionary<int, string> dic = isRightInputLifePumpWord();
-            if (LifePumpInfoList.Count == 0)
+            if (LifePumpInfoList.Count == 0 || LifeBaseInfoList.Count == 0)
             {
-                MessageBox.Show("生活泵组请至少输入一组数据！");
+                MessageBox.Show("生活泵组和生活水箱请至少输入一组数据！");
             }
-            else if (dic.Count > 0)//有错误
+            else if (isRightInputLifePumpWord().Count > 0)
             {
+                Dictionary<int, string> dic = isRightInputLifePumpWord();
                 string message = "";
-                foreach (var i in dic)//汇总错误信息
+                foreach (var i in dic)
                 {
                     message += i.Value + "\n";
                 }
+                MessageBox.Show(message);
 
-                if (canContinue)//不需要终止
-                {
-                    MessageBoxResult result = MessageBox.Show(message, "", MessageBoxButton.OKCancel);
-                    switch (result)
-                    {
-                        case MessageBoxResult.OK:
-                            drawLifePump("生成说明");
-                            break;
-                        case MessageBoxResult.Cancel:
-                            break;
-                    }
-                }
-                else
-                    MessageBox.Show(message);
             }
             else
-                drawLifePump("生成说明");
+            {
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    ThLifePumpCommon.Button_Name = "生成说明";
+                    using (var cmd = new ThLifePumpCmd())
+                    {
+
+                        setInputLifePump();
+                        cmd.Execute();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -729,58 +627,32 @@ namespace ThMEPWSS.PumpSectionalView.Model
         private Dictionary<int, string> isRightInputLifePumpWord()
         {
             Dictionary<int, string> dic = new Dictionary<int, string>();
-            canContinue = true;
 
             if (BaseHigh_Life == null || BaseHigh_Life <= 0)
-            {
-                dic.Add(1, "基础高度须大于0");
-                canContinue = false;
-            }
+                dic.Add(1, "基础高度应大于0");
 
+           
 
             foreach (var i in LifePumpInfoList)
             {
                 if (i.No == null || i.No.Trim() == "")
-                {
                     if (!dic.ContainsKey(11))
                         dic.Add(11, "泵组编号不能为空");
-                    canContinue = false;
-                }
-
                 if (i.Flow_Info == null || i.Flow_Info <= 0)
-                {
                     if (!dic.ContainsKey(12))
-                        dic.Add(12, "水泵扬程须大于0 ");
-                    canContinue = false;
-                }
-
+                        dic.Add(12, "水泵扬程应大于0 ");
                 if (i.Head == null || i.Head <= 0)
-                {
                     if (!dic.ContainsKey(13))
-                        dic.Add(13, "水泵流量须大于0");
-                    canContinue = false;
-                }
-
+                        dic.Add(13, "水泵流量应大于0");
                 if (i.Power == null || i.Power <= 0)
-                {
                     if (!dic.ContainsKey(14))
                         dic.Add(14, "水泵功率应大于0");
-                    canContinue = false;
-                }
-
                 if (i.Num == null || i.Num <= 0)
-                {
                     if (!dic.ContainsKey(15))
                         dic.Add(15, "水泵数量应大于0");
-                    canContinue = false;
-                }
-
                 if (i.NoteSelect == null || i.NoteSelect.Trim() == "")
-                {
                     if (!dic.ContainsKey(16))
                         dic.Add(16, "备注1不能为空");
-                    canContinue = false;
-                }
             }
             return dic;
         }
@@ -789,36 +661,35 @@ namespace ThMEPWSS.PumpSectionalView.Model
         public ICommand CallLifePumpGraphCmd => new RelayCommand(CallLifePumpGraph);
         public void CallLifePumpGraph()
         {
-            Dictionary<int, string> dic = isRightInputLifePumpGraph();
             if (LifePumpInfoList.Count == 0 || LifeBaseInfoList.Count == 0)
             {
                 MessageBox.Show("生活泵组和生活水箱请至少输入一组数据！");
             }
-            else if (dic.Count > 0)//有错误
+            else if (isRightInputLifePumpGraph().Count > 0)
             {
+                Dictionary<int, string> dic = isRightInputLifePumpGraph();
                 string message = "";
-                foreach (var i in dic)//汇总错误信息
+                foreach (var i in dic)
                 {
                     message += i.Value + "\n";
                 }
+                MessageBox.Show(message);
 
-                if (canContinue)//不需要终止
-                {
-                    MessageBoxResult result = MessageBox.Show(message, "", MessageBoxButton.OKCancel);
-                    switch (result)
-                    {
-                        case MessageBoxResult.OK:
-                            drawLifePump("生成材料表");
-                            break;
-                        case MessageBoxResult.Cancel:
-                            break;
-                    }
-                }
-                else
-                    MessageBox.Show(message);
             }
             else
-                drawLifePump("生成材料表");
+            {
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    ThLifePumpCommon.Button_Name = "生成材料表";
+                    using (var cmd = new ThLifePumpCmd())
+                    {
+
+                        setInputLifePump();
+                        cmd.Execute();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -828,94 +699,44 @@ namespace ThMEPWSS.PumpSectionalView.Model
         private Dictionary<int, string> isRightInputLifePumpGraph()
         {
             Dictionary<int, string> dic = new Dictionary<int, string>();
-            canContinue = true;
-
 
             foreach (var i in LifeBaseInfoList)
             {
                 if (i.No == null || i.No.Trim() == "")
-                {
                     if (!dic.ContainsKey(2))
                         dic.Add(2, "水箱名称不能为空");
-                    canContinue = false;
-                }
-
                 if (!isAboveZeroAndHalf(i.Length ?? 0.0) || !isAboveZeroAndHalf(i.Width ?? 0.0) || !isAboveZeroAndHalf(i.Height ?? 0.0))
-                {
                     if (!dic.ContainsKey(3))
-                        dic.Add(3, "水箱尺寸须为0.5的倍数");
-                    canContinue = false;
-                }
-
-                if (i.Volume == null || i.Volume <= 0)
-                {
+                        dic.Add(3, "水箱尺寸应为0.5的倍数");
+                if (i.Volume == null || i.Volume <= 0 || i.Volume > i.Length * i.Width * i.Height)
                     if (!dic.ContainsKey(4))
-                        dic.Add(4, "水箱有效容积须大于0");
-                    canContinue = false;
-                }
-                else
-                {
-                    //避免精度丢失
-                    double l = i.Length ?? 0.0;
-                    double w = i.Width ?? 0.0;
-                    double h = i.Height ?? 0.0;
-                    double v = i.Volume ?? 0.0;
-                    if (v > l * w * (h - 0.85))
-                        dic.Add(0 - (int)i.CheckNo, i.No + "尺寸不满足有效容积要求，是否继续？");
-                }
-
-
+                        dic.Add(4, "水箱有效容积输入错误");
                 if (i.Num == null || i.Num <= 0)
-                {
                     if (!dic.ContainsKey(5))
-                        dic.Add(5, "水箱数量须大于0");
-                    canContinue = false;
-                }
+                        dic.Add(5, "水箱数量应大于0");
+
             }
 
             foreach (var i in LifePumpInfoList)
             {
                 if (i.No == null || i.No.Trim() == "")
-                {
                     if (!dic.ContainsKey(11))
                         dic.Add(11, "泵组编号不能为空");
-                    canContinue = false;
-                }
-
                 if (i.Flow_Info == null || i.Flow_Info <= 0)
-                {
                     if (!dic.ContainsKey(12))
-                        dic.Add(12, "水泵扬程须大于0 ");
-                    canContinue = false;
-                }
-
+                        dic.Add(12, "水泵扬程应大于0 ");
                 if (i.Head == null || i.Head <= 0)
-                {
                     if (!dic.ContainsKey(13))
-                        dic.Add(13, "水泵流量须大于0");
-                    canContinue = false;
-                }
-
+                        dic.Add(13, "水泵流量应大于0");
                 if (i.Power == null || i.Power <= 0)
-                {
                     if (!dic.ContainsKey(14))
                         dic.Add(14, "水泵功率应大于0");
-                    canContinue = false;
-                }
-
                 if (i.Num == null || i.Num <= 0)
-                {
                     if (!dic.ContainsKey(15))
                         dic.Add(15, "水泵数量应大于0");
-                    canContinue = false;
-                }
-
                 if (i.NoteSelect == null || i.NoteSelect.Trim() == "")
-                {
                     if (!dic.ContainsKey(16))
                         dic.Add(16, "备注1不能为空");
-                    canContinue = false;
-                }
             }
             return dic;
         }
@@ -1119,52 +940,31 @@ namespace ThMEPWSS.PumpSectionalView.Model
         public ICommand CallFirePumpCmd => new RelayCommand(CallFirePump);
         public void CallFirePump()
         {
-            Dictionary<int, string> dic = isRightInputFirePump();
             if (FirePumpInfoList.Count == 0)
             {
                 MessageBox.Show("消火栓组请至少输入一组数据！");
-
             }
-            else if (dic.Count > 0)//有错误
+            else if (isRightInputFirePump().Count > 0)
             {
+                Dictionary<int, string> dic = isRightInputFirePump();
                 string message = "";
-                foreach (var i in dic)//汇总错误信息
+                foreach (var i in dic)
                 {
                     message += i.Value + "\n";
                 }
+                MessageBox.Show(message);
 
-
-                if (canContinue)//不需要终止
-                {
-                    MessageBoxResult result = MessageBox.Show(message, "", MessageBoxButton.OKCancel);
-                    switch (result)
-                    {
-                        case MessageBoxResult.OK:
-                            drawFirePump("生成剖面图");
-                            break;
-
-                        case MessageBoxResult.Cancel:
-                            break;
-                    }
-                }
-                else
-                    MessageBox.Show(message);
             }
             else
-                drawFirePump("生成剖面图");
-
-        }
-
-        private void drawFirePump(string name)
-        {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                ThFirePumpCommon.Button_Name = name;
-                using (var cmd = new ThFirePumpCmd())
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 {
-                    setInputFirePump();
-                    cmd.Execute();
+                    ThFirePumpCommon.Button_Name = "生成剖面图";
+                    using (var cmd = new ThFirePumpCmd())
+                    {
+                        cmd.Execute();
+                    }
                 }
             }
         }
@@ -1217,183 +1017,55 @@ namespace ThMEPWSS.PumpSectionalView.Model
         private Dictionary<int, string> isRightInputFirePump()
         {
             Dictionary<int, string> dic = new Dictionary<int, string>();
-            canContinue = true;
 
             if (BuildingFinishHeight_Fire == null)
-            {
-                dic.Add(1, "请输入建筑完成面标高数据");
-                canContinue = false;
-            }
-            else if (BuildingFinishHeight_Fire < -10)
-                dic.Add(1, "根据规范要求消防水池高度不可低于-10m，是否继续？");
-
+                dic.Add(1, "建筑完成面标高不能为空");
 
             if (RoofHeight_Fire == null)
-            {
-                dic.Add(2, "请输入顶板下标高数据");
-                canContinue = false;
-            }
-            else if (RoofHeight_Fire <= BuildingFinishHeight_Fire)
-            {
-                dic.Add(2, "建筑完成面标高须小于顶板下标高");
-                canContinue = false;
-            }
+                dic.Add(2, "顶板下标高不能为空");
 
             if (BaseHeight_Fire == null)
-            {
-                dic.Add(3, "请输入基础高度数据");
-                canContinue = false;
-            }
-            else if (BaseHeight_Fire == 0)
-            {
-                dic.Add(3, "基础高度不可为0");
-                canContinue = false;
-            }
+                dic.Add(3, "基础高度不能为空");
 
+            if (PoolArea_Fire == null || PoolArea_Fire <= 0)
+                dic.Add(4, "水池面积须大于0");
 
-            if (PoolArea_Fire == null)
-            {
-                dic.Add(4, "请输入水池面积数据");
-                canContinue = false;
-            }
-            else if (PoolArea_Fire <= 0)
-            {
-                dic.Add(4, "水池面积不可为0");
-                canContinue = false;
-            }
+            if (Depth_Fire == null || Depth_Fire <= 0)
+                dic.Add(5, "有效水深须大于0");
 
+            if (Volume_Fire == null || Volume_Fire <= 0 || Volume_Fire > PoolArea_Fire * Depth_Fire)
+                dic.Add(6, "有效容积输入错误");
 
-            if (Depth_Fire == null)
-            {
-                dic.Add(5, "请输入有效水深数据");
-                canContinue = false;
-            }
-            else if (Depth_Fire <= 0)
-            {
-                dic.Add(5, "有效水深不可为0");
-                canContinue = false;
-            }
-
-
-            if (Volume_Fire == null)
-            {
-                dic.Add(6, "请输入有效容积数据");
-                canContinue = false;
-            }
-            else if (Volume_Fire <= 0)
-            {
-                dic.Add(6, "有效容积不可为0");
-                canContinue = false;
-            }
-            else if (Volume_Fire > PoolArea_Fire * Depth_Fire)
-                dic.Add(6, "当前水池尺寸不满足有效容积要求，是否继续？");
-
-            bool isOutdoor = false;
             foreach (var i in FirePumpInfoList)
             {
                 if (string.IsNullOrEmpty(i.No.Trim()))
-                {
                     if (!dic.ContainsKey(7))
-                    {
-                        dic.Add(7, "请输入泵组编号");
-                        canContinue = false;
-
-                    }
-                }
-                else if (i.No.Contains("室外"))
-                    isOutdoor = true;
-
-
-
-                if (i.Flow_Info == null)
-                {
+                        dic.Add(7, "泵组编号不能为空");
+                if (i.Flow_Info == null || i.Flow_Info <= 0)
                     if (!dic.ContainsKey(8))
-                        dic.Add(8, "请输入流量数据");
-                    canContinue = false;
-                }
-                else if (i.Flow_Info <= 0)
-                {
-                    if (!dic.ContainsKey(8))
-                        dic.Add(8, "流量不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Head == null)
-                {
+                        dic.Add(8, "流量须大于0");
+                if (i.Head == null || i.Head <= 0)
                     if (!dic.ContainsKey(9))
-                        dic.Add(9, "请输入扬程数据");
-                    canContinue = false;
-                }
-                else if (i.Head <= 0)
-                {
-                    if (!dic.ContainsKey(9))
-                        dic.Add(9, "扬程不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Power == null)
-                {
+                        dic.Add(9, "扬程须大于0");
+                if (i.Power == null || i.Power <= 0)
                     if (!dic.ContainsKey(10))
-                        dic.Add(10, "请输入功率数据");
-                    canContinue = false;
-                }
-                else if (i.Power <= 0)
-                {
-                    if (!dic.ContainsKey(10))
-                        dic.Add(10, "功率不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Num == null)
-                {
+                        dic.Add(10, "功率须大于0");
+                if (i.Num == null || i.Num <= 0)
                     if (!dic.ContainsKey(11))
-                        dic.Add(11, "请输入泵数量数据");
-                    canContinue = false;
-                }
-                else if (i.Num <= 0)
-                {
-                    if (!dic.ContainsKey(11))
-                        dic.Add(11, "泵数量不可为0");
-                    canContinue = false;
-                }
+                        dic.Add(11, "泵数量须大于0");
 
-
-                if (i.Hole == null)
-                {
+                if (i.Hole == null || i.Hole <= 0)
                     if (!dic.ContainsKey(12))
-                        dic.Add(12, "请输入放气孔高度数据");
-                    canContinue = false;
-                }
-                else if (i.Hole <= 0)
-                {
-                    if (!dic.ContainsKey(12))
-                        dic.Add(12, "放气孔高度不可为0");
-                    canContinue = false;
-                }
-
+                        dic.Add(12, "放气孔高度须大于0");
                 if (i.NumSelect == null || i.NumSelect == "")
-                {
                     if (!dic.ContainsKey(13))
-                        dic.Add(13, "请输入使用台数");
-                    canContinue = false;
-                }
-
+                        dic.Add(13, "使用台数不能为空");
                 if (i.TypeSelect == null || i.TypeSelect == "")
-                {
                     if (!dic.ContainsKey(14))
-                        dic.Add(14, "请选择泵类型");
-                    canContinue = false;
-                }
+                        dic.Add(14, "泵类型不能为空");
 
             }
 
-            if (isOutdoor && BuildingFinishHeight_Fire < -6)
-            {
-                if (dic.ContainsKey(1))
-                    dic[1] = "根据规范要求消防水池储存室外用水时高度不可低于-6m，是否继续？";
-                else
-                    dic.Add(1, "根据规范要求消防水池储存室外用水时高度不可低于-6m，是否继续？");
-            }
 
             return dic;
         }
@@ -1402,39 +1074,34 @@ namespace ThMEPWSS.PumpSectionalView.Model
         public ICommand CallFirePumpWordCmd => new RelayCommand(CallFirePumpWord);
         public void CallFirePumpWord()
         {
-            Dictionary<int, string> dic = isRightInputFirePumpWord();
             if (FirePumpInfoList.Count == 0)
             {
                 MessageBox.Show("消火栓组请至少输入一组数据！");
-
             }
-            else if (dic.Count > 0)//有错误
+            else if (isRightInputFirePumpWord().Count > 0)
             {
+                Dictionary<int, string> dic = isRightInputFirePumpWord();
                 string message = "";
-                foreach (var i in dic)//汇总错误信息
+                foreach (var i in dic)
                 {
                     message += i.Value + "\n";
                 }
+                MessageBox.Show(message);
 
-
-                if (canContinue)//不需要终止
-                {
-                    MessageBoxResult result = MessageBox.Show(message, "", MessageBoxButton.OKCancel);
-                    switch (result)
-                    {
-                        case MessageBoxResult.OK:
-                            drawFirePump("生成说明");
-                            break;
-
-                        case MessageBoxResult.Cancel:
-                            break;
-                    }
-                }
-                else
-                    MessageBox.Show(message);
             }
             else
-                drawFirePump("生成说明");
+            {
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    ThFirePumpCommon.Button_Name = "生成说明";
+                    using (var cmd = new ThFirePumpCmd())
+                    {
+                        setInputFirePump();
+                        cmd.Execute();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -1444,140 +1111,73 @@ namespace ThMEPWSS.PumpSectionalView.Model
         private Dictionary<int, string> isRightInputFirePumpWord()
         {
             Dictionary<int, string> dic = new Dictionary<int, string>();
-            canContinue = true;
 
             foreach (var i in FirePumpInfoList)
             {
                 if (string.IsNullOrEmpty(i.No.Trim()))
                     if (!dic.ContainsKey(7))
-                    {
-                        dic.Add(7, "请输入泵组编号");
-                        canContinue = false;
-
-                    }
-
-                if (i.Flow_Info == null)
-                {
+                        dic.Add(7, "泵组编号不能为空");
+                if (i.Flow_Info == null || i.Flow_Info <= 0)
                     if (!dic.ContainsKey(8))
-                        dic.Add(8, "请输入流量数据");
-                    canContinue = false;
-                }
-                else if (i.Flow_Info <= 0)
-                {
-                    if (!dic.ContainsKey(8))
-                        dic.Add(8, "流量不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Head == null)
-                {
+                        dic.Add(8, "流量须大于0");
+                if (i.Head == null || i.Head <= 0)
                     if (!dic.ContainsKey(9))
-                        dic.Add(9, "请输入扬程数据");
-                    canContinue = false;
-                }
-                else if (i.Head <= 0)
-                {
-                    if (!dic.ContainsKey(9))
-                        dic.Add(9, "扬程不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Power == null)
-                {
+                        dic.Add(9, "扬程须大于0");
+                if (i.Power == null || i.Power <= 0)
                     if (!dic.ContainsKey(10))
-                        dic.Add(10, "请输入功率数据");
-                    canContinue = false;
-                }
-                else if (i.Power <= 0)
-                {
-                    if (!dic.ContainsKey(10))
-                        dic.Add(10, "功率不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Num == null)
-                {
+                        dic.Add(10, "功率须大于0");
+                if (i.Num == null || i.Num <= 0)
                     if (!dic.ContainsKey(11))
-                        dic.Add(11, "请输入泵数量数据");
-                    canContinue = false;
-                }
-                else if (i.Num <= 0)
-                {
-                    if (!dic.ContainsKey(11))
-                        dic.Add(11, "泵数量不可为0");
-                    canContinue = false;
-                }
+                        dic.Add(11, "泵数量须大于0");
 
-
-                if (i.Hole == null)
-                {
+                if (i.Hole == null || i.Hole <= 0)
                     if (!dic.ContainsKey(12))
-                        dic.Add(12, "请输入放气孔高度数据");
-                    canContinue = false;
-                }
-                else if (i.Hole <= 0)
-                {
-                    if (!dic.ContainsKey(12))
-                        dic.Add(12, "放气孔高度不可为0");
-                    canContinue = false;
-                }
-
+                        dic.Add(12, "放气孔高度须大于0");
                 if (i.NumSelect == null || i.NumSelect == "")
-                {
                     if (!dic.ContainsKey(13))
-                        dic.Add(13, "请输入使用台数");
-                    canContinue = false;
-                }
-
+                        dic.Add(13, "使用台数不能为空");
                 if (i.TypeSelect == null || i.TypeSelect == "")
-                {
                     if (!dic.ContainsKey(14))
-                        dic.Add(14, "请选择泵类型");
-                    canContinue = false;
-                }
+                        dic.Add(14, "泵类型不能为空");
 
             }
 
+
             return dic;
         }
-
+        
         //生成材料
         public ICommand CallFirePumpGraphCmd => new RelayCommand(CallFirePumpGraph);
         public void CallFirePumpGraph()
         {
-            Dictionary<int, string> dic = isRightInputFirePumpGraph();
             if (FirePumpInfoList.Count == 0)
             {
                 MessageBox.Show("消火栓组请至少输入一组数据！");
-
             }
-            else if (dic.Count > 0)//有错误
+            else if (isRightInputFirePumpGraph().Count > 0)
             {
+                Dictionary<int, string> dic = isRightInputFirePumpGraph();
                 string message = "";
-                foreach (var i in dic)//汇总错误信息
+                foreach (var i in dic)
                 {
                     message += i.Value + "\n";
                 }
+                MessageBox.Show(message);
 
-
-                if (canContinue)//不需要终止
-                {
-                    MessageBoxResult result = MessageBox.Show(message, "", MessageBoxButton.OKCancel);
-                    switch (result)
-                    {
-                        case MessageBoxResult.OK:
-                            drawFirePump("生成材料表");
-                            break;
-
-                        case MessageBoxResult.Cancel:
-                            break;
-                    }
-                }
-                else
-                    MessageBox.Show(message);
             }
             else
-                drawFirePump("生成材料表");
+            {
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    ThFirePumpCommon.Button_Name = "生成材料表";
+                    using (var cmd = new ThFirePumpCmd())
+                    {
+                        setInputFirePump();
+                        cmd.Execute();
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -1587,140 +1187,48 @@ namespace ThMEPWSS.PumpSectionalView.Model
         private Dictionary<int, string> isRightInputFirePumpGraph()
         {
             Dictionary<int, string> dic = new Dictionary<int, string>();
-            canContinue = true;
 
-            if (PoolArea_Fire == null)
-            {
-                dic.Add(4, "请输入水池面积数据");
-                canContinue = false;
-            }
-            else if (PoolArea_Fire <= 0)
-            {
-                dic.Add(4, "水池面积不可为0");
-                canContinue = false;
-            }
+            if (PoolArea_Fire == null || PoolArea_Fire <= 0)
+                dic.Add(4, "水池面积须大于0");
 
+            if (Depth_Fire == null || Depth_Fire <= 0)
+                dic.Add(5, "有效水深须大于0");
 
-            if (Depth_Fire == null)
-            {
-                dic.Add(5, "请输入有效水深数据");
-                canContinue = false;
-            }
-            else if (Depth_Fire <= 0)
-            {
-                dic.Add(5, "有效水深不可为0");
-                canContinue = false;
-            }
-
-
-            if (Volume_Fire == null)
-            {
-                dic.Add(6, "请输入有效容积数据");
-                canContinue = false;
-            }
-            else if (Volume_Fire <= 0)
-            {
-                dic.Add(6, "有效容积不可为0");
-                canContinue = false;
-            }
-            else if (Volume_Fire > PoolArea_Fire * Depth_Fire)
-                dic.Add(6, "当前水池尺寸不满足有效容积要求，是否继续？");
-
+            if (Volume_Fire == null || Volume_Fire <= 0 || Volume_Fire > PoolArea_Fire * Depth_Fire)
+                dic.Add(6, "有效容积输入错误");
 
             foreach (var i in FirePumpInfoList)
             {
                 if (string.IsNullOrEmpty(i.No.Trim()))
                     if (!dic.ContainsKey(7))
-                    {
-                        dic.Add(7, "请输入泵组编号");
-                        canContinue = false;
-
-                    }
-
-                if (i.Flow_Info == null)
-                {
+                        dic.Add(7, "泵组编号不能为空");
+                if (i.Flow_Info == null || i.Flow_Info <= 0)
                     if (!dic.ContainsKey(8))
-                        dic.Add(8, "请输入流量数据");
-                    canContinue = false;
-                }
-                else if (i.Flow_Info <= 0)
-                {
-                    if (!dic.ContainsKey(8))
-                        dic.Add(8, "流量不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Head == null)
-                {
+                        dic.Add(8, "流量须大于0");
+                if (i.Head == null || i.Head <= 0)
                     if (!dic.ContainsKey(9))
-                        dic.Add(9, "请输入扬程数据");
-                    canContinue = false;
-                }
-                else if (i.Head <= 0)
-                {
-                    if (!dic.ContainsKey(9))
-                        dic.Add(9, "扬程不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Power == null)
-                {
+                        dic.Add(9, "扬程须大于0");
+                if (i.Power == null || i.Power <= 0)
                     if (!dic.ContainsKey(10))
-                        dic.Add(10, "请输入功率数据");
-                    canContinue = false;
-                }
-                else if (i.Power <= 0)
-                {
-                    if (!dic.ContainsKey(10))
-                        dic.Add(10, "功率不可为0");
-                    canContinue = false;
-                }
-
-                if (i.Num == null)
-                {
+                        dic.Add(10, "功率须大于0");
+                if (i.Num == null || i.Num <= 0)
                     if (!dic.ContainsKey(11))
-                        dic.Add(11, "请输入泵数量数据");
-                    canContinue = false;
-                }
-                else if (i.Num <= 0)
-                {
-                    if (!dic.ContainsKey(11))
-                        dic.Add(11, "泵数量不可为0");
-                    canContinue = false;
-                }
+                        dic.Add(11, "泵数量须大于0");
 
-
-                if (i.Hole == null)
-                {
+                if (i.Hole == null || i.Hole <= 0)
                     if (!dic.ContainsKey(12))
-                        dic.Add(12, "请输入放气孔高度数据");
-                    canContinue = false;
-                }
-                else if (i.Hole <= 0)
-                {
-                    if (!dic.ContainsKey(12))
-                        dic.Add(12, "放气孔高度不可为0");
-                    canContinue = false;
-                }
-
+                        dic.Add(12, "放气孔高度须大于0");
                 if (i.NumSelect == null || i.NumSelect == "")
-                {
                     if (!dic.ContainsKey(13))
-                        dic.Add(13, "请输入使用台数");
-                    canContinue = false;
-                }
-
+                        dic.Add(13, "使用台数不能为空");
                 if (i.TypeSelect == null || i.TypeSelect == "")
-                {
                     if (!dic.ContainsKey(14))
-                        dic.Add(14, "请选择泵类型");
-                    canContinue = false;
-                }
+                        dic.Add(14, "泵类型不能为空");
 
             }
 
-            return dic;
 
+            return dic;
         }
 
         private int FirePumpNum { set; get; }//消防泵房组编号
@@ -1811,7 +1319,7 @@ namespace ThMEPWSS.PumpSectionalView.Model
                     else
                     {
                         if (!dic.ContainsKey(3))
-                            dic.Add(3, "请指定泵类型");
+                            dic.Add(3, "泵类型不在选型库");
                         continue;
                     }
 
