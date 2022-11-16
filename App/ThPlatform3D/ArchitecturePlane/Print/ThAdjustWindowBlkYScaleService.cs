@@ -29,8 +29,8 @@ namespace ThPlatform3D.ArchitecturePlane.Print
 
         private void Adjust(ThComponentInfo window)
         {
-            var sp = window.Start.ToPoint3d();
-            var ep = window.End.ToPoint3d();
+            var sp = window.Start;
+            var ep = window.End;
             if (sp.HasValue && ep.HasValue)
             {
                 if (sp.Value.DistanceTo(ep.Value) <= 10.0)

@@ -81,6 +81,7 @@
     <Compile Include="Common\ThPlanePrintParameter.cs" />
     <Compile Include="Common\ThPlaneUtils.cs" />
     <Compile Include="Common\ThPrintService.cs" />
+    <Compile Include="Common\ThSvgParseInfoExtension.cs" />
     <Compile Include="ConfigService.cs" />
     <Compile Include="Model\Printer\PrintConfig.cs" />
     <Compile Include="Model\User\UserInfo.cs" />

@@ -29,8 +29,8 @@ namespace ThPlatform3D.ArchitecturePlane.Service
         private DBObjectCollection Create(ThComponentInfo door)
         {
             var results = new DBObjectCollection();
-            var sp = door.Start.ToPoint3d();
-            var ep = door.End.ToPoint3d();
+            var sp = door.Start;
+            var ep = door.End;
             if(sp.HasValue && ep.HasValue)
             {
                 if(sp.Value.DistanceTo(ep.Value)<=10.0)
