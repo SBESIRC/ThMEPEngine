@@ -1811,7 +1811,7 @@ namespace ThMEPWSS.PumpSectionalView.Model
                     else
                     {
                         if (!dic.ContainsKey(3))
-                            dic.Add(3, "请选择泵类型");
+                            dic.Add(3, "请指定泵类型");
                         continue;
                     }
 
