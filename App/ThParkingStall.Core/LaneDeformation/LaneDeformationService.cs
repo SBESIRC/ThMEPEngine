@@ -36,7 +36,11 @@ namespace ThParkingStall.Core.LaneDeformation
             // 计算容差值
             ToleranceCalculator toleranceCalculator = new ToleranceCalculator(ProcessedData.BlockNodeList);
             toleranceCalculator.Pipeline();
-            
+
+            //
+            CarsRegenerator carsRegenerator = new CarsRegenerator(ProcessedData.BlockNodeList, PassDirection.FORWARD);
+            carsRegenerator.Pipeline();
+
             //
             GetResult();
             return;

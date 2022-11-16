@@ -650,6 +650,12 @@ namespace ThMEPArchitecture.MultiProcess
                 DrawUtils.ShowGeometry(pos, value, "l0Tolerances", 0, hight: 500);
             }
 
+            foreach (Polygon a in drawTmpOutPut.RearrangeRegions)
+            {
+                MPolygon la = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(la, "l0RearrangeRegions", 6);
+            }
+
 
 
 
