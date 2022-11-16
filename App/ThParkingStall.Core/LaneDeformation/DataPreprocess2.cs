@@ -8,15 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using ThParkingStall.Core.LaneDeformation;
 using NetTopologySuite.Operation.OverlayNG;
+using ThParkingStall.Core.MPartitionLayout;
 
 namespace ThParkingStall.Core.LaneDeformation
 {
     public class DataPreprocess2
     {
         public VehicleLaneData rawData;
+        private MNTSSpatialIndex obstableSpatialIndex;
         public DataPreprocess2() 
         {
             rawData = RawData.rawData;
+            obstableSpatialIndex = new MNTSSpatialIndex(VehicleLane.Blocks);
         }
         public void Pipeline()
         {
@@ -36,7 +39,7 @@ namespace ThParkingStall.Core.LaneDeformation
             var polyList = new List<Polygon>();
             if (freeAreeResult is Polygon a)
             {
-                List<Polygon> polygons = PolygonUtils.ClearBufferHelper(a, -0.1, 0.1);
+                List<Polygon> polygons = PolygonUtils.ClearBufferHelper(a, -1, 1);
                 polyList.AddRange(polygons);
             }
             else if (freeAreeResult is GeometryCollection collection)
@@ -45,11 +48,13 @@ namespace ThParkingStall.Core.LaneDeformation
                 {
                     if (geo is Polygon pl)
                     {
-                        List<Polygon> polygons = PolygonUtils.ClearBufferHelper(pl, -0.1, 0.1);
+                        List<Polygon> polygons = PolygonUtils.ClearBufferHelper(pl, -1, 1);
                         polyList.AddRange(polygons);
                     }
                 }
             }
+
+            var obstables = obstableSpatialIndex.SelectCrossingGeometry(parkingPlace.ParkingPlaceBlockObb);
 
             var freeList = new List<FreeAreaRec>();
             foreach (var p in polyList)
@@ -72,9 +77,10 @@ namespace ThParkingStall.Core.LaneDeformation
                         maxY = coord.Y;
                 }
                 var area = new FreeAreaRec(
-                    new Coordinate(minX, minY), new Coordinate(maxX, minY), 
+                    new Coordinate(minX, minY), new Coordinate(maxX, minY),
                     new Coordinate(maxX, maxY), new Coordinate(minX, maxY)
-                    );
+                );
+                //area.FreeLength = 0;
                 freeList.Add(area);
             }
             return freeList;
@@ -93,6 +99,9 @@ namespace ThParkingStall.Core.LaneDeformation
 
                 foreach (var parkingPlace in lane.ParkingPlaceBlockList)
                 {
+                    parkingPlace.FatherVehicleLane = lane;
+                    parkingPlace.Cars.ForEach(car => car.FatherParkingPlaceBlock = parkingPlace);
+                    parkingPlace.Cars.ForEach(car => car.FatherVehicleLane = parkingPlace.FatherVehicleLane);
                     if (laneBlock.IsHorizontal)
                     {
                         foreach (var plot in parkingPlace.Cars)
@@ -152,12 +161,14 @@ namespace ThParkingStall.Core.LaneDeformation
             {
                 var leftDown = node.LeftDownPoint;
                 var rightUp = node.RightUpPoint;
-                List<Coordinate> pointList = new List<Coordinate>();
-                pointList.Add(leftDown);
-                pointList.Add(new Coordinate(rightUp.X, leftDown.Y));
-                pointList.Add(new Coordinate(rightUp.X, leftDown.Y - 5));
-                pointList.Add(new Coordinate(leftDown.X, leftDown.Y - 5));
-                pointList.Add(leftDown);
+                List<Coordinate> pointList = new List<Coordinate>
+                {
+                    leftDown,
+                    new Coordinate(rightUp.X, leftDown.Y),
+                    new Coordinate(rightUp.X, leftDown.Y - 5),
+                    new Coordinate(leftDown.X, leftDown.Y - 5),
+                    leftDown
+                };
                 var query = new Polygon(new LinearRing(pointList.ToArray()));
                 var result = polygonSpatialIndex.SelectCrossingGeometry(query);
                 foreach (BlockNode child in result)
@@ -165,8 +176,8 @@ namespace ThParkingStall.Core.LaneDeformation
                     if (child.RightUpPoint.Y.CompareTo(rightUp.Y) <= 0 &&
                         child.RightUpPoint.Y.CompareTo(leftDown.Y - 5) >= 0 &&
                         child.LeftDownPoint.Y.CompareTo(leftDown.Y - 5) < 0 &&
-                        child.LeftDownPoint.X.CompareTo(rightUp.X) < 0 &&
-                        child.RightUpPoint.X.CompareTo(leftDown.X) > 0)
+                        child.LeftDownPoint.X.CompareTo(rightUp.X - 1) < 0 &&
+                        child.RightUpPoint.X.CompareTo(leftDown.X + 1) > 0)
                     {
                         node.NeighborNodes[(int)PassDirection.FORWARD].Add(child);
                         child.NeighborNodes[(int)PassDirection.BACKWARD].Add(node);

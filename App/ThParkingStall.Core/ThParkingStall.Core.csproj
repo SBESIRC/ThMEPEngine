@@ -78,7 +78,7 @@
     <Compile Include="LaneDeformation\Model\FreeAreaRec.cs" />
     <Compile Include="LaneDeformation\Model\BNSpatialIndex.cs" />
     <Compile Include="LaneDeformation\Service\BuildFreeArea.cs" />
-    <Compile Include="LaneDeformation\Service\CarGenerator.cs" />
+    <Compile Include="LaneDeformation\Service\CarsRegenerator.cs" />
     <Compile Include="LaneDeformation\Service\ToleranceCalculator.cs" />
     <Compile Include="LaneDeformation\Utils\PolygonUtils.cs" />
     <Compile Include="LineCleaner\LineService.cs" />

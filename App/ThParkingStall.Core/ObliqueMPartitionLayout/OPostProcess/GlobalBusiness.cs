@@ -247,6 +247,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public List<double> ToleranceResults = new List<double>();
         public List<Point> TolerancePositions = new List<Point>();
 
+        public List<Polygon> RearrangeRegions = new List<Polygon>();
+
 
         //luoyun7
         public List<Polygon> OriginalFreeAreaList =new List<Polygon>();

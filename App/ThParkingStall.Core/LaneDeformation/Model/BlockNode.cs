@@ -252,16 +252,34 @@ namespace ThParkingStall.Core.LaneDeformation
         private void MergeTable()
         {
             var deleteList = new List<int>();
+            // 合并值相同的区域
+            for (int i = 1; i < ToleranceTable.Count - 1; i++)
+            {
+                if (ToleranceTable[i].ValueRight == ToleranceTable[i - 1].ValueRight)
+                    deleteList.Add(i);
+            }
+            for (int i = deleteList.Count - 1; i >= 0; i--)
+                ToleranceTable.RemoveAt(deleteList[i]);
             // 去掉值为-1的区域
-            // ** 连续-1情况未考虑，若之前的逻辑正确应该不会出现
             if (ToleranceTable[0].ValueRight < 0)
-                ToleranceTable[0].ValueRight = ToleranceTable[1].ValueRight;
+            {
+                if (ToleranceTable[1].Coord - ToleranceTable[0].Coord < 10)
+                    ToleranceTable[0].ValueRight = ToleranceTable[1].ValueRight;
+                else
+                    ToleranceTable[0].ValueRight = SelfTolerance;
+            }
             for (int i = 1; i < ToleranceTable.Count - 1; i++)
             {
                 if (ToleranceTable[i].ValueRight < 0)
-                    ToleranceTable[i].ValueRight = Math.Max(ToleranceTable[i - 1].ValueRight, ToleranceTable[i + 1].ValueRight);
+                {
+                    if (ToleranceTable[i + 1].Coord - ToleranceTable[i].Coord < 10)
+                        ToleranceTable[i].ValueRight = Math.Max(ToleranceTable[i - 1].ValueRight, ToleranceTable[i + 1].ValueRight);
+                    else
+                        ToleranceTable[i].ValueRight = SelfTolerance;
+                }
             }
             // 合并值相同的区域
+            deleteList.Clear();
             for (int i = 1; i < ToleranceTable.Count - 1; i++)
             {
                 if (ToleranceTable[i].ValueRight == ToleranceTable[i - 1].ValueRight)

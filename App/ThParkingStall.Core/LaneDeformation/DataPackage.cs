@@ -26,11 +26,11 @@ namespace ThParkingStall.Core.LaneDeformation
         //临时做个示例
         static public List<List<FreeAreaRec>> FreeBlockList = new List<List<FreeAreaRec>>();
         static public List<BlockNode> BlockNodeList = new List<BlockNode>();
-        
-        //
-        static public List<Polygon> 
-        static public List<LineSegment>
-        static public List<LineSegment>
+
+        // 名字没改
+        static public List<List<Polygon>> output1 = new List<List<Polygon>>();
+        static public List<LineSegment> output2 = new List<LineSegment>();
+        static public List<List<LineSegment>> output3 = new List<List<LineSegment>>();
 
         public ProcessedData() { }
 
@@ -41,7 +41,7 @@ namespace ThParkingStall.Core.LaneDeformation
     public class Parameter
     {
         static public Vector2D TestDirection = new Vector2D(0, -1);
-
+        static public double SingleParkingPlaceWidth = 2400;
 
     }
 

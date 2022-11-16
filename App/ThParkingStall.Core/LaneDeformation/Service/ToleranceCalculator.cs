@@ -104,7 +104,7 @@ namespace ThParkingStall.Core.LaneDeformation
             // Draw
             var pointsToDraw = new List<Point>();
             var valuesToDraw = new List<double>();
-            foreach (var node in ProcessedData.BlockNodeList)
+            foreach (var node in Nodes)
             {
                 if (node is BreakableBlock bb && bb.ToleranceTable != null)
                 {
