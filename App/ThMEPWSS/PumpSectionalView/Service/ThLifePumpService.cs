@@ -35,9 +35,7 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             this.acadDatabase = acadDatabase;
         }
 
-        /// <summary>
-        /// 泵房剖面图
-        /// </summary>
+        
         public void CallLifePump(string button)
         {
             var blkList = ThLifePumpCommon.BlkName;//块列表
@@ -180,6 +178,9 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
 
         }
 
+        /// <summary>
+        /// 泵房剖面图
+        /// </summary>
         public void DrawLifePump(Point3d wcsPt)
         {
             BlockTable bt = (BlockTable)acadDatabase.Database.BlockTableId.GetObject(OpenMode.ForRead);
