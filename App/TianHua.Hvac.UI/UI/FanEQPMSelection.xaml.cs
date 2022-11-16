@@ -869,6 +869,8 @@ namespace TianHua.Hvac.UI.UI
             {
                 if (!exportTypes.Any(c => c == item.fanDataModel.Scenario))
                     continue;
+                if (item.fanDataModel.DragModel != null)
+                    item.fanDataModel.DragModel.RefeshData();
                 resList.Add(item.fanDataModel);
             }
             foreach (var item in tempViewModels)
