@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.IO.SVG
 {
@@ -12,11 +13,11 @@ namespace ThMEPEngineCore.IO.SVG
         /// <summary>
         /// 起点
         /// </summary>
-        public string Start { get; set; } = "";
+        public Point3d? Start { get; set; }
         /// <summary>
         /// 终点
         /// </summary>
-        public string End { get; set; } = "";
+        public Point3d? End { get; set; }
         /// <summary>
         /// 门、窗所在的洞宽度
         /// </summary>
@@ -27,6 +28,7 @@ namespace ThMEPEngineCore.IO.SVG
         public string HoleHeight { get; set; } = "";
         /// <summary>
         /// 矩阵
+        /// 暂时未用到
         /// </summary>
         public string Matrix { get; set; } = "";
         /// <summary>
@@ -48,11 +50,36 @@ namespace ThMEPEngineCore.IO.SVG
         /// <summary>
         /// 构件自身的厚度
         /// </summary>
-        public string Thickness { get; set; } = "";
-        public string BasePoint { get; set; } = "";
-        public string CenterPoint { get; set; } = "";
+        public string Thickness { get; set; }
+        public Point3d? BasePoint { get; set; } 
+        public Point3d? CenterPoint { get; set; }
         public ThComponentInfo()
         {            
+        }
+
+        public void Transform(Matrix3d mt)
+        {
+            if(mt==null)
+            {
+                return;
+            }
+            Element.TransformBy(mt);
+            if(Start.HasValue)
+            {
+                Start = Start.Value.TransformBy(mt);
+            }
+            if(End.HasValue)
+            {
+                End = End.Value.TransformBy(mt);
+            }
+            if(BasePoint.HasValue)
+            {
+                BasePoint = BasePoint.Value.TransformBy(mt);
+            }
+            if(CenterPoint.HasValue)
+            {
+                CenterPoint = CenterPoint.Value.TransformBy(mt);
+            }
         }
     }
 }

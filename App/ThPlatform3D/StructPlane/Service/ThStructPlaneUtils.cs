@@ -168,13 +168,14 @@ namespace ThPlatform3D.StructPlane.Service
         public static List<double> GetDoubles(this string content)
         {
             var datas = new List<double>();
-            string pattern = @"\d+([.]\d+)?";
+            string pattern = @"[-]?\d+([.]\d+)?";
             foreach (Match item in Regex.Matches(content, pattern))
             {
                 datas.Add(double.Parse(item.Value));
             }
             return datas;
         }
+
         public static Polyline CreateRectangle(this Point3d center, 
             Vector3d xVec, Vector3d yVec,
             double xLength, double yLength)

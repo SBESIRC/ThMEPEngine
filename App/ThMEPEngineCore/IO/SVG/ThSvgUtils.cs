@@ -93,10 +93,10 @@ namespace ThMEPEngineCore.IO.SVG
                         componentInfo.Type = item.Value;
                         break;
                     case "start":
-                        componentInfo.Start = item.Value;
+                        componentInfo.Start = item.Value.ToPoint3d();
                         break;
                     case "end":
-                        componentInfo.End = item.Value;
+                        componentInfo.End = item.Value.ToPoint3d();
                         break;
                     case "hole-width":
                         componentInfo.HoleWidth = item.Value;
@@ -114,16 +114,17 @@ namespace ThMEPEngineCore.IO.SVG
                         componentInfo.Rotation = item.Value;
                         break;
                     case "basepoint":
-                        componentInfo.BasePoint = item.Value;
+                        componentInfo.BasePoint = item.Value.ToPoint3d();
                         break;
                     case "opendirection":
                         componentInfo.OpenDirection = item.Value;
                         break;
                     case "matrix":
+                        // 暂时不用
                         componentInfo.Matrix = item.Value;
                         break;
                     case "center-point":
-                        componentInfo.CenterPoint = item.Value;
+                        componentInfo.CenterPoint = item.Value.ToPoint3d();
                         break;
                 }
             }            
@@ -478,6 +479,58 @@ namespace ThMEPEngineCore.IO.SVG
                     0, 0, 0, 1
             };
             return new Matrix3d(datas);
+        }
+        public static Point3d? ToPoint3d(this string point)
+        {
+            double x, y, z;
+            var values = point.Split(',');
+            if (point.IndexOf(",") > 0)
+            {
+                values = point.Split(',');
+            }
+            else
+            {
+                values = point.Split(' ');
+            }
+            if (values.Length == 2)
+            {
+                if (double.TryParse(values[0].Trim(), out x) && double.TryParse(values[1].Trim(), out y))
+                {
+                    return new Point3d(x, y, 0);
+                }
+            }
+            if (values.Length == 3)
+            {
+                if (double.TryParse(values[0].Trim(), out x) &&
+                    double.TryParse(values[1].Trim(), out y) &&
+                    double.TryParse(values[2].Trim(), out z))
+                {
+                    return new Point3d(x, y, z);
+                }
+            }
+            return null;
+        }
+        public static Vector3d? ToVector3d(this string point)
+        {
+            double x, y, z;
+            var values = point.Split(',');
+            if (values.Length == 2)
+            {
+                if (double.TryParse(values[0], out x) && double.TryParse(values[1], out y))
+                {
+                    return new Vector3d(x, y, 0);
+                }
+            }
+            if (values.Length == 3)
+            {
+                if (double.TryParse(values[0], out x) &&
+                    double.TryParse(values[1], out y) &&
+                    double.TryParse(values[2], out z))
+                {
+                    return new Vector3d(x, y, z);
+                }
+            }
+            return null;
         }
     }
     public enum DrawingType

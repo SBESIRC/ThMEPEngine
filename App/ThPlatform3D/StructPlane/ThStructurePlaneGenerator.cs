@@ -331,6 +331,7 @@ namespace ThPlatform3D.StructPlane
             var svgInput = svg.ParseInfo;
 
             // 移动
+            svgInput.MoveToOrigin();
             if (flrNaturalNumber>1)
             {
                 var moveDir = new Vector3d(0, PrintParameter.FloorSpacing * (flrNaturalNumber - 1), 0);
@@ -353,6 +354,9 @@ namespace ThPlatform3D.StructPlane
             var svg = new ThStructureSVGReader();
             svg.ReadFromFile(svgFile);
             var svgInput = svg.ParseInfo;
+
+            // 移到原位
+            svgInput.MoveToOrigin();
 
             // 移动
             if (flrNaturalNumber > 1)

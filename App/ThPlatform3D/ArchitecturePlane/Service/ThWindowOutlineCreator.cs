@@ -33,8 +33,8 @@ namespace ThPlatform3D.ArchitecturePlane.Service
         }
         private Polyline Create(ThComponentInfo window)
         {
-            var startCord = window.Start.ToPoint3d();
-            var endCord = window.End.ToPoint3d();
+            var startCord = window.Start;
+            var endCord = window.End;
             if (!startCord.HasValue && !endCord.HasValue)
             {
                 return null;

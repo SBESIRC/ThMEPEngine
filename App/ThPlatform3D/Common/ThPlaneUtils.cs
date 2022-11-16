@@ -167,6 +167,15 @@ namespace ThPlatform3D.Common
             return 0.0;
         }
 
+        public static string GetOriginOffset(this Dictionary<string, string> properties)
+        {
+            if (properties.ContainsKey(ThSvgPropertyNameManager.OriginOffsetPropertyName))
+            {
+                return properties[ThSvgPropertyNameManager.OriginOffsetPropertyName];
+            }
+            return "";
+        }
+
         public static Extents2d ToExtents2d(this DBObjectCollection objs)
         {
             var extents = new Extents2d();

@@ -33,8 +33,8 @@ namespace ThPlatform3D.ArchitecturePlane.Service
             var collector = new DBObjectCollection();
             _doors.ForEach(o =>
             {
-                var startPtV = o.Start.ToPoint3d();
-                var endPtV = o.End.ToPoint3d();
+                var startPtV = o.Start;
+                var endPtV = o.End;
 
                 if(!startPtV.HasValue || !endPtV.HasValue)
                 {

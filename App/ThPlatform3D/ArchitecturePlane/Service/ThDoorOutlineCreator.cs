@@ -36,8 +36,8 @@ namespace ThPlatform3D.ArchitecturePlane.Service
         }
         private Polyline Create(ThComponentInfo door)
         {
-            var startCord = door.Start.ToPoint3d();
-            var endCord = door.End.ToPoint3d();
+            var startCord = door.Start;
+            var endCord = door.End;
             if (!startCord.HasValue && !endCord.HasValue)
             {
                 return null;

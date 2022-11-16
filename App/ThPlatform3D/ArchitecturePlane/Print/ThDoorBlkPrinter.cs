@@ -23,8 +23,8 @@ namespace ThPlatform3D.ArchitecturePlane.Print
                 var results = new ObjectIdCollection();
                 infos.ForEach(o =>
                 {
-                    var startPt = o.Start.ToPoint3d();
-                    var endPt = o.End.ToPoint3d();                  
+                    var startPt = o.Start;
+                    var endPt = o.End;                  
                     if(startPt.HasValue && endPt.HasValue)
                     {
                         var line = new Line(startPt.Value, endPt.Value);
