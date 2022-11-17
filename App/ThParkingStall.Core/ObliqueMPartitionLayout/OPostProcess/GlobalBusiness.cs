@@ -101,6 +101,8 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
                 tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec, ObliqueMPartition.DisParallelCarLength, ObliqueMPartition.DisParallelCarWidth
                     , ref line_align_backback_rest, true, false, false, false, true, true, false);
             }
+            _cars.AddRange(tmpro.Cars.Select(e => e.Polyline));
+            _columns.AddRange(tmpro.Pillars);
             #endregion
         }
 
@@ -263,6 +265,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public List<Polygon> Cars = new List<Polygon>();
         public List<Polygon> CarBlocks = new List<Polygon>();
         public List<LineSegment> CarLine = new List<LineSegment>();
+        public List<LineSegment> OldCarLine = new List<LineSegment>();
 
         //增加要打印的东西
         public DrawTmpOutPut() 

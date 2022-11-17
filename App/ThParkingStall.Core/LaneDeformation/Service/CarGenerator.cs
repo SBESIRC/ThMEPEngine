@@ -20,7 +20,7 @@ namespace ThParkingStall.Core.LaneDeformation
     {
         //输入
         public List<List<Polygon>> FreePolygonsList = new List<List<Polygon>>();
-        public List<Polygon> VehicleLaneBoundary = new List<Polygon>();
+        //public List<Polygon> VehicleLaneBoundary = new List<Polygon>();
         public List<List<LineSegment>> UpVehicleLaneList = new List<List<LineSegment>>();
         public List<LineSegment> DownVehicleLane = new List<LineSegment>();
 
@@ -31,6 +31,7 @@ namespace ThParkingStall.Core.LaneDeformation
         //临时变量
         public LineSegment NowDownLine = new LineSegment();
         public List<Polygon> NowFreeAreaList = new List<Polygon>(); 
+        public List<LineSegment> NowUpVehicleLaneList = new List<LineSegment>();
 
         public List<Polygon> CarParkingObbs = new List<Polygon>();
         public List<Polygon> Columns = new List<Polygon>();
@@ -50,8 +51,15 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             for (int i = 0; i < FreePolygonsList.Count; i++)
             {
+                if (FreePolygonsList[i].Count == 0) 
+                {
+                    NewCarDataPasses.Add(new NewCarDataPass());
+                    continue;
+                }
                 SingleRecGenerator(i);
             }
+
+            ProcessedData.NewCarDataPasses = NewCarDataPasses;
         }
 
 
@@ -67,12 +75,22 @@ namespace ThParkingStall.Core.LaneDeformation
 
             List<Polygon> newFreePolyList = GetFreeAreaList(DownVehicleLane[index], FreePolygonsList[index]);
 
-            List<LineSegment> lineList = GetLineList(newFreePolyList);
 
+            //
+            List<LineSegment> lineList = GetLineList(newFreePolyList);
+            lineList = lineList.OrderBy(x => x.MinX).ToList();
+            LDOutput.DrawTmpOutPut0.OldCarLine.AddRange(lineList);
+
+
+            List<double> freeLengthList = GetFreeLength(lineList,nowLineSegments);
+            lineList = RearrangeLine(lineList, freeLengthList);
+            lineList = LineCombination(lineList);
+            //
             List<Polygon> cars = new List<Polygon>();
             List<Polygon> columns = new List<Polygon>();
             Vector2D tmpVec = new Vector2D(0, 1);
 
+            //
             LDOutput.DrawTmpOutPut0.CarBlocks.AddRange(blocks);
             LDOutput.DrawTmpOutPut0.CarLine.AddRange(lineList);
             LDOutput.DrawTmpOutPut0.NewFreeArea.AddRange(newFreePolyList);
@@ -84,7 +102,7 @@ namespace ThParkingStall.Core.LaneDeformation
 
                 LineSegment nowLine = new LineSegment(new Coordinate(lineList[i].MinX, lineList[i].MinY - 2750), new Coordinate(lineList[i].MaxX, lineList[i].MaxY - 2750));
                 
-                blocks = new List<Polygon>();
+                //blocks = new List<Polygon>();
 
                 GlobalBusiness.GenerateCars(nowLine, tmpVec, blocks,
                     ref singleAreaCars, ref singleAreaColumns);
@@ -198,38 +216,153 @@ namespace ThParkingStall.Core.LaneDeformation
         }
 
 
-        public List<LineSegment> RearrangeLine(List<LineSegment> lineSegments) 
+        public List<double> GetFreeLength(List<LineSegment> lines,List<LineSegment> blockLines) 
+        {
+            List<double> result = new List<double>();
+
+            for (int i = 0; i < lines.Count; i++) 
+            {
+                LineSegment nowLine = lines[i];
+                List<double> tmpLengthList = new List<double>();
+                tmpLengthList.Add(100000);
+                for (int j = 0; j < blockLines.Count; j++) 
+                {
+                    if (MappingIntersection(nowLine.MinX, nowLine.MaxX, blockLines[j].MinX, blockLines[j].MaxX)) 
+                    {
+                        tmpLengthList.Add(blockLines[j].MinY - nowLine.MaxY);
+                    }
+                }
+                double nowMin = tmpLengthList.Min();
+                result.Add(nowMin);
+            }
+            return result;
+        }
+
+
+        public bool MappingIntersection(double x0, double x1, double x2, double x3) 
+        {
+            if (x0 <= x2 && x3 <= x1 || x2 <= x0 && x1 <= x3 ||
+                x0 >= x2 && x0 <= x3 - 10 || x1 >= x2 + 10 && x0 <= x3) return true;
+
+            return false;
+        }
+
+
+        public List<LineSegment> RearrangeLine(List<LineSegment> lineSegments,List<double> freeLengthList) 
         {
             List<LineSegment> newLineList = new List<LineSegment>();
 
-            double nowY = lineSegments[0].MaxX;
+            double nowY = lineSegments[0].MaxY;
 
             for (int i = 0; i < lineSegments.Count; i++) 
             {
                 LineSegment nowLine = lineSegments[i];
-                if (nowLine.MaxX  < nowY && Math.Abs(nowY - nowLine.MaxY) < 2000) 
-                {
+                double hDis = nowY - nowLine.MaxY;
+                bool rearrange = false;
 
-                    LineSegment tmpLine = new LineSegment(new Coordinate(nowLine.MinX+10,nowY + 10),new Coordinate(nowLine.MaxX-10,nowY+10));
-                    LineSegment tmpLine2 = new LineSegment(new Coordinate(nowLine.MinX, nowY), new Coordinate(nowLine.MaxX, nowY ));
-                    //if (InPolygon(tmpLine,))
+                if (hDis > 0 && hDis < 2000)
+                {
+                    if (freeLengthList[i] >= hDis + 5300)
+                    {
+                        freeLengthList[i] = freeLengthList[i] - hDis;
+                        lineSegments[i] = new LineSegment(new Coordinate(nowLine.MinX, nowLine.MinY + hDis), new Coordinate(nowLine.MaxX, nowLine.MaxY + hDis));
+                        rearrange = true;
+                    }
+                }
+
+                if (!rearrange) 
+                {
+                    nowY = nowLine.MaxY;
                 }
             }
+
+
+            nowY = lineSegments.Last().MaxY;
+
+            for (int i = lineSegments.Count -1; i >= 0; i--)
+            {
+                LineSegment nowLine = lineSegments[i];
+                double hDis = nowY - nowLine.MaxY;
+                bool rearrange = false;
+
+                if (hDis > 0 && hDis < 2000)
+                {
+                    if (freeLengthList[i] >= hDis + 5300)
+                    {
+                        freeLengthList[i] = freeLengthList[i] - hDis;
+                        lineSegments[i] = new LineSegment(new Coordinate(nowLine.MinX, nowLine.MinY + hDis), new Coordinate(nowLine.MaxX, nowLine.MaxY + hDis));
+                        rearrange = true;
+                    }
+                }
+
+                if (!rearrange)
+                {
+                    nowY = nowLine.MaxY;
+                }
+            }
+
+            newLineList = lineSegments;
 
             return newLineList;
         }
 
 
-        public int InPolygon(LineSegment a,List<Polygon> polygons) 
+        public List<LineSegment> LineCombination(List<LineSegment> lines) 
         {
-            int flag = 0;
-            return flag;
+            List<LineSegment> newlines = new List<LineSegment>();
+
+            double startX = lines[0].MinX;
+            double endX = lines[0].MaxX;
+            double startY = lines[0].MinY;
+            for (int i = 0; i < lines.Count; i++) 
+            {
+                LineSegment nowLine = lines[i];
+                bool recovery = false;
+                if (startX > 0 && Math.Abs(nowLine.MinY -  startY) < 10 && Math.Abs(nowLine.MinX - endX) < 10)
+                { 
+                    endX = nowLine.MaxX;
+                    if (i == lines.Count - 1) 
+                    {
+                        recovery = true;
+                    }
+                }
+                else 
+                {
+                    if (startX == 0 && endX == 0)
+                    {
+
+                    }
+                    else 
+                    {
+                        newlines.Add(new LineSegment(new Coordinate(startX, startY), new Coordinate(endX, startY)));
+                    }
+
+                    startX = nowLine.MinX;
+                    endX = nowLine.MaxX;
+                    startY = nowLine.MinY;
+
+                    if (i == lines.Count - 1)
+                    {
+                        recovery = true;
+                    }
+                }
+
+                if (recovery)
+                {
+                    newlines.Add(new LineSegment(new Coordinate(startX,startY), new Coordinate(endX,startY)));
+                    startX = 0;
+                    endX = 0;
+                    startY = 0;
+                }
+            }
+
+            return newlines;
         }
 
         //后处理环节
         public void AdjustCars() 
         {
-        
+            
         }
 
         //保存结果
@@ -244,7 +377,7 @@ namespace ThParkingStall.Core.LaneDeformation
             List<double> beyondDisList = new List<double>(); 
             for (int i = 0; i < CarParkingObbs.Count; i++) 
             {
-                Polygon nowBoundary = CarParkingObbs[i].Boundary as Polygon;
+                Polygon nowBoundary = CarParkingObbs[i];
                 List<double> xyList = GetBoundaryXY(nowBoundary);
                 LineSegment upLine = new LineSegment(new Coordinate(xyList[0], xyList[3]), new Coordinate(xyList[1], xyList[3]));
                 double beyondDis = upLine.MaxY  - NowDownLine.MinY;
@@ -288,10 +421,10 @@ namespace ThParkingStall.Core.LaneDeformation
 
     public class NewCarDataPass
     {
-        public List<Polygon> NewCars;
-        public List<LineSegment> CarUpLine;
-        public List<double> CarUpLineOccupy;
-        public List<Polygon> NewColumns;
+        public List<Polygon> NewCars = new List<Polygon>();
+        public List<LineSegment> CarUpLine = new List<LineSegment>();
+        public List<double> CarUpLineOccupy = new List<double>();
+        public List<Polygon> NewColumns = new List<Polygon>();
         public NewCarDataPass() { }
     }
 }

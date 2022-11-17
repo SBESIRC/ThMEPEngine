@@ -723,6 +723,12 @@ namespace ThMEPArchitecture.MultiProcess
                 DrawUtils.ShowGeometry(ma, "l1CarLine", 3);
             }
 
+            foreach (LineSegment a in drawTmpOutPut.OldCarLine)
+            {
+                Line ma = a.ToDbLine();
+                DrawUtils.ShowGeometry(ma, "l1OldCarLine", 4);
+            }
+
 
 
 
