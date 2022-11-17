@@ -130,14 +130,18 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             a1.Add("水泵出水横管4", "DN" + CalOutletHorizontal().ToString());
 
             a1.Add(ThFirePumpCommon.HighPumpFoundation, ess[ThFirePumpCommon.HighPumpFoundation]);
+            a1.Add(ThFirePumpCommon.HighPumpFoundation+"1", ess[ThFirePumpCommon.HighPumpFoundation]);//卧式泵
 
             a1.Add("水泵出水立管", "DN" + CalOutlet().ToString());
+            a1.Add("水泵出水立管1", "DN" + CalOutlet().ToString());
             a1.Add(ThFirePumpCommon.PumpSuctionPipeDiameter, "DN" + CalSuction().ToString());
+            a1.Add(ThFirePumpCommon.PumpSuctionPipeDiameter+"1", "DN" + CalSuction().ToString());//卧式泵
             a1.Add(ThFirePumpCommon.WaterSuctionPipeDiameter, "DN" + CalSuctionTotal().ToString());
+            a1.Add(ThFirePumpCommon.WaterSuctionPipeDiameter+"1", "DN" + CalSuctionTotal().ToString());//卧式泵
 
             a1.Add(ThFirePumpCommon.CrossTubeHeight, ess[ThFirePumpCommon.CrossTubeHeight]);
 
-
+            
             return a1;
 
         }

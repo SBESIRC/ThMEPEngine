@@ -124,7 +124,23 @@
                     />
                     <Label Content="m³" VerticalAlignment="Center"/>
                 </StackPanel>
-
+                
+                <!--
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="2" Grid.Column="0" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                    <Label  Content="最低有效水深：h+" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30"
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding FirePressure_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m" VerticalAlignment="Center"/>
+                </StackPanel>
+                -->
+                
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="2" Grid.Column="0" Margin="0,5,5,5" Grid.ColumnSpan="1">
                     <Label  Content="消火栓泵启泵压力" VerticalAlignment="Center"/>
                     <TextBox 
@@ -139,7 +155,9 @@
                     <Label Content="MPa" VerticalAlignment="Center"/>
                 </StackPanel>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="2" Grid.Column="1" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="2" Grid.Column="1" Margin="0,5,5,5" Grid.ColumnSpan="2">
                     <Label  Content="喷淋泵启泵压力" VerticalAlignment="Center"/>
                     <TextBox 
                         Width="40" 

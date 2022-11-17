@@ -35,9 +35,13 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             this.acadDatabase = acadDatabase;
         }
 
-        
+        /// <summary>
+        /// 入口调用
+        /// </summary>
+        /// <param name="button"></param>
         public void CallLifePump(string button)
         {
+            int iiiiii = 111111;
             var blkList = ThLifePumpCommon.BlkName;//块列表
             var layerList = ThLifePumpCommon.Layer;//层
 
@@ -185,22 +189,32 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         {
             BlockTable bt = (BlockTable)acadDatabase.Database.BlockTableId.GetObject(OpenMode.ForRead);
             var blk = new BlockReference(wcsPt, bt[ThLifePumpCommon.BlkName[0]]);
+
+            /*var attNameValues = GetAttributes();
+            var objId= acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                                          ThLifePumpCommon.Layer[0],
+                                          ThLifePumpCommon.BlkName[0],
+                                          wcsPt,
+                                          new Scale3d(1),
+                                          0,
+                                          attNameValues);*/
+
+
             var obj = new DBObjectCollection();
             blk.Explode(obj);//炸开
-
+           
             var plList = obj.OfType<Polyline>().ToList();//所有polyline 14
             plList = getSortedPolylineByLocate(plList);//根据minX、minY排序
 
             var lList = obj.OfType<Line>().ToList();//所有Line 14
             var bList = obj.OfType<BlockReference>().ToList();//所有block 14            
-            var tList = obj.OfType<DBText>().ToList();//所有文字 7
+            var tList = obj.OfType<DBText>().ToList();//所有文字（包括属性定义） 7
             var aList = obj.OfType<AlignedDimension>().ToList();//对齐标注 9
             var hList = obj.OfType<Hatch>().ToList();//混凝土 1
 
             List<Polyline> frame = calLifePumpList(plList, lList, bList, tList, aList);//改大小并且得到外框
 
 
-            //加入图纸
             var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
             var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);//旋转角度
             var rotaM = Matrix3d.Rotation(angle, Vector3d.ZAxis, blk.Position);
@@ -224,24 +238,24 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             {
                 p.TransformBy(rotaM);
 
-                acadDatabase.ModelSpace.Add(p);
+               acadDatabase.ModelSpace.Add(p);
             }
 
             foreach (var p in tList)
             {
                 p.TransformBy(rotaM);
 
-                acadDatabase.ModelSpace.Add(p);
+               acadDatabase.ModelSpace.Add(p);
             }
 
             foreach (var p in aList)
             {
                 p.TransformBy(rotaM);
 
-                acadDatabase.ModelSpace.Add(p);
+               acadDatabase.ModelSpace.Add(p);
             }
 
-            modefyData(bList, tList, aList);//修改块的数据
+            modefyData(bList, tList, aList, acadDatabase);//修改块的数据
 
             setOutFrame(hList, frame);//混凝土
         }
@@ -414,9 +428,9 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
         /// <summary>
         /// 修改块数据
         /// </summary>
-        private void modefyData(List<BlockReference> br, List<DBText> ta, List<AlignedDimension> ad)
+        private void modefyData(List<BlockReference> br, List<DBText> ta, List<AlignedDimension> ad, AcadDatabase acadDatabase)
         {
-            ResetLifePumpData r = new ResetLifePumpData(br, ta, ad);
+            ResetLifePumpData r = new ResetLifePumpData(br, ta, ad, acadDatabase);
             r.setLifePumpData();
         }
         private void modefyMaterial(List<ObjectId> m)
@@ -442,6 +456,27 @@ namespace ThMEPWSS.PumpSectionalView.Service.Impl
             t.WidthFactor = widthFactor;
             return t;
         }
+
+        /// <summary>
+        /// 获得最原始图块的属性
+        /// </summary>
+        /// <param name="ess"></param>
+        /// <returns></returns>
+        private static Dictionary<string, string> GetAttributes()
+        {
+            var a1 = new Dictionary<string, string>();
+
+            CalDataLifePump c = new CalDataLifePump();
+            var data = c.getData();
+
+            a1.Add(ThLifePumpCommon.OverflowPipeDiameter+"1", "DN" + data[ThLifePumpCommon.OverflowPipeDiameter]);
+            a1.Add(ThLifePumpCommon.OverflowPipeDiameter, "DN" + data[ThLifePumpCommon.OverflowPipeDiameter]);
+            a1.Add(ThLifePumpCommon.DrainPipeDiameter + "1", "DN" + data[ThLifePumpCommon.DrainPipeDiameter]);
+
+            return a1;
+
+        }
+
         //刷新图纸
         public static void LoadBlockLayerToDocument(Database database, List<string> blockNames, List<string> layerNames)
         {

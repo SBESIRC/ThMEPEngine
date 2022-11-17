@@ -215,7 +215,7 @@ namespace ThMEPWSS.PumpSectionalView
 
                     if (button == "生成剖面图")
                     {
-                        DrawFirePump(wcsPt,type);
+                        DrawFirePump(wcsPt,type, acadDatabase);
                     }
                     else if (button == "生成说明")
                     {
@@ -303,7 +303,7 @@ namespace ThMEPWSS.PumpSectionalView
         /// </summary>
         /// <param name="wcsPt"></param>
         /// <param name="type"></param>
-        private void DrawFirePump(Point3d wcsPt,string type)
+        private void DrawFirePump(Point3d wcsPt,string type, AcadDatabase acadDatabase)
         {
             //动态块-自定义
             var dynDic = new Dictionary<string, object>() {
@@ -319,6 +319,25 @@ namespace ThMEPWSS.PumpSectionalView
             //插入属性块-消防泵房剖面2
             Point3d wcsPt2 = new Point3d(wcsPt.X, wcsPt.Y - 9000, wcsPt.Z);
             ThFirePumpService.InsertBlockWithAttribute(wcsPt2, ThFirePumpCommon.BlkName[1], rotaM);
+
+            //标志!
+            //插入文字
+            DBText t1 = ThFirePumpService.GetText("消防水泵房：", new Point3d(wcsPt.X+1500, wcsPt.Y -9000-2200, wcsPt.Z), 264.3, 0.7, "W-WSUP-NOTE");//+360
+            t1.TransformBy(rotaM);
+            acadDatabase.ModelSpace.Add(t1);
+
+            DBText t2 = ThFirePumpService.GetText("标高剖面示意图", new Point3d(wcsPt.X+3500 , wcsPt.Y - 9000 - 2200, wcsPt.Z), 264.3, 0.7, "W-WSUP-NOTE");//+360
+            t2.TransformBy(rotaM);
+            acadDatabase.ModelSpace.Add(t2);
+
+            //插入多段线
+            Polyline p1 = ThFirePumpService.GetPolyline(wcsPt.X+1500, wcsPt.X + 4800, wcsPt.Y - 9000 - 2200-200, "W-WSUP-NOTE", 35);//+160
+            p1.TransformBy(rotaM);
+            acadDatabase.ModelSpace.Add(p1);
+
+            Polyline p2 = ThFirePumpService.GetPolyline(wcsPt.X+1500, wcsPt.X + 4800, wcsPt.Y - 9000 - 2200-250, "W-WSUP-NOTE", 0);//+110
+            p2.TransformBy(rotaM);
+            acadDatabase.ModelSpace.Add(p2);
         }
 
         /// <summary>
@@ -343,6 +362,7 @@ namespace ThMEPWSS.PumpSectionalView
             //blk.DowngradeOpen();
          
 
+            /*
             //插入文字
             DBText t1 = ThFirePumpService.GetText("消防水泵房：", new Point3d(wcsPt.X , wcsPt.Y +360, 0), 264.3, 0.7, "W-WSUP-NOTE");//+360
             t1.TransformBy(rotaM);
@@ -360,7 +380,7 @@ namespace ThMEPWSS.PumpSectionalView
             Polyline p2 = ThFirePumpService.GetPolyline(wcsPt.X , wcsPt.X + 3300, wcsPt.Y +110, "W-WSUP-NOTE", 0);//+110
             p2.TransformBy(rotaM);
             acadDatabase.ModelSpace.Add(p2);
-
+            */
            
         }
 

@@ -2,10 +2,15 @@
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Windows.Documents;
+using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
+
 using ThMEPWSS.PumpSectionalView.Service.Impl;
 
 namespace ThMEPWSS.PumpSectionalView.Utils
@@ -1449,13 +1454,15 @@ namespace ThMEPWSS.PumpSectionalView.Utils
         List<AttributeDefinition> aList;//找出属性定义
         List<AlignedDimension> adList;
         Dictionary<string, string> data;
+        AcadDatabase acadDatabase;
 
-        public ResetLifePumpData(List<BlockReference> bList, List<DBText> taList, List<AlignedDimension> adList)
+        public ResetLifePumpData(List<BlockReference> bList, List<DBText> taList, List<AlignedDimension> adList, AcadDatabase acadDatabase)
         {
 
             this.bList = bList;
             this.taList = taList;
             this.adList = adList.OrderBy(x => x.TextPosition.X).ThenBy(x => x.TextPosition.Y).ToList();
+            this.acadDatabase = acadDatabase;
 
             CalDataLifePump c = new CalDataLifePump();
             data = c.getData();
@@ -1474,6 +1481,7 @@ namespace ThMEPWSS.PumpSectionalView.Utils
             setInletPipe(bList);//进水管
             setOverflowDia(aList);//溢流管
             setDrainDia(aList);//泄水管
+            setSnorkel2(bList);//通气管2
         }
         private void findAttrDefinition()
         {
@@ -1481,6 +1489,7 @@ namespace ThMEPWSS.PumpSectionalView.Utils
             {
                 if (f is AttributeDefinition a)
                 {
+                    //taList.Add(a.ConvertAttributeDefinitionToText());
                     aList.Add(a);
                 }
             }
@@ -1519,6 +1528,8 @@ namespace ThMEPWSS.PumpSectionalView.Utils
             //溢流水位：h+<hs-0.30>
             value = new Dictionary<string, string>() { { ThLifePumpCommon.OverflowWaterLevel, data[ThLifePumpCommon.OverflowWaterLevel] } };
             b[i].ObjectId.UpdateAttributesInBlock(value);
+
+            burstBlock(b[i]);
         }
 
         /// <summary>
@@ -1586,6 +1597,7 @@ namespace ThMEPWSS.PumpSectionalView.Utils
             value = new Dictionary<string, string>() { { ThLifePumpCommon.PumpOutletPipeDiameter, data[ThLifePumpCommon.PumpOutletPipeDiameter] } };
             b[i].ObjectId.UpdateAttributesInBlock(value);
 
+            burstBlock(b[i]);
         }
 
         /// <summary>
@@ -1598,6 +1610,8 @@ namespace ThMEPWSS.PumpSectionalView.Utils
             //水箱进水管管径：DN<水箱进水管管径数值>
             var value = new Dictionary<string, string>() { { ThLifePumpCommon.WaterTankInletPipeDiameter, data[ThLifePumpCommon.WaterTankInletPipeDiameter] } };
             b[i].ObjectId.UpdateAttributesInBlock(value);
+
+            burstBlock(b[i]);
         }
 
         /// <summary>
@@ -1606,11 +1620,23 @@ namespace ThMEPWSS.PumpSectionalView.Utils
         /// <param name="a"></param>
         private void setOverflowDia(List<AttributeDefinition> a)
         {
+            Entity inserText;
+
             int i = a.FindIndex(i => i.Tag == "溢流管管径1");
             a[i].Tag = data[ThLifePumpCommon.OverflowPipeDiameter];
+            inserText = a[i].ConvertAttributeDefinitionToText();//变成文字dbtext
+            a[i].UpgradeOpen();
+            a[i].Erase();
+            acadDatabase.ModelSpace.Add(inserText);//插入图纸
+
 
             i = a.FindIndex(i => i.Tag == "溢流管管径");
             a[i].Tag = data[ThLifePumpCommon.OverflowPipeDiameter];
+            inserText = a[i].ConvertAttributeDefinitionToText();//变成文字dbtext
+            a[i].UpgradeOpen();
+            a[i].Erase();
+            acadDatabase.ModelSpace.Add(inserText);//插入图纸
+
         }
 
         /// <summary>
@@ -1621,7 +1647,39 @@ namespace ThMEPWSS.PumpSectionalView.Utils
         {
             int i = a.FindIndex(i => i.Tag == "泄水管管径");
             a[i].Tag = data[ThLifePumpCommon.DrainPipeDiameter];
+            var inserText = a[i].ConvertAttributeDefinitionToText();//变成文字dbtext
+            a[i].UpgradeOpen();
+            a[i].Erase();
+            acadDatabase.ModelSpace.Add(inserText);//插入图纸
 
+        }
+
+        /// <summary>
+        /// 通气管2
+        /// </summary>
+        /// <param name="b"></param>
+        private void setSnorkel2(List<BlockReference> b)
+        {
+            int i = b.FindIndex(i => i.Name == "通气管2");
+
+            burstBlock(b[i]);
+        }
+
+        /// <summary>
+        /// 炸开指定的块,并删除原块
+        /// </summary>
+        /// <param name="b"></param>
+        private void burstBlock(BlockReference b)
+        {
+           
+            var obj = new DBObjectCollection();
+            b.Burst(obj);
+            foreach (Entity e in obj)
+            {
+                acadDatabase.ModelSpace.Add(e);
+            }
+            b.UpgradeOpen();
+            b.Erase();
 
         }
     }

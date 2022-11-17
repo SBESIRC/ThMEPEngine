@@ -1070,6 +1070,18 @@ namespace ThMEPWSS.PumpSectionalView.Model
                 this.RaisePropertyChanged();
             }
         }
+
+        /*private double? _MinDepth_Fire { get; set; }
+        public double? MinDepth_Fire
+        {
+            get { return _MinDepth_Fire; }
+            set
+            {
+                _MinDepth_Fire = value;
+                this.RaisePropertyChanged();
+            }
+        }*/
+
         private double? _FirePressure_Fire { get; set; }
         public double? FirePressure_Fire
         {
@@ -1226,6 +1238,8 @@ namespace ThMEPWSS.PumpSectionalView.Model
             }
             else if (BuildingFinishHeight_Fire < -10)
                 dic.Add(1, "根据规范要求消防水池高度不可低于-10m，是否继续？");
+            
+                
 
 
             if (RoofHeight_Fire == null)
@@ -1238,6 +1252,9 @@ namespace ThMEPWSS.PumpSectionalView.Model
                 dic.Add(2, "建筑完成面标高须小于顶板下标高");
                 canContinue = false;
             }
+            else if(RoofHeight_Fire- BuildingFinishHeight_Fire < Depth_Fire+2.35)
+                dic.Add(2, "：当前泵房高度不满足有效水深要求，是否继续？");
+                
 
             if (BaseHeight_Fire == null)
             {
