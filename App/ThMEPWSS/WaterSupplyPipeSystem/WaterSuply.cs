@@ -684,7 +684,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                     var sobj = obj as ThStoreys;
                     var br = acadDatabase.Element<BlockReference>(sobj.ObjectId);
                     if (!br.IsDynamicBlock) continue;
-                    if (sobj.StoreyType.ToString().Contains("StandardStorey"))
+                    if (sobj.StoreyType.ToString().Contains("StandardStorey")|| sobj?.StoreyTypeString.ToString().Contains("楼层")==true)
                     {
                         if (!sobj.StoreyNumber.Trim().StartsWith("-") && !sobj.StoreyNumber.Trim().StartsWith("B"))
                         {
