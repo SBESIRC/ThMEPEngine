@@ -38,8 +38,8 @@ namespace ThParkingStall.Core.LineCleaner
         }
         public List<LineSegment> Clean(List<LineSegment> lines)//三板斧
         {
-            var paralled = MergeParalle(lines);//合并距离较近的平行线
-            var noded = Noding(paralled);//节点化
+            //var paralled = MergeParalle(lines);//合并距离较近的平行线
+            var noded = Noding(lines);//节点化
             return MergePoints(noded);//合并节点
         }
         public List<LineSegment> MergeParalle(List<LineSegment> inputLines)//把平行（角度小于delta）且相交(距离小于tol）的线合并
@@ -199,7 +199,7 @@ namespace ThParkingStall.Core.LineCleaner
                     }
                 }
             }
-            return lines.Where(l =>l.Length > 0).ToList();
+            return lines.Where(l =>l.Length > 0).ToLineStrings().ToHashSet().ToLineSegments();
         }
         private MagneticPoint Merge(IEnumerable<MagneticPoint> mPs)
         {

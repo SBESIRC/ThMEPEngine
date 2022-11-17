@@ -1,7 +1,9 @@
-﻿using NetTopologySuite.Geometries;
+﻿using NetTopologySuite.Algorithm;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
 using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.Linemerge;
+using NetTopologySuite.Operation.OverlayNG;
 using NetTopologySuite.Operation.Polygonize;
 using System;
 using System.Collections.Generic;
@@ -25,8 +27,8 @@ namespace ThParkingStall.Core.FireZone
         #endregion
 
         #region 处理后数据
-        private LinearRing Shell;
-        private List<LinearRing> Holes;
+        public LinearRing Shell;
+        public List<LinearRing> Holes;
         private STRtree<LinearRing> HoleEngine = new STRtree<LinearRing>();
         public List<LineString> Paths;//处理后的所有线
         private STRtree<LineString> PathEngine = new STRtree<LineString>();
@@ -47,7 +49,9 @@ namespace ThParkingStall.Core.FireZone
             _InputHoles = basement.Holes;
 
             var MLstr = new MultiLineString(fireLines.ToLineStrings().ToArray());
-            InputLines = basement.Intersection(MLstr).Get<LineString>().ToLineSegments();//求交集
+            InputLines = OverlayNGRobust.Overlay(basement, MLstr, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection)
+                .Get<LineString>().ToLineSegments();//求交集
+            //InputLines = fireLines;
             Clean();
         }
         public FireZoneMap CreateMap(Polygon newShell = null)//基于输入边界创建map
@@ -88,7 +92,7 @@ namespace ThParkingStall.Core.FireZone
                 if (PtDic.ContainsKey(p1)) PtDic[p1].Add(i);
                 else PtDic.Add(p1, new List<int> { i });
             }
-            var nodePts = PtDic.Keys.Where(k => PtDic[k].Count > 2);
+            var nodePts = PtDic.Keys.Where(k => PtDic[k].Count >= 2);
             foreach (var coor in nodePts)
             {
                 map.Add(new FireZoneNode(coor));
@@ -97,30 +101,46 @@ namespace ThParkingStall.Core.FireZone
             Logger.Information($"添加节点时:{_stopWatch.Elapsed.TotalSeconds - t_pre}");
             return map;
         }
-        private void Clean()//线清理 + 去除cutedge
+        private void Clean()
         {
             var lines = new List<LineSegment>();
             lines.AddRange(InputLines);
             lines.AddRange(_InputShell.ToLineSegments());
             lines.AddRange(_InputHoles.ToLineSegments());
             var cleaner = new LineService(lines);
-            var lstrs = cleaner.Clean(false).ToLineStrings().ToHashSet();
+            var lstrs = cleaner.Clean(false).ToLineStrings().ToHashSet().ToList();
 
             var polygonizer = new Polygonizer();
             foreach (var l in lstrs) polygonizer.Add(l);
-            var polygons = polygonizer.GetPolygons().OfType<Polygon>().Select(p => new Polygon(p.Shell));
-
+            
+            var polygons = polygonizer.GetPolygons().OfType<Polygon>().Select(p =>new Polygon(p.Shell)).ToList();
             var geo = new MultiLineString(polygons.Select(p => p.Shell).ToArray()).Union();
-            Shell = ((Polygon)new MultiPolygon(polygons.ToArray()).Union()).Shell;
-            Holes = _InputHoles.Select(h => polygons.Where(p => p.Contains(h.Centroid)).First().Shell).ToList();
-            Holes.ForEach(h => HoleEngine.Insert(h.EnvelopeInternal, h));
-            geo = geo.Difference(Shell);
-            Holes.ForEach(h => geo = geo.Difference(h));
-            var merger = new LineMerger();
-            merger.Add(geo);
-            Paths = merger.GetMergedLineStrings().OfType<LineString>().ToList();
-            Paths.ForEach(p => PathEngine.Insert(p.EnvelopeInternal, p));
-        }
 
+            var polygonEngine = new STRtree<int>();
+            for(int i = 0; i < polygons.Count; i++)
+            {
+                polygonEngine.Insert(polygons[i].EnvelopeInternal, i);
+            }
+
+            Shell = ((Polygon)new MultiPolygon(polygons.ToArray()).Union()).Shell;
+            geo = geo.Difference(Shell);
+            
+            Holes = new List<LinearRing>();
+            foreach (var inhole in _InputHoles)
+            {
+                var posbuffered = new Polygon(inhole).Buffer(6, MitreParam);
+                var queried = polygonEngine.Query(posbuffered.EnvelopeInternal).
+                    Where(id => posbuffered.Contains(polygons[id]));
+                var polys = polygons.Slice(queried);
+                
+                polys.ForEach(p =>geo = geo.Difference(p.Shell));
+                Holes.Add(((Polygon) new MultiPolygon(polys.ToArray()).Union()).Shell);
+            }
+            Holes.ForEach(h => HoleEngine.Insert(h.EnvelopeInternal, h));
+
+            Paths = geo.Get<LineString>();
+            Paths.ForEach(p => PathEngine.Insert(p.EnvelopeInternal, p));
+
+        }
     }
 }

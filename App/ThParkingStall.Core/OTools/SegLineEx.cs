@@ -12,6 +12,7 @@ using ThParkingStall.Core.Tools;
 using static ThParkingStall.Core.Tools.ListEx;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Algorithm;
+using NetTopologySuite.Mathematics;
 
 namespace ThParkingStall.Core.OTools
 {
@@ -563,6 +564,49 @@ namespace ThParkingStall.Core.OTools
             //var ordered = coors.PositiveOrder();
             return new LineSegment(diameter.Coordinates.First(), diameter.Coordinates.Last());
         }
+        public static LineSegment MergeParalle(this List<LineSegment> lineSegments)
+        {
+            if (lineSegments.Count == 0) return null;
+            if (lineSegments.Count == 1) return lineSegments.First();
+            var dir = lineSegments.OrderBy(l => l.Length).Last().DirVector();
+            var centers = lineSegments.Select(l => l.MidPoint);
+            var centroid = new Coordinate(centers.Average(c =>c.X),centers.Average(c =>c.Y));
+            var initLine = new LineSegment(centroid,dir.Translate(centroid));
+            var coors = new List<Coordinate>();
+            var pos = 0.0;
+            Coordinate posCoor = centroid;
+            var neg = 0.0;
+            Coordinate negCoor = centroid;
+            foreach (var l in lineSegments)
+            {
+                var pj0 = initLine.Project(l.P0);
+                var dot0 = new Vector2D(centroid, pj0).Dot(dir);
+                if (dot0 > pos)
+                {
+                    pos = dot0;
+                    posCoor = pj0;
+                }
+                else if (dot0 < neg)
+                {
+                    neg = dot0;
+                    negCoor = pj0;
+                }
+                var pj1 = initLine.Project(l.P1);
+                var dot1 = new Vector2D(centroid, pj1).Dot(dir);
+                if (dot1 > pos)
+                {
+                    pos = dot1;
+                    posCoor = pj1;
+                }
+                else if (dot1 < neg)
+                {
+                    neg = dot1;
+                    negCoor = pj1;
+                }
+            }
+            return new LineSegment(negCoor, posCoor);
+        }
+
         public static SegLine Merge(this List<SegLine> segLines)
         {
             var newSplitter = segLines.Select(l =>l.Splitter).ToList().Merge();

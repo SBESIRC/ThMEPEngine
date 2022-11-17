@@ -52,7 +52,8 @@ namespace ThParkingStall.Core.FireZone
             IdToNode.Add(ObjId, node);
             node.ObjId = ObjId;
             ObjId += 1;
-            if (node.Type == 0) NodeDic.Add(node.Coordinates.First(), node);
+            if (node.Type == 0 && !NodeDic.ContainsKey(node.Coordinates.First())) 
+                NodeDic.Add(node.Coordinates.First(), node);
             else
             {
                 for (int i = 0; i < node.Coordinates.Length - 1; i++)
@@ -64,6 +65,8 @@ namespace ThParkingStall.Core.FireZone
         }
         public void Add(FireZoneEdge edge)
         {
+            //if (!NodeDic.ContainsKey(edge.P0) || !NodeDic.ContainsKey(edge.P1)) return;//有bug
+
             var node0 = NodeDic[edge.P0];
             var node1 = NodeDic[edge.P1];
             if (node0.ObjId == node1.ObjId) return;//接到相同节点，跳过
@@ -72,9 +75,11 @@ namespace ThParkingStall.Core.FireZone
             ObjId += 1;
             node0.AddBranch(edge, node1);
             node1.AddBranch(edge, node0);
+            
+
         }
 
-        public (Polygon,Polygon,double) FindBestFireZone(double minArea ,double maxArea ,int StepSize = 13)
+        public (Polygon,Polygon,double) FindBestFireZone(double minArea ,double maxArea ,int StepSize = 14)
         {
             MinArea = minArea * multiplier* multiplier;
             MaxArea = maxArea * multiplier* multiplier;
@@ -140,6 +145,7 @@ namespace ThParkingStall.Core.FireZone
         {
             var polyCnt = 0;
             var planCnt = 0;
+            t_pre = _stopwatch.Elapsed.TotalSeconds;
             foreach (var path in PathsToSocre)
             {
                 if (ScoredPaths.ContainsKey(path)) continue;

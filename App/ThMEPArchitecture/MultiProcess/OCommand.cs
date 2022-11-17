@@ -114,6 +114,7 @@ namespace ThMEPArchitecture.MultiProcess
                             saveDoc = false;
                             //RunDirect(currentDb);
                             FireZoneTest2(currentDb);
+                            //FireZoneTest3(currentDb);
                         }
                         else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
                         {
@@ -187,11 +188,41 @@ namespace ThMEPArchitecture.MultiProcess
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
                     var creator = new FireZoneCreator(blk, Logger);
-                    var zones = creator.GetBestZones(3900, 4000);
-                    zones.ForEach(z => z.ToDbMPolygon().AddToCurrentSpace());
+                    var zones = creator.GetBestZones(3950, 4000);
+                    for(int j = 0; j < zones.Count; j++)
+                    {
+                        var layerName = $"防火分区{j}";
+                        if (!acadDatabase.Layers.Contains(layerName))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerName, 0);
+                        var mpoly = zones[j].ToDbMPolygon();
+                        mpoly.Layer = layerName;
+                        mpoly.AddToCurrentSpace();
+                    }
                 }
             }
         }
+        public void FireZoneTest3(AcadDatabase acadDatabase)
+        {
+            var blks = InputData.SelectBlocks(acadDatabase);
+            var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
+            if (blks == null) return;
+            foreach (var blk in blks)
+            {
+                var blkName = blk.GetEffectiveName();
+                UpdateLogger(blkName);
+                Logger?.Information("块名：" + blkName);
+                Logger?.Information("文件名：" + DrawingName);
+                Logger?.Information("用户名：" + Environment.UserName);
+                for (int i = 0; i < MultiSolutionList.Count; i++)
+                {
+                    var stopWatch = new Stopwatch();
+                    stopWatch.Start();
+                    var creator = new FireLineCreator(blk, Logger);
+                    creator.Skeletons.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+                }
+            }
+        }
+
         public void RunDirect(AcadDatabase acadDatabase)
         {
             var blks = InputData.SelectBlocks(acadDatabase);
