@@ -72,11 +72,12 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThRawBeamExtractionSecondVisitor()
             {
-                LayerFilter = ThExtractBeamConfig.Instance.GetSelectLayers(db).ToHashSet()
+                LayerFilter = ThExtractBeamConfig.Instance.GetAllLayers(db).ToHashSet()
             };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(db);
+            extractor.ExtractFromMS(db);
             return visitor.Results;
         }        
 
