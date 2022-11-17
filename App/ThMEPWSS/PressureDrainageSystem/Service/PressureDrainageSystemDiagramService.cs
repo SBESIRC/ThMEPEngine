@@ -504,7 +504,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     bool changeLayer = false;
                     foreach (var br in allBlocks[i])
                     {
-                        if (br.Name == "污水井编号" || br.Name == "污废合流井编号")
+                        if (br.Name == "污水井编号" || br.Name == "污废合流井编号" || br.Name == "废水井编号")
                         {
                             changeLayer = true;
                             break;

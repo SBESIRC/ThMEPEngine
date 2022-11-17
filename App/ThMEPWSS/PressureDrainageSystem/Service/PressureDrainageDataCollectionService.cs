@@ -329,7 +329,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     try
                     {
-                        return e.Database != null && e.GetEffectiveName().Contains("污水井编号");
+                        return e.Database != null && (e.GetEffectiveName().Contains("污水井编号") || e.GetEffectiveName().Contains("废水井编号"));
                     }
                     catch
                     {
