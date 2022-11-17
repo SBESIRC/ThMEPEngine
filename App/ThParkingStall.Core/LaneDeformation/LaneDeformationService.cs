@@ -42,6 +42,9 @@ namespace ThParkingStall.Core.LaneDeformation
             carsRegenerator.Pipeline();
 
             //
+            CarGenerator carGenerator = new CarGenerator();
+            carGenerator.Pipeline();
+
             GetResult();
             return;
         }

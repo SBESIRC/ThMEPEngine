@@ -32,6 +32,9 @@ namespace ThParkingStall.Core.LaneDeformation
         static public List<LineSegment> output2 = new List<LineSegment>();
         static public List<List<LineSegment>> output3 = new List<List<LineSegment>>();
 
+        //CarGenerator
+        static public List<NewCarDataPass> NewCarDataPasses = new List<NewCarDataPass>();
+
         public ProcessedData() { }
 
 
