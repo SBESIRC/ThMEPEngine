@@ -406,8 +406,8 @@ namespace ThPlatform3D.StructPlane
         private DBObjectCollection GetBelowObjs(List<ThGeometry> geos)
         {
             var polygons = new DBObjectCollection();
-            var belowColumns = geos.GetBelowColumnGeos();
-            var belowShearWalls = geos.GetBelowShearwallGeos();
+            var belowColumns = geos.GetBelowStandardColumnGeos();
+            var belowShearWalls = geos.GetBelowStandardShearwallGeos();
             belowColumns.ForEach(o => polygons.Add(o.Boundary));
             belowShearWalls.ForEach(o => polygons.Add(o.Boundary));
             return polygons;

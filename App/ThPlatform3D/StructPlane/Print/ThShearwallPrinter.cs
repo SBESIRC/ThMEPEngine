@@ -70,5 +70,41 @@ namespace ThPlatform3D.StructPlane.Print
                 LayerName = ThPrintLayerManager.BelowShearWallHatchLayerName,
             };
         }
+
+        public static PrintConfig GetPassHeightWallConfig()
+        {
+            return new PrintConfig
+            {
+                LayerName = ThPrintLayerManager.PassHeightWallLayerName,
+            };
+        }
+
+        public static HatchPrintConfig GetPassHeightWallHatchConfig()
+        {
+            return new HatchPrintConfig
+            {
+                PatternName = "QD_ASPHALTUM",
+                PatternScale = 20.0,
+                LayerName = ThPrintLayerManager.PassHeightWallHatchLayerName,
+            };
+        }
+
+        public static PrintConfig GetWindowWallConfig()
+        {
+            return new PrintConfig
+            {
+                LayerName = ThPrintLayerManager.WindowWallLayerName,
+            };
+        }
+
+        public static HatchPrintConfig GetWindowWallHatchConfig()
+        {
+            return new HatchPrintConfig
+            {
+                PatternName = "CROSS",
+                PatternScale = 10.0,
+                LayerName = ThPrintLayerManager.WindowWallHatchLayerName,
+            };
+        }
     }
 }

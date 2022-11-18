@@ -332,24 +332,50 @@ namespace ThPlatform3D.StructPlane.Print
                     }
                     else if (category == ThIfcCategoryManager.ColumnCategory)
                     {
-                        if (o.IsUpperFloorColumn())
+                        var description = o.Properties.GetDescription();
+                        if(description.IsStandardColumn())
                         {
-                            Append(PrintUpperColumn(acadDb, o));
+                            if (o.IsUpperFloorColumn())
+                            {
+                                Append(PrintUpperColumn(acadDb, o));
+                            }
+                            else if (o.IsBelowFloorColumn())
+                            {
+                                Append(PrintBelowColumn(acadDb, o));
+                            }
                         }
-                        else if (o.IsBelowFloorColumn())
+                        else
                         {
-                            Append(PrintBelowColumn(acadDb, o));
+                            if(description.IsConstructColumn())
+                            {
+                                Append(PrintConstructColumn(acadDb, o));
+                            }
                         }
                     }
                     else if (category == ThIfcCategoryManager.WallCategory)
                     {
-                        if (o.IsUpperFloorShearWall())
+                        var description = o.Properties.GetDescription();
+                        if(description.IsStandardWall())
                         {
-                            Append(PrintUpperShearWall(acadDb, o));
+                            if (o.IsUpperFloorShearWall())
+                            {
+                                Append(PrintUpperShearWall(acadDb, o));
+                            }
+                            else if (o.IsBelowFloorShearWall())
+                            {
+                                Append(PrintBelowShearWall(acadDb, o));
+                            }
                         }
-                        else if (o.IsBelowFloorShearWall())
+                        else
                         {
-                            Append(PrintBelowShearWall(acadDb, o));
+                            if(description.IsPassHeightWall())
+                            {
+                                Append(PrintPassHeightWall(acadDb, o));
+                            }
+                            else if(description.IsWindowWall())
+                            {
+                                Append(PrintWindowWall(acadDb, o));
+                            }
                         }
                     }
                     else if (category == ThIfcCategoryManager.SlabCategory)

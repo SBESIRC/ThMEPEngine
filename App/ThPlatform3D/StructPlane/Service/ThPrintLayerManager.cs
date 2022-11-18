@@ -7,7 +7,9 @@ namespace ThPlatform3D.StructPlane.Service
     {
         public static string BeamLayerName = "S_BEAM";
         public static string ColumnLayerName = "S_COLU";
+        public static string ConstructColumnLayerName = "S_CONS_构造柱";
         public static string ColumnHatchLayerName = "S_COLU_HACH";
+        public static string ConstructColumnHatchLayerName = "S_CONS_构造柱填充";
         public static string BelowColumnLayerName = "S_COLU_BELW_DASH";
         public static string BelowColumnHatchLayerName = "S_COLU_BELW_DASH_HACH";
         public static string HoleLayerName = "S_HOLE";
@@ -16,6 +18,10 @@ namespace ThPlatform3D.StructPlane.Service
         public static string ShearWallHatchLayerName = "S_WALL_HACH";
         public static string BelowShearWallLayerName = "S_WALL_BELW_DASH";
         public static string BelowShearWallHatchLayerName = "S_WALL_BELW_DASH_HACH";
+        public static string PassHeightWallLayerName = "S_CONS_通高墙";
+        public static string PassHeightWallHatchLayerName = "S_CONS_通高墙填充";
+        public static string WindowWallLayerName = "S_CONS_窗台墙";
+        public static string WindowWallHatchLayerName = "S_CONS_窗台墙填充";
         public static string SlabLayerName = "S_PLAN_HACH";
         public static string SlabHatchLayerName = "S_PLAN_HACH";
         public static string BeamTextLayerName = "S_BEAM_TEXT_VERT";
@@ -32,10 +38,16 @@ namespace ThPlatform3D.StructPlane.Service
         {
             get
             {
-                var layers = new List<string>() { BeamLayerName , ColumnLayerName , ColumnHatchLayerName ,
-                    BelowColumnLayerName,BelowColumnHatchLayerName,HoleLayerName,HoleHatchLayerName,
-                    ShearWallLayerName,ShearWallHatchLayerName,BelowShearWallLayerName,
-                    BelowShearWallHatchLayerName,SlabLayerName,SlabHatchLayerName,BeamTextLayerName,
+                var layers = new List<string>() { BeamLayerName , 
+                    ColumnLayerName , ColumnHatchLayerName ,                    
+                    BelowColumnLayerName,BelowColumnHatchLayerName,
+                    ConstructColumnLayerName,ConstructColumnHatchLayerName,                    
+                    ShearWallLayerName,ShearWallHatchLayerName,
+                    BelowShearWallLayerName,BelowShearWallHatchLayerName,
+                    PassHeightWallLayerName,PassHeightWallHatchLayerName,
+                    WindowWallLayerName,WindowWallHatchLayerName,
+                    HoleLayerName,HoleHatchLayerName,
+                    SlabLayerName,SlabHatchLayerName,BeamTextLayerName,
                     SlabTextLayerName,ElevationTableLineLayerName,ElevationTableTextLayerName,
                     SlabPatternTableTextLayerName,HeadTextLayerName,HeadTextDownLineLayerName,
                 StairSlabCornerLineLayerName,StairSlabCornerTextLayerName,DefpointsLayerName};

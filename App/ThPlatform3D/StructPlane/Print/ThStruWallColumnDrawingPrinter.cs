@@ -50,17 +50,25 @@ namespace ThPlatform3D.StructPlane.Print
                 {
                     if (category == ThIfcCategoryManager.ColumnCategory)
                     {
-                        if(o.IsBelowFloorColumn())
+                        var description = o.Properties.GetDescription();
+                        if(description.IsStandardColumn())
                         {
-                            Append(PrintUpperColumn(acadDb, o));
-                        }                       
+                            if (o.IsBelowFloorColumn())
+                            {
+                                Append(PrintUpperColumn(acadDb, o));
+                            }
+                        }                                              
                     }
                     else if (category == ThIfcCategoryManager.WallCategory)
                     {
-                        if(o.IsBelowFloorShearWall())
+                        var description = o.Properties.GetDescription();
+                        if(description.IsStandardWall())
                         {
-                            Append(PrintUpperShearWall(acadDb, o));
-                        }                        
+                            if (o.IsBelowFloorShearWall())
+                            {
+                                Append(PrintUpperShearWall(acadDb, o));
+                            }
+                        }                                               
                     }
                 }
             });

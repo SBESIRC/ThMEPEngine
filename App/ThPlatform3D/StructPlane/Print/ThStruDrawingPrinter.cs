@@ -71,6 +71,14 @@ namespace ThPlatform3D.StructPlane.Print
             var hatchConfig = ThColumnPrinter.GetBelowColumnHatchConfig();
             return ThColumnPrinter.Print(acadDb, column.Boundary as Polyline, outlineConfig, hatchConfig);
         }
+
+        protected ObjectIdCollection PrintConstructColumn(AcadDatabase acadDb, ThGeometry column)
+        {
+            var outlineConfig = ThColumnPrinter.GetConstructColumnConfig();
+            var hatchConfig = ThColumnPrinter.GetConstructColumnHatchConfig();
+            return ThColumnPrinter.Print(acadDb, column.Boundary as Polyline, outlineConfig, hatchConfig);
+        }
+
         protected ObjectIdCollection PrintUpperShearWall(AcadDatabase acadDb, ThGeometry shearwall)
         {
             var outlineConfig = ThShearwallPrinter.GetUpperShearWallConfig();
@@ -92,6 +100,42 @@ namespace ThPlatform3D.StructPlane.Print
         {
             var outlineConfig = ThShearwallPrinter.GetBelowShearWallConfig();
             var hatchConfig = ThShearwallPrinter.GetBelowShearWallHatchConfig();
+            if (shearwall.Boundary is Polyline polyline)
+            {
+                return ThShearwallPrinter.Print(acadDb, polyline, outlineConfig, hatchConfig);
+            }
+            else if (shearwall.Boundary is MPolygon mPolygon)
+            {
+                return ThShearwallPrinter.Print(acadDb, mPolygon, outlineConfig, hatchConfig);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+
+        protected ObjectIdCollection PrintPassHeightWall(AcadDatabase acadDb, ThGeometry wall)
+        {
+            var outlineConfig = ThShearwallPrinter.GetPassHeightWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetPassHeightWallHatchConfig();
+            if (wall.Boundary is Polyline polyline)
+            {
+                return ThShearwallPrinter.Print(acadDb, polyline, outlineConfig, hatchConfig);
+            }
+            else if (wall.Boundary is MPolygon mPolygon)
+            {
+                return ThShearwallPrinter.Print(acadDb, mPolygon, outlineConfig, hatchConfig);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+
+        protected ObjectIdCollection PrintWindowWall(AcadDatabase acadDb, ThGeometry shearwall)
+        {
+            var outlineConfig = ThShearwallPrinter.GetWindowWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetWindowWallHatchConfig();
             if (shearwall.Boundary is Polyline polyline)
             {
                 return ThShearwallPrinter.Print(acadDb, polyline, outlineConfig, hatchConfig);

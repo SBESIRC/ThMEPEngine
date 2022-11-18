@@ -54,5 +54,22 @@ namespace ThPlatform3D.StructPlane.Print
                 PatternScale = 30.0,
             };
         }
+
+        public static PrintConfig GetConstructColumnConfig()
+        {
+            return new PrintConfig
+            {
+                LayerName = ThPrintLayerManager.ConstructColumnLayerName,
+            };
+        }
+        public static HatchPrintConfig GetConstructColumnHatchConfig()
+        {
+            return new HatchPrintConfig
+            {
+                LayerName = ThPrintLayerManager.ConstructColumnHatchLayerName,
+                PatternName = "钢筋混凝土",
+                PatternScale = 30.0,
+            };
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace ThPlatform3D.StructPlane.Service
         }
         public List<ThGeometry> BuildArea(List<ThGeometry> geos)
         {
-            var wallGeos = geos.GetWallGeos();
+            var wallGeos = geos.GetStandardWallGeos();
             var results = geos.Except(wallGeos).ToList();
             
             var groups = wallGeos.GroupBy(x =>
