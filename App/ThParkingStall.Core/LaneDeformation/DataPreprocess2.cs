@@ -16,6 +16,7 @@ namespace ThParkingStall.Core.LaneDeformation
     {
         public VehicleLaneData rawData;
         private MNTSSpatialIndex obstableSpatialIndex;
+        private double CatchRange = 200;
         public DataPreprocess2() 
         {
             rawData = RawData.rawData;
@@ -70,7 +71,6 @@ namespace ThParkingStall.Core.LaneDeformation
             var freeList = new List<FreeAreaRec>();
             foreach (var p in polyList)
             {
-                LDOutput.DrawTmpOutPut0.OriginalFreeAreaList.Add(p);
                 double minX = 0, maxX = 0, minY = 0, maxY = 0;
                 PolygonUtils.GetBoundaryBoxCoords(p, ref minX, ref minY, ref maxX, ref maxY);
                 var area = new FreeAreaRec(
@@ -158,13 +158,13 @@ namespace ThParkingStall.Core.LaneDeformation
             {
                 var leftDown = node.LeftDownPoint;
                 var rightUp = node.RightUpPoint;
-                var query = PolygonUtils.CreatePolygonRec(leftDown.X, rightUp.X, leftDown.Y - 5, leftDown.Y);
+                var query = PolygonUtils.CreatePolygonRec(leftDown.X, rightUp.X, leftDown.Y - CatchRange, leftDown.Y);
                 var result = polygonSpatialIndex.SelectCrossingGeometry(query);
                 foreach (BlockNode child in result)
                 {
                     if (child.RightUpPoint.Y.CompareTo(rightUp.Y) <= 0 &&
-                        child.RightUpPoint.Y.CompareTo(leftDown.Y - 5) >= 0 &&
-                        child.LeftDownPoint.Y.CompareTo(leftDown.Y - 5) < 0 &&
+                        child.RightUpPoint.Y.CompareTo(leftDown.Y - CatchRange) >= 0 &&
+                        child.LeftDownPoint.Y.CompareTo(leftDown.Y - CatchRange) < 0 &&
                         child.LeftDownPoint.X.CompareTo(rightUp.X - 1) < 0 &&
                         child.RightUpPoint.X.CompareTo(leftDown.X + 1) > 0)
                     {
@@ -177,7 +177,7 @@ namespace ThParkingStall.Core.LaneDeformation
                                 faLane.IsFtherLane[(int)PassDirection.FORWARD] = true;
                                 faLane.IsFtherLane[(int)PassDirection.BACKWARD] = false;
                                 chLane.IsFtherLane[(int)PassDirection.FORWARD] = false;
-                                chLane.IsFtherLane[(int)PassDirection.BACKWARD] = false;
+                                chLane.IsFtherLane[(int)PassDirection.BACKWARD] = true;
                             }
                         }
                         else if (node is SpotBlock faSpot && child is SpotBlock chSpot)

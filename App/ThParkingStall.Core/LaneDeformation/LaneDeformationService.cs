@@ -45,6 +45,10 @@ namespace ThParkingStall.Core.LaneDeformation
             CarGenerator carGenerator = new CarGenerator();
             carGenerator.Pipeline();
 
+            //
+            CarsPorter carsPorter = new CarsPorter(ProcessedData.BlockNodeList, PassDirection.BACKWARD);
+            carsPorter.Pipeline();
+
             GetResult();
             return;
         }

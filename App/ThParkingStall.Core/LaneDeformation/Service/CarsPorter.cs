@@ -7,24 +7,114 @@ namespace ThParkingStall.Core.LaneDeformation
 
     class CarsPorter
     {
+        // input
+        public List<LaneBlock> RearrangedLanes;
+        public List<List<SpotBlock>> RearrangedSpots;
+        public List<NewCarDataPass> NewCarDataPasses;
+        // tmp
         private List<BlockNode> Nodes;
         private Queue<BlockNode> WaitQueue = new Queue<BlockNode>();
         private PassDirection Dir;
-        public CarsPorter(List<BlockNode> nodes)
+        public CarsPorter(List<BlockNode> nodes, PassDirection dir)
         {
+            Dir = dir;
             Nodes = nodes;
+            RearrangedLanes = ProcessedData.RearrangedLanes;
+            RearrangedSpots = ProcessedData.RearrangedSpots;
+            NewCarDataPasses = ProcessedData.NewCarDataPasses;
+            Preprocess();
         }
         void Preprocess()
         {
+            var usefulLanes = new List<LaneBlock>();
+            var usefulData = new List<NewCarDataPass>();
+            for (int i = 0; i < RearrangedLanes.Count; i++)
+            {
+                //if (NewCarDataPasses[i].NewCars.Count > RearrangedSpots[i].Count)
+                if (i == 0 || i == 4)
+                {
+                    usefulLanes.Add(RearrangedLanes[i]);
+                    usefulData.Add(NewCarDataPasses[i]);
+                    RearrangedSpots[i].ForEach(s => s.IsDeleted = true);
+                }
+            }
+            RearrangedLanes = usefulLanes;
+            NewCarDataPasses = usefulData;
+
             WaitQueue.Clear();
-            // 从移动车位开始寻找所有孩子
-            // 被找到的孩子入度加1
-            // 入度为0则入队
+            foreach (BlockNode n in Nodes)
+            {
+                int degree = n.LastNodes(Dir).Count;
+                n.SetInDegree(Dir, degree);
+                if (degree is 0)
+                    WaitQueue.Enqueue(n);
+            }
         }
-        public void Run(PassDirection dir)
+        public void Pipeline()
         {
-            Dir = dir;
-            Preprocess();
+            for (int i = 0; i < RearrangedLanes.Count; i++)
+            {
+                List<BlockNode> newSpots = new List<BlockNode>();
+                for (int j = 0; j < NewCarDataPasses[i].NewCars.Count; j++)
+                {
+                    var p = NewCarDataPasses[i].NewCars[j];
+                    var sp = new SingleParkingPlace(p, 0, new PureVector(0, 0), p.Coordinate);
+                    var newSpot = new SpotBlock(sp, Parameter.TestDirection);
+                    newSpot.SetMovement(Dir, NewCarDataPasses[i].CarUpLineOccupy[j]);
+                    newSpots.Add(newSpot);
+                    LDOutput.DrawTmpOutPut0.ResultSpotsNew.Add(p);
+                }
+                RearrangedLanes[i].InitMovements(Dir, true, newSpots);
+            }
+
+            UpdateMovements();
+
+            // Draw
+            var pointsToDraw = new List<Point>();
+            var valuesToDraw = new List<double>();
+            foreach (var node in Nodes)
+            {
+                if (node is BreakableBlock bb && bb.MovementTable != null)
+                {
+                    for (int i = 0; i < bb.MovementTable.Count - 1; i++)
+                    {
+                        Point p = new Point(bb.MovementTable[i].Coord, node.Obb.Centroid.Y);
+                        pointsToDraw.Add(p);
+                        valuesToDraw.Add(bb.MovementTable[i].ValueRight);
+                    }
+                }
+                else
+                {
+                    Point p = new Point(node.Obb.Centroid.X - 800, node.Obb.Centroid.Y);
+                    pointsToDraw.Add(p);
+                    valuesToDraw.Add(node.Movement(Dir));
+                }
+            }
+            LDOutput.DrawTmpOutPut0.TolerancePositions = pointsToDraw;
+            LDOutput.DrawTmpOutPut0.ToleranceResults = valuesToDraw;
+
+            // Draw 
+            foreach (var node in Nodes)
+            {
+                if (node is SpotBlock spot)
+                {
+                    if (spot.IsDeleted)
+                        continue;
+                    var movement = spot.Movement(Dir);
+                    if (movement < 0.01)
+                        LDOutput.DrawTmpOutPut0.ResultSpotsNew.Add(spot.Obb);
+                    else
+                    {
+                        LDOutput.DrawTmpOutPut0.ResultSpotsNew.Add(
+                            PolygonUtils.CreatePolygonRec(
+                                spot.LeftDownPoint.X, spot.RightUpPoint.X,
+                                spot.LeftDownPoint.Y + movement, spot.RightUpPoint.Y + movement));
+                    }
+                }
+            }
+        }
+        public void UpdateMovements()
+        {
             while (WaitQueue.Count > 0)
             {
                 BlockNode node = WaitQueue.Dequeue();
@@ -35,10 +125,6 @@ namespace ThParkingStall.Core.LaneDeformation
                 else if (node is SpotBlock spot)
                 {
                     GetMaxMovement(spot);
-                    if (spot.Movement(dir) > 0)
-                    {
-                        // OutPut.MoveSpots.Add(spot);
-                    }
                 }
                 else if (node is ParkBlock park)
                 {
@@ -66,63 +152,31 @@ namespace ThParkingStall.Core.LaneDeformation
                     }
                 }
 
-                // 更新后继的入度,为0则入队
-                UpdateNextNodes(node);
+                foreach (BlockNode n in node.NextNodes(Dir))
+                {
+                    n.InDegreeDecre(Dir);
+                    if (n.InDegree(Dir) is 0)
+                        WaitQueue.Enqueue(n);
+                }
             }
         }
-        private void UpdateNextNodes(BlockNode node)
-        {
-            foreach (BlockNode n in node.NextNodes(Dir))
-            {
-                n.InDegreeDecre(Dir);
-                if (n.InDegree(Dir) is 0)
-                    WaitQueue.Enqueue(n);
-            }
-        }
-        private void GetMaxMovement(BlockNode node)
+        private bool GetMaxMovement(BlockNode node)
         {
             if (node.LastNodes(Dir).Count is 0)
+            {
                 node.SetMovement(Dir, 0);
+                return false;
+            }
             else
             {
-                double max = 0;
+                double max = node.Movement(Dir);
                 foreach (BlockNode n in node.LastNodes(Dir))
                 {
-                    /*                    if (n.Type is BlockType.LANE &&
-                                            ((LaneBlock) n).)*/
                     max = BlockNode.MaxMove(n.MovementForChild(Dir, node.LeftDownPoint.X, node.RightUpPoint.X), max);
                 }
                 node.SetMovement(Dir, max);
+                return max > 0.01;
             }
-        }
-        public void Pipeline()
-        {
-            Run(PassDirection.BACKWARD);
-            //Run(PassDirection.BACKWARD);
-
-            // Draw
-/*            var pointsToDraw = new List<Point>();
-            var valuesToDraw = new List<double>();
-            foreach (var node in Nodes)
-            {
-                if (node is BreakableBlock bb && bb.ToleranceTable != null)
-                {
-                    for (int i = 0; i < bb.ToleranceTable.Count - 1; i++)
-                    {
-                        Point p = new Point(bb.ToleranceTable[i].Coord, node.Obb.Centroid.Y);
-                        pointsToDraw.Add(p);
-                        valuesToDraw.Add(bb.ToleranceTable[i].ValueRight);
-                    }
-                }
-                else
-                {
-                    Point p = new Point(node.Obb.Centroid.X - 800, node.Obb.Centroid.Y);
-                    pointsToDraw.Add(p);
-                    valuesToDraw.Add(node.Tolerance(PassDirection.FORWARD));
-                }
-            }
-            LDOutput.DrawTmpOutPut0.TolerancePositions = pointsToDraw;
-            LDOutput.DrawTmpOutPut0.ToleranceResults = valuesToDraw;*/
         }
 
     }

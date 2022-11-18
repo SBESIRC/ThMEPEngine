@@ -31,6 +31,8 @@ namespace ThParkingStall.Core.LaneDeformation
         static public List<List<Polygon>> output1 = new List<List<Polygon>>();
         static public List<LineSegment> output2 = new List<LineSegment>();
         static public List<List<LineSegment>> output3 = new List<List<LineSegment>>();
+        static public List<LaneBlock> RearrangedLanes = new List<LaneBlock>();
+        static public List<List<SpotBlock>> RearrangedSpots = new List<List<SpotBlock>>();
 
         //CarGenerator
         static public List<NewCarDataPass> NewCarDataPasses = new List<NewCarDataPass>();

@@ -135,6 +135,7 @@ namespace ThParkingStall.Core.LaneDeformation
     public class SpotBlock : BlockNode
     {
         public SingleParkingPlace Spot;
+        public bool IsDeleted = false;
         public SpotBlock(SingleParkingPlace spot, Vector2D dir)
         {
             Spot = spot;
@@ -215,15 +216,18 @@ namespace ThParkingStall.Core.LaneDeformation
         }
         private void InitToleranceTable(PassDirection passDir, bool narrow = false)
         {
-            ToleranceTable = new List<MarkPoint>
+            if (ToleranceTable is null)
             {
-                new MarkPoint(LeftDownPoint.X, -1),
-                new MarkPoint(RightUpPoint.X, 0)
-            };
-            if (LastNodes(passDir).Count == 0)
-            {
-                ToleranceTable[0].ValueRight = SelfTolerance;
-                return;
+                ToleranceTable = new List<MarkPoint>
+                {
+                    new MarkPoint(LeftDownPoint.X, -1),
+                    new MarkPoint(RightUpPoint.X, 0)
+                };
+                if (LastNodes(passDir).Count == 0)
+                {
+                    ToleranceTable[0].ValueRight = SelfTolerance;
+                    return;
+                }
             }
             var segList = new List<ValueTuple<double, double, double>>();
             foreach (var node in this.LastNodes(passDir))
@@ -242,8 +246,8 @@ namespace ThParkingStall.Core.LaneDeformation
             }
             foreach (var seg in segList)
             {
-                var left = Math.Max(seg.Item1 - (narrow ? VehicleLane.VehicleLaneWidth : 0), LeftDownPoint.X);
-                var right = Math.Min(seg.Item2 + (narrow ? VehicleLane.VehicleLaneWidth : 0), RightUpPoint.X);
+                var left = Math.Max(seg.Item1 - (narrow ? VehicleLane.VehicleLaneWidth * 2 : 0), LeftDownPoint.X);
+                var right = Math.Min(seg.Item2 + (narrow ? VehicleLane.VehicleLaneWidth * 2 : 0), RightUpPoint.X);
                 var value = seg.Item3 + SelfTolerance;
                 if (left >= right) continue;
 
@@ -310,9 +314,9 @@ namespace ThParkingStall.Core.LaneDeformation
         }
         // 移动值
         public List<MarkPoint> MovementTable = null;
-        public void InitMovements(PassDirection passDir, bool expand = false)
+        public void InitMovements(PassDirection passDir, bool expand = false, List<BlockNode> lastNodes = null)
         {
-            InitMovementTable(passDir, expand);
+            InitMovementTable(passDir, lastNodes == null ? LastNodes(passDir) : lastNodes, expand);
             MergeMovementTable();
         }
         public override double MovementForChild(PassDirection passDir, double left, double right)
@@ -337,21 +341,24 @@ namespace ThParkingStall.Core.LaneDeformation
 
             return res;
         }
-        private void InitMovementTable(PassDirection passDir, bool expand = false)
+        private void InitMovementTable(PassDirection passDir, List<BlockNode> lastNodes, bool expand = false)
         {
-            MovementTable = new List<MarkPoint>
+            if (MovementTable is null)
             {
-                new MarkPoint(LeftDownPoint.X, -1),
-                new MarkPoint(RightUpPoint.X, 0)
-            };
-            if (LastNodes(passDir).Count == 0)
-            {
-                MovementTable[0].ValueRight = 0;
-                return;
+                MovementTable = new List<MarkPoint>
+                {
+                    new MarkPoint(LeftDownPoint.X, -1),
+                    new MarkPoint(RightUpPoint.X, 0)
+                };
+                if (lastNodes.Count == 0)
+                {
+                    MovementTable[0].ValueRight = 0;
+                    return;
+                }
             }
 
             var segList = new List<ValueTuple<double, double, double>>();
-            foreach (var node in this.LastNodes(passDir))
+            foreach (var node in lastNodes)
             {
                 if (node is BreakableBlock bb && bb.MovementTable != null)
                 {
@@ -365,10 +372,11 @@ namespace ThParkingStall.Core.LaneDeformation
                     segList.Add((node.LeftDownPoint.X, node.RightUpPoint.X, node.Movement(passDir)));
                 }
             }
+
             foreach (var seg in segList)
             {
-                var left = Math.Max(seg.Item1 - (expand ? VehicleLane.VehicleLaneWidth : 0), LeftDownPoint.X);
-                var right = Math.Min(seg.Item2 + (expand ? VehicleLane.VehicleLaneWidth : 0), RightUpPoint.X);
+                var left = Math.Max(seg.Item1 - (expand ? VehicleLane.VehicleLaneWidth * 2 : 0), LeftDownPoint.X);
+                var right = Math.Min(seg.Item2 + (expand ? VehicleLane.VehicleLaneWidth * 2 : 0), RightUpPoint.X);
                 var value = MaxMove(seg.Item3 - SelfTolerance, 0);
                 if (left >= right) continue;
 

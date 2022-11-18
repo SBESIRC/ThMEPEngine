@@ -251,6 +251,9 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
 
         public List<Polygon> RearrangeRegions = new List<Polygon>();
 
+        public List<Polygon> ResultSpotsOld = new List<Polygon>();
+        public List<Polygon> ResultSpotsNew = new List<Polygon>();
+
 
         //luoyun7
         public List<Polygon> OriginalFreeAreaList =new List<Polygon>();

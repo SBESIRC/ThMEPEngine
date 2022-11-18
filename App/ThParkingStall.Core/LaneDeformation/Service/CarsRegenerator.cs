@@ -26,18 +26,27 @@ namespace ThParkingStall.Core.LaneDeformation
             ProcessedData.output1.Clear();
             ProcessedData.output2.Clear();
             ProcessedData.output3.Clear();
+            ProcessedData.RearrangedLanes.Clear();
+            ProcessedData.RearrangedSpots.Clear();
 
             foreach (var lane in potentials)
             {
                 List<Polygon> polygons = new List<Polygon>();
                 LineSegment line = null;
                 List<LineSegment> upLines = new List<LineSegment>();
-                GetParkingPlace(lane, ref polygons, ref line, ref upLines);
+                List<SpotBlock> cars = new List<SpotBlock>();
+                GetParkingPlace(lane, ref polygons, ref line, ref upLines, ref cars);
                 regions.Add(polygons);
+
+                if (polygons.Count == 0)
+                    continue;
 
                 ProcessedData.output1.Add(polygons);
                 ProcessedData.output2.Add(line);
                 ProcessedData.output3.Add(upLines);
+                ProcessedData.RearrangedLanes.Add(lane);
+                ProcessedData.RearrangedSpots.Add(cars);
+                //cars.ForEach(c => LDOutput.DrawTmpOutPut0.ResultSpotsOld.Add(c.Obb));
             }
 
             // Draw
@@ -52,39 +61,52 @@ namespace ThParkingStall.Core.LaneDeformation
             {
                 if (node is LaneBlock laneBlock && laneBlock.IsHorizontal && !laneBlock.IsFtherLane[(int)PassDir])
                 {
+                    bool isPotential = false;
+
                     if (laneBlock.Lane.ParkingPlaceBlockList.Count == 1)
                     {
-                        var parkObb = laneBlock.Lane.ParkingPlaceBlockList[0].ParkingPlaceBlockObb;
+                        /*var parkObb = laneBlock.Lane.ParkingPlaceBlockList[0].ParkingPlaceBlockObb;
                         double left = parkObb.Coordinates[0].X;
                         double right = parkObb.Coordinates[0].X;
                         for (int i = 1; i < parkObb.Coordinates.Count(); i++)
                         {
                             left = Math.Min(left, parkObb.Coordinates[i].X);
                             right = Math.Max(right, parkObb.Coordinates[i].X);
-                        }
-                        continue;
-                    }
-                    bool isPotential = false;
-                    foreach (var park in laneBlock.Lane.ParkingPlaceBlockList)
-                    {
-                        foreach (var spot in park.Cars)
+                        }*/
+                        foreach (var car in laneBlock.Lane.ParkingPlaceBlockList[0].Cars)
                         {
-                            if (spot.Type != 2)
+                            if (car.Type == 1)
                             {
                                 isPotential = true;
                                 break;
                             }
                         }
                         if (isPotential)
-                            break;
+                            res.Add(laneBlock);
                     }
-                    if (isPotential)
-                        res.Add(laneBlock);
+                    else
+                    {
+                        foreach (var park in laneBlock.Lane.ParkingPlaceBlockList)
+                        {
+                            foreach (var spot in park.Cars)
+                            {
+                                if (spot.Type != 2)
+                                {
+                                    isPotential = true;
+                                    break;
+                                }
+                            }
+                            if (isPotential)
+                                break;
+                        }
+                        if (isPotential)
+                            res.Add(laneBlock);
+                    }
                 }
             }
             return res;
         }
-        private void GetParkingPlace(LaneBlock laneBlock, ref List<Polygon> polygons, ref LineSegment line, ref List<LineSegment> upLines)
+        private void GetParkingPlace(LaneBlock laneBlock, ref List<Polygon> polygons, ref LineSegment line, ref List<LineSegment> upLines, ref List<SpotBlock> cars)
         {
             var children = new List<Geometry>();
             var q = new Queue<BlockNode>();
@@ -103,6 +125,7 @@ namespace ThParkingStall.Core.LaneDeformation
                         continue;
                     if (spotBlock.Spot.Type == 2)
                         continue;
+                    cars.Add(spotBlock);
                 }
 
                 children.AddRange(PolygonUtils.GetBufferedPolygons(node.Obb, 50));

@@ -134,6 +134,7 @@ namespace ThParkingStall.Core.LaneDeformation
         {
             CarParkingObbs = new List<Polygon>();
             Columns = new List<Polygon>();
+            NowDownLine = DownVehicleLane[index];
         }
 
 
