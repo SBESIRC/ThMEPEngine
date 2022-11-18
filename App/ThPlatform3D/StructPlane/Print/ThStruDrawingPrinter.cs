@@ -150,7 +150,7 @@ namespace ThPlatform3D.StructPlane.Print
             }
         }
 
-        protected ObjectIdCollection PrintHeadText(AcadDatabase acadDb,string flrRange,Tuple<string,string,string> stdFlrInfo)
+        protected Tuple<ObjectIdCollection, ObjectIdCollection> PrintHeadText(AcadDatabase acadDb,string flrRange,Tuple<string,string,string> stdFlrInfo)
         {
             //stdFlrInfo->Start楼层编号，End楼层编号,标准层
             var extents = GetPrintObjsExtents(acadDb);
@@ -163,7 +163,8 @@ namespace ThPlatform3D.StructPlane.Print
                 BasePt = textCenter,
                 StdFlrInfo = stdFlrInfo
             };
-            return printService.Print(acadDb);
+            printService.Print(acadDb);
+            return Tuple.Create(printService.HeadTextObjIds, printService.TimeStampTextObjIds);
         }
         /// <summary>
         /// 获取 ObjIds 集合里的范围

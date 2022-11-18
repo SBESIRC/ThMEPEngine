@@ -37,7 +37,7 @@ namespace ThPlatform3D.StructPlane.Service
         {
             // 获取IfcWall几何物体
             return geos.GetAllWallGeos()
-                .Where(g => g.Properties.GetCategory() == ThIfcCategoryManager.WallCategory)
+                .Where(g => g.Properties.GetDescription().IsStandardWall())
                 .ToList();
         }
         public static List<ThGeometry> GetPassHeightGeos(this List<ThGeometry> geos)

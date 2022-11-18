@@ -163,7 +163,9 @@ namespace ThPlatform3D.StructPlane.Print
                 Append(beamBlkIds);
 
                 // 打印标题
-                Append(PrintHeadText(acadDb));
+                var textRes = PrintHeadText(acadDb);
+                Append(textRes.Item1);
+                Append(textRes.Item2);
 
                 // 打印柱表
                 var elevationTblBasePt = GetElevationBasePt(acadDb);
@@ -550,13 +552,13 @@ namespace ThPlatform3D.StructPlane.Print
             });
         }
 
-        private ObjectIdCollection PrintHeadText(AcadDatabase acadDb)
+        private Tuple<ObjectIdCollection, ObjectIdCollection> PrintHeadText(AcadDatabase acadDb)
         {
             // 打印自然层标识, eg 一层~五层结构平面层
             var flrRange = _floorInfos.GetFloorRange(_flrBottomEle);
             if (string.IsNullOrEmpty(flrRange))
             {
-                return new ObjectIdCollection();
+                return Tuple.Create(new ObjectIdCollection(),new ObjectIdCollection());
             }
             var stdFlrInfo = _floorInfos.GetStdFlrInfo(_flrBottomEle);
             return PrintHeadText(acadDb, flrRange, stdFlrInfo);

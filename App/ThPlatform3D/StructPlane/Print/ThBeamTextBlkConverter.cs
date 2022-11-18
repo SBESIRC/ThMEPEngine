@@ -177,7 +177,7 @@ namespace ThPlatform3D.StructPlane.Print
             {
                 var current = horParallelTexts[i] as DBText;
                 var moveDistance = textGaps[i-1];
-                var mt = Matrix3d.Displacement(new Vector3d(0, moveDistance, 0));
+                var mt = Matrix3d.Displacement(new Vector3d(0, -1.0*moveDistance, 0));
                 current.TransformBy(mt);
             }
         }

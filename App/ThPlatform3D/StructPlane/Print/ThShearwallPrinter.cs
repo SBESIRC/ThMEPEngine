@@ -83,7 +83,7 @@ namespace ThPlatform3D.StructPlane.Print
         {
             return new HatchPrintConfig
             {
-                PatternName = "QD_ASPHALTUM",
+                PatternName = "S_ASPHALTUM",
                 PatternScale = 20.0,
                 LayerName = ThPrintLayerManager.PassHeightWallHatchLayerName,
             };

@@ -20,12 +20,15 @@ namespace ThPlatform3D.StructPlane.Service
         public Point3d BasePt { get; set; } = Point3d.Origin;
         public Tuple<string, string, string> StdFlrInfo { get; set; }
         #endregion
+        public ObjectIdCollection HeadTextObjIds { get;private set; }
+        public ObjectIdCollection TimeStampTextObjIds { get; private set; }
         public ThPrintDrawingHeadService()
         {
+            HeadTextObjIds = new ObjectIdCollection();
+            TimeStampTextObjIds = new ObjectIdCollection();
         }
-        public ObjectIdCollection Print(AcadDatabase acadDb)
+        public void Print(AcadDatabase acadDb)
         {
-            var results = new ObjectIdCollection();
             var mark1ObjIds =  new ObjectIdCollection();
             var mark2ObjIds = new ObjectIdCollection();
             // 打印标准层信息+时间戳
@@ -38,13 +41,13 @@ namespace ThPlatform3D.StructPlane.Service
             }
             var headTextIds = PrintHead(acadDb);
             var scaleTextIds = PrintScale(acadDb);
-            headTextIds.OfType<ObjectId>().ForEach(o => results.Add(o));
-            scaleTextIds.OfType<ObjectId>().ForEach(o => results.Add(o));
-            mark1ObjIds.OfType<ObjectId>().ForEach(o => results.Add(o));
-            mark2ObjIds.OfType<ObjectId>().ForEach(o => results.Add(o));
+            headTextIds.OfType<ObjectId>().ForEach(o => HeadTextObjIds.Add(o));
+            scaleTextIds.OfType<ObjectId>().ForEach(o => HeadTextObjIds.Add(o));
+            mark1ObjIds.OfType<ObjectId>().ForEach(o => TimeStampTextObjIds.Add(o));
+            mark2ObjIds.OfType<ObjectId>().ForEach(o => TimeStampTextObjIds.Add(o));
             if (headTextIds.Count == 0)
             {
-                return results;
+                return;
             }
             var downLineWidth = 80.0;
             // 创建文字
@@ -62,7 +65,7 @@ namespace ThPlatform3D.StructPlane.Service
             downLine.AddVertexAt(1, new Point2d(downLineLength / 2.0, 0), 0.0, downLineWidth, downLineWidth);
             downLine.Layer = ThPrintLayerManager.HeadTextDownLineLayerName;
             downLine.ColorIndex = (int)ColorIndex.BYLAYER;
-            results.Add(acadDb.ModelSpace.Add(downLine));
+            HeadTextObjIds.Add(acadDb.ModelSpace.Add(downLine));
 
             // 调整比例文字
             if (scaleTextIds.Count > 0)
@@ -103,12 +106,16 @@ namespace ThPlatform3D.StructPlane.Service
 
             // 移动
             var mt = Matrix3d.Displacement(BasePt - Point3d.Origin);
-            results.OfType<ObjectId>().ForEach(o =>
+            HeadTextObjIds.OfType<ObjectId>().ForEach(o =>
             {
                 var entity = acadDb.Element<Entity>(o, true);
                 entity.TransformBy(mt);
             });
-            return results;
+            TimeStampTextObjIds.OfType<ObjectId>().ForEach(o =>
+            {
+                var entity = acadDb.Element<Entity>(o, true);
+                entity.TransformBy(mt);
+            });
         }
 
         private string BuildMark1()

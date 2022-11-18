@@ -321,8 +321,8 @@ namespace ThPlatform3D.StructPlane.Service
             var stdFloors = floorInfos.GetFloors(flrBottomEle);
             if (stdFloors.Count() == 1)
             {
-                var stdFlr = stdFloors.First().StdFlrNo;
-                var floors = floorInfos.Where(o => o.StdFlrNo == stdFlr);
+                stdFlrNo = stdFloors.First().StdFlrNo;
+                var floors = floorInfos.Where(o => o.StdFlrNo == stdFlrNo);
                 if (floors.Count() == 1)
                 {
                     var floorNo = floors.First().FloorNo.ToUpper();
@@ -336,7 +336,10 @@ namespace ThPlatform3D.StructPlane.Service
                         startFloorNo = floorNo+"F";
                         endFloorNo = floorNo + "F";
                     }
-                    stdFlrNo = floors.First().StdFlrNo;                    
+                    if(!stdFlrNo.Trim().ToUpper().StartsWith("FLOOR"))
+                    {
+                        stdFlrNo = "Floor" + stdFlrNo.Trim();
+                    }
                 }
                 else if (floors.Count() > 1)
                 {
@@ -358,7 +361,10 @@ namespace ThPlatform3D.StructPlane.Service
                     {
                         endFloorNo = endFloorNo1 + "F";
                     }
-                    stdFlrNo = floors.First().StdFlrNo;
+                    if (!stdFlrNo.Trim().ToUpper().StartsWith("FLOOR"))
+                    {
+                        stdFlrNo = "Floor" + stdFlrNo.Trim();
+                    }
                 }
             }
             return Tuple.Create(startFloorNo, endFloorNo, stdFlrNo);

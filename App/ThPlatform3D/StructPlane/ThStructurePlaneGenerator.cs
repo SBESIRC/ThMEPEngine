@@ -287,7 +287,14 @@ namespace ThPlatform3D.StructPlane
                 entity.Layer == ThPrintLayerManager.BelowShearWallLayerName ||
                 entity.Layer == ThPrintLayerManager.BelowShearWallHatchLayerName ||
                 entity.Layer == ThPrintLayerManager.ShearWallLayerName ||
-                entity.Layer == ThPrintLayerManager.ShearWallHatchLayerName)
+                entity.Layer == ThPrintLayerManager.ShearWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.ConstructColumnLayerName ||
+                entity.Layer == ThPrintLayerManager.ConstructColumnHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.PassHeightWallLayerName ||
+                entity.Layer == ThPrintLayerManager.PassHeightWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.WindowWallLayerName ||
+                entity.Layer == ThPrintLayerManager.WindowWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.DefpointsLayerName)
                 {
                     blkIds.Add(o);
                 }
