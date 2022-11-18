@@ -6,6 +6,7 @@ using Tianhua.Platform3D.UI.Interfaces;
 using TianHua.Platform3D.UI.ViewModels;
 using Autodesk.AutoCAD.ApplicationServices;
 using acadApp = Autodesk.AutoCAD.ApplicationServices;
+using ThPlatform3D;
 
 namespace Tianhua.Platform3D.UI.UI
 {
@@ -296,6 +297,16 @@ namespace Tianhua.Platform3D.UI.UI
             {
                 return null;
             }
+        }
+
+        private void tabStorey_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var buildinName = "";
+            if (this.tabStorey.SelectedItem != null)
+            {
+                buildinName = this.tabStorey.SelectedItem.ToString();
+            }
+            ConfigService.ConfigInstance.BindingBuildingName(buildinName);
         }
     }
 }

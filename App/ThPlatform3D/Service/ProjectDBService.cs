@@ -36,29 +36,19 @@ namespace ThPlatform3D.Service
             SqlSugarClient sqlClient = new SqlSugarClient(dbSqlServerConfig);
             SqlSugarProvider sqlDB = sqlClient.GetConnection(dbSqlServerConfig.ConfigId);
             //step1获取可以看的项目
-            var dataTable = sqlClient.Ado.GetDataTable("SELECT [Id] FROM [Product_Project].[dbo].[AI_prjrole] where [ExecutorId]=@Uid", new { Uid = userId });
-            var prjIds = new List<string>();
-            foreach (DataRow dataRow in dataTable.Rows)
-            {
-                var id = dataRow[0].ToString();
-                if (prjIds.Contains(id))
-                    continue;
-                prjIds.Add(id);
-            }
+            Expressionable<DBProject> expressionable = new Expressionable<DBProject>();
+            expressionable.And(c => c.ExecutorId == userId);
+            var prjs = sqlDB.Queryable<DBProject>().Where(expressionable.ToExpression()).Distinct().ToList();
+            var prjIds = prjs.Select(c => c.Id).ToList();
+            Expressionable<DBSubProject> expSubPrj = new Expressionable<DBSubProject>();
+            expSubPrj.And(c => prjIds.Contains(c.Id));
+            var allSubPrjs = sqlDB.Queryable<DBSubProject>().Where(expSubPrj.ToExpression()).Distinct().ToList();
             //step2根据项目获取项目的完整信息
-            foreach (var prjId in prjIds)
+            foreach (var prj in prjs)
             {
-                Expressionable<DBProject> expressionable = new Expressionable<DBProject>();
-                expressionable.And(c => c.Id == prjId);
-                expressionable.And(c => c.MajorName == null);
-                var prjs = sqlDB.Queryable<DBProject>().Where(expressionable.ToExpression()).ToList();
-                if (prjs.Count < 1)
-                    continue;
-                var prj = prjs.FirstOrDefault();
+                prj.ExecutorId = "";
                 prj.SubProjects = new List<DBSubProject>();
-                Expressionable<DBSubProject> subExp = new Expressionable<DBSubProject>();
-                subExp.And(c => c.Id == prjId);
-                var subPrjs = sqlDB.Queryable<DBSubProject>().Where(subExp.ToExpression()).Distinct().ToList();
+                var subPrjs = allSubPrjs.Where(c => c.Id == prj.Id).Distinct();
                 prj.SubProjects.AddRange(subPrjs);
                 resPorject.Add(prj);
             }
@@ -95,20 +85,6 @@ namespace ThPlatform3D.Service
                 msg = ex.Message;
                 return false;
             }
-        }
-        public ProjectFile GetValidProject(string fileName, string prjId, string subPrjId)
-        {
-            var sqlClient = new SqlSugarClient(dbMySqlConfig);
-            SqlSugarProvider sqlDB = sqlClient.GetConnection(dbMySqlConfig.ConfigId);
-            var expressionable = new Expressionable<ProjectFile>();
-            expressionable.And(c => c.FileName == fileName);
-            expressionable.And(c => c.PrjId == prjId);
-            expressionable.And(c => c.SubPrjId == subPrjId);
-            expressionable.And(c => c.IsDel == 0);
-            var res = sqlDB.Queryable<ProjectFile>().Where(expressionable.ToExpression()).ToList();
-            if (res.Count < 1)
-                return null;
-            return res.FirstOrDefault();
         }
         public ProjectFile GetValidProject(string fileName)
         {

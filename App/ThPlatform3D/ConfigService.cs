@@ -48,6 +48,10 @@ namespace ThPlatform3D
         {
             InitBinding();
         }
+        public void BindingBuildingName(string buildingName) 
+        {
+            BindingName = buildingName;
+        }
         /// <summary>
         /// 当前图纸绑定的项目信息
         /// </summary>
@@ -88,6 +92,7 @@ namespace ThPlatform3D
         }
         private void InitBinding() 
         {
+            BindingName = string.Empty;
             BindingMajor = string.Empty;
             BindingPrjId = string.Empty;
             BindingPrjName = string.Empty;

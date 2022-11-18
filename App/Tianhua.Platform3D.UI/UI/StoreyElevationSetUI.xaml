@@ -12,7 +12,7 @@
         </Grid.RowDefinitions>
         <Button Style="{x:Null}" Panel.ZIndex="3"  HorizontalAlignment="Right" Margin="0,0,5,0" Name="btnAddBuilding" Content="新增单体" Width="80" Height="20" Click="btnAddBuilding_Click"></Button>
         <TabControl Style="{x:Null}" Panel.ZIndex="0" Margin="0,-25,0,0" Grid.Row="1" Name="tabStorey" TabStripPlacement="Top" MouseDoubleClick="tabControl1_MouseDoubleClick" 
-                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" HorizontalContentAlignment="Stretch" SelectionChanged="tabStorey_SelectionChanged"
                     >
             <TabControl.ContextMenu>
                 <ContextMenu>
