@@ -15,7 +15,7 @@ namespace ThParkingStall.Core.LaneDeformation
 {
     public class BuildFreeArea
     {
-        
+
         //类公共变量
         public Vector2D MoveDir = new Vector2D();
         public List<Polygon> OriginalFreeAreaList = new List<Polygon>();
@@ -34,17 +34,17 @@ namespace ThParkingStall.Core.LaneDeformation
         List<FreeAreaRec> CombinedFreeAreaRec = new List<FreeAreaRec>();
         Polygon nowBoundary;
 
-        public BuildFreeArea(List<Polygon> originalFreeAreaList,Vector2D dir) 
+        public BuildFreeArea(List<Polygon> originalFreeAreaList, Vector2D dir)
         {
             MoveDir = dir;
             OriginalFreeAreaList = originalFreeAreaList;
         }
 
-        public void Pipeline() 
+        public void Pipeline()
         {
-            for (int i = 0; i < OriginalFreeAreaList.Count; i++) 
+            for (int i = 0; i < OriginalFreeAreaList.Count; i++)
             {
-                if (i == 7) 
+                if (i == 7)
                 {
                     int stop = 0;
                 }
@@ -56,7 +56,7 @@ namespace ThParkingStall.Core.LaneDeformation
 
         }
 
-        public void FromSingleFreeArea(Polygon singleFreeArea) 
+        public void FromSingleFreeArea(Polygon singleFreeArea)
         {
             var obbPointList = singleFreeArea.Coordinates.ToList();
 
@@ -67,10 +67,10 @@ namespace ThParkingStall.Core.LaneDeformation
 
             List<double> xList = GetXList(obbPointList);
             //增加人为切割
-            xList = AddEquidistantX(xList,500);
+            xList = AddEquidistantX(xList, 500);
 
             //清除部分重合点
-            xList = IgnoreSmall(xList,50);
+            xList = IgnoreSmall(xList, 50);
 
 
             //两种切分方式
@@ -81,10 +81,10 @@ namespace ThParkingStall.Core.LaneDeformation
             tmpRecs = new List<FreeAreaRec>();
         }
 
-        public List<double> GetXList(List<Coordinate> pointList) 
+        public List<double> GetXList(List<Coordinate> pointList)
         {
             List<double> xList = new List<double>();
-            for (int i = 0;i< pointList.Count; i++) 
+            for (int i = 0; i < pointList.Count; i++)
             {
                 xList.Add(pointList[i].X);
             }
@@ -101,14 +101,14 @@ namespace ThParkingStall.Core.LaneDeformation
             return yList.OrderBy(x => x).ToList();
         }
 
-        public List<double> AddEquidistantX(List<double> xList, double dis = 500) 
+        public List<double> AddEquidistantX(List<double> xList, double dis = 500)
         {
             List<double> newXList = new List<double>();
 
             double nowMaxX = xList.Last();
             double nowMinX = xList.First();
 
-            for (int i = 1; nowMinX + i * dis < nowMaxX; i++) 
+            for (int i = 1; nowMinX + i * dis < nowMaxX; i++)
             {
                 double tmpX = nowMinX + i * dis;
                 newXList.Add(tmpX);
@@ -148,7 +148,7 @@ namespace ThParkingStall.Core.LaneDeformation
 
 
         //第一类分割法
-        public void GetCutRecs0(Polygon singleFreeArea,List<double> xList) 
+        public void GetCutRecs0(Polygon singleFreeArea, List<double> xList)
         {
             List<List<double>> XYListMap = GetXYMap(singleFreeArea, xList);
             //XYListMap = CombineXYMap(ref xList, XYListMap);
@@ -168,7 +168,7 @@ namespace ThParkingStall.Core.LaneDeformation
             for (int i = 0; i < xList.Count; i++)
             {
                 double nowx = xList[i];
-                LineSegment line = new LineSegment(xList[i],minY-100, xList[i], maxY+100);
+                LineSegment line = new LineSegment(xList[i], minY - 100, xList[i], maxY + 100);
                 List<Coordinate> coordinates = line.IntersectPoint(oPl).ToList();
                 if (coordinates.Count < 2)
                 {
@@ -185,13 +185,14 @@ namespace ThParkingStall.Core.LaneDeformation
             return xyMap;
         }
 
-        public List<List<double>> CombineXYMap(ref List<double> xList, List<List<double>> xyMap,double threshold = 5) 
+        public List<List<double>> CombineXYMap(ref List<double> xList, List<List<double>> xyMap, double threshold = 5)
         {
             List<double> newxList = new List<double>();
             List<List<double>> newxyMap = new List<List<double>>();
             List<double> tmpyList = new List<double>();
             tmpyList = xyMap[0];
             double nowX = xList[0];
+
             for (int i = 0; i < xList.Count - 1; i++)
             {
                 //继续前进
@@ -210,7 +211,7 @@ namespace ThParkingStall.Core.LaneDeformation
                 else  //直接停止 
                 {
                     newxList.Add(nowX);
-                    tmpyList= tmpyList.OrderBy(x => x).ToList();
+                    tmpyList = tmpyList.OrderBy(x => x).ToList();
                     newxyMap.Add(tmpyList);
 
                     nowX = xList[i + 1];
@@ -230,34 +231,34 @@ namespace ThParkingStall.Core.LaneDeformation
             return newxyMap;
         }
 
-        public void FromPointToRecs(List<double> xList,List<List<double>> XYListMap) 
+        public void FromPointToRecs(List<double> xList, List<List<double>> XYListMap)
         {
             tmpRecs.Clear();
 
-            for (int i = 0; i < XYListMap.Count - 1; i++) 
+            for (int i = 0; i < XYListMap.Count - 1; i++)
             {
-                if (XYListMap[i].Count < 2 || XYListMap[i+1].Count < 2) continue;
+                if (XYListMap[i].Count < 2 || XYListMap[i + 1].Count < 2) continue;
                 double ymin0 = XYListMap[i].First();
                 double ymax0 = XYListMap[i].Last();
 
-                double ymin1 = XYListMap[i+1].First();
-                double ymax1 = XYListMap[i+1].Last();
+                double ymin1 = XYListMap[i + 1].First();
+                double ymax1 = XYListMap[i + 1].Last();
 
                 double ymax = Math.Min(ymax1, ymax0);
                 double ymin = Math.Max(ymin1, ymin0);
 
                 List<double> newyList = new List<double>();
-                foreach (double singley in XYListMap[i]) 
+                foreach (double singley in XYListMap[i])
                 {
                     if (singley <= ymax && singley >= ymin) newyList.Add(singley);
                 }
-                foreach (double singley in XYListMap[i+1])
+                foreach (double singley in XYListMap[i + 1])
                 {
                     if (singley <= ymax && singley >= ymin) newyList.Add(singley);
                 }
                 newyList = newyList.OrderBy(x => x).ToList();
 
-                GetRecsFromColumn(xList[i], xList[i+1], newyList);
+                GetRecsFromColumn(xList[i], xList[i + 1], newyList);
 
                 //tmpRecs.Add(new FreeAreaRec(
                 //    new Coordinate(xList[i], ymin), new Coordinate(xList[i + 1], ymin),
@@ -265,19 +266,19 @@ namespace ThParkingStall.Core.LaneDeformation
             }
         }
 
-        public void GetRecsFromColumn(double x0,double x1,List<double> newyList) 
+        public void GetRecsFromColumn(double x0, double x1, List<double> newyList)
         {
-            if (newyList.Count < 2) 
+            if (newyList.Count < 2)
             {
                 int stop = 0;
                 return;
             }
             double starty = newyList[0];
             double endy = newyList[0];
-            for (int i = 0; i < newyList.Count - 1; i++) 
+            for (int i = 0; i < newyList.Count - 1; i++)
             {
                 double y0 = starty;
-                double y1 = newyList[i+1];
+                double y1 = newyList[i + 1];
 
                 Polygon testPl = PolygonUtils.CreatePolygonRec(x0, x1, y0, y1);
                 var smallPl = testPl.Buffer(-2);
@@ -293,13 +294,13 @@ namespace ThParkingStall.Core.LaneDeformation
                     endy = y1;
 
                     //处理最后一个特殊情况
-                    if (i + 1 == newyList.Count - 1) 
+                    if (i + 1 == newyList.Count - 1)
                     {
-                        if (endy - starty > 5) 
+                        if (endy - starty > 5)
                         {
                             tmpRecs.Add(new FreeAreaRec(
-                               new Coordinate(x0,starty), new Coordinate(x1, starty),
-                               new Coordinate(x1,endy), new Coordinate(x0, endy)));
+                               new Coordinate(x0, starty), new Coordinate(x1, starty),
+                               new Coordinate(x1, endy), new Coordinate(x0, endy)));
                         }
                     }
                 }
@@ -325,7 +326,7 @@ namespace ThParkingStall.Core.LaneDeformation
         //第二类分割法
         public void GetCutRecs1(Polygon singleFreeArea, List<double> xList)
         {
-       
+
             FromPointToRecs2(xList);
 
             //仅仅保留上下两个矩形
@@ -376,9 +377,9 @@ namespace ThParkingStall.Core.LaneDeformation
                 LDOutput.DrawTmpOutPut0.TmpCutRecs.AddRange(pendingPolygons);
 
 
-                for (int j = 0; j < pendingPolygons.Count ; j++) {
+                for (int j = 0; j < pendingPolygons.Count; j++) {
                     List<Coordinate> isRec = RecVerification(pendingPolygons[j]);
-                    if (isRec.Count > 0) 
+                    if (isRec.Count > 0)
                     {
                         tmpRecSingleX.Add(new FreeAreaRec(isRec[0], isRec[1], isRec[2], isRec[3]));
                     }
@@ -392,7 +393,7 @@ namespace ThParkingStall.Core.LaneDeformation
             }
         }
 
-        public List<Coordinate> RecVerification(Polygon maybeRec) 
+        public List<Coordinate> RecVerification(Polygon maybeRec)
         {
             List<Coordinate> coordinates = new List<Coordinate>();
             var xlist = GetXList(maybeRec.Coordinates.ToList());
@@ -400,23 +401,23 @@ namespace ThParkingStall.Core.LaneDeformation
             double deltay = ylist.Last() - ylist.First();
             double deltax = xlist.Last() - xlist.First();
             double recArea = deltax * deltay;
-            if (maybeRec.Area > recArea * 0.5) 
-            if(true)
-            {
-                coordinates.Add(new Coordinate(xlist.First(),ylist.First()));
-                coordinates.Add(new Coordinate(xlist.Last(),ylist.First()));
-                coordinates.Add(new Coordinate(xlist.Last(), ylist.Last()));
-                coordinates.Add(new Coordinate(xlist.First(), ylist.Last()));
-            }
+            if (maybeRec.Area > recArea * 0.5)
+                if (true)
+                {
+                    coordinates.Add(new Coordinate(xlist.First(), ylist.First()));
+                    coordinates.Add(new Coordinate(xlist.Last(), ylist.First()));
+                    coordinates.Add(new Coordinate(xlist.Last(), ylist.Last()));
+                    coordinates.Add(new Coordinate(xlist.First(), ylist.Last()));
+                }
 
             return coordinates;
         }
 
 
-        public void GetUsefulRecs() 
+        public void GetUsefulRecs()
         {
             clearedTmpRecsX = new List<List<FreeAreaRec>>();
-            for (int i = 0; i < tmpRecsX.Count; i++) 
+            for (int i = 0; i < tmpRecsX.Count; i++)
             {
                 List<FreeAreaRec> tmpNewSingleRecs = new List<FreeAreaRec>();
                 if (tmpRecsX[i].Count >= 2)
@@ -425,7 +426,7 @@ namespace ThParkingStall.Core.LaneDeformation
                     tmpNewSingleRecs.Add(tmpRecsX[i].Last());
 
                 }
-                else if (tmpRecsX[i].Count == 1) 
+                else if (tmpRecsX[i].Count == 1)
                 {
                     tmpNewSingleRecs.Add(tmpRecsX[i].First());
                 }
@@ -472,14 +473,14 @@ namespace ThParkingStall.Core.LaneDeformation
                         nowWidth = nowRec.Width;
                         nowMinY = nowRec.LeftDownPoint.Y;
                         nowMaxY = nowRec.LeftUpPoint.Y;
-                        
+
                     }
                     else
                     {
                         upFreeAreaRecs.Add(nowRec);
                     }
                 }
-                else if(count > 0)
+                else if (count > 0)
                 {
                     //同底同高合并
                     if (Math.Abs(nowRec.LeftDownPoint.Y - nowMinY) < 10 && Math.Abs(nowRec.LeftUpPoint.Y - nowMaxY) < 10)
@@ -508,9 +509,9 @@ namespace ThParkingStall.Core.LaneDeformation
                         nowWidth = nowWidth + nowRec.Width;
                         rightX = nowRec.RightDownPoint.X;
                     }
-                    
+
                     //不合并
-                    else 
+                    else
                     {
                         //旧block回收
                         retrieve = true;
@@ -526,14 +527,14 @@ namespace ThParkingStall.Core.LaneDeformation
                     retrieve = true;
                 }
 
-                if (retrieve) 
+                if (retrieve)
                 {
                     List<Coordinate> coordinates = new List<Coordinate>();
                     coordinates.Add(new Coordinate(leftX, nowMinY));
                     coordinates.Add(new Coordinate(rightX, nowMinY));
                     coordinates.Add(new Coordinate(rightX, nowMaxY));
                     coordinates.Add(new Coordinate(leftX, nowMaxY));
-                    upFreeAreaRecs.Add(new FreeAreaRec(coordinates[0], coordinates[1],coordinates[2],coordinates[3]));
+                    upFreeAreaRecs.Add(new FreeAreaRec(coordinates[0], coordinates[1], coordinates[2], coordinates[3]));
 
                     //回收后变量置零
                     nowWidth = 0;
@@ -544,7 +545,7 @@ namespace ThParkingStall.Core.LaneDeformation
                     count = 0;
                 }
 
-                if (nowBlockCreate) 
+                if (nowBlockCreate)
                 {
                     if (nowRec.Width < threshold)
                     {
@@ -690,19 +691,20 @@ namespace ThParkingStall.Core.LaneDeformation
 
         }
 
-        void GetBoundaryFreeAreaRecs(double length = 20) 
+        void GetBoundaryFreeAreaRecs(double length = 20)
         {
             Polygon boundary = VehicleLane.Boundary.Clone();
             List<Coordinate> points = VehicleLane.Boundary.Coordinates.ToList();
 
-            for (int i = 0; i < points.Count; i++) 
+
+            for (int i = 0; i < points.Count; i++)
             {
                 Coordinate pt0 = points[i];
                 Coordinate pt1 = points[(i + 1) % points.Count];
                 Vector2D vecDir0 = new Vector2D(1, 0);
                 Vector2D vecDir1 = new Vector2D(-1, 0);
 
-                Vector2D vec0 = new Vector2D(pt0,pt1).Normalize();
+                Vector2D vec0 = new Vector2D(pt0, pt1).Normalize();
 
                 if (vec0.Dot(vecDir1) > 0.95)
                 {
@@ -718,10 +720,20 @@ namespace ThParkingStall.Core.LaneDeformation
                 }
             }
 
-            for (int i = 0; i < BoundaryFreeAreaRecs.Count; i++) 
+            for (int i = 0; i < BoundaryFreeAreaRecs.Count; i++)
             {
                 LDOutput.DrawTmpOutPut0.BoundaryRecs.Add(BoundaryFreeAreaRecs[i].Obb);
             }
+        }
+
+
+
+        public void test() 
+        {
+            Polygon a = OriginalFreeAreaList[0];
+
+            Polygon pl = new Polygon(new LinearRing(a.Coordinates));
+        
         }
     }
 }

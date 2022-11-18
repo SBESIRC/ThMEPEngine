@@ -698,6 +698,40 @@ namespace ThMEPArchitecture.MultiProcess
                 MPolygon ma = a.ToDbMPolygon();
                 DrawUtils.ShowGeometry(ma, "l0BoundaryRecs", 0);
             }
+
+            foreach (Polygon a in drawTmpOutPut.NewFreeArea)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l1NewFreeArea", 1);
+            }
+
+            foreach (Polygon a in drawTmpOutPut.Cars)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l1Cars", 2);
+            }
+
+            foreach (Polygon a in drawTmpOutPut.CarBlocks)
+            {
+                MPolygon ma = a.ToDbMPolygon();
+                DrawUtils.ShowGeometry(ma, "l1CarBlocks", 3);
+            }
+
+            foreach (LineSegment a in drawTmpOutPut.CarLine)
+            {
+                Line ma = a.ToDbLine();
+                DrawUtils.ShowGeometry(ma, "l1CarLine", 3);
+            }
+
+            foreach (LineSegment a in drawTmpOutPut.OldCarLine)
+            {
+                Line ma = a.ToDbLine();
+                DrawUtils.ShowGeometry(ma, "l1OldCarLine", 4);
+            }
+
+
+
+
         }
     }
 }
