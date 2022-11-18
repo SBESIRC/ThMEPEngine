@@ -168,6 +168,7 @@ namespace ThMEPArchitecture.FireZone
             if(newShell != null) minArea = Math.Min(minArea, newShell.Area * 0.001 * 0.001 / 2);
             var map = Translator.CreateMap(newShell);
 
+            //return map.FindBestAC(minArea, maxArea);
             return map.FindBestFireZone(minArea, maxArea);
         }
         #endregion

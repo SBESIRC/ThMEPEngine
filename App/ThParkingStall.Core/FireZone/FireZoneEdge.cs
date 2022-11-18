@@ -14,11 +14,13 @@ namespace ThParkingStall.Core.FireZone
         public Coordinate P1 { get { return Path.EndPoint.Coordinate; } }
         public int ObjId = -1;
         public double Cost;
+        public double Pheromone;
         public FireZoneEdge(LineString path, double cost = -1)
         {
             Path = path;
             if (cost < 0) Cost = path.Length;
             else Cost = cost;
+            Pheromone = 1;
         }
         public override bool Equals(object obj)
         {

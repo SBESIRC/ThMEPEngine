@@ -200,5 +200,122 @@ namespace ThParkingStall.Core.FireZone
         {
             return polygon.Area<=MaxArea && polygon.Area>=MinArea;
         }
+
+        #region 蚁群算法求解
+        public (Polygon, Polygon, double) FindBestAC(double minArea, double maxArea,
+            int StepSize = 25,int antCnt = 300,int loops = 300) 
+        {
+            MinArea = minArea * multiplier * multiplier;
+            MaxArea = maxArea * multiplier * multiplier;
+            var t_start = _stopwatch.Elapsed.TotalSeconds;
+            var minCost = double.MaxValue;
+            FireZonePath optSolution = null;
+            for(int iter = 0; iter < loops; iter++)
+            {
+                var solutions = new List<FireZonePath>();
+                for(int ant = 0; ant < antCnt; ant++)
+                {
+                    var solution = SearchOne(StepSize, minCost);
+                    if (solution != null)
+                    {
+                        solutions.Add(solution);
+                        if (solution.Cost < minCost)
+                        {
+                            minCost = solution.Cost;
+                            optSolution = solution;
+                        }
+                    }
+                }
+                foreach(var solution in solutions)
+                {
+                    var Path = solution.Path;
+                    for (int i = 0; i < Path.Count; i++)
+                    {
+                        var objId = Path[i];
+                        if (i % 2 == 0)
+                        {
+                            IdToEdge[objId].Pheromone +=1* StepSize *1000/ solution.Cost;
+                        }
+                    }
+                }
+                foreach(var edge in IdToEdge.Values)
+                {
+                    edge.Pheromone *= 0.8;
+                }
+            }
+
+            if (optSolution != null) return ScoredPaths[optSolution];
+            else return (null, null, -1);
+        }
+        private FireZonePath SearchOne(int maxDepth,double minCost)
+        {
+            var path = new FireZonePath();
+            for (int i = 0; i < maxDepth; i++)
+            {
+                var next = SearchAC(path, minCost);
+                if (next == null) break;
+                path = next;
+            }
+            if (!path.Ended) return null;
+
+            if (!ScoredPaths.ContainsKey(path))
+            {
+                var splitted = Split(path);
+                var areaDiff = Math.Min(AreaDiff(splitted.Item1), AreaDiff(splitted.Item2));
+                path.Cost += 20 * Math.Sqrt(areaDiff);
+                ScoredPaths.Add(path, (splitted.Item1, splitted.Item2, path.Cost));
+            }
+            else
+            {
+                path.Cost = ScoredPaths[path].Item3;
+            }
+            return path;
+        }
+        private FireZonePath SearchAC(FireZonePath initPath,double minCost)
+        {
+            var nextLevelPath = new List<FireZonePath>();
+            if (initPath.Ended) return null;
+            FireZoneNode initNode;
+            if (initPath.Path.Count == 0)//初始节点，未添加路径
+            {
+                initNode = Root;
+            }
+            else
+            {
+                initNode = IdToNode[initPath.Path.Last()];
+            }
+            var prob = new List<double>();
+            foreach (var branch in initNode.Branches)
+            {
+                var next_edge = branch.Item1;
+                if (minCost < next_edge.Cost + initPath.Cost) continue;
+                if (initPath.Contains(next_edge)) continue;
+                var next_node = branch.Item2;
+                if (initPath.Contains(next_node)) continue;
+                var newPath = initPath.Step(next_edge, next_node);
+                nextLevelPath.Add(newPath);
+                prob.Add(next_edge.Pheromone);
+            }
+            if(prob.Count == 0) return null;
+            var sum = prob.Sum();
+            prob = prob.Select(p =>p/sum).ToList();
+            var rand = ThParkingStallCoreTools.RandDouble();
+            var p_sum = 0.0;
+            for (int i = 0; i < prob.Count; i++)
+            {
+                p_sum += prob[i];
+                if (p_sum > rand) return nextLevelPath[i]; 
+            }
+            return nextLevelPath.Last();
+        }
+
+        private double AreaDiff(Polygon poly)
+        {
+            if(poly.Area < MinArea) return MinArea - poly.Area;
+            else if(poly.Area > MaxArea) return poly.Area - MaxArea;
+            return 0;
+        }
+
+        #endregion
     }
 }
