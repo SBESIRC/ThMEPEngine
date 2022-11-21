@@ -12,7 +12,10 @@ namespace ThPlatform3D.StructPlane.Print
         {
             var results = new ObjectIdCollection();
             var textId = dbText.Print(acadDb, config);
-            results.Add(textId);
+            if(textId!=ObjectId.Null)
+            {
+                results.Add(textId);
+            }            
             return results;
         }
 

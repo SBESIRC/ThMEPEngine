@@ -14,10 +14,16 @@ namespace ThPlatform3D.StructPlane.Print
         {
             var results = new ObjectIdCollection();
             var outlineId =  polygon.Print(acadDb, outlineConfig);
-            var objIds = new ObjectIdCollection { outlineId };
-            var hatchId = objIds.Print(acadDb, hatchConfig);
-            results.Add(outlineId);
-            results.Add(hatchId);
+            if(outlineId!=ObjectId.Null)
+            {
+                results.Add(outlineId);
+                var objIds = new ObjectIdCollection { outlineId };
+                var hatchId = objIds.Print(acadDb, hatchConfig);
+                if(hatchId!=ObjectId.Null)
+                {
+                    results.Add(hatchId);
+                }                
+            }
             return results;
         }
         public static ObjectIdCollection Print(AcadDatabase acadDb, MPolygon polygon,PrintConfig outlineConfig, HatchPrintConfig hatchConfig)

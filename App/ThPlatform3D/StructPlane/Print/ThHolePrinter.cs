@@ -25,22 +25,35 @@ namespace ThPlatform3D.StructPlane.Print
                 return results;
             }            
             var outPolygonId = polygon.Print(db, outlineConfig);
-            results.Add(outPolygonId);
-            var newOutPolygon = Handle(polygon);
-            if (newOutPolygon.Area < 1.0)
+            if(outPolygonId!=ObjectId.Null)
             {
+                results.Add(outPolygonId);
+                var newOutPolygon = Handle(polygon);
+                if (newOutPolygon.Area < 1.0)
+                {
+                    return results;
+                }
+                var innerhole = BuildHatchHole(newOutPolygon);
+                if (innerhole.Area > 0.0)
+                {
+                    var innerPolygonId = innerhole.Print(db, outlineConfig);
+                    if(innerPolygonId!=ObjectId.Null)
+                    {
+                        results.Add(innerPolygonId);
+                        var objIds = new ObjectIdCollection { innerPolygonId };
+                        var hatchId = objIds.Print(db, hatchConfig);
+                        if(hatchId!=ObjectId.Null)
+                        {
+                            results.Add(hatchId);
+                        }                        
+                    }                    
+                }
                 return results;
             }
-            var innerhole = BuildHatchHole(newOutPolygon);
-            if (innerhole.Area > 0.0)
+            else
             {
-                var innerPolygonId = innerhole.Print(db, outlineConfig);
-                var objIds = new ObjectIdCollection { innerPolygonId };
-                var hatchId = objIds.Print(db, hatchConfig);
-                results.Add(innerPolygonId);
-                results.Add(hatchId);
-            }
-            return results;
+                return results;
+            }            
         }
         private static Polyline Handle(Polyline polygon)
         {

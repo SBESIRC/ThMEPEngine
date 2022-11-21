@@ -493,7 +493,7 @@ namespace ThPlatform3D.StructPlane.Print
                 corners.OfType<Line>().ForEach(l => results.AddRange(
                     ThStairLineMarkPrinter.Print(acadDb, l, lineConfig, textConfig)));
             }
-            return results;
+            return results.OfType<ObjectId>().ToCollection();
         }
 
         private Dictionary<string,HatchPrintConfig> GetSlabHatchConfigs(List<string> elevations)

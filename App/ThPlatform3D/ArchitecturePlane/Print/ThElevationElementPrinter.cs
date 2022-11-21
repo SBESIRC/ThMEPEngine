@@ -14,8 +14,11 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         public ObjectIdCollection Print(Database db, Curve curve)
         {
             var results = new ObjectIdCollection();
-            var beamId = curve.Print(db, Config);
-            results.Add(beamId);
+            var id = curve.Print(db, Config);
+            if(id!=ObjectId.Null)
+            {
+                results.Add(id);
+            }            
             return results;
         }
         public static PrintConfig GetConfig()

@@ -29,23 +29,30 @@ namespace ThPlatform3D.Common
 
         public static ObjectId Print(this Entity entity, AcadDatabase acadDb, PrintConfig config)
         {
-            if(entity.ObjectId==ObjectId.Null)
+            try
             {
-                var objId = acadDb.ModelSpace.Add(entity);
-                entity.Layer = config.LayerName;
-                entity.Linetype = config.LineType;
-                entity.LineWeight = config.LineWeight;
-                entity.ColorIndex = config.Color;
-                if (config.LineTypeScale.HasValue)
+                if (entity.ObjectId == ObjectId.Null)
                 {
-                    entity.LinetypeScale = config.LineTypeScale.Value;
+                    var objId = acadDb.ModelSpace.Add(entity);
+                    entity.Layer = config.LayerName;
+                    entity.Linetype = config.LineType;
+                    entity.LineWeight = config.LineWeight;
+                    entity.ColorIndex = config.Color;
+                    if (config.LineTypeScale.HasValue)
+                    {
+                        entity.LinetypeScale = config.LineTypeScale.Value;
+                    }
+                    return objId;
                 }
-                return objId;
+                else
+                {
+                    return entity.ObjectId;
+                }                
             }
-            else
+            catch
             {
-                return entity.ObjectId;
-            }
+                return ObjectId.Null;
+            }            
         }
 
         public static ObjectId Print(this DBText dbText, Database db, AnnotationPrintConfig config)
@@ -60,21 +67,28 @@ namespace ThPlatform3D.Common
         {
             // 事务在外部开启
             // 传入的文字几何位置已经确定了，这儿只设置相关属性
-            if(dbText.ObjectId==ObjectId.Null)
+            try
             {
-                var objId = acadDb.ModelSpace.Add(dbText);
-                dbText.Layer = config.LayerName;
-                dbText.Height = config.Height;
-                dbText.WidthFactor = config.WidthFactor;
-                dbText.ColorIndex = config.Color;
-                dbText.TextStyleId = config.TextStyleId;
-                return objId;
-                
+                if (dbText.ObjectId == ObjectId.Null)
+                {
+                    var objId = acadDb.ModelSpace.Add(dbText);
+                    dbText.Layer = config.LayerName;
+                    dbText.Height = config.Height;
+                    dbText.WidthFactor = config.WidthFactor;
+                    dbText.ColorIndex = config.Color;
+                    dbText.TextStyleId = config.TextStyleId;
+                    return objId;
+                }
+                else
+                {
+                    return dbText.ObjectId;
+                }                
             }
-            else
+            catch
             {
-                return dbText.ObjectId;
+                return ObjectId.Null;
             }
+            
         }
 
         public static ObjectId Print(this ObjectIdCollection objIds, Database db,  HatchPrintConfig config)
@@ -87,22 +101,29 @@ namespace ThPlatform3D.Common
 
         public static ObjectId Print(this ObjectIdCollection objIds, AcadDatabase acadDb, HatchPrintConfig config)
         {
-            Hatch oHatch = new Hatch();
-            oHatch.HatchObjectType = HatchObjectType.HatchObject;
-            oHatch.Normal = config.Normal;
-            oHatch.Elevation = config.Elevation;
-            //oHatch.PatternAngle = config.PatternAngle;
-            oHatch.PatternScale = config.PatternScale;
-            //oHatch.PatternSpace = config.PatternSpace;
-            oHatch.SetHatchPattern(config.PatternType, config.PatternName);
-            oHatch.ColorIndex = config.Color;
-            oHatch.Layer = config.LayerName;
-            //oHatch.Transparency = new Autodesk.AutoCAD.Colors.Transparency(77); //30%
-            var hatchId = acadDb.ModelSpace.Add(oHatch);
-            oHatch.Associative = config.Associative;
-            oHatch.AppendLoop((int)HatchLoopTypes.Default, objIds);
-            oHatch.EvaluateHatch(true);
-            return hatchId;
+            try
+            {
+                Hatch oHatch = new Hatch();
+                oHatch.HatchObjectType = HatchObjectType.HatchObject;
+                oHatch.Normal = config.Normal;
+                oHatch.Elevation = config.Elevation;
+                //oHatch.PatternAngle = config.PatternAngle;
+                oHatch.PatternScale = config.PatternScale;
+                //oHatch.PatternSpace = config.PatternSpace;
+                oHatch.SetHatchPattern(config.PatternType, config.PatternName);
+                oHatch.ColorIndex = config.Color;
+                oHatch.Layer = config.LayerName;
+                //oHatch.Transparency = new Autodesk.AutoCAD.Colors.Transparency(77); //30%
+                var hatchId = acadDb.ModelSpace.Add(oHatch);
+                oHatch.Associative = config.Associative;
+                oHatch.AppendLoop((int)HatchLoopTypes.Default, objIds);
+                oHatch.EvaluateHatch(true);
+                return hatchId;
+            }
+            catch
+            {
+                return ObjectId.Null;
+            }            
         }
 
         public static ObjectIdCollection Print(this MPolygon polygon, Database db, PrintConfig outlineConfig,HatchPrintConfig hatchConfig)
@@ -115,47 +136,54 @@ namespace ThPlatform3D.Common
 
         public static ObjectIdCollection Print(this MPolygon polygon, AcadDatabase acadDb, PrintConfig outlineConfig, HatchPrintConfig hatchConfig)
         {
-            var results = new ObjectIdCollection();
-            var shell = polygon.Shell();
-            var holes = polygon.Holes();
-            var shellId = shell.Print(acadDb, outlineConfig);
-            var holeIds = new ObjectIdCollection();
-            holes.ForEach(h => holeIds.Add(h.Print(acadDb, outlineConfig)));
-            if (hatchConfig != null)
+            try
             {
-                Hatch oHatch = new Hatch();
-                oHatch.HatchObjectType = HatchObjectType.HatchObject;
-                oHatch.Normal = hatchConfig.Normal;
-                oHatch.Elevation = hatchConfig.Elevation;
-                //oHatch.PatternAngle = config.PatternAngle;
-                oHatch.PatternScale = hatchConfig.PatternScale;
-                //oHatch.PatternSpace = config.PatternSpace;
-                oHatch.SetHatchPattern(hatchConfig.PatternType, hatchConfig.PatternName);
-                oHatch.ColorIndex = (int)ColorIndex.BYLAYER;
-                oHatch.Layer = hatchConfig.LayerName;
-                var hatchId = acadDb.ModelSpace.Add(oHatch);
-                oHatch.Associative = hatchConfig.Associative;
-                if (holes.Count == 0)
+                var results = new ObjectIdCollection();
+                var shell = polygon.Shell();
+                var holes = polygon.Holes();
+                var shellId = shell.Print(acadDb, outlineConfig);
+                var holeIds = new ObjectIdCollection();
+                holes.ForEach(h => holeIds.Add(h.Print(acadDb, outlineConfig)));
+                if (hatchConfig != null)
                 {
-                    oHatch.AppendLoop((int)HatchLoopTypes.Default,
-                        new ObjectIdCollection { shellId });
-                }
-                else
-                {
-                    oHatch.AppendLoop(HatchLoopTypes.Outermost,
-                            new ObjectIdCollection { shellId });
-                    holeIds.OfType<ObjectId>().ForEach(o =>
+                    Hatch oHatch = new Hatch();
+                    oHatch.HatchObjectType = HatchObjectType.HatchObject;
+                    oHatch.Normal = hatchConfig.Normal;
+                    oHatch.Elevation = hatchConfig.Elevation;
+                    //oHatch.PatternAngle = config.PatternAngle;
+                    oHatch.PatternScale = hatchConfig.PatternScale;
+                    //oHatch.PatternSpace = config.PatternSpace;
+                    oHatch.SetHatchPattern(hatchConfig.PatternType, hatchConfig.PatternName);
+                    oHatch.ColorIndex = (int)ColorIndex.BYLAYER;
+                    oHatch.Layer = hatchConfig.LayerName;
+                    var hatchId = acadDb.ModelSpace.Add(oHatch);
+                    oHatch.Associative = hatchConfig.Associative;
+                    if (holes.Count == 0)
                     {
-                        oHatch.AppendLoop(HatchLoopTypes.Default,
-                            new ObjectIdCollection { o });
-                    });
+                        oHatch.AppendLoop((int)HatchLoopTypes.Default,
+                            new ObjectIdCollection { shellId });
+                    }
+                    else
+                    {
+                        oHatch.AppendLoop(HatchLoopTypes.Outermost,
+                                new ObjectIdCollection { shellId });
+                        holeIds.OfType<ObjectId>().ForEach(o =>
+                        {
+                            oHatch.AppendLoop(HatchLoopTypes.Default,
+                                new ObjectIdCollection { o });
+                        });
+                    }
+                    oHatch.EvaluateHatch(true);
+                    results.Add(hatchId);
                 }
-                oHatch.EvaluateHatch(true);
-                results.Add(hatchId);
+                results.Add(shellId);
+                holeIds.OfType<ObjectId>().ForEach(o => results.Add(o));
+                return results;
             }
-            results.Add(shellId);
-            holeIds.OfType<ObjectId>().ForEach(o => results.Add(o));
-            return results;
+            catch
+            {
+                return new ObjectIdCollection();
+            }            
         }
     }
 }

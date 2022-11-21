@@ -12,10 +12,16 @@ namespace ThPlatform3D.StructPlane.Print
         {
             var results = new ObjectIdCollection();
             var outlineId =  polygon.Print(db, outlineConfig);
-            var objIds = new ObjectIdCollection { outlineId };
-            var hatchId = objIds.Print(db, hatchConfig);
-            results.Add(outlineId);
-            results.Add(hatchId);
+            if(outlineId!=ObjectId.Null)
+            {
+                results.Add(outlineId);
+                var objIds = new ObjectIdCollection { outlineId };
+                var hatchId = objIds.Print(db, hatchConfig);
+                if(hatchId!=ObjectId.Null)
+                {
+                    results.Add(hatchId);
+                }                
+            }
             return results;
         }
 

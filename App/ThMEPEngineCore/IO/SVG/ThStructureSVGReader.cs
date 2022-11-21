@@ -105,14 +105,26 @@ namespace ThMEPEngineCore.IO.SVG
                     if (children is SvgPath svgPath)
                     {
                         var curves = svgPath.ParseSvgPath();
-                        if (properties["type"].ToString() == "IfcSlab" && curves.Count > 1)
+                        var cleanCurves = Clean(curves.ToCollection());
+                        if(cleanCurves.Count==0)
                         {
-                            var polygons = BuildArea(curves.ToCollection());
-                            polygons.OfType<Entity>().ForEach(e => results.Add(CreateThGeometry(e, properties)));
+                            continue;
+                        }
+                        if (properties["type"].ToString() == "IfcSlab")
+                        {
+                            if (cleanCurves.Count > 1)
+                            {
+                                var polygons = BuildArea(cleanCurves);
+                                polygons.OfType<Entity>().ForEach(e => results.Add(CreateThGeometry(e, properties)));
+                            }
+                            else
+                            {
+                                cleanCurves.OfType<Curve>().ForEach(c => results.Add(CreateThGeometry(c, properties)));
+                            }
                         }
                         else
                         {
-                            curves.ForEach(c => results.Add(CreateThGeometry(c, properties)));
+                            cleanCurves.OfType<Curve>().ForEach(c => results.Add(CreateThGeometry(c, properties)));
                         }
                     }
                     else if (children is SvgRectangle svgRect)
@@ -168,9 +180,7 @@ namespace ThMEPEngineCore.IO.SVG
                 }
                 catch
                 {
-
                 }
-                
             }
             // 收集结果
             ParseInfo.Geos = results;
@@ -180,19 +190,29 @@ namespace ThMEPEngineCore.IO.SVG
         
         private DBObjectCollection BuildArea(DBObjectCollection objs)
         {
-            var polygons = objs.FilterSmallArea(1.0);
-            var simplifier = new ThPolygonalElementSimplifier();
-            polygons = simplifier.Normalize(polygons);
-            polygons = polygons.FilterSmallArea(1.0);
-            polygons = simplifier.MakeValid(polygons);
-            polygons = polygons.FilterSmallArea(1.0);
-            polygons = simplifier.Simplify(polygons);
-            polygons = polygons.FilterSmallArea(1.0);
-            var results = polygons.BuildArea();
+            var results = objs.BuildArea();
             results = results.FilterSmallArea(1.0);
             return results;
         }
-        
+        private DBObjectCollection Clean(DBObjectCollection polygons)
+        {
+            if(polygons.Count==0)
+            {
+                return new DBObjectCollection();
+            }
+            else
+            {
+                var results = polygons.FilterSmallArea(1.0);
+                var simplifier = new ThPolygonalElementSimplifier();
+                results = simplifier.Normalize(results);
+                results = results.FilterSmallArea(1.0);
+                results = simplifier.MakeValid(results);
+                results = results.FilterSmallArea(1.0);
+                results = simplifier.Simplify(results);
+                results = results.FilterSmallArea(1.0);
+                return results;
+            }            
+        }
         //private Matrix3d GetTransformMatrix(SvgTransformCollection svgTransforms)
         //{
         //    if(svgTransforms==null)
