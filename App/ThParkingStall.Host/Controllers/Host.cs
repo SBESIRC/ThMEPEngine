@@ -24,7 +24,7 @@ namespace ThParkingStall.Host.Controllers
         public static void InitSERVERS()
         {
             SERVERS = new Queue<string>();
-            //SERVERS.Enqueue("http://172.17.1.73");
+            SERVERS.Enqueue("http://172.17.1.73");
             SERVERS.Enqueue("http://172.16.1.84");//host服务器
             //SERVERS.Enqueue("http://172.16.1.109");
         }
@@ -59,13 +59,26 @@ namespace ThParkingStall.Host.Controllers
             lock (obj)
             {
                 GlobalParas.FILES.Enqueue(filename);
+                int cycleCount = 0;
                 while (true)
                 {
+                    cycleCount++;
                     if (GlobalParas.SERVERS.Count > 0)
                     {
                         server = GlobalParas.SERVERS.Dequeue();
-                        file = GlobalParas.FILES.Dequeue();
-                        break;
+                        if (askAnswer(server))
+                        {
+                            file = GlobalParas.FILES.Dequeue();
+                            break;
+                        }
+                        else
+                        {
+                            GlobalParas.SERVERS.Enqueue(server);
+                            if (cycleCount > 2)
+                            {
+                                return "服务器繁忙中，等待超时,请稍候再试。";
+                            }
+                        }
                     }
                     else
                     {
@@ -160,9 +173,36 @@ namespace ThParkingStall.Host.Controllers
         {
             return true;
         }
+        static bool askAnswer(string server)
+        {
+            var appHttp = $"{server}:{GlobalParas.tcp_app}/Cal/AskAnswer";
+            SetCertificatePolicy();
+            List<Byte> pageData = new List<byte>();
+            string pageHtml = "";
+            WebClientEx MyWebClient = new WebClientEx();
+            MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
+            MyWebClient.Timeout = 10 * 60 * 1000;
+            Task.Factory.StartNew(() =>
+            {
+                pageData = MyWebClient.DownloadData(appHttp).ToList();
+            }).Wait(-1);
+            pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
+            if(pageHtml.Contains("1"))
+                return true;
+            else return false;
+        }
 
     }
-
+    [ApiController]
+    [Route("[controller]")]
+    public class AskAnswer : ControllerBase
+    {
+        [HttpGet]
+        public string askAnswer()
+        {
+            return "1";
+        }
+    }
     [ApiController]
     [Route("[controller]")]
     public class ReadServers:ControllerBase
