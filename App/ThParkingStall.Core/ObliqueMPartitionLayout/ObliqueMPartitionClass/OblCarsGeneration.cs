@@ -509,6 +509,40 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                     var sourceLine = iniLineToDataConversion.Translation(-vec.Normalize() * DisLaneWidth / 2);
                     var parkingPlaceBlockObb = PolyFromLines(iniLineToDataConversion, iniLineToDataConversion.Translation(vec.Normalize() * ((isBackBackmodule ? DisVertCarLengthBackBack : length_offset))));
                     var parkingPlaceBlock = new ParkingPlaceBlock(sourceLine, parkingPlaceBlockObb, new PureVector(vec.Normalize().X, vec.Normalize().Y), _SingleParkingPlaces, _LDColumns);
+                    #region 如果是背靠背，找出上一次以普通尺寸加入的修改为背靠背
+                    if (isBackBackmodule)
+                    {
+                        for (int k = 0; k < ParkingPlaceBlocks.Count; k++)
+                        {
+                            var ppBlock= ParkingPlaceBlocks[k];
+                            var ppBlockObb = ppBlock.ParkingPlaceBlockObb;
+                            var g= NetTopologySuite.Operation.OverlayNG.OverlayNGRobust.Overlay(ppBlockObb, parkingPlaceBlockObb, NetTopologySuite.Operation.Overlay.SpatialFunction.Intersection);
+                            if (g is Polygon && g.Area > 1)
+                            {
+                                var carsInPpBlockObbTypes = Cars.Where(e => ppBlockObb.Contains(e.Polyline.Centroid.Coordinate)).Select(e => e.CarLayoutMode).ToList();
+                                if (carsInPpBlockObbTypes.Contains(((int)CarLayoutMode.VERTBACKBACK)) && !ContainBackBackModules(ppBlock))
+                                {
+                                    var ppVec = new Vector2D(ppBlock.BlockDir.X, ppBlock.BlockDir.Y).Normalize();
+                                    var ppAnchorLine = ppBlock.SourceLane.Translation(ppVec * DisLaneWidth / 2);
+                                    ppBlock.ParkingPlaceBlockObb = PolyFromLines(ppAnchorLine, ppAnchorLine.Translation(ppVec * DisVertCarLengthBackBack));
+                                    ppBlock.Cars = ppBlock.Cars.Select(e =>
+                                     {
+                                         if(e.Type== ((int)CarLayoutMode.VERTBACKBACK) || e.Type== ((int)CarLayoutMode.PARALLEL))
+                                            return e;
+                                         else
+                                         {
+                                             var parCarPls = e.ParkingPlaceObb.GetEdges().OrderBy(t => t.Length).Take(2).ToList();
+                                             var parCarEdge= parCarPls.OrderBy(t => ppBlock.SourceLane.ClosestPoint(t.MidPoint).Distance(t.MidPoint)).First();
+                                             var parCarPl = PolyFromLines(parCarEdge, parCarEdge.Translation(new Vector2D(e.ParkingPlaceDir.X,e.ParkingPlaceDir.Y).Normalize()*DisVertCarLengthBackBack));
+                                             var newCar = new SingleParkingPlace(parCarPl, ((int)CarLayoutMode.VERTBACKBACK), e.ParkingPlaceDir, e.Point);
+                                             return newCar;
+                                         }
+                                     }).ToList();
+                                }
+                            }
+                        }
+                    }
+                    #endregion
                     ParkingPlaceBlocks.Add(parkingPlaceBlock);
                 }
             } 
@@ -536,6 +570,14 @@ bool generate_middle_pillar = false, bool isin_backback = false, bool check_adj_
                 Pillars.AddRange(middle_pillars);
             }
             #endregion
+        }
+
+        bool ContainBackBackModules(ParkingPlaceBlock placeBlock)
+        {
+            var indexes=placeBlock.Cars.Select(e => e.Type).ToList();
+            if(indexes.Contains(((int)SingleParkingPlaceType.VERTBACKBACK)))
+                return true;
+            return false;
         }
     }
 }
