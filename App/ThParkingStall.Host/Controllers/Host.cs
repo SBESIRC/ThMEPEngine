@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -23,7 +24,7 @@ namespace ThParkingStall.Host.Controllers
         public static void InitSERVERS()
         {
             SERVERS = new Queue<string>();
-            SERVERS.Enqueue("http://172.17.1.73");
+            //SERVERS.Enqueue("http://172.17.1.73");
             SERVERS.Enqueue("http://172.16.1.84");//host服务器
             //SERVERS.Enqueue("http://172.16.1.109");
         }
@@ -85,6 +86,7 @@ namespace ThParkingStall.Host.Controllers
             {
                 return "服务器繁忙中，等待超时,请稍候再试。";
             }
+
 
             //把文件发送到对应服务器
             var data_dir = @"C:\AIIIS\DATAIIS";
@@ -228,6 +230,17 @@ namespace ThParkingStall.Host.Controllers
         [HttpGet]
         public string Run(string filename = "",string guid="",string isinHost="")
         {
+            //杀死可能存在的多余进程
+            try
+            {
+                Process[] processes = Process.GetProcesses();
+                foreach (var process in processes)
+                {
+                    if (process.ProcessName.Contains("ThParkingStallServer.Core") || process.ProcessName.Contains("ThParkingStall.Core"))
+                        process.Kill();
+                }
+            }
+            catch { }
             try
             {
                 var pro = new System.Diagnostics.Process();
