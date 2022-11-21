@@ -5,11 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using ThControlLibraryWPF.ControlUtils;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
-using ThMEPWSS.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {

@@ -19,8 +19,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="0" Orientation="Vertical">
-                <cus:ImageButton Height="22" Content="楼层框定" Name="btnFloorFrame" Margin="0,0,0,5" Click="btnFloorFrame_Click"></cus:ImageButton>
-                <cus:ImageButton Height="22" Content="读取楼层" Margin="0" Name="btnReadFloor" Click="btnReadFloor_Click"></cus:ImageButton>
+                <cus:ImageButton Height="50" Content="读取楼层" Margin="0" Name="btnReadFloor" Click="btnReadFloor_Click"></cus:ImageButton>
             </StackPanel>
             <StackPanel Grid.Column="1" Orientation="Vertical">
                 <cus:ImageButton Name="btnDrawPipe" Height="22"  Content="立管图块" Margin="5,0,0,5" Click="btnDrawPipe_Click"></cus:ImageButton>

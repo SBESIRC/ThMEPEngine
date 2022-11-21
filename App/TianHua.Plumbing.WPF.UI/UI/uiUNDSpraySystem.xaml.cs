@@ -17,10 +17,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             DataContext = viewModel;
         }
 
-        private void BtnSelectFloor_Click(object sender, RoutedEventArgs e)
-        {
-            viewModel.CreateFloorFraming();
-        }
 
         private void BtnReadStoreys_Click(object sender, RoutedEventArgs e)
         {
