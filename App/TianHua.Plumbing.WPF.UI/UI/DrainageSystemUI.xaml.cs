@@ -107,24 +107,24 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 CadCache.ShowAllWindows();
             }
         }
-        //这明明是“新建楼层图框”
-        private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                CadCache.HideAllWindows(); ;
-                FocusMainWindow();
-                ThMEPWSS.Common.Utils.CreateFloorFraming(false);
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                CadCache.ShowAllWindows();
-            }
-        }
+        ////这明明是“新建楼层图框”
+        //private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
+        //{
+        //    try
+        //    {
+        //        CadCache.HideAllWindows(); ;
+        //        FocusMainWindow();
+        //        ThMEPWSS.Common.Utils.CreateFloorFraming(false);
+        //    }
+        //    catch (System.Exception ex)
+        //    {
+        //        MessageBox.Show(ex.Message);
+        //    }
+        //    finally
+        //    {
+        //        CadCache.ShowAllWindows();
+        //    }
+        //}
 
         private void ImageButton_Click_2(object sender, RoutedEventArgs e)
         {
