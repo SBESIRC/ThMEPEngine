@@ -31,23 +31,20 @@ namespace TianHua.Hvac.UI.EQPMFanSelect.EventMonitor
         {
             if (dbObject == null)
                 return;
-            if (dbObject is BlockReference block)
+            if (dbObject is BlockReference)
             {
-                using (AcadDatabase acadDatabase = AcadDatabase.Use(dbObject.Database))
+                var pFanModel = FanDataModelExtension.ReadBlockAllFanData(dbObject.Id, out FanDataModel cFanModel, out bool isCopy);
+                if (pFanModel == null)
+                    return;
+                if (!isCopy)
+                    return;
+                pFanModel.ID = Guid.NewGuid().ToString();
+                if (null != cFanModel)
                 {
-                    var pFanModel = FanDataModelExtension.ReadBlockAllFanData(block, out FanDataModel cFanModel, out bool isCopy);
-                    if (pFanModel == null)
-                        return;
-                    if (!isCopy)
-                        return;
-                    pFanModel.ID = Guid.NewGuid().ToString();
-                    if (null != cFanModel)
-                    {
-                        cFanModel.ID = Guid.NewGuid().ToString();
-                        cFanModel.PID = pFanModel.ID;
-                    }
-                    dbObject.Id.SetModelIdentifier(pFanModel.XDataValueList(1, cFanModel, dbObject.Id.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
+                    cFanModel.ID = Guid.NewGuid().ToString();
+                    cFanModel.PID = pFanModel.ID;
                 }
+                dbObject.Id.SetModelIdentifier(pFanModel.XDataValueList(1, cFanModel, dbObject.Id.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
             }
         }
     }

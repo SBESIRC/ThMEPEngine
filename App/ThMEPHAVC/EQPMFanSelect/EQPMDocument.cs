@@ -20,8 +20,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                 // 获取原模型对象
                 foreach (ObjectId item in allBlocks)
                 {
-                    var fanBlock = acdb.Element<BlockReference>(item);
-                    var pModel = FanDataModelExtension.ReadBlockAllFanData(fanBlock, out FanDataModel cModel, out bool isCopy);
+                    var pModel = FanDataModelExtension.ReadBlockAllFanData(item, out FanDataModel cModel, out bool isCopy);
                     if (null == pModel || !isCopy)
                         continue;
                     pModel.ID = Guid.NewGuid().ToString();
@@ -55,8 +54,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                 // 获取原模型对象
                 foreach (ObjectId item in targetBlocks)
                 {
-                    var fanBlock = acdb.Element<BlockReference>(item);
-                    var pModel = FanDataModelExtension.ReadBlockAllFanData(fanBlock, out FanDataModel cModel, out bool isCopy);
+                    var pModel = FanDataModelExtension.ReadBlockAllFanData(item, out FanDataModel cModel, out bool isCopy);
                     if (null == pModel)
                         continue;
                     bool haveChildFan = cModel != null;
