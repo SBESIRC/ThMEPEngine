@@ -7620,40 +7620,123 @@ cb: tolReturnValueRangeTo =>
       }
       var REGION_BORDER_BUFFE_RDISTANCE = pipeIds.Select(id => DrainageLabelItem.Parse(id)).Where(tolReturnValueMinRange => tolReturnValueMinRange != null).ToList();
       var rest = pipeIds.Except(REGION_BORDER_BUFFE_RDISTANCE.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.Label)).ToList();
-      var TolLaneProtect = REGION_BORDER_BUFFE_RDISTANCE.GroupBy(tolReturnValueMinRange => VTFac.Create(tolReturnValueMinRange.Prefix, tolReturnValueMinRange.D1S, tolReturnValueMinRange.Suffix)).Select(l => l.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.D2).ToList());
-      foreach (var default_fire_valve_width in TolLaneProtect)
       {
-        if (default_fire_valve_width.Count == THESAURUSHOUSING)
+        var TolLaneProtect = REGION_BORDER_BUFFE_RDISTANCE.GroupBy(tolReturnValueMinRange => VTFac.Create(tolReturnValueMinRange.Prefix, tolReturnValueMinRange.D1S, tolReturnValueMinRange.Suffix)).Select(l => l.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.D2).ToList());
+        foreach (var default_fire_valve_width in TolLaneProtect)
         {
-          yield return default_fire_valve_width.First().Label;
-        }
-        else if (default_fire_valve_width.Count > THESAURUSPERMUTATION && default_fire_valve_width.Count == default_fire_valve_width.Last().D2 - default_fire_valve_width.First().D2 + THESAURUSHOUSING)
-        {
-          var tolReturnValueMinRange = default_fire_valve_width.First();
-          yield return $"{tolReturnValueMinRange.Prefix}{tolReturnValueMinRange.D1S}-{default_fire_valve_width.First().D2S}{tolReturnValueMinRange.Suffix}~{default_fire_valve_width.Last().D2S}{tolReturnValueMinRange.Suffix}";
-        }
-        else
-        {
-          var sb = new StringBuilder();
+          if (default_fire_valve_width.Count == THESAURUSHOUSING)
+          {
+            yield return default_fire_valve_width.First().Label;
+          }
+          else if (default_fire_valve_width.Count > THESAURUSPERMUTATION && default_fire_valve_width.Count == default_fire_valve_width.Last().D2 - default_fire_valve_width.First().D2 + THESAURUSHOUSING)
           {
             var tolReturnValueMinRange = default_fire_valve_width.First();
-            sb.Append($"{tolReturnValueMinRange.Prefix}{tolReturnValueMinRange.D1S}-");
+            yield return $"{tolReturnValueMinRange.Prefix}{tolReturnValueMinRange.D1S}-{default_fire_valve_width.First().D2S}{tolReturnValueMinRange.Suffix}~{default_fire_valve_width.Last().D2S}{tolReturnValueMinRange.Suffix}";
           }
-          for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < default_fire_valve_width.Count; MAX_ANGEL_TOLLERANCE++)
+          else
           {
-            var tolReturnValueMinRange = default_fire_valve_width[MAX_ANGEL_TOLLERANCE];
-            sb.Append($"{tolReturnValueMinRange.D2S}{tolReturnValueMinRange.Suffix}");
-            if (MAX_ANGEL_TOLLERANCE != default_fire_valve_width.Count - THESAURUSHOUSING)
+            var sb = new StringBuilder();
             {
-              sb.Append(DEMATERIALISING);
+              var tolReturnValueMinRange = default_fire_valve_width.First();
+              sb.Append($"{tolReturnValueMinRange.Prefix}{tolReturnValueMinRange.D1S}-");
             }
+            for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < default_fire_valve_width.Count; MAX_ANGEL_TOLLERANCE++)
+            {
+              var tolReturnValueMinRange = default_fire_valve_width[MAX_ANGEL_TOLLERANCE];
+              sb.Append($"{tolReturnValueMinRange.D2S}{tolReturnValueMinRange.Suffix}");
+              if (MAX_ANGEL_TOLLERANCE != default_fire_valve_width.Count - THESAURUSHOUSING)
+              {
+                sb.Append(DEMATERIALISING);
+              }
+            }
+            yield return sb.ToString();
           }
-          yield return sb.ToString();
+        }
+      }
+      var items2 = rest.Select(id => THMEPWSSCRYSTALLOGRAPHY.Parse(id)).Where(tolReturnValueMinRange => tolReturnValueMinRange != null).ToList();
+      rest = rest.Except(items2.Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.THMEPWSSTHESAURUSBOULDER)).ToList();
+      {
+        var TolLaneProtect = items2.GroupBy(tolReturnValueMinRange => VTFac.Create(tolReturnValueMinRange.THMEPWSSMORPHOLOGICALLY, tolReturnValueMinRange.THMEPWSSTHESAURUSBOTHER)).Select(l => l.OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.THMEPWSSTHESAURUSBOTTOM).ToList());
+        foreach (var default_fire_valve_width in TolLaneProtect)
+        {
+          if (default_fire_valve_width.Count == THESAURUSHOUSING)
+          {
+            yield return default_fire_valve_width.First().THMEPWSSTHESAURUSBOULDER;
+          }
+          else if (default_fire_valve_width.Count > THESAURUSPERMUTATION && default_fire_valve_width.Count == default_fire_valve_width.Last().THMEPWSSTHESAURUSBOTTOM - default_fire_valve_width.First().THMEPWSSTHESAURUSBOTTOM + THESAURUSHOUSING)
+          {
+            var tolReturnValueMinRange = default_fire_valve_width.First();
+            yield return $"{tolReturnValueMinRange.THMEPWSSMORPHOLOGICALLY}-{tolReturnValueMinRange.THMEPWSSTHESAURUSBOTHER}-{default_fire_valve_width.First().THMEPWSSTHESAURUSBOTTLE}~{default_fire_valve_width.Last().THMEPWSSTHESAURUSBOTTLE}";
+          }
+          else
+          {
+            var sb = new StringBuilder();
+            {
+              var tolReturnValueMinRange = default_fire_valve_width.First();
+              sb.Append($"{tolReturnValueMinRange.THMEPWSSMORPHOLOGICALLY}-{tolReturnValueMinRange.THMEPWSSTHESAURUSBOTHER}-");
+            }
+            var d = new Dictionary<int, int>();
+            var THMEPWSSTHESAURUSBORROW = new HashSet<int>();
+            var defaultFireValveLength = default_fire_valve_width.Where(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.THMEPWSSCIRCUMNAVIGATION).Select(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax.THMEPWSSTHESAURUSBOTTOM).ToHashSet();
+            foreach (var MAX_ANGEL_TOLLERANCE in defaultFireValveLength.ToList().OrderBy(TolLightRangeSingleSideMax => TolLightRangeSingleSideMax))
+            {
+              if (!defaultFireValveLength.Contains(MAX_ANGEL_TOLLERANCE)) continue;
+              if (defaultFireValveLength.Contains(MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING) && defaultFireValveLength.Contains(MAX_ANGEL_TOLLERANCE + THESAURUSPERMUTATION))
+              {
+                d[MAX_ANGEL_TOLLERANCE] = THESAURUSSTAMPEDE;
+                for (int MAX_ANGLE_TOLLERANCE = MAX_ANGEL_TOLLERANCE + THESAURUSHOUSING; MAX_ANGLE_TOLLERANCE < THESAURUSFINALITY; MAX_ANGLE_TOLLERANCE++)
+                {
+                  if (!defaultFireValveLength.Contains(MAX_ANGLE_TOLLERANCE)) break;
+                  ++d[MAX_ANGEL_TOLLERANCE];
+                  defaultFireValveLength.Remove(MAX_ANGLE_TOLLERANCE);
+                  THMEPWSSTHESAURUSBORROW.Add(MAX_ANGLE_TOLLERANCE);
+                }
+              }
+            }
+            for (int MAX_ANGEL_TOLLERANCE = THESAURUSSTAMPEDE; MAX_ANGEL_TOLLERANCE < default_fire_valve_width.Count; MAX_ANGEL_TOLLERANCE++)
+            {
+              var tolReturnValueMinRange = default_fire_valve_width[MAX_ANGEL_TOLLERANCE];
+              if (THMEPWSSTHESAURUSBORROW.Contains(tolReturnValueMinRange.THMEPWSSTHESAURUSBOTTOM)) continue;
+              sb.Append(tolReturnValueMinRange.THMEPWSSTHESAURUSBOTTLE);
+              if (d.TryGetValue(tolReturnValueMinRange.THMEPWSSTHESAURUSBOTTOM, out var n))
+              {
+                sb.Append(THESAURUSEXCREMENT + (tolReturnValueMinRange.THMEPWSSTHESAURUSBOTTOM + n));
+              }
+              if (MAX_ANGEL_TOLLERANCE + n < default_fire_valve_width.Count - THESAURUSHOUSING)
+              {
+                sb.Append(DEMATERIALISING);
+              }
+            }
+            yield return sb.ToString();
+          }
         }
       }
       foreach (var DEFAULT_FIRE_VALVE_WIDTH in rest)
       {
         yield return DEFAULT_FIRE_VALVE_WIDTH;
+      }
+    }
+    public class THMEPWSSCRYSTALLOGRAPHY
+    {
+      public string THMEPWSSTHESAURUSBOULDER;
+      public string THMEPWSSMORPHOLOGICALLY;
+      public string THMEPWSSTHESAURUSBOTHER;
+      public string THMEPWSSTHESAURUSBOTTLE;
+      public bool THMEPWSSCIRCUMNAVIGATION => int.TryParse(THMEPWSSTHESAURUSBOTTLE.Trim(THESAURUSOVERCOME, THESAURUSHOMOGENOUS), out _);
+      public int THMEPWSSTHESAURUSBOTTOM => int.TryParse(THMEPWSSTHESAURUSBOTTLE.Trim(THESAURUSOVERCOME, THESAURUSHOMOGENOUS), out int DEFAULT_FIRE_VALVE_WIDTH) ? DEFAULT_FIRE_VALVE_WIDTH : -THESAURUSHOUSING;
+      static readonly Regex tolReturnValueDistCheck = new Regex(THESAURUSARBITRATOR);
+      public static THMEPWSSCRYSTALLOGRAPHY Parse(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+      {
+        if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return null;
+        var tolReturnValueMinRange = tolReturnValueDistCheck.Match(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE);
+        if (!tolReturnValueMinRange.Success) return null;
+        return new THMEPWSSCRYSTALLOGRAPHY()
+        {
+          THMEPWSSTHESAURUSBOULDER = MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE,
+          THMEPWSSMORPHOLOGICALLY = tolReturnValueMinRange.Groups[THESAURUSHOUSING].Value,
+          THMEPWSSTHESAURUSBOTHER = tolReturnValueMinRange.Groups[THESAURUSPERMUTATION].Value,
+          THMEPWSSTHESAURUSBOTTLE = tolReturnValueMinRange.Groups[INTROPUNITIVENESS].Value,
+        };
       }
     }
     public static IEnumerable<KeyValuePair<int, int>> GetPairs(IEnumerable<int> ints)
@@ -10268,29 +10351,29 @@ cb: tolReturnValueRangeTo =>
     public static bool IsY1L(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(CHRISTIANIZATION);
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(CHRISTIANIZATION);
     }
     public static bool IsY2L(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(UNPREMEDITATEDNESS);
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(UNPREMEDITATEDNESS);
     }
     public static bool IsNL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSFINICKY);
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSFINICKY);
     }
     public static bool IsYL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
       for (int MAX_ANGEL_TOLLERANCE = INTROPUNITIVENESS; MAX_ANGEL_TOLLERANCE < THESAURUSACRIMONIOUS; MAX_ANGEL_TOLLERANCE++)
       {
-        if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSREGENERATE + MAX_ANGEL_TOLLERANCE + THESAURUSREALLY))
+        if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSREGENERATE + MAX_ANGEL_TOLLERANCE + THESAURUSREALLY))
         {
           return THESAURUSOBSTINACY;
         }
       }
-      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.StartsWith(THESAURUSUNBEATABLE);
+      return MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(THESAURUSUNBEATABLE);
     }
     public static bool IsRainLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
@@ -10887,7 +10970,6 @@ cb: tolReturnValueRangeTo =>
         public const int THESAURUSINAUDIBLE = 1506;
         public const string UNCEREMONIOUSNESS = "NOTE";
         public const string THESAURUSFLABBY = "DIMS";
-        public const string THESAURUSPOTENTIAL = @"(?:^F0L\-)|(?:^FL.*\-0$)|(?:^FL\-0$)";
         public const string PHONOCARDIOGRAPH = "污废水管+通气管";
         public const string DEINSTITUTIONALIZATION = "天井";
         public const string QUOTATIONLORENTZ = "散排至天井";
@@ -10924,11 +11006,21 @@ cb: tolReturnValueRangeTo =>
         public const int THESAURUSDEALER = 459;
         public const int THESAURUSPALACE = 6000;
         public const string THESAURUSPONDER = "W-RAIN-OUT-PIPE";
-        public const string THESAURUSDIFFERENTIAL = @"^W\w?L";
-        public const string THESAURUSADMINISTRATION = @"^F\w?L";
-        public const string THESAURUSIMPLICATE = @"^P\w?L";
-        public const string INTERRELATIONSHIP = @"^T\w?L";
-        public const string THESAURUSLIBERTINE = @"^D\w?L";
+        public const string THESAURUSCORRECTION = @"W\w?L";
+        public const string ENVIRONMENTALLY = @"F\w?L";
+        public const string THESAURUSFAVOURITISM = @"(?:F0L\-)|(?:FL.*\-0$)|(?:FL\-0$)";
+        public const string THESAURUSDERIVATIVE = @"P\w?L";
+        public const string DENDROCHRONOLOGY = @"T\w?L";
+        public const string C6H5RCORCORC6H5 = @"D\w?L";
+        public const int THESAURUSMEDICINAL = 73;
+        public const int THESAURUSCRITIC = 109;
+        public const int CONTEMPORARINESS = 112;
+        public const int QUOTATIONCHOROID = 69;
+        public const int THESAURUSDEFILE = 116;
+        public const int UNCHALLENGEABLE = 105;
+        public const char THESAURUSOVERCOME = '\'';
+        public const char THESAURUSHOMOGENOUS = '`';
+        public const string THESAURUSARBITRATOR = @"(\w+)-(\w+)-(\w+'?`?)$";
     public static bool IsToilet(string roomName)
     {
       var roomNameContains = new List<string>
@@ -10978,7 +11070,7 @@ cb: tolReturnValueRangeTo =>
     public static bool IsWL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSDIFFERENTIAL);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSCORRECTION);
     }
     public static bool IsDraiFL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
@@ -10987,28 +11079,28 @@ cb: tolReturnValueRangeTo =>
     public static bool IsFL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSADMINISTRATION);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, ENVIRONMENTALLY);
     }
     public static bool IsFL0(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      if (Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSPOTENTIAL, RegexOptions.IgnoreCase)) return THESAURUSOBSTINACY;
+      if (Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSFAVOURITISM, RegexOptions.IgnoreCase)) return THESAURUSOBSTINACY;
       return IsFL(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE) && MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE.Contains(AUTOLITHOGRAPHIC);
     }
     public static bool IsPL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSIMPLICATE);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSDERIVATIVE);
     }
     public static bool IsTL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, INTERRELATIONSHIP);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, DENDROCHRONOLOGY);
     }
     public static bool IsDL(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
       if (MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE == null) return INTRAVASCULARLY;
-      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, THESAURUSLIBERTINE);
+      return Regex.IsMatch(MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE, C6H5RCORCORC6H5);
     }
     public static bool IsDraiLabel(string MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
     {
@@ -11883,7 +11975,8 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
                       {
                         if (vpst(MinWellToUrinalDistance[THESAURUSSTAMPEDE].GetCenter().ToNTSPoint()) && vpst(MinWellToUrinalDistance[THESAURUSHOUSING].GetCenter().ToNTSPoint()))
                         {
-                          MinDownspoutToBalconyfloordrain.Add(default_fire_valve_width.Key as string);
+                          var SidewaterbucketYIndent = default_fire_valve_width.Key as string;
+                          if (!IsWL(SidewaterbucketYIndent)) MinDownspoutToBalconyfloordrain.Add(SidewaterbucketYIndent);
                         }
                       }
                     }
@@ -14253,7 +14346,7 @@ if (!ThRainSystemService.ImportElementsFromStdDwg()) return INTRAVASCULARLY;
           if (maxToiletToFloordrainDistance2 == THESAURUSWINDFALL)
           {
             dynamic o = maxToiletToCondensepipeDistance.AcadObject;
-            var repeated_point_distance = (string)o.DimStyleText + (string)o.VPipeFloorNum + THESAURUSSPECIFICATION + (string)o.VPipeNum;
+            string repeated_point_distance = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection().OfType<Entity>().FirstOrDefault(tolReturnValue0Approx => { var TolLightRangeSingleSideMax = tolReturnValue0Approx.GetType().Name; return (TolLightRangeSingleSideMax.Length == THESAURUSACTUAL && TolLightRangeSingleSideMax[THESAURUSSTAMPEDE] == THESAURUSMEDICINAL && TolLightRangeSingleSideMax[THESAURUSHOUSING] == THESAURUSCRITIC && TolLightRangeSingleSideMax[THESAURUSPERMUTATION] == CONTEMPORARINESS && TolLightRangeSingleSideMax[INTROPUNITIVENESS] == QUOTATIONCHOROID && TolLightRangeSingleSideMax[QUOTATIONEDIBLE] == THESAURUSBISEXUAL && TolLightRangeSingleSideMax[THESAURUSCOMMUNICATION] == THESAURUSDEFILE && TolLightRangeSingleSideMax[SUPERLATIVENESS] == UNCHALLENGEABLE && TolLightRangeSingleSideMax[THESAURUSDESTITUTE] == THESAURUSDEFILE && TolLightRangeSingleSideMax[THESAURUSSCARCE] == THESAURUSPERVADE); })?.ExplodeToDBObjectCollection()?.OfType<DBText>()?.FirstOrDefault()?.TextString ?? ((string)o.DimStyleText + (string)o.VPipeFloorNum + THESAURUSSPECIFICATION + (string)o.VPipeNum);
             if (IsDrainageLabel(repeated_point_distance))
             {
               var MAX_TAG_YPOSITION = maxToiletToCondensepipeDistance.ExplodeToDBObjectCollection();
