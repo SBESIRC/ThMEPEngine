@@ -4,4 +4,3 @@ import "ThTCHRootData.proto";
 message ThTCHPositioningElementData {
     ThTCHRootData root = 1;
 }
-

@@ -11,14 +11,14 @@ namespace ThPlatform3D.StructPlane.Service
     internal class ThAdjustBeamMarkPosService
     {
         // 梁标注距离梁线间隔
-        private double beamMarkInterval= 70; // 第一个梁标注的边界距离梁边界的间隙
-        private double textBoundaryInterval = 70; // 梁标注的边界距离梁标注的间隙
+        private double firstBeamMarkInterval= 50; // 第一个梁标注边界距离梁边界的间隙
+        private double beamMarkInterval = 70; // 梁标注边界的Gap距离
         private ThCADCoreNTSSpatialIndex beamLineSpatialIndex;
         public ThAdjustBeamMarkPosService(DBObjectCollection beamLines, 
-            double beamMarkInterval, double textBoundaryInterval)
+            double firstBeamMarkInterval, double beamMarkInterval)
         {
+            this.firstBeamMarkInterval = firstBeamMarkInterval;
             this.beamMarkInterval = beamMarkInterval;
-            this.textBoundaryInterval = textBoundaryInterval;
             beamLineSpatialIndex = new ThCADCoreNTSSpatialIndex(beamLines);
         }
         public void Adjust(DBObjectCollection beamMarks, Vector3d moveDir)
@@ -28,32 +28,29 @@ namespace ThPlatform3D.StructPlane.Service
                 return;
             }
             var firstText = beamMarks.OfType<DBText>().First();
-            var textCenter = firstText.GetCenterPointByOBB();
             var maximumBeamWidth = GetBeamWidth(beamMarks.OfType<DBText>().OrderByDescending(o => GetBeamWidth(o)).First());
-            // 获取firstText中心距离梁线的长度
-            var distance = GetTextMoveDisToBeam(textCenter, firstText.Rotation, moveDir, maximumBeamWidth);
-            if (distance == 0)
+            if(maximumBeamWidth == 0.0)
             {
-                distance = maximumBeamWidth / 2.0;
+                maximumBeamWidth = ThStructurePlaneCommon.BeamDefaultCalculateWidth;
             }
-            var geoHeights = beamMarks.OfType<DBText>().Select(o => CalculateTextHeight(o)).ToList();
-            var newTextCenter = textCenter + moveDir.GetNormal().MultiplyBy(
-               distance + beamMarkInterval + geoHeights[0] / 2.0);
-            var mt1 = Matrix3d.Displacement(newTextCenter - textCenter);
-            firstText.TransformBy(mt1);
-            for (int i = 1; i < beamMarks.Count; i++)
+            var geoTextHeights = beamMarks.OfType<DBText>().Select(o => CalculateTextHeight(o)).ToList();
+            var baseOffsetDistance = maximumBeamWidth / 2.0 + firstBeamMarkInterval;
+            for (int i = 0; i < beamMarks.Count; i++)
             {
-                var secondText = beamMarks[i] as DBText;
-                double middleTextHeights = 0.0;
-                for (int j = 2; j < i; j++)
+                var current = beamMarks[i] as DBText;
+                var currentGeoHeight = geoTextHeights[i];
+                double distance = 0.0;
+                if (i == 0)
                 {
-                    middleTextHeights += geoHeights[j];
+                    distance = baseOffsetDistance + currentGeoHeight / 2.0;
                 }
-                var textInterval = geoHeights[0] / 2.0 + middleTextHeights + geoHeights[i] / 2.0 + i * textBoundaryInterval;
-                var oldSecondTextCenter = secondText.GetCenterPointByOBB();
-                var newSecondTextCenter = newTextCenter.GetExtentPoint(moveDir, textInterval);
-                var mt2 = Matrix3d.Displacement(newSecondTextCenter - oldSecondTextCenter);
-                secondText.TransformBy(mt2);
+                else
+                {
+                    var heights = geoTextHeights.Take(i).Sum();
+                    distance = baseOffsetDistance + heights + i * beamMarkInterval + currentGeoHeight / 2.0;
+                }
+                var mt = Matrix3d.Displacement(moveDir.GetNormal().MultiplyBy(distance));
+                current.TransformBy(mt);
             }
         }
 

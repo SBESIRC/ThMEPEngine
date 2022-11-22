@@ -55,19 +55,23 @@ namespace ThPlatform3D.StructPlane.Service
                             if(center is Line line)
                             {
                                 var perpendVec = line.LineDirection().GetPerpendicularVector();
-                                var closePt = line.GetClosestPointTo(originPos.Value, true);
-                                var dir = closePt.GetVectorTo(text.Position);
-                                if(dir.DotProduct(perpendVec)>0)
-                                {
-                                    dir = perpendVec;
-                                }
-                                else
-                                {
-                                    dir = perpendVec.Negate();
-                                }
+                                //var closePt = line.GetClosestPointTo(originPos.Value, true);
+                                //var dir = closePt.GetVectorTo(text.Position);
+                                //if(dir.DotProduct(perpendVec)>0)
+                                //{
+                                //    dir = perpendVec;
+                                //}
+                                //else
+                                //{
+                                //    dir = perpendVec.Negate();
+                                //}
+                                var dir1 = perpendVec;
+                                var dir2 = perpendVec.Negate();
                                 var beamWidth = GetBeamWidth(p, center);
-                                var beamArea = SingleBuffer(line, beamWidth / 2.0 + _beamEdgeDistance+text.Height, dir);
-                                blks.AddRange(QueryExistedBlks(beamArea));
+                                var beamArea1 = SingleBuffer(line, beamWidth / 2.0 + _beamEdgeDistance+text.Height, dir1);
+                                var beamArea2 = SingleBuffer(line, beamWidth / 2.0 + _beamEdgeDistance + text.Height, dir2);
+                                blks.AddRange(QueryExistedBlks(beamArea1));
+                                blks.AddRange(QueryExistedBlks(beamArea2));
                             }
                             else if(center is Arc arc)
                             {

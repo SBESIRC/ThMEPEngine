@@ -354,15 +354,27 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         private static void GetCoolAndHotCapacity(string capacity, out double cool, out double hot)
         {
+            cool = 0;
+            hot = 0;
+
             var str = capacity.Split('/');
-            cool = GetDoubleFromString(str[0]);
-            hot = GetDoubleFromString(str[1]);
+            if (str != null && str.Count() == 2)
+            {
+                cool = GetDoubleFromString(str[0]);
+                hot = GetDoubleFromString(str[1]);
+            }
         }
         private static void GetCoolAndHotTempDiff(string tempDiff, out double cool, out double hot)
         {
+            cool = 0;
+            hot = 0;
+
             var str = tempDiff.Split('/');
-            cool = GetDoubleFromString(str[0]);
-            hot = GetDoubleFromString(str[1]);
+            if (str != null && str.Count() == 2)
+            {
+                cool = GetDoubleFromString(str[0]);
+                hot = GetDoubleFromString(str[1]);
+            }
         }
         public static double GetVectorAngle(Vector3d vector)
         {
@@ -443,7 +455,7 @@ namespace ThMEPHVAC.FanConnect.Command
             if (node.Children.Count == 0)
             {
                 var closetPt = fan.FanObb.GetClosestPointTo(node.Item.PLine.EndPoint, false);
-                if (fan.FanPoint.DistanceTo(node.Item.PLine.EndPoint) < 400.0)
+                if (fan.FanPoint.DistanceTo(node.Item.PLine.EndPoint) < 400.0 )
                 {
                     node.Item.ConnectFan = fan;
 

@@ -2,15 +2,15 @@
 using Linq2Acad;
 using DotNetARX;
 using System.IO;
-using Google.Protobuf;
 using System.IO.Pipes;
 using System.Threading;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.Runtime;
-using ThMEPTCH.Services;
 using System.Security.Principal;
 using ThMEPTCH.CAD;
+using ThMEPTCH.Services;
+using Google.Protobuf;
 
 namespace ThPlatform3D
 {
@@ -24,7 +24,8 @@ namespace ThPlatform3D
             sw.Start();
             var service = new ThDWGToIFCService("");
             var project = service.DWGToProjectData(true, false);
-            if (project != null)
+            var message = BuildProtobufMessage(project);
+            if (message != null)
             {
                 sw.Stop();
                 Active.Editor.WriteLine($"读入并解析图纸完成，耗时{sw.ElapsedMilliseconds}毫秒。");
@@ -41,7 +42,7 @@ namespace ThPlatform3D
                 {
                     try
                     {
-                        var bytes = project.ToThBimData(ProtoBufDataType.PushType, PlatformType.CADPlatform);
+                        var bytes = message.ToByteArray();
                         pipeClient.Connect(5000);
                         pipeClient.Write(bytes, 0, bytes.Length);
                         Active.Editor.WriteLine($"传输数据完成，耗时{sw.ElapsedMilliseconds}毫秒。");
@@ -53,73 +54,9 @@ namespace ThPlatform3D
                                 var path = Path.GetDirectoryName(dwgFullName);
                                 var fileName = Path.GetFileNameWithoutExtension(dwgFullName);
                                 var thbimPath = Path.Combine(path, fileName + ".thbim");
-                                //var thbimBytes = project.ToThBimData(ProtoBufDataType.ExternalLink, PlatformType.CADPlatform);
-                                var thbimBytes = bytes;
-                                thbimBytes[2] = 3;
                                 using (var stream = new FileStream(thbimPath, FileMode.Create))
                                 {
-                                    stream.Write(thbimBytes, 0, thbimBytes.Length);
-                                }
-                                Active.Editor.WriteLine($"外链文件生成，路径：[{thbimPath}]");
-                            }
-                            else
-                            {
-                                Active.Editor.WriteLine($"未检测到当前打开的DWG文件目录，生成外链文件失败!");
-                            }
-                        }
-                    }
-                    catch (System.Exception ex)
-                    {
-                        Active.Editor.WriteLine($"传输数据失败：{ex.Message}。");
-                    }
-                }
-            }
-            sw.Stop();
-        }
-
-        [CommandMethod("TIANHUACAD", "THCAD2SERVERPUSH", CommandFlags.Modal)]
-        public void THCAD2SERVERPUSH()
-        {
-            Active.Editor.WriteLine($"开始读入图纸。");
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            var service = new ThDWGToIFCService("");
-            var project = service.DWGToProjectData(false, false);
-            if (project != null)
-            {
-                sw.Stop();
-                Active.Editor.WriteLine($"读入并解析图纸完成，耗时{sw.ElapsedMilliseconds}毫秒。");
-
-                sw.Reset();
-                Active.Editor.WriteLine($"开始传输数据。");
-                sw.Start();
-
-                using (var pipeClient = new NamedPipeClientStream(".",
-                    "THCAD2SERVERPIPE",
-                    PipeDirection.Out,
-                    PipeOptions.None,
-                    TokenImpersonationLevel.Impersonation))
-                {
-                    try
-                    {
-                        var bytes = project.ToThBimData(ProtoBufDataType.PushType, PlatformType.CADPlatform);
-                        pipeClient.Connect(5000);
-                        pipeClient.Write(bytes, 0, bytes.Length);
-                        Active.Editor.WriteLine($"传输数据完成，耗时{sw.ElapsedMilliseconds}毫秒。");
-                        using (AcadDatabase acdb = AcadDatabase.Active())
-                        {
-                            if (Active.Document.IsNamedDrawing)
-                            {
-                                var dwgFullName = Active.Document.Name;
-                                var path = Path.GetDirectoryName(dwgFullName);
-                                var fileName = Path.GetFileNameWithoutExtension(dwgFullName);
-                                var thbimPath = Path.Combine(path, fileName + ".thbim");
-                                //var thbimBytes = project.ToThBimData(ProtoBufDataType.ExternalLink, PlatformType.CADPlatform);
-                                var thbimBytes = bytes;
-                                thbimBytes[2] = 3;
-                                using (var stream = new FileStream(thbimPath, FileMode.Create))
-                                {
-                                    stream.Write(thbimBytes, 0, thbimBytes.Length);
+                                    stream.Write(bytes, 0, bytes.Length);
                                 }
                                 Active.Editor.WriteLine($"外链文件生成，路径：[{thbimPath}]");
                             }
@@ -143,7 +80,8 @@ namespace ThPlatform3D
         {
             var service = new ThDWGToIFCService("");
             var project = service.DWGToProjectData(true, true);
-            if (project == null)
+            var message = BuildProtobufMessage(project);
+            if (message == null)
             {
                 return;
             }
@@ -158,7 +96,7 @@ namespace ThPlatform3D
                     try
                     {
                         pipeServer.WaitForConnection();
-                        var bytes = project.ToThBimData(ProtoBufDataType.PushType, PlatformType.CADPlatform);
+                        var bytes = message.ToByteArray();
                         pipeServer.Write(bytes, 0, bytes.Length);
 
                         pipeServer.Close();
@@ -192,6 +130,26 @@ namespace ThPlatform3D
             {
                 Active.Database.GetEditor().WriteMessage("Server 异常\r\n");
             }
+        }
+
+        private ProtobufMessage BuildProtobufMessage(ThTCHProjectData project)
+        {
+            if (project == null)
+            {
+                return null;
+            }
+            project.ProjectId = ConfigService.ConfigInstance.BindingPrjId;
+            project.ProjectSubId = ConfigService.ConfigInstance.BindingSubPrjId;
+            project.BindingName = ConfigService.ConfigInstance.BindingName;
+
+            ProtobufMessage message = new ProtobufMessage();
+            MessageHeader header = new MessageHeader();
+            header.Major = ConfigService.ConfigInstance.BindingMajor;
+            header.Source = MessageSourceEnum.Cad;
+            message.Header = header;
+            message.CadProjects.Add(project);
+
+            return message;
         }
     }
 }

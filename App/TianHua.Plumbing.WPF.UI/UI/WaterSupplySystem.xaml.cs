@@ -13,16 +13,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         static WaterSupplyVM viewModel;
 
-
         public WaterSupplySystem()
         {
             InitializeComponent();
-            //给水系统图相关
             if (null == viewModel)
                 viewModel = new WaterSupplyVM();
             this.DataContext = viewModel;
         }
-
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
@@ -37,7 +34,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 return;
             }
         }
-
 
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
@@ -58,17 +54,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             catch{}
         }
 
-
-        private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                viewModel.CreateFloorFraming();
-            }
-            catch{}
-        }
-
-
         private void btnReadStoreys_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -77,7 +62,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             catch{}
         }
-
 
         private void ThCustomWindow_Loaded(object sender, RoutedEventArgs e)
         {

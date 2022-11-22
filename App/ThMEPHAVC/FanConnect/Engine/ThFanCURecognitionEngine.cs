@@ -16,11 +16,13 @@ namespace ThMEPHVAC.FanConnect.Engine
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
-                return Active.Editor.FilterBlocks(BlockNames(sysType))
+                var blkList = Active.Editor.FilterBlocks(BlockNames(sysType))
                     .Select(o => acadDatabase.ElementOrDefault<BlockReference>(o))
-                    .Where(o => o != null)
-                    .Select(o => ThFanConnectUtils.GetFanFromBlockReference(o))
+                    .Where(o => o != null);
+                var modelList = blkList.Select(o => ThFanConnectUtils.GetFanFromBlockReference(o))
                     .ToList();
+
+                return modelList;
             }
         }
 

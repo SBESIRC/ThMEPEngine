@@ -173,21 +173,18 @@ namespace ThPlatform3D.StructPlane.Print
             {
                 return;
             } 
-            for (int i = 0; i < horParallelTexts.Count; i++)
+            for (int i = 1; i < horParallelTexts.Count; i++)
             {
                 var current = horParallelTexts[i] as DBText;
-                var moveDistance = 0.0;
-                for(int j =i;j< textGaps.Count;j++)
-                {
-                    moveDistance += textGaps[j];
-                }
-                var mt = Matrix3d.Displacement(new Vector3d(0, moveDistance, 0));
+                var moveDistance = textGaps[i-1];
+                var mt = Matrix3d.Displacement(new Vector3d(0, -1.0*moveDistance, 0));
                 current.TransformBy(mt);
             }
         }
 
         private List<double> CalculateTextGaps(DBObjectCollection parallelTexts)
         {
+            // 计算每一个文字距离第一个文字距离
             var results = new List<double>();
             if(parallelTexts.Count==0)
             {

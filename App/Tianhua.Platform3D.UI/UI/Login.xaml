@@ -1,0 +1,31 @@
+﻿<Window x:Class="Tianhua.Platform3D.UI.UI.Login"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+        mc:Ignorable="d"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner"
+        Title="用户登录"
+        ResizeMode="NoResize"
+        SizeToContent="WidthAndHeight">
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="100"></ColumnDefinition>
+            <ColumnDefinition Width="150"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Label Content="用户名:" Grid.Row="0" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+        <TextBox Grid.Row="0" x:Name="txtUName" Grid.Column="1" Height="22"  VerticalContentAlignment="Center"></TextBox>
+        <Label Content="密码:" Grid.Row="1" Grid.Column="0"  VerticalContentAlignment="Center"></Label>
+        <PasswordBox Grid.Row="1" x:Name="txtUPsw" Grid.Column="1" Height="22"  VerticalContentAlignment="Center"></PasswordBox>
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="99" HorizontalAlignment="Right">
+            <Button Content="登录" Height="22" Width="50" x:Name="btnLogin" Click="btnLogin_Click"></Button>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -8,6 +8,7 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.SVG;
 using ThPlatform3D.Common;
 using ThPlatform3D.StructPlane.Service;
+using System;
 
 namespace ThPlatform3D.StructPlane.Print
 {
@@ -25,7 +26,9 @@ namespace ThPlatform3D.StructPlane.Print
                 PrintGeos(acadDb);
 
                 // 打印标题
-                PrintHeadText(acadDb);
+                var textRes = PrintHeadText(acadDb);
+                Append(textRes.Item1);
+                Append(textRes.Item2);
 
                 // 打印层高表
                 //PrintElevationTable(acadDb);
@@ -50,17 +53,25 @@ namespace ThPlatform3D.StructPlane.Print
                 {
                     if (category == ThIfcCategoryManager.ColumnCategory)
                     {
-                        if(o.IsBelowFloorColumn())
+                        var description = o.Properties.GetDescription();
+                        if(description.IsStandardColumn())
                         {
-                            Append(PrintUpperColumn(acadDb, o));
-                        }                       
+                            if (o.IsBelowFloorColumn())
+                            {
+                                Append(PrintUpperColumn(acadDb, o));
+                            }
+                        }                                              
                     }
                     else if (category == ThIfcCategoryManager.WallCategory)
                     {
-                        if(o.IsBelowFloorShearWall())
+                        var description = o.Properties.GetDescription();
+                        if(description.IsStandardWall())
                         {
-                            Append(PrintUpperShearWall(acadDb, o));
-                        }                        
+                            if (o.IsBelowFloorShearWall())
+                            {
+                                Append(PrintUpperShearWall(acadDb, o));
+                            }
+                        }                                               
                     }
                 }
             });
@@ -83,15 +94,16 @@ namespace ThPlatform3D.StructPlane.Print
             objs.OfType<Entity>().ForEach(e=>e.TransformBy(mt));
             Append(objs.Print(acadDb));
         }
-        private void PrintHeadText(AcadDatabase acadDb)
+        private Tuple<ObjectIdCollection, ObjectIdCollection> PrintHeadText(AcadDatabase acadDb)
         {
             // 打印自然层标识, eg 一层~五层结构平面层
             var flrRange = _floorInfos.GetFloorHeightRange(_flrBottomEle);
             if (string.IsNullOrEmpty(flrRange))
             {
-                return;
-            }            
-            Append(PrintHeadText(acadDb, flrRange)); // 把结果存到ObjIds中
+                return Tuple.Create(new ObjectIdCollection(),new ObjectIdCollection());
+            }
+            var stdFlrInfo = _floorInfos.GetStdFlrInfo(_flrBottomEle);
+            return PrintHeadText(acadDb, flrRange, stdFlrInfo);
         }
     }
 }

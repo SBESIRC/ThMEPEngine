@@ -30,8 +30,8 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         
         private ObjectId InsertDoor(AcadDatabase acadDb, ThComponentInfo component, string blkName, double scale)
         {
-            var startPt = component.Start.ToPoint3d();
-            var endPt = component.End.ToPoint3d();
+            var startPt = component.Start;
+            var endPt = component.End;
             if (!startPt.HasValue || !endPt.HasValue)
             {
                 return ObjectId.Null;

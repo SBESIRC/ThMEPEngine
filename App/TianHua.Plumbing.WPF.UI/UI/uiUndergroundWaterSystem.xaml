@@ -16,10 +16,9 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0">
             <WrapPanel Orientation="Vertical" Margin="0,0,5,0">
-                <cus:ImageButton  Content="楼层框定" Name="btnFloorLimit" Height="25" Width="60" Margin="0,0,0,0" TabIndex="1" Click="btnFloorLimit_Click" />
-                <cus:ImageButton  Content="读取楼层" Name="btnFloorRead" Height="25" Width="60" Margin="0,5,0,0" TabIndex="2" Click="btnFloorRead_Click"/>
+                <cus:ImageButton  Content="读取楼层" Name="btnFloorRead" Height="25" Width="60" Margin="0,0,0,0" TabIndex="2" Click="btnFloorRead_Click"/>
             </WrapPanel>
-            <cus:ImageButton Content="参数设置" Name="btnParaSet" Height="55" Width="85" Margin="10,0,0,0" Click="btnParaSet_Click" ImageTextLocation="TextOnly" TabIndex="3"/>
+            <cus:ImageButton Content="参数设置" Name="btnParaSet" Height="25" Width="85" Margin="10,0,0,0" Click="btnParaSet_Click" ImageTextLocation="TextOnly" TabIndex="3"/>
 
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1">

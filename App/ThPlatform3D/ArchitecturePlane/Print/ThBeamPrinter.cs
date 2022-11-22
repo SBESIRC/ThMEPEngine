@@ -15,7 +15,10 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         {
             var results = new ObjectIdCollection();
             var beamId = curve.Print(db, Config);
-            results.Add(beamId);
+            if(beamId!=ObjectId.Null)
+            {
+                results.Add(beamId);
+            }            
             return results;
         }
         public static PrintConfig GetSectionConfig()

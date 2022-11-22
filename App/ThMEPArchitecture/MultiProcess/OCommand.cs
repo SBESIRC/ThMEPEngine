@@ -212,7 +212,16 @@ namespace ThMEPArchitecture.MultiProcess
             DisplayLogger?.Information("地库总数量: " + blks.Count().ToString());
             foreach (var blk in blks)
             {
-                ProcessTheBlock(blk, autoMode);
+                var msg = "";
+                ProcessTheBlock(blk,ref msg, autoMode);
+                if (msg != "")
+                {
+                    if (msg.Contains("服务器繁忙"))
+                    {
+                        DisplayLogger.Information("服务器繁忙中，请稍后再试");
+                        break;
+                    }
+                }
             }
             ShowDisplayInfo(blks.Count());
         }
@@ -220,6 +229,12 @@ namespace ThMEPArchitecture.MultiProcess
         {
             var blks = InputData.SelectBlocks(acadDatabase);
             if (blks == null) return;
+            var displayPro = ProcessForDisplay.CreateSubProcess();
+            if (ParameterViewModel.ShowLogs)
+            {
+                displayPro.Start();
+                displayInfos = new List<DisplayInfo>();
+            }
             foreach (var blk in blks)
             {
                 var blkName = blk.GetEffectiveName();
@@ -247,6 +262,7 @@ namespace ThMEPArchitecture.MultiProcess
                 //var lanes = OInterParameter.GetBoundLanes();
                 var BPA = new BuildingPosAnalysis(ParameterViewModel);
                 BPA.Logger = Logger;
+                BPA.DisplayLogger = DisplayLogger;
                 int fileSize = 64; // 64Mb
                 var nbytes = fileSize * 1024 * 1024;
                 if (ParameterViewModel.UseGA)
@@ -300,7 +316,7 @@ namespace ThMEPArchitecture.MultiProcess
                 entities.ShowBlock("障碍物移位结果", "障碍物移位结果");
             }
         }
-        private void ProcessTheBlock(BlockReference block, bool autoMode = false, bool definePriority = true)
+        private void ProcessTheBlock(BlockReference block,ref string msg, bool autoMode = false, bool definePriority = true)
         {
             var MultiSolutionList = ParameterViewModel.GetMultiSolutionList();
             //var MultiSolutionList = new List<int> { 0 };
@@ -354,6 +370,8 @@ namespace ThMEPArchitecture.MultiProcess
             for (int i = 0; i < MultiSolutionList.Count; i++)
             {
                 var guid = (Guid.NewGuid()).ToString();
+                var userName = System.Environment.UserName;
+                guid = userName + "_" + guid;
                 WriteGuidToMemoryFile(guid);
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
@@ -367,7 +385,11 @@ namespace ThMEPArchitecture.MultiProcess
                 else
                 {
                     DisplayLogger.Information("发送至服务器计算;");
-                    Solution = GetGenomeFromServer(dataWraper, guid);
+                    Solution = GetGenomeFromServer(dataWraper, guid,ref msg);
+                    if (msg != "")
+                    {
+                        return;
+                    }
                     DisplayLogger.Information("接受到服务器计算结果;");
                 }
                 ProcessAndDisplay(Solution, i, stopWatch);
@@ -409,10 +431,10 @@ namespace ThMEPArchitecture.MultiProcess
                 return Solution;
             }
         }
-        Genome GetGenomeFromServer(DataWraper dataWraper,string guid)
+        Genome GetGenomeFromServer(DataWraper dataWraper,string guid,ref string msg)
         {
             ServerGenerationService serverGenerationService = new ServerGenerationService();
-            var gene = serverGenerationService.GetGenome(dataWraper,guid);
+            var gene = serverGenerationService.GetGenome(dataWraper,guid,ref msg);
             return gene;
         }
 
@@ -482,7 +504,7 @@ namespace ThMEPArchitecture.MultiProcess
                         OInterParameter.TotalArea.Coordinates.Min(c => c.X)) / 2;
                     TableTools.ShowTables(new Point3d(midX, minY - 20000, 0), ParkingStallCount);
                 }
-                if (displayInfos != null)
+                if (displayInfos != null && displayInfos.Count>0)
                 {
                     displayInfos.Last().FinalStalls = $"最大车位数: {ParkingStallCount} ";
                     displayInfos.Last().FinalAveAreas = "车均面积: " + string.Format("{0:N2}", areaPerStall) + "平方米/辆";

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+enum MessageSourceEnum{
+    CAD = 0;
+    SU = 1;
+    Platform3D = 2;
+}
+
+message MessageHeader {
+    string major = 1;
+    MessageSourceEnum source = 2;
+    string description = 3;
+}

@@ -13,7 +13,10 @@ namespace ThPlatform3D.StructPlane.Print
         {
             var results = new ObjectIdCollection();
             var beamId = curve.Print(acadDb, config);
-            results.Add(beamId);
+            if(beamId!=ObjectId.Null)
+            {
+                results.Add(beamId);
+            }            
             return results;
         }
         public static PrintConfig GetBeamConfig()

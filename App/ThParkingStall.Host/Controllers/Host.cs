@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -58,24 +59,39 @@ namespace ThParkingStall.Host.Controllers
             lock (obj)
             {
                 GlobalParas.FILES.Enqueue(filename);
+                int cycleCount = 0;
                 while (true)
                 {
+                    cycleCount++;
                     if (GlobalParas.SERVERS.Count > 0)
                     {
                         server = GlobalParas.SERVERS.Dequeue();
-                        file = GlobalParas.FILES.Dequeue();
-                        break;
+                        if (askAnswer(server))
+                        {
+                            file = GlobalParas.FILES.Dequeue();
+                            break;
+                        }
+                        else
+                        {
+                            GlobalParas.SERVERS.Enqueue(server);
+                            if (cycleCount > 2)
+                            {
+                                return "服务器繁忙中，等待超时,请稍候再试。";
+                            }
+                        }
                     }
                     else
                     {
-                        if (curWaitServerTime > waitServerTime)
-                        {
-                            GlobalParas.FILES.Dequeue();
-                            curWaitServerTime = -1;
-                            break;
-                        }
-                        Thread.Sleep(2 * 1000);
-                        curWaitServerTime += 10;
+                        GlobalParas.FILES.Dequeue();
+                        return "服务器繁忙中，等待超时,请稍候再试。";
+                        //if (curWaitServerTime > waitServerTime)
+                        //{
+                        //    GlobalParas.FILES.Dequeue();
+                        //    curWaitServerTime = -1;
+                        //    break;
+                        //}
+                        //Thread.Sleep(2 * 1000);
+                        //curWaitServerTime += 10;
                     }
                 }
             }
@@ -157,9 +173,36 @@ namespace ThParkingStall.Host.Controllers
         {
             return true;
         }
+        static bool askAnswer(string server)
+        {
+            var appHttp = $"{server}:{GlobalParas.tcp_app}/Cal/AskAnswer";
+            SetCertificatePolicy();
+            List<Byte> pageData = new List<byte>();
+            string pageHtml = "";
+            WebClientEx MyWebClient = new WebClientEx();
+            MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
+            MyWebClient.Timeout = 10 * 60 * 1000;
+            Task.Factory.StartNew(() =>
+            {
+                pageData = MyWebClient.DownloadData(appHttp).ToList();
+            }).Wait(-1);
+            pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
+            if(pageHtml.Contains("1"))
+                return true;
+            else return false;
+        }
 
     }
-
+    [ApiController]
+    [Route("[controller]")]
+    public class AskAnswer : ControllerBase
+    {
+        [HttpGet]
+        public string askAnswer()
+        {
+            return "1";
+        }
+    }
     [ApiController]
     [Route("[controller]")]
     public class ReadServers:ControllerBase
@@ -227,6 +270,17 @@ namespace ThParkingStall.Host.Controllers
         [HttpGet]
         public string Run(string filename = "",string guid="",string isinHost="")
         {
+            //杀死可能存在的多余进程
+            try
+            {
+                Process[] processes = Process.GetProcesses();
+                foreach (var process in processes)
+                {
+                    if (process.ProcessName.Contains("ThParkingStallServer.Core") || process.ProcessName.Contains("ThParkingStall.Core"))
+                        process.Kill();
+                }
+            }
+            catch { }
             try
             {
                 var pro = new System.Diagnostics.Process();

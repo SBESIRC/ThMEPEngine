@@ -65,6 +65,24 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{73447F36-3568-443F-8668-67185F7BF5A9}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Google.Protobuf.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_SqlSugar" Guid="{B10BD152-D1D3-4161-8FE1-E889F2956AAC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_SqlSugar" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\SqlSugar.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_MySql_Data" Guid="{42BD40EA-4E58-43E9-9C37-2C00509A5E10}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_MySql_Data" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\MySql.Data.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4_Streams" Guid="{5B2245F3-C60E-4D65-8778-6CC7679302D5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4_Streams" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\K4os.Compression.LZ4.Streams.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4" Guid="{BFC8F352-E253-4EC5-933F-5AA6DB8A4AAF}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\K4os.Compression.LZ4.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Hash_xxHash" Guid="{4BDDA1AA-2522-4865-9681-D036F1B29211}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_K4os_Hash_xxHash" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\K4os.Hash.xxHash.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_ZstdNet" Guid="{55B2F434-D54B-44D7-8E08-5B6DE752689D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_ZstdNet" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ZstdNet.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -135,6 +153,24 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" Guid="{0C814A86-4D61-4D76-9194-C79341F83A2A}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Google.Protobuf.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_SqlSugar" Guid="{76EDDD95-9D2B-4578-8AD2-8BEC647A6FF1}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_SqlSugar" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\SqlSugar.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_MySql_Data" Guid="{D886DC16-E919-4B4B-900E-D9F2A0F25041}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_MySql_Data" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\MySql.Data.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4_Streams" Guid="{8DD89570-AA5C-424F-8272-4417C9062B0A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4_Streams" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\K4os.Compression.LZ4.Streams.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4" Guid="{D60AA23C-81F7-4FFB-80AD-33042D9B82F2}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\K4os.Compression.LZ4.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Hash_xxHash" Guid="{3BF32748-5887-477C-A6F1-A91C5CFFBD5B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_K4os_Hash_xxHash" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\K4os.Hash.xxHash.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_Common_ZstdNet" Guid="{F0F52A6F-AEE4-49A7-9751-44A7EB66F4B5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_Common_ZstdNet" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ZstdNet.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_Common_X64">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -168,6 +204,12 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_SqlSugar" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MySql_Data" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4_Streams" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Hash_xxHash" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ZstdNet" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_NTS_Features" />
@@ -190,6 +232,12 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Linq" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_System_Data_SQLite_Interop" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_Google_Protobuf_Core" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_SqlSugar" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_MySql_Data" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4_Streams" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Compression_LZ4" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_K4os_Hash_xxHash" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_Common_ZstdNet" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

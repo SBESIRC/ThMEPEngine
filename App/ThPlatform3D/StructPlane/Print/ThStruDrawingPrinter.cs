@@ -7,6 +7,7 @@ using ThPlatform3D.Common;
 using ThMEPEngineCore.IO.SVG;
 using ThPlatform3D.StructPlane.Service;
 using System.Linq;
+using System;
 
 namespace ThPlatform3D.StructPlane.Print
 {
@@ -70,6 +71,14 @@ namespace ThPlatform3D.StructPlane.Print
             var hatchConfig = ThColumnPrinter.GetBelowColumnHatchConfig();
             return ThColumnPrinter.Print(acadDb, column.Boundary as Polyline, outlineConfig, hatchConfig);
         }
+
+        protected ObjectIdCollection PrintConstructColumn(AcadDatabase acadDb, ThGeometry column)
+        {
+            var outlineConfig = ThColumnPrinter.GetConstructColumnConfig();
+            var hatchConfig = ThColumnPrinter.GetConstructColumnHatchConfig();
+            return ThColumnPrinter.Print(acadDb, column.Boundary as Polyline, outlineConfig, hatchConfig);
+        }
+
         protected ObjectIdCollection PrintUpperShearWall(AcadDatabase acadDb, ThGeometry shearwall)
         {
             var outlineConfig = ThShearwallPrinter.GetUpperShearWallConfig();
@@ -105,8 +114,45 @@ namespace ThPlatform3D.StructPlane.Print
             }
         }
 
-        protected ObjectIdCollection PrintHeadText(AcadDatabase acadDb,string flrRange)
+        protected ObjectIdCollection PrintPassHeightWall(AcadDatabase acadDb, ThGeometry wall)
         {
+            var outlineConfig = ThShearwallPrinter.GetPassHeightWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetPassHeightWallHatchConfig();
+            if (wall.Boundary is Polyline polyline)
+            {
+                return ThShearwallPrinter.Print(acadDb, polyline, outlineConfig, hatchConfig);
+            }
+            else if (wall.Boundary is MPolygon mPolygon)
+            {
+                return ThShearwallPrinter.Print(acadDb, mPolygon, outlineConfig, hatchConfig);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+
+        protected ObjectIdCollection PrintWindowWall(AcadDatabase acadDb, ThGeometry shearwall)
+        {
+            var outlineConfig = ThShearwallPrinter.GetWindowWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetWindowWallHatchConfig();
+            if (shearwall.Boundary is Polyline polyline)
+            {
+                return ThShearwallPrinter.Print(acadDb, polyline, outlineConfig, hatchConfig);
+            }
+            else if (shearwall.Boundary is MPolygon mPolygon)
+            {
+                return ThShearwallPrinter.Print(acadDb, mPolygon, outlineConfig, hatchConfig);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+
+        protected Tuple<ObjectIdCollection, ObjectIdCollection> PrintHeadText(AcadDatabase acadDb,string flrRange,Tuple<string,string,string> stdFlrInfo)
+        {
+            //stdFlrInfo->Start楼层编号，End楼层编号,标准层
             var extents = GetPrintObjsExtents(acadDb);
             var textCenter = new Point3d((extents.MinPoint.X + extents.MaxPoint.X) / 2.0,
                 extents.MinPoint.Y - _printParameter.HeadTextDisToPaperBottom, 0.0); // 3500 是文字中心到图纸底部的高度
@@ -115,8 +161,10 @@ namespace ThPlatform3D.StructPlane.Print
                 Head = flrRange,
                 DrawingSacle = _printParameter.DrawingScale,
                 BasePt = textCenter,
+                StdFlrInfo = stdFlrInfo
             };
-            return printService.Print(acadDb);
+            printService.Print(acadDb);
+            return Tuple.Create(printService.HeadTextObjIds, printService.TimeStampTextObjIds);
         }
         /// <summary>
         /// 获取 ObjIds 集合里的范围

@@ -29,7 +29,9 @@ namespace ThPlatform3DCui
 
         private void RedirectAssemblies()
         {
+            ThCuiAssemblyService.RedirectAssembly("MySql.Data", new Version(8, 0, 31, 0));
             ThCuiAssemblyService.RedirectAssembly("System.Memory", new Version(4, 0, 1, 2));
+            ThCuiAssemblyService.RedirectAssembly("System.Buffers", new Version(4, 0, 3, 0));
             ThCuiAssemblyService.RedirectAssembly("ICSharpCode.SharpZipLib", new Version(1,3,3,11));
             ThCuiAssemblyService.RedirectAssembly("System.Runtime.CompilerServices.Unsafe", new Version(6, 0, 0, 0));
         }

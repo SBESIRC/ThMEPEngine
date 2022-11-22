@@ -25,17 +25,24 @@ namespace ThPlatform3D.StructPlane.Service
         private bool IsDoubleRowBeamMark(DBObjectCollection beamTexts)
         {
             // 业务叫双梁标注，但实际Case会有三梁或，四梁
-            var elevations = beamTexts.OfType<DBText>().Select(o => o.TextString.GetElevation().Value).ToList();
-            bool isSameElevaton = true;
-            for(int i=1;i<elevations.Count;i++)
+            try
             {
-                if(Math.Abs(elevations[i]- elevations[0])>1.0)
+                var elevations = beamTexts.OfType<DBText>().Select(o => o.TextString.GetElevation().Value).ToList();
+                bool isSameElevaton = true;
+                for (int i = 1; i < elevations.Count; i++)
                 {
-                    isSameElevaton = false;
-                    break;
+                    if (Math.Abs(elevations[i] - elevations[0]) > 1.0)
+                    {
+                        isSameElevaton = false;
+                        break;
+                    }
                 }
+                return !isSameElevaton;
             }
-            return !isSameElevaton;
+            catch
+            {
+            }
+            return false;
         }
 
         private DBObjectCollection Sort(DBObjectCollection beamTexts)
@@ -58,7 +65,6 @@ namespace ThPlatform3D.StructPlane.Service
         private double TextParallelTolerance = 1.0; // 文字平行容差
         private double ClosestDistanceTolerance = 50.0; // 文字中心到文字中心的距离范围
         private Dictionary<DBText, Point3d> TextCenterDict { get; set; }
-        private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         public List<DBObjectCollection> Groups { get; private set; }
         public ThFullOverlapBeamMarkGrouper(DBObjectCollection beamMarks)
         {
@@ -66,7 +72,6 @@ namespace ThPlatform3D.StructPlane.Service
             TextCenterDict = GetTextCenter(beamMarks)
                 .Where(o => o.Value.HasValue)
                 .ToDictionary(item=>item.Key,item=>item.Value.Value);            
-            SpatialIndex = new ThCADCoreNTSSpatialIndex(TextCenterDict.Keys.ToCollection());
         }
         public void Group()
         {
@@ -76,14 +81,22 @@ namespace ThPlatform3D.StructPlane.Service
                 if(IsGrouped(item.Key))
                 {
                     continue;
-                }
-                var envelope = CreateEnvelope(item.Value, ClosestDistanceTolerance, ClosestDistanceTolerance);
-                var objs = Query(SpatialIndex, envelope);
+                }                
+                var objs = GetCloseObjs(item.Value, ClosestDistanceTolerance);                
                 objs = objs.OfType<DBText>()
+                    .Where(o=> !IsGrouped(o))
                     .Where(o => item.Key.Rotation.IsRadianParallel(o.Rotation, TextParallelTolerance))
                     .ToCollection();
                 Groups.Add(objs);
             }
+        }
+
+        private DBObjectCollection GetCloseObjs(Point3d textCenter,double radius)
+        {
+            return TextCenterDict
+                .Where(o => o.Value.DistanceTo(textCenter) <= radius)
+                .Select(o => o.Key)
+                .ToCollection();
         }
 
         private bool IsGrouped(DBText text)

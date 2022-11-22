@@ -2,6 +2,7 @@
 using Serilog.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.MemoryMappedFiles;
 using System.Linq;
@@ -51,6 +52,8 @@ namespace ThParkingStallProgramDisplay
         }
         static void readfromserver(List<string> contents, string end, Logger Logger)
         {
+            Thread.Sleep(3 * 1000);
+            var contentCount = contents.Count;
             var guid = readGuidFromMemory(Logger);
             if (guid == "")
             {
@@ -61,8 +64,15 @@ namespace ThParkingStallProgramDisplay
             var filename = $"DisplayLog_{guid}.txt";
             Logger.Information(guid);
             var quit = false;
+            var cycleCount = 0;
             while (true)
             {
+                cycleCount++;
+                if (cycleCount > 10 && contents.Count == contentCount)
+                {
+                    Console.WriteLine("未读取到服务器数据。");
+                    return;
+                }
                 try
                 {
                     using (WebClient client = new WebClient())
@@ -73,6 +83,8 @@ namespace ThParkingStallProgramDisplay
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine("进程显示出错: "+ex.Message);
+                    Console.WriteLine("进程显示出错: " + ex.StackTrace);
                     Logger.Information(ex.Message);
                     Logger.Information(ex.StackTrace);
                 }
@@ -101,7 +113,7 @@ namespace ThParkingStallProgramDisplay
                 }
                 if (quit)
                     break;
-                Thread.Sleep(1 * 1000);
+                Thread.Sleep(2 * 1000);
             }
         }
         static string readGuidFromMemory(Logger Logger)

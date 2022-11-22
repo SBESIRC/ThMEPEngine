@@ -18,5 +18,6 @@
         public readonly static string NamePropertyName = "name";
         public readonly static string ProfileNamePropertyName = "ProfileName";
         public readonly static string FloorNamePropertyName = "floor_name";
+        public readonly static string OriginOffsetPropertyName = "origin-offset";
     }
 }

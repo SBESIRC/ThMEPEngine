@@ -168,13 +168,14 @@ namespace ThPlatform3D.StructPlane.Service
         public static List<double> GetDoubles(this string content)
         {
             var datas = new List<double>();
-            string pattern = @"\d+([.]\d+)?";
+            string pattern = @"[-]?\d+([.]\d+)?";
             foreach (Match item in Regex.Matches(content, pattern))
             {
                 datas.Add(double.Parse(item.Value));
             }
             return datas;
         }
+
         public static Polyline CreateRectangle(this Point3d center, 
             Vector3d xVec, Vector3d yVec,
             double xLength, double yLength)
@@ -311,6 +312,62 @@ namespace ThPlatform3D.StructPlane.Service
                 }
             }
             return result;
+        }
+        public static Tuple<string,string,string> GetStdFlrInfo(this List<ThFloorInfo> floorInfos, double flrBottomEle)
+        {
+            var startFloorNo = "";
+            var endFloorNo = "";
+            var stdFlrNo = "";
+            var stdFloors = floorInfos.GetFloors(flrBottomEle);
+            if (stdFloors.Count() == 1)
+            {
+                stdFlrNo = stdFloors.First().StdFlrNo;
+                var floors = floorInfos.Where(o => o.StdFlrNo == stdFlrNo);
+                if (floors.Count() == 1)
+                {
+                    var floorNo = floors.First().FloorNo.ToUpper();
+                    if (floorNo.EndsWith("F"))
+                    {
+                        startFloorNo = floorNo;
+                        endFloorNo = floorNo;
+                    }
+                    else
+                    {
+                        startFloorNo = floorNo+"F";
+                        endFloorNo = floorNo + "F";
+                    }
+                    if(!stdFlrNo.Trim().ToUpper().StartsWith("FLOOR"))
+                    {
+                        stdFlrNo = "Floor" + stdFlrNo.Trim();
+                    }
+                }
+                else if (floors.Count() > 1)
+                {
+                    var startFloorNo1 = floors.First().FloorNo.ToUpper();
+                    var endFloorNo1 = floors.Last().FloorNo.ToUpper();
+                    if(startFloorNo1.EndsWith("F"))
+                    {
+                        startFloorNo = startFloorNo1;
+                    }
+                    else
+                    {
+                        startFloorNo = startFloorNo1 + "F";
+                    }
+                    if (endFloorNo1.EndsWith("F"))
+                    {
+                        endFloorNo = endFloorNo1;
+                    }
+                    else
+                    {
+                        endFloorNo = endFloorNo1 + "F";
+                    }
+                    if (!stdFlrNo.Trim().ToUpper().StartsWith("FLOOR"))
+                    {
+                        stdFlrNo = "Floor" + stdFlrNo.Trim();
+                    }
+                }
+            }
+            return Tuple.Create(startFloorNo, endFloorNo, stdFlrNo);
         }
         public static string GetFloorHeightRange(this List<ThFloorInfo> floorInfos, double flrBottomEle)
         {

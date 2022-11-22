@@ -14,10 +14,16 @@ namespace ThPlatform3D.StructPlane.Print
         {
             var results = new ObjectIdCollection();
             var outlineId =  polygon.Print(acadDb, outlineConfig);
-            var objIds = new ObjectIdCollection { outlineId };
-            var hatchId = objIds.Print(acadDb, hatchConfig);
-            results.Add(outlineId);
-            results.Add(hatchId);
+            if(outlineId!=ObjectId.Null)
+            {
+                results.Add(outlineId);
+                var objIds = new ObjectIdCollection { outlineId };
+                var hatchId = objIds.Print(acadDb, hatchConfig);
+                if(hatchId!=ObjectId.Null)
+                {
+                    results.Add(hatchId);
+                }                
+            }
             return results;
         }
         public static ObjectIdCollection Print(AcadDatabase acadDb, MPolygon polygon,PrintConfig outlineConfig, HatchPrintConfig hatchConfig)
@@ -64,10 +70,46 @@ namespace ThPlatform3D.StructPlane.Print
             return new HatchPrintConfig
             {
                 //PatternType = HatchPatternType.CustomDefined,
-                //PatternName = "钢筋混凝土",
-                PatternName = "AR-CONC",
+                //PatternName = "AR-CONC",
+                PatternName = "钢筋混凝土",                
                 PatternScale = 50.0,
                 LayerName = ThPrintLayerManager.BelowShearWallHatchLayerName,
+            };
+        }
+
+        public static PrintConfig GetPassHeightWallConfig()
+        {
+            return new PrintConfig
+            {
+                LayerName = ThPrintLayerManager.PassHeightWallLayerName,
+            };
+        }
+
+        public static HatchPrintConfig GetPassHeightWallHatchConfig()
+        {
+            return new HatchPrintConfig
+            {
+                PatternName = "S_ASPHALTUM",
+                PatternScale = 20.0,
+                LayerName = ThPrintLayerManager.PassHeightWallHatchLayerName,
+            };
+        }
+
+        public static PrintConfig GetWindowWallConfig()
+        {
+            return new PrintConfig
+            {
+                LayerName = ThPrintLayerManager.WindowWallLayerName,
+            };
+        }
+
+        public static HatchPrintConfig GetWindowWallHatchConfig()
+        {
+            return new HatchPrintConfig
+            {
+                PatternName = "CROSS",
+                PatternScale = 10.0,
+                LayerName = ThPrintLayerManager.WindowWallHatchLayerName,
             };
         }
     }

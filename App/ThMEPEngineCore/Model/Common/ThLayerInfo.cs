@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.Model.Common
             }
         }
 
-        private bool _isSelected = false;
+        private bool _isSelected = true;
         public bool IsSelected
         {
             get => _isSelected;

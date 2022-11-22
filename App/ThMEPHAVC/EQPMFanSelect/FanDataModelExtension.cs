@@ -21,7 +21,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                 // 设备符号
                 [EQPMFanCommon.BLOCK_ATTRIBUTE_EQUIPMENT_SYMBOL] = EQPMFanCommon.Symbol(model.Name, model.InstallSpace),
                 // 风机功能
-                [EQPMFanCommon.BLOCK_ATTRIBUTE_FAN_USAGE] = model.ServiceArea == null ? "":model.ServiceArea,
+                [EQPMFanCommon.BLOCK_ATTRIBUTE_FAN_USAGE] = model.ServiceArea == null ? "" : model.ServiceArea,
                 // 风量
                 [EQPMFanCommon.BLOCK_ATTRIBUTE_FAN_VOLUME] = EQPMFanCommon.AirVolume(model.AirVolumeDescribe),
                 // 全压
@@ -76,7 +76,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             };
             return valueList;
         }
-        public static TypedValueList XDataValueList(this FanDataModel model, int number, FanDataModel childFan,string handleStr) 
+        public static TypedValueList XDataValueList(this FanDataModel model, int number, FanDataModel childFan, string handleStr)
         {
             var strScenario = CommonUtil.GetEnumDescription(model.Scenario);
             var strType = CommonUtil.GetEnumDescription(model.VentStyle);
@@ -96,7 +96,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             };
             return valueList;
         }
-        public static FanBlockXDataModel FanXData(this FanDataModel model,FanDataModel childFan) 
+        public static FanBlockXDataModel FanXData(this FanDataModel model, FanDataModel childFan)
         {
             var strFanEng = CommonUtil.GetEnumDescription(model.VentLev);
             var strElvEng = CommonUtil.GetEnumDescription(model.EleLev);
@@ -121,7 +121,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                 retModel.SelectionFactor = string.Format("{0}/{1}", model.DragModel.SelectionFactor, childFan.DragModel.SelectionFactor);
                 retModel.FanModelInputMotorPower = string.Format("{0}/{1}", model.FanModelTypeCalcModel.FanModelInputMotorPower, childFan.FanModelTypeCalcModel.FanModelInputMotorPower);
             }
-            else 
+            else
             {
                 retModel.AirCalcValue = string.Format("{0}", model.VolumeCalcModel.AirCalcValue);
                 retModel.AirCalcFactor = string.Format("{0}", model.VolumeCalcModel.AirCalcFactor);
@@ -136,7 +136,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             }
             return retModel;
         }
-        public static FanBlockXDataModel ReadBlockFanXData(this ObjectId blockId,out FanBlockXDataBase fanBlockXData,string regAppName = ThHvacCommon.RegAppName_FanSelectionEx) 
+        public static FanBlockXDataModel ReadBlockFanXData(this ObjectId blockId, out FanBlockXDataBase fanBlockXData, string regAppName = ThHvacCommon.RegAppName_FanSelectionEx)
         {
             fanBlockXData = null;
             FanBlockXDataModel retModel = null;
@@ -145,7 +145,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             {
                 return retModel;
             }
-            try 
+            try
             {
                 fanBlockXData = new FanBlockXDataBase();
                 //读取顺序要和上面的写入顺序一致
@@ -170,13 +170,13 @@ namespace ThMEPHVAC.EQPMFanSelect
                             fanBlockXData.FanControlString = strData;
                             break;
                         case 6:
-                            try 
+                            try
                             {
                                 if (string.IsNullOrEmpty(strData) || !strData.EndsWith("}"))
                                 {
                                     retModel = ReadStringDataToModel(strData);
                                 }
-                                else 
+                                else
                                 {
                                     retModel = JsonHelper.DeserializeJsonToObject<FanBlockXDataModel>(strData);
                                 }
@@ -195,7 +195,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                     }
                 }
             }
-            catch 
+            catch
             {
                 return null;
             }
@@ -214,20 +214,20 @@ namespace ThMEPHVAC.EQPMFanSelect
                     retModel.FanModelCCCF = name;
                 }
             }
-            if (string.IsNullOrEmpty(retModel.AirCalcValue)) 
+            if (string.IsNullOrEmpty(retModel.AirCalcValue))
             {
                 retModel.AirCalcValue = blockId.GetDynBlockValue(ThHvacCommon.BLOCK_ATTRIBUTE_FAN_VOLUME);
             }
-            if (string.IsNullOrEmpty(retModel.VibrationMode)) 
+            if (string.IsNullOrEmpty(retModel.VibrationMode))
             {
                 retModel.VibrationMode = CommonUtil.GetEnumDescription(EnumDampingType.RDamping);
             }
             return retModel;
         }
-        public static FanDataModel ReadBlockAllFanData(BlockReference fanBlock,out FanDataModel cModel,out bool isCopy) 
+        public static FanDataModel ReadBlockAllFanData(ObjectId fanBlockId, out FanDataModel cModel, out bool isCopy)
         {
             var reg = new Regex("[0-9]+", RegexOptions.IgnoreCase | RegexOptions.Singleline);
-            var pModel = ReadFanBlockModel(fanBlock.Id, out cModel, out isCopy);
+            var pModel = ReadFanBlockModel(fanBlockId, out cModel, out isCopy);
             if (null == pModel)
                 return pModel;
             bool haveValue = false;
@@ -236,11 +236,15 @@ namespace ThMEPHVAC.EQPMFanSelect
                 pModel.IntakeForm = EnumFanAirflowDirection.StraightInAndStraightOut;
                 haveValue = true;
             }
-            else 
+            else
             {
-               
-                var trx = fanBlock.Database.TransactionManager.TopTransaction;
-                var blockName = fanBlock.DynamicBlockTableRecord.GetDBObject<BlockTableRecord>(trx, OpenMode.ForRead, false).Name;
+                // DynamicBlockTableRecord always have a valid value:
+                //  1. if the block is normal block, it's the normal block.
+                //  2. if the block is dynamic block, it's the dyanmic block.
+                var fanBlockRef = (BlockReference)fanBlockId.GetObject(OpenMode.ForRead);
+                var blockName = ((BlockTableRecord)fanBlockRef.DynamicBlockTableRecord.GetObject(OpenMode.ForRead)).Name;
+
+                // Mapping block name with EnumFanAirflowDirection
                 var items = CommonUtil.EnumDescriptionToList(typeof(EnumFanAirflowDirection));
                 foreach (var item in items)
                 {
@@ -254,7 +258,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             }
             if (!haveValue)
                 pModel.IntakeForm = EnumFanAirflowDirection.StraightInAndStraightOut;
-            var visAttrs = BlockTools.GetAttributesInBlockReference(fanBlock.Id, true);
+            var visAttrs = BlockTools.GetAttributesInBlockReference(fanBlockId, true);
             foreach (var attr in visAttrs)
             {
                 var strValue = attr.Value;
@@ -266,10 +270,10 @@ namespace ThMEPHVAC.EQPMFanSelect
                     {
                         pModel.InstallSpace = spliteStr[1];
                     }
-                    else 
+                    else
                     {
                         var firstIndex = strValue.IndexOf("-");
-                        if (firstIndex > 0 && (firstIndex + 1 < strValue.Length)) 
+                        if (firstIndex > 0 && (firstIndex + 1 < strValue.Length))
                         {
                             pModel.InstallSpace = strValue.Substring(firstIndex + 1);
                         }
@@ -344,7 +348,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             }
             return pModel;
         }
-        public static FanDataModel ReadFanBlockModel(ObjectId fanBlockId, out FanDataModel cModel, out bool isCopy) 
+        public static FanDataModel ReadFanBlockModel(ObjectId fanBlockId, out FanDataModel cModel, out bool isCopy)
         {
             FanDataModel pModel = null;
             cModel = null;
@@ -358,11 +362,11 @@ namespace ThMEPHVAC.EQPMFanSelect
             pModel = new FanDataModel(enumItem);
             pModel.ID = xDataBase.Id;
             pModel.VentStyle = CommonUtil.GetEnumItemByDescription<EnumFanModelType>(xDataBase.VentStyleString);
-            pModel.Control = CommonUtil.GetEnumItemByDescription<EnumFanControl>( xDataBase.FanControlString);
-            pModel.EleLev = CommonUtil.GetEnumItemByDescription<EnumFanEnergyConsumption>( xData.ElvLev);
-            pModel.VentLev = CommonUtil.GetEnumItemByDescription<EnumFanEnergyConsumption>( xData.VentLev);
+            pModel.Control = CommonUtil.GetEnumItemByDescription<EnumFanControl>(xDataBase.FanControlString);
+            pModel.EleLev = CommonUtil.GetEnumItemByDescription<EnumFanEnergyConsumption>(xData.ElvLev);
+            pModel.VentLev = CommonUtil.GetEnumItemByDescription<EnumFanEnergyConsumption>(xData.VentLev);
             pModel.VibrationMode = CommonUtil.GetEnumItemByDescription<EnumDampingType>(xData.VibrationMode);
-            pModel.FanModelTypeCalcModel.ValueSource = CommonUtil.GetEnumItemByDescription<EnumValueSource>( xData.FanModelMotorPowerSource);
+            pModel.FanModelTypeCalcModel.ValueSource = CommonUtil.GetEnumItemByDescription<EnumValueSource>(xData.FanModelMotorPowerSource);
             pModel.Remark = xDataBase.Remark;
             bool haveChild = !string.IsNullOrEmpty(temp) && temp.Contains("/");
             if (haveChild)
@@ -448,7 +452,7 @@ namespace ThMEPHVAC.EQPMFanSelect
                 double.TryParse(spliteSelectionFactor[1], out double SelectionFactor2);
                 cModel.DragModel.SelectionFactor = SelectionFactor2;
             }
-            if (!string.IsNullOrEmpty(xData.FanModelInputMotorPower)) 
+            if (!string.IsNullOrEmpty(xData.FanModelInputMotorPower))
             {
                 var spliteInputMotorPower = xData.FanModelInputMotorPower.Split('/');
                 pModel.FanModelTypeCalcModel.FanModelInputMotorPower = spliteInputMotorPower[0];
@@ -491,7 +495,7 @@ namespace ThMEPHVAC.EQPMFanSelect
             return tempModel;
         }
     }
-    public class FanBlockXDataBase 
+    public class FanBlockXDataBase
     {
         public string Id { get; set; }
         /// <summary>
@@ -519,7 +523,7 @@ namespace ThMEPHVAC.EQPMFanSelect
         /// </summary>
         public string Remark { get; set; }
     }
-    public class FanBlockXDataModel 
+    public class FanBlockXDataModel
     {
         /// <summary>
         /// 风机输入风量（双频时数据格式为 12000/10000）

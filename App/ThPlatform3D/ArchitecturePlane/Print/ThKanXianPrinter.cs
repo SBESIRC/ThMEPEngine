@@ -14,8 +14,11 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         public ObjectIdCollection Print(Database db, Curve curve)
         {
             var results = new ObjectIdCollection();
-            var beamId = curve.Print(db, Config);
-            results.Add(beamId);
+            var kanxianId = curve.Print(db, Config);
+            if(kanxianId!=ObjectId.Null)
+            {
+                results.Add(kanxianId);
+            }            
             return results;
         }
         public static PrintConfig GetConfig()

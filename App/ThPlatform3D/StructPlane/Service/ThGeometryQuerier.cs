@@ -26,13 +26,36 @@ namespace ThPlatform3D.StructPlane.Service
                 .GroupBy(o => o);
             return groups.OrderByDescending(o => o.Count()).Select(o => o.Key).ToList();
         }
-        public static List<ThGeometry> GetWallGeos(this List<ThGeometry> geos)
+        public static List<ThGeometry> GetAllWallGeos(this List<ThGeometry> geos)
         {
             // 获取IfcWall几何物体
             return geos
                 .Where(g => g.Properties.GetCategory() == ThIfcCategoryManager.WallCategory)
                 .ToList();
         }
+        public static List<ThGeometry> GetStandardWallGeos(this List<ThGeometry> geos)
+        {
+            // 获取IfcWall几何物体
+            return geos.GetAllWallGeos()
+                .Where(g => g.Properties.GetDescription().IsStandardWall())
+                .ToList();
+        }
+        public static List<ThGeometry> GetPassHeightGeos(this List<ThGeometry> geos)
+        {
+            // 获取type=IfcWall,description="S_CONS_通高墙"
+            return geos.GetAllWallGeos()
+                .Where(g => g.Properties.GetDescription().IsPassHeightWall())
+                .ToList();
+        }
+
+        public static List<ThGeometry> GetWindowHeightGeos(this List<ThGeometry> geos)
+        {
+            // 获取type=IfcWall,description="S_CONS_窗台墙"
+            return geos.GetAllWallGeos()
+                .Where(g => g.Properties.GetDescription().IsWindowWall())
+                .ToList();
+        }
+
         public static List<ThGeometry> GetSlabGeos(this List<ThGeometry> geos)
         {
             // 获取IfcSlab几何物体
@@ -80,14 +103,14 @@ namespace ThPlatform3D.StructPlane.Service
                 .ToList();
         }
 
-        public static List<ThGeometry> GetBelowColumnGeos(this List<ThGeometry> geos)
+        public static List<ThGeometry> GetBelowStandardColumnGeos(this List<ThGeometry> geos)
         {
-            return geos.Where(o => IsBelowFloorColumn(o)).ToList();
+            return geos.Where(o => IsBelowFloorColumn(o) && o.Properties.GetDescription().IsStandardColumn()).ToList();
         }
 
-        public static List<ThGeometry> GetBelowShearwallGeos(this List<ThGeometry> geos)
+        public static List<ThGeometry> GetBelowStandardShearwallGeos(this List<ThGeometry> geos)
         {
-            return geos.Where(o => IsBelowFloorShearWall(o)).ToList();
+            return geos.Where(o => IsBelowFloorShearWall(o) && o.Properties.GetDescription().IsStandardWall()).ToList();
         }
 
         public static bool IsUpperFloorColumn(this ThGeometry geo)
@@ -134,6 +157,33 @@ namespace ThPlatform3D.StructPlane.Service
                 return Math.Abs(values[0] - 10.0) <= 1e-4;
             }
             return false;
+        }
+
+        public static bool IsStandardColumn(this string description)
+        {
+            return string.IsNullOrEmpty(description);
+        }
+
+        public static bool IsConstructColumn(this string description)
+        {
+            return description.ToUpper().Contains("S_CONS_构造柱");
+        }
+
+        public static bool IsStandardWall(this string description)
+        {
+            return string.IsNullOrEmpty(description);
+        }
+
+        public static bool IsPassHeightWall(this string description)
+        {
+            // 全混凝土外墙（通高）
+            return description.ToUpper().Contains("S_CONS_通高墙");
+        }
+
+        public static bool IsWindowWall(this string description)
+        {
+            // 全混凝土外墙（窗台）
+            return description.Contains("S_CONS_窗台墙");
         }
     }
 }

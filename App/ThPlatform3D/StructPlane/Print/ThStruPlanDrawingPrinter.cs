@@ -78,12 +78,7 @@ namespace ThPlatform3D.StructPlane.Print
                 dwgExistedElements = GetAllObjsInRange(acadDb, geoExtents); // 获取Dwg此范围内的所有对象
                 var dwgExistedBeamMarkBlks = GetBeamMarks(dwgExistedElements); // 图纸上已存在的梁标注(块)
 
-                // 打印对象
-                // 记录梁文字原始位置
-                var beamMarkOriginTextPos = new Dictionary<DBText, Point3d>();
-                // 用于把打印的文字转成块,最后把梁文字删除掉  
-                var beamTextGroupObjIds = new List<ObjectIdCollection>();
-
+                // 打印对象            
                 // 打印楼梯板对角线及标注
                 Append(PrintStairSlabCorner(acadDb, stairSlabCorners));
 
@@ -95,15 +90,18 @@ namespace ThPlatform3D.StructPlane.Print
                 beamTexts.OfType<DBText>().ForEach(o => beamTextInfos.Add(o, res.Item2[o.ObjectId]));
 
                 // 打印双梁标注
+                // 用于把打印的文字转成块,最后把梁文字删除掉  
+                var beamTextGroupObjIds = new List<ObjectIdCollection>();
                 var dblRowBeamMarkIds = PrintDoubleRowBeams(acadDb, dblRowBeamMarks);
                 dblRowBeamMarkIds.ForEach(o => Append(o.Item1));
                 dblRowBeamMarkIds.ForEach(o => beamTextGroupObjIds.Add(o.Item1));
 
                 // 记录梁标注文字的原始位置
+                var beamMarkOriginTextPos = new Dictionary<DBText, Point3d>();
                 _geos.GetBeamMarks()
                     .Select(o => o.Boundary)
                     .OfType<DBText>()
-                    .ForEach(o => beamMarkOriginTextPos.Add(o, o.GetCenterPointByOBB()));
+                    .ForEach(o => beamMarkOriginTextPos.Add(o, o.AlignmentPoint));
 
                 // 对双梁文字调整位置(后处理)  
                 AdjustDblRowMarkPos(acadDb, dblRowBeamMarkIds, beamLines);
@@ -165,7 +163,9 @@ namespace ThPlatform3D.StructPlane.Print
                 Append(beamBlkIds);
 
                 // 打印标题
-                Append(PrintHeadText(acadDb));
+                var textRes = PrintHeadText(acadDb);
+                Append(textRes.Item1);
+                Append(textRes.Item2);
 
                 // 打印柱表
                 var elevationTblBasePt = GetElevationBasePt(acadDb);
@@ -334,24 +334,50 @@ namespace ThPlatform3D.StructPlane.Print
                     }
                     else if (category == ThIfcCategoryManager.ColumnCategory)
                     {
-                        if (o.IsUpperFloorColumn())
+                        var description = o.Properties.GetDescription();
+                        if(description.IsStandardColumn())
                         {
-                            Append(PrintUpperColumn(acadDb, o));
+                            if (o.IsUpperFloorColumn())
+                            {
+                                Append(PrintUpperColumn(acadDb, o));
+                            }
+                            else if (o.IsBelowFloorColumn())
+                            {
+                                Append(PrintBelowColumn(acadDb, o));
+                            }
                         }
-                        else if (o.IsBelowFloorColumn())
+                        else
                         {
-                            Append(PrintBelowColumn(acadDb, o));
+                            if(description.IsConstructColumn())
+                            {
+                                Append(PrintConstructColumn(acadDb, o));
+                            }
                         }
                     }
                     else if (category == ThIfcCategoryManager.WallCategory)
                     {
-                        if (o.IsUpperFloorShearWall())
+                        var description = o.Properties.GetDescription();
+                        if(description.IsStandardWall())
                         {
-                            Append(PrintUpperShearWall(acadDb, o));
+                            if (o.IsUpperFloorShearWall())
+                            {
+                                Append(PrintUpperShearWall(acadDb, o));
+                            }
+                            else if (o.IsBelowFloorShearWall())
+                            {
+                                Append(PrintBelowShearWall(acadDb, o));
+                            }
                         }
-                        else if (o.IsBelowFloorShearWall())
+                        else
                         {
-                            Append(PrintBelowShearWall(acadDb, o));
+                            if(description.IsPassHeightWall())
+                            {
+                                Append(PrintPassHeightWall(acadDb, o));
+                            }
+                            else if(description.IsWindowWall())
+                            {
+                                Append(PrintWindowWall(acadDb, o));
+                            }
                         }
                     }
                     else if (category == ThIfcCategoryManager.SlabCategory)
@@ -400,8 +426,11 @@ namespace ThPlatform3D.StructPlane.Print
                         {
                             textMoveDir = o.Properties.GetDirection().ToVector();
                         }
-                        dbText.TextString = dbText.TextString + "（" + i++ + "）";                        
-                        beamIds.AddRange(ThAnnotationPrinter.Print(acadDb, dbText, _beamTextConfig));                       
+                        dbText.TextString = dbText.TextString + "（" + i++ + "）";  
+                        if(dbText.ObjectId==ObjectId.Null)
+                        {
+                            beamIds.AddRange(ThAnnotationPrinter.Print(acadDb, dbText, _beamTextConfig));
+                        }                     
                     }
                 });
                 if(textMoveDir.Length <= 1e-6 && g.Count>0)
@@ -464,7 +493,7 @@ namespace ThPlatform3D.StructPlane.Print
                 corners.OfType<Line>().ForEach(l => results.AddRange(
                     ThStairLineMarkPrinter.Print(acadDb, l, lineConfig, textConfig)));
             }
-            return results;
+            return results.OfType<ObjectId>().ToCollection();
         }
 
         private Dictionary<string,HatchPrintConfig> GetSlabHatchConfigs(List<string> elevations)
@@ -523,15 +552,16 @@ namespace ThPlatform3D.StructPlane.Print
             });
         }
 
-        private ObjectIdCollection PrintHeadText(AcadDatabase acadDb)
+        private Tuple<ObjectIdCollection, ObjectIdCollection> PrintHeadText(AcadDatabase acadDb)
         {
             // 打印自然层标识, eg 一层~五层结构平面层
             var flrRange = _floorInfos.GetFloorRange(_flrBottomEle);
             if (string.IsNullOrEmpty(flrRange))
             {
-                return new ObjectIdCollection();
+                return Tuple.Create(new ObjectIdCollection(),new ObjectIdCollection());
             }
-            return PrintHeadText(acadDb, flrRange);
+            var stdFlrInfo = _floorInfos.GetStdFlrInfo(_flrBottomEle);
+            return PrintHeadText(acadDb, flrRange, stdFlrInfo);
         }
     }
 }

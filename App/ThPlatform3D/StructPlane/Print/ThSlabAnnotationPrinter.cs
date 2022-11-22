@@ -23,7 +23,10 @@ namespace ThPlatform3D.StructPlane.Print
                                     new Scale3d(1.0),
                                     0.0,
                                     attNameValues);
-            results.Add(blkId);
+            if(blkId!=ObjectId.Null)
+            {
+                results.Add(blkId);
+            }            
             return results;
         }
     }

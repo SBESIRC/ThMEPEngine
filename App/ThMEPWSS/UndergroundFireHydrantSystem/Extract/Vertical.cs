@@ -65,7 +65,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         
         private static bool IsTargetLayer(string layer)//立管图层
         {
-            return layer.Equals("W-FRPT-HYDT-VPIPE")
+            return (layer.Contains("HYDT")&& layer.Contains("VPIPE"))
                  || layer.Equals("W-FRPT-HYDT-EQPM")
                  || layer.Equals("W-FRPT-HYDT")
                  || layer.Equals("W-FRPT-EXTG");

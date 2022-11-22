@@ -147,6 +147,12 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_SuperBoundaryConfig" Guid="{0FCFE576-2968-4A42-8EAD-4DD44B9F948B}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_SuperBoundaryConfig" Source="$(var.AutoloaderContentsPath)\Support\SuperBoundaryConfig.ini" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_VF_Pump" Guid="{D5DDF3B8-85B6-4D48-BB3E-B7E99A709A81}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_VF_Pump" Source="$(var.AutoloaderContentsPath)\Support\生活变频泵选泵.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Fire_Pump" Guid="{1E60D97E-70A2-4BAB-B413-E1DAC1CB51FE}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Fire_Pump" Source="$(var.AutoloaderContentsPath)\Support\消防泵查询表.xlsx" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -323,6 +329,8 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Reinforced_Concrete" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_SuperBoundaryConfig" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_VF_Pump" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fire_Pump" />
         </ComponentGroup>
     </Fragment>
 </Wix>

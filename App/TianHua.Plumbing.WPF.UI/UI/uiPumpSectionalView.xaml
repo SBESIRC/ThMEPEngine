@@ -1,0 +1,867 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiPumpSectionalView"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:valRules="clr-namespace:TianHua.Plumbing.WPF.UI.Validations;assembly=TianHua.Plumbing.WPF.UI"
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.Validations"
+             xmlns:converter="TianHua.Plumbing.WPF.UI.UI" 
+             xmlns:converter1="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+             Closing="ThCustomWindow_Closing"
+             mc:Ignorable="d" 
+             SizeToContent="Height" Height="Auto" Width="700" MinHeight="300" Loaded="Window_Loaded">
+
+    <cus:ThCustomWindow.Resources>
+        <converter1:CountConverter x:Key="countConverter" />
+    </cus:ThCustomWindow.Resources>
+   
+    <TabControl   HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="消防泵房"  FontSize="15" />
+                </StackPanel>
+            </TabItem.Header>
+            <Grid Margin="5,5,5,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="1.5*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="0.5*"/>
+                    <ColumnDefinition Width="70"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="0" Grid.Column="0" Margin="0,5,5,5" Grid.ColumnSpan="2">
+                    <Label  Content="消防泵房：建筑完成面标高" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30" 
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="AllowNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding BuildingFinishHeight_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged, 
+                            Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="0" Grid.Column="1" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                    <Label  Content="顶板下标高" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30" 
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="AllowNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding RoofHeight_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,
+                        Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="0" Grid.Column="2" Margin="0,5,5,5" Grid.ColumnSpan="2">
+                    <Label  Content="水泵基础高度" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30" 
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding BaseHeight_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m" VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="1" Grid.Column="0" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                    <Label  Content="消防水池：面积" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30"
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding PoolArea_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="1" Grid.Column="1" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                    <Label  Content="有效水深" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30"
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding Depth_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="1" Grid.Column="2" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                    <Label  Content="有效容积" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30" 
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding Volume_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m³" VerticalAlignment="Center"/>
+                </StackPanel>
+                
+                <!--
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="2" Grid.Column="0" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                    <Label  Content="最低有效水深：h+" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30"
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding FirePressure_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m" VerticalAlignment="Center"/>
+                </StackPanel>
+                -->
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="2" Grid.Column="0" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                    <Label  Content="消火栓泵启泵压力" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30"
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding FirePressure_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="MPa" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="2" Grid.Column="1" Margin="0,5,5,5" Grid.ColumnSpan="2">
+                    <Label  Content="喷淋泵启泵压力" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Width="40" 
+                        Height="30" 
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding WaterPressure_Fire,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="MPa" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="3" Grid.Column="5" Margin="5,10,5,5">
+                    <cus:ImageButton  Height="25" Width="25"   Margin=" 0,0,5,0"
+                              NormalImage="../Images/xinzeng-xian.png" ImageStretch="Fill" ImageMargin="5,5,5,5"
+                             ImageHeight="25" ImageWidth="25" Name="btnAddFire" Command="{Binding btnAddFire_Cmd}" >
+                    </cus:ImageButton>
+                    <cus:ImageButton  Height="25" Width="25"   Margin="5,0,0,0"    
+                              NormalImage="../Images/jianshao-xian.png" ImageStretch="Fill" ImageMargin="5,5,5,5"
+                             ImageHeight="25" ImageWidth="25" Name="btnDelFire" Command="{Binding btnDelFire_Cmd}" >
+                    </cus:ImageButton>
+                </StackPanel>
+
+
+
+                <DataGrid Margin="5,5,5,5" Grid.Row="3" Grid.ColumnSpan="4" Name="dataGrid_Fire"  AutoGenerateColumns="False" CanUserAddRows="False" 
+                           Validation.ErrorTemplate="{x:Null}"
+                          ItemsSource="{Binding FirePumpInfoList}" BorderThickness="1"  BorderBrush="Black" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ColumnHeaderHeight="25" MinHeight="50" Height="100" RowHeight="25" HorizontalAlignment="Center">
+                   
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                            <Setter Property="Background" Value="#ffffff"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="BorderThickness" Value="1" />
+                           
+                            <Setter Property="BorderBrush" Value="Black" />
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                   <!--
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/>
+                            <Setter Property="BorderBrush" Value="Blue"/>
+                            <Setter Property="Margin" Value="0.5,0,0,0"/>
+                        </Style>
+                    </DataGrid.CellStyle>-->
+                    
+                    <DataGrid.Columns >
+                        <DataGridTemplateColumn Header="泵组编号" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        
+                                        <TextBox  Height="25" BorderBrush="White" Margin="1,0,0,0"
+                                            Text="{Binding No,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="流量(m3/h)" Width="70">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Flow_Info,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="扬程(m)" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Head,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="功率(kW)" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Power,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="泵数量" Width="50">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox
+                                            Name="Num_TextBox"
+                                            Height="25"
+                                            BorderBrush="White"
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            PreviewTextInput="NotNegativeInteger_PreviewTextInput"  >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="Num"
+                                                    Mode="TwoWay"
+                                                    ValidatesOnExceptions="False"
+                                                    NotifyOnSourceUpdated="True"
+                                                    Converter="{StaticResource countConverter}"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="放气孔高度(mm)" Width="95">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox
+                                            Name="Num_TextBox"
+                                            Height="25"
+                                            BorderBrush="White"
+                                            
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            PreviewTextInput="NotNegativeInteger_PreviewTextInput"  >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="Hole"
+                                                    Mode="TwoWay"
+                                                    ValidatesOnExceptions="False"
+                                                    NotifyOnSourceUpdated="True"
+                                                    Converter="{StaticResource countConverter}"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="使用台数" Width="70" >
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox Foreground="#FF545454"  Height="25" BorderBrush="White" VerticalContentAlignment="Center" 
+                                              IsEditable="False" 
+                                            SelectedItem="{Binding NumSelect,Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+				                            ItemsSource="{Binding NumList,Mode=OneWay, NotifyOnSourceUpdated=True}">
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="泵类型" Width="60" >
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox Foreground="#FF545454"  Height="25" BorderBrush="White" VerticalContentAlignment="Center" 
+                                            IsEditable="False" 
+                                            SelectedItem="{Binding TypeSelect, Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+				                            ItemsSource="{Binding TypeList,Mode=OneWay, NotifyOnSourceUpdated=True}">
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="备注" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNullString_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Note,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+               
+
+              
+                <!--
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" Margin="5,10,5,5">
+                    <CheckBox Command="{Binding AutoChooseFire_Cmd}" IsChecked ="{Binding Path=IsAutoChooseFire, Mode=TwoWay,NotifyOnTargetUpdated=True,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center">自动选泵</CheckBox>
+                </StackPanel>-->
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" Margin="5,10,0,5">
+                    <Button  Content="自动选泵" Width="100" Height="30" Command="{Binding AutoChooseFire_Cmd}"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" Margin="170,10,0,5" Grid.ColumnSpan="2">
+                    <Button  Content="生成剖面图" Width="100" Height="30" Command="{Binding CallFirePumpCmd}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" Margin="340,10,0,5" Grid.ColumnSpan="3">
+                    <Button  Content="生成说明" Width="100" Height="30" Command="{Binding CallFirePumpWordCmd}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="4" Grid.Column="0" Margin="510,10,0,5" Grid.ColumnSpan="4">
+                    <Button  Content="生成材料表" Width="100" Height="30" Command="{Binding CallFirePumpGraphCmd}"/>
+                </StackPanel>
+                
+            </Grid>
+        </TabItem>
+        
+        <TabItem>
+            <TabItem.Header>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="生活泵房"  FontSize="15" />
+                </StackPanel>
+            </TabItem.Header>
+            <Grid Margin="5,0,5,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="90"/>
+                </Grid.ColumnDefinitions>
+
+                <Label  Grid.Row="0" Grid.Column="0" TextBlock.FontSize="15" Margin="5,5,5,0" TextBlock.FontWeight="Black" Content="生活水箱:"  HorizontalAlignment="Left"  />
+
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="1" Grid.Column="1" Margin="5,10,5,5">
+                    <cus:ImageButton  Height="25" Width="25"   Margin="0,5,5,5" 
+                              NormalImage="../Images/xinzeng-xian.png" ImageStretch="Fill" 
+                             ImageHeight="25" ImageWidth="25" Name="btnAddBase" Command="{Binding btnAddBase_Cmd}" >
+                    </cus:ImageButton>
+                    <cus:ImageButton  Height="25" Width="25"   Margin="5,0,0,0"    
+                              NormalImage="../Images/jianshao-xian.png" ImageStretch="Fill" 
+                             ImageHeight="25" ImageWidth="25" Name="btnDelBase" Command="{Binding btnDelBase_Cmd}" >
+                    </cus:ImageButton>
+                </StackPanel>
+
+                <Grid Margin="5,0,0,0" Grid.Row="1">
+                    <DataGrid Name="dataGrid_Base"  AutoGenerateColumns="False" CanUserAddRows="False" HorizontalAlignment="Center" ItemsSource="{Binding LifeBaseInfoList}" ColumnHeaderHeight="25" MinHeight="50"  RowHeight="25" BorderThickness="1"  BorderBrush="Black">
+                        
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                                <Setter Property="Background" Value="#ffffff"></Setter>
+                                <Setter Property="Foreground" Value="Black"></Setter>
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="BorderBrush" Value="Black" />
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+
+
+                        <DataGrid.Columns>
+                            
+                            <DataGridTemplateColumn Header="水箱名称" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate >
+                                        <TextBox              
+                                            BorderBrush="White"
+                                            Height="25"
+                                            PreviewTextInput="NotNullString_PreviewTextInput"              
+                                            >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="No"
+                                                    Mode="TwoWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    NotifyOnValidationError="True"
+                                                    
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <!--                                                    <Binding.ValidationRules>
+                                                        <local:StringNotNullValidationRule ValidatesOnTargetUpdated="False"/>
+                                                    </Binding.ValidationRules>
+                                                    -->
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="长(m)" Width="65">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox 
+                                           BorderBrush="White"
+                                            Height="25"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="Length"
+                                                    Mode="TwoWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    NotifyOnValidationError="True"
+                                                    Converter="{StaticResource countConverter}"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <!-- 
+                                                    <Binding.ValidationRules>
+                                                        <local:AboveZeroAndHalfVlidationRule ValidatesOnTargetUpdated="False" />
+                                                    </Binding.ValidationRules>
+                                                    -->
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="宽(m)" Width="65">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox 
+                                            Height="25"
+                                            BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="Width"
+                                                    Mode="TwoWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    NotifyOnValidationError="True"
+                                                    Converter="{StaticResource countConverter}"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <!-- 
+                                                    <Binding.ValidationRules>
+                                                        <local:AboveZeroAndHalfVlidationRule ValidatesOnTargetUpdated="False" />
+                                                    </Binding.ValidationRules>
+                                                    -->
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="高(m)" Width="65">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox 
+                                            Height="25"
+                                            BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="Height"
+                                                    Mode="TwoWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    NotifyOnValidationError="True"
+                                                    Converter="{StaticResource countConverter}"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <!-- 
+                                                    <Binding.ValidationRules>
+                                                        <local:AboveZeroAndHalfVlidationRule ValidatesOnTargetUpdated="False" />
+                                                    </Binding.ValidationRules>
+                                                    -->
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="有效容积(m³)" Width="100">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox 
+                                            Height="25"
+                                         BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="Volume"
+                                                    Mode="TwoWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    NotifyOnValidationError="True"
+                                                    Converter="{StaticResource countConverter}"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <!-- 
+                                                    <Binding.ValidationRules>
+                                                        <local:AboveZeroValidationRule ValidatesOnTargetUpdated="False" />
+                                                    </Binding.ValidationRules>
+                                                    -->
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="数量" Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox 
+                                            Height="25"
+                                            BorderBrush="White"
+                                            PreviewTextInput="NotNegativeInteger_PreviewTextInput"  >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="Num"
+                                                    Mode="TwoWay"
+                                                    NotifyOnSourceUpdated="True"
+                                                    NotifyOnValidationError="True"
+                                                    Converter="{StaticResource countConverter}"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                    <!-- 
+                                                    <Binding.ValidationRules>
+                                                        <local:AboveZeroValidationRule ValidatesOnTargetUpdated="False" />
+                                                    </Binding.ValidationRules>
+                                                    -->
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="备注" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNullString_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Note,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+
+                <StackPanel Orientation="Horizontal"  HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0" Margin="5,10,5,0">
+                    <Label  Content="生活水箱基础高度：" VerticalAlignment="Center" Height="30" />
+                   
+                    <TextBox 
+                        Width="60" 
+                        Height="30" 
+                        BorderBrush="black"
+                        Validation.ErrorTemplate="{x:Null}"
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding BaseHigh_Life,Mode=TwoWay,ValidatesOnDataErrors=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label  Content="m" VerticalAlignment="Center" Height="30" />
+                </StackPanel>
+                
+                <Label  Grid.Row="3" Grid.Column="0" TextBlock.FontSize="15" Margin="5,30,5,0" TextBlock.FontWeight="Black" Content="生活泵组:"  HorizontalAlignment="Left"  />
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Center" Grid.Row="4" Grid.Column="1" Margin="5,10,5,5">
+                    <cus:ImageButton  Height="25" Width="25"   Margin=" 0,0,5,0"
+                              NormalImage="../Images/xinzeng-xian.png" ImageStretch="Fill" ImageMargin="5,5,5,5"
+                             ImageHeight="25" ImageWidth="25" Name="btnAddPump" Command="{Binding btnAddPump_Cmd}">
+                    </cus:ImageButton>
+                    <cus:ImageButton  Height="25" Width="25"   Margin="5,0,0,0"    
+                              NormalImage="../Images/jianshao-xian.png" ImageStretch="Fill" ImageMargin="5,5,5,5"
+                             ImageHeight="25" ImageWidth="25" Name="btnDelPump" Command="{Binding btnDelPump_Cmd}">
+                    </cus:ImageButton>
+                </StackPanel>
+                
+                <Grid Margin="5,0,0,0" Grid.Row="4">
+                    <DataGrid Name="dataGrid_Pump"  AutoGenerateColumns="False" CanUserAddRows="False" 
+                               Validation.ErrorTemplate="{x:Null}"
+                              ItemsSource="{Binding LifePumpInfoList}" ColumnHeaderHeight="25" MinHeight="50"  RowHeight="25" 
+                              HorizontalAlignment="Center" BorderBrush="Black" BorderThickness="1" >
+                        <DataGrid.ColumnHeaderStyle>
+                            <Style TargetType="DataGridColumnHeader">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                                <Setter Property="Background" Value="#ffffff"></Setter>
+                                <Setter Property="Foreground" Value="Black"></Setter>
+                                <Setter Property="BorderThickness" Value="1" />
+                                <Setter Property="BorderBrush" Value="Black" />
+                            </Style>
+                        </DataGrid.ColumnHeaderStyle>
+                        <DataGrid.Columns>
+                         
+                            <DataGridTemplateColumn Header="泵组编号" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNullString_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding No,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="流量(m3/h)" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Flow_Info,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="扬程(m)" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Head,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="功率(kW)" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Power,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTemplateColumn Header="泵数量" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox
+                                            Name="Num_TextBox"
+                                            Height="25"
+                                            BorderBrush="White"
+                                            
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            PreviewTextInput="NotNegativeInteger_PreviewTextInput"  >
+                                            <TextBox.Text>
+                                                <Binding
+                                                    Path="Num"
+                                                    Mode="TwoWay"
+                                                    ValidatesOnExceptions="False"
+                                                    NotifyOnSourceUpdated="True"
+                                                    Converter="{StaticResource countConverter}"
+                                                    UpdateSourceTrigger="PropertyChanged">
+                                                </Binding>
+                                            </TextBox.Text>
+                                        </TextBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+
+                            <DataGridTemplateColumn Header="备注1" Width="80" >
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <ComboBox Foreground="#FF545454"  Height="25" BorderBrush="White" VerticalContentAlignment="Center" 
+                                            Padding="0,0,0,0"  IsEditable="False" SelectedItem="{Binding NoteSelect,Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
+				                            ItemsSource="{Binding NoteList,Mode=OneWay, NotifyOnSourceUpdated=True}">
+                                        </ComboBox>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            
+                          
+                            <DataGridTemplateColumn Header="备注2" Width="*">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox  Height="25" BorderBrush="White"
+                                            PreviewTextInput="NotNullString_PreviewTextInput"  
+                                            InputMethod.IsInputMethodEnabled="False"
+                                            Text="{Binding Note,Mode=TwoWay,ValidatesOnExceptions=False,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                                            />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+                
+                
+                <!--
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="0" Margin="20,20,50,5">
+                    <CheckBox Command="{Binding AutoChooseLife_Cmd}" IsChecked ="{Binding Path=IsAutoChooseLife, Mode=TwoWay,NotifyOnTargetUpdated=True,UpdateSourceTrigger=PropertyChanged}"  VerticalAlignment="Center">自动选泵</CheckBox>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,20,50,0">
+                    <Button  Content="生成剖面图" Width="100" Height="30" Command="{Binding CallLifePumpCmd}" />
+                </StackPanel>
+                -->
+                
+                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="0" Margin="5,10,0,5">
+                    <Button  Content="自动选泵" Width="100" Height="30" Command="{Binding AutoChooseLife_Cmd}"/>
+                </StackPanel>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="0" Margin="170,10,0,5" Grid.ColumnSpan="2">
+                    <Button  Content="生成剖面图" Width="100" Height="30" Command="{Binding CallLifePumpCmd}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="0" Margin="340,10,0,5" Grid.ColumnSpan="3">
+                    <Button  Content="生成说明" Width="100" Height="30" Command="{Binding CallLifePumpWordCmd}"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="5" Grid.Column="0" Margin="510,10,0,5" Grid.ColumnSpan="4">
+                    <Button  Content="生成材料表" Width="100" Height="30" Command="{Binding CallLifePumpGraphCmd}"/>
+                </StackPanel>
+                
+            </Grid>
+        </TabItem>
+       
+        <TabItem Header="屋顶消防水箱" FontSize="15">
+            
+            <Grid Margin="5,20,5,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                   
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                    <RowDefinition Height="Auto" ></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="1.5*"/>
+                </Grid.ColumnDefinitions>
+
+               
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="left" Grid.Row="0" Grid.Column="0" Margin="0,5,5,5" Grid.ColumnSpan="1">
+                    <Label  Content="屋顶水箱尺寸：" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Name="Length_TextBox"
+                        Width="60" 
+                        Height="30" 
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        LostFocus="Length_LostFocus"
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding Length,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m(l)x"/>
+                    <TextBox 
+                        Name="Width_TextBox"
+                        Width="60" 
+                        Height="30" 
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        LostFocus="Width_LostFocus"
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding Width,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m(w)x"/>
+                    <TextBox 
+                        Name="High_TextBox"
+                        Width="60" 
+                        Height="30" 
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        LostFocus="High_LostFocus"
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding High,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    <Label Content="m(h)"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="0" Grid.Column="1" Margin="0,5,5,5" Grid.ColumnSpan="1" >
+                    <Label  Content="有效容积：" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Name="Volume_TextBox"
+                        Width="60" 
+                        Height="30" 
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding Volume,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    
+                    <Label Content="m³"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="1" Grid.Column="0" Margin="0,10,5,0" >
+                    <Label  Content="水箱基础高度(不含槽钢)：" VerticalAlignment="Center"/>
+                    <TextBox 
+                        Name="BaseHigh_TextBox"
+                        Width="80" 
+                        Height="30" 
+                        PreviewTextInput="NotNegativeDecimals_PreviewTextInput"  
+                        PreviewKeyDown="TextBaseHigh_PreviewKeyDown" 
+                        InputMethod.IsInputMethodEnabled="False"
+                        Text="{Binding BaseHigh,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource countConverter}}"
+                    />
+                    
+                    <Label Content="m"/>
+                </StackPanel>
+
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0" Margin="5,15,5,0" >
+                    <CheckBox IsChecked ="{Binding Path=HasPump, Mode=TwoWay,NotifyOnTargetUpdated=True,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">屋顶稳压泵</CheckBox>
+                </StackPanel>
+
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="2" Grid.Column="0" Margin="150,15,5,0" >
+                    <CheckBox IsChecked ="{Binding Path=HasRoof, Mode=TwoWay,NotifyOnTargetUpdated=True,UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center">消防水箱间</CheckBox>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="3" Grid.Column="1" Margin="0,100,50,0">
+                    <Button  Content="生成剖面图" Width="100" Height="30"   Command="{Binding CallHighWaterTankCmd}"/>
+                </StackPanel>
+
+                
+
+            </Grid>
+        </TabItem>
+
+
+       
+    </TabControl>
+</cus:ThCustomWindow>

@@ -164,6 +164,7 @@
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\NormalUCSOpt.cs" />
     <Compile Include="CAD\NameValueString.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
+    <Compile Include="CAD\ThMEPBOLService.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
     <Compile Include="CAD\ThMEPDbExtension.cs" />
     <Compile Include="CAD\ThMEPDbUniqueIdService.cs" />

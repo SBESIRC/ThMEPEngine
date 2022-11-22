@@ -81,7 +81,15 @@
     <Compile Include="Common\ThPlanePrintParameter.cs" />
     <Compile Include="Common\ThPlaneUtils.cs" />
     <Compile Include="Common\ThPrintService.cs" />
+    <Compile Include="Common\ThSvgParseInfoExtension.cs" />
+    <Compile Include="ConfigService.cs" />
     <Compile Include="Model\Printer\PrintConfig.cs" />
+    <Compile Include="Model\User\UserInfo.cs" />
+    <Compile Include="Model\Project\DBProject.cs" />
+    <Compile Include="Model\Project\DBSubProject.cs" />
+    <Compile Include="Service\ProjectDBService.cs" />
+    <Compile Include="Model\Project\ProjectFile.cs" />
+    <Compile Include="Service\UserLoginService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructPlane\Print\ThAnnotationPrinter.cs" />
     <Compile Include="StructPlane\Print\ThBeamPrinter.cs" />
@@ -154,7 +162,14 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="Service\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MySql.Data">
+      <Version>8.0.31</Version>
+    </PackageReference>
+    <PackageReference Include="SqlSugar">
+      <Version>5.1.3.32</Version>
+    </PackageReference>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

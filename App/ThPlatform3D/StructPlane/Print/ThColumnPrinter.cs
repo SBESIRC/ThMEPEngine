@@ -12,10 +12,16 @@ namespace ThPlatform3D.StructPlane.Print
         {
             var results = new ObjectIdCollection();
             var outlineId =  polygon.Print(db, outlineConfig);
-            var objIds = new ObjectIdCollection { outlineId };
-            var hatchId = objIds.Print(db, hatchConfig);
-            results.Add(outlineId);
-            results.Add(hatchId);
+            if(outlineId!=ObjectId.Null)
+            {
+                results.Add(outlineId);
+                var objIds = new ObjectIdCollection { outlineId };
+                var hatchId = objIds.Print(db, hatchConfig);
+                if(hatchId!=ObjectId.Null)
+                {
+                    results.Add(hatchId);
+                }                
+            }
             return results;
         }
 
@@ -49,8 +55,25 @@ namespace ThPlatform3D.StructPlane.Print
             return new HatchPrintConfig
             {
                 LayerName = ThPrintLayerManager.BelowColumnHatchLayerName,
-                //PatternName = "钢筋混凝土",
-                PatternName = "AR-CONC",
+                PatternName = "钢筋混凝土",
+                //PatternName = "AR-CONC",
+                PatternScale = 30.0,
+            };
+        }
+
+        public static PrintConfig GetConstructColumnConfig()
+        {
+            return new PrintConfig
+            {
+                LayerName = ThPrintLayerManager.ConstructColumnLayerName,
+            };
+        }
+        public static HatchPrintConfig GetConstructColumnHatchConfig()
+        {
+            return new HatchPrintConfig
+            {
+                LayerName = ThPrintLayerManager.ConstructColumnHatchLayerName,
+                PatternName = "钢筋混凝土",
                 PatternScale = 30.0,
             };
         }

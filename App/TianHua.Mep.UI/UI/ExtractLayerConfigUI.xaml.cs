@@ -25,15 +25,15 @@ namespace TianHua.Mep.UI.UI
 
         private void rbLayer_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            //this.btnAddBeamLayer.IsEnabled = false;
-            //this.btnDelBeamLayer.IsEnabled = false;
-            //this.listBox1.IsEnabled = false;
+            this.btnAddBeamLayer.IsEnabled = true;
+            this.btnDelBeamLayer.IsEnabled = true;
+            this.listBox1.IsEnabled = true;
         }
         private void rbDB_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
-            //this.btnAddBeamLayer.IsEnabled = false;
-            //this.btnDelBeamLayer.IsEnabled = false;
-            //this.listBox1.IsEnabled = false;
+            this.btnAddBeamLayer.IsEnabled = false;
+            this.btnDelBeamLayer.IsEnabled = false;
+            this.listBox1.IsEnabled = false;
         }
 
         private void btnOk_Click(object sender, System.Windows.RoutedEventArgs e)

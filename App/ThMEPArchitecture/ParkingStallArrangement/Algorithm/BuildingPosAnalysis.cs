@@ -49,6 +49,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public ParkingStallArrangementViewModel VM;
         public Serilog.Core.Logger Logger { get; set; }
+        public Serilog.Core.Logger DisplayLogger { get; set; }
         //1.获取所有可能的移动方案
         //网格+特殊点 
         //筛选合理解
@@ -273,6 +274,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information($"初代倍率: {VM.FirstPopMagnitude}");
             Logger?.Information($"最大迭代时间: {VM.MaxTimespan} 分");
             Logger?.Information($"CPU数量：" + Environment.ProcessorCount.ToString());
+            DisplayLogger?.Information($"迭代次数: {VM.IterationCount}");
+            DisplayLogger?.Information($"种群数量: {VM.PopulationCount}");
+            DisplayLogger?.Information($"初代倍率: {VM.FirstPopMagnitude}");
+            DisplayLogger?.Information($"最大迭代时间: {VM.MaxTimespan} 分");
+            DisplayLogger?.Information($"CPU数量：" + Environment.ProcessorCount.ToString());
             try
             {
                 GAMP_init();
@@ -321,6 +327,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             t_pre = stopWatch.Elapsed.TotalSeconds;
             Logger?.Information("-----------------");
             Logger?.Information("障碍物迭代");
+            DisplayLogger?.Information("-----------------");
+            DisplayLogger?.Information("障碍物迭代");
             MutexLists = new List<List<Mutex>>();
             var initSingnals = new List<Mutex>();
             ProcList = new List<Process>();
@@ -348,6 +356,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             initSingnals.ForEach(s => s.WaitOne());//进程启动完成
             Logger?.Information($"障碍物迭代初始化用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
+            DisplayLogger?.Information($"障碍物迭代初始化用时: {stopWatch.Elapsed.TotalSeconds - t_pre}秒");
         }
         private bool GAMP_ProcessOne()
         {
@@ -375,6 +384,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             Logger?.Information($"第{Iter}代计算结果:" + msg);
             Logger?.Information($"每个建筑计算次数:" + calCnts);
+            DisplayLogger?.Information($"第{Iter}代计算结果:" + msg);
+            DisplayLogger?.Information($"每个建筑计算次数:" + calCnts);
             return false;
         }
 

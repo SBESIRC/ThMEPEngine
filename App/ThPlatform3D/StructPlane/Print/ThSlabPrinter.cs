@@ -20,13 +20,19 @@ namespace ThPlatform3D.StructPlane.Print
                 return results;
             }            
             var outlineId = polygon.Print(acadDb, outlineConfig);
-            var objIds = new ObjectIdCollection { outlineId };
-            if(hatchConfig != null)
+            if(outlineId!=ObjectId.Null)
             {
-                var hatchId = objIds.Print(acadDb, hatchConfig);
-                results.Add(hatchId);
-            }            
-            results.Add(outlineId);            
+                results.Add(outlineId);                
+                if (hatchConfig != null)
+                {
+                    var objIds = new ObjectIdCollection { outlineId };
+                    var hatchId = objIds.Print(acadDb, hatchConfig);
+                    if(hatchId!=ObjectId.Null)
+                    {
+                        results.Add(hatchId);
+                    }
+                }
+            }   
             return results;
         }
 

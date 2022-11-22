@@ -85,6 +85,8 @@
     <Compile Include="CAD\ThDBVisitorExtension.cs" />
     <Compile Include="CAD\ThTArchWallExtension.cs" />
     <Compile Include="CAD\ThTCHEDbExtension.cs" />
+    <Compile Include="Data\MessageHeader.cs" />
+    <Compile Include="Data\ProtobufMessage.cs" />
     <Compile Include="Data\ThCircleLableGroupData.cs" />
     <Compile Include="Data\ThDimensionGroupData.cs" />
     <Compile Include="Data\ThGridLineSyetemData.cs" />
@@ -95,6 +97,8 @@
     <Compile Include="Data\ThSUComponentData.cs" />
     <Compile Include="Data\ThSUFaceBrepData.cs" />
     <Compile Include="Data\ThSUFaceMeshData.cs" />
+    <Compile Include="Data\ThSUFollowSlopeElementData.cs" />
+    <Compile Include="Data\ThSUFollowSlopeRooofData.cs" />
     <Compile Include="Data\ThSUGeometry.cs" />
     <Compile Include="Data\ThSULoopData.cs" />
     <Compile Include="Data\ThSUMaterialData.cs" />

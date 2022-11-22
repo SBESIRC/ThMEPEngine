@@ -53,8 +53,8 @@ namespace ThPlatform3D.ArchitecturePlane.Service
                 return null;
             }
             var mark = BuildMark(width, height);
-            var startCord = door.Start.ToPoint3d();
-            var endCord = door.End.ToPoint3d();
+            var startCord = door.Start;
+            var endCord = door.End;
             if(!startCord.HasValue && !endCord.HasValue)
             {
                 return null;
@@ -86,7 +86,7 @@ namespace ThPlatform3D.ArchitecturePlane.Service
                 return null;
             }
             var mark = BuildMark(width, height);
-            var centeCoord = door.CenterPoint.ToPoint3d();
+            var centeCoord = door.CenterPoint;
             if (!centeCoord.HasValue)
             {
                 return null;

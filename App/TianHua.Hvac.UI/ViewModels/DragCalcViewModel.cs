@@ -150,24 +150,17 @@ namespace TianHua.Hvac.UI.ViewModels
         void CalcDuckDrag() 
         {
             //计算风管阻力
-            DuctResistance = (int)(calcModel.DuctLength * calcModel.Friction * (1 + calcModel.LocRes));
+            DuctResistance = calcModel.CalcDuckDrag();
         }
         void CalcDuckAllDrag() 
         {
             //计算总阻力
-            CalcResistance = calcModel.DuctResistance + calcModel.Damper + calcModel.EndReservedAirPressure + calcModel.DynPress;
+            CalcResistance = calcModel.CalcDuckAllDrag();
         }
         void CalcDuckTypeAllDrag() 
         {
             //计算选型总阻力
-            var temp = (int)((calcModel.DuctResistance + calcModel.Damper + calcModel.EndReservedAirPressure + calcModel.DynPress) * calcModel.SelectionFactor);
-            int power = (int)Math.Pow(10, 1);
-            var unitsDigit = (temp - temp / power * power) * 10 / power;
-            if (unitsDigit != 0)
-            {
-                temp = temp + 10 - unitsDigit;
-            }
-            WindResis = temp;
+            WindResis = calcModel.CalcDuckTypeAllDrag();
         }
     }
 }

@@ -55,12 +55,18 @@ namespace ThPlatform3D.ArchitecturePlane.Print
         {
             var results = new ObjectIdCollection();
             var outlineId = polygon.Print(db, OutlineConfig);
-            results.Add(outlineId);
-            if (HatchConfig != null)
+            if(outlineId!=ObjectId.Null)
             {
-                var objIds = new ObjectIdCollection { outlineId };
-                var hatchId = objIds.Print(db, HatchConfig);
-                results.Add(hatchId);
+                results.Add(outlineId);
+                if (HatchConfig != null)
+                {
+                    var objIds = new ObjectIdCollection { outlineId };
+                    var hatchId = objIds.Print(db, HatchConfig);
+                    if(hatchId!=ObjectId.Null)
+                    {
+                        results.Add(hatchId);
+                    }
+                }
             }
             return results;
         }

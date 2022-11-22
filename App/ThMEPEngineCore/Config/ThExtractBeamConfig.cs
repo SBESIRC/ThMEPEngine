@@ -29,6 +29,15 @@ namespace ThMEPEngineCore.Config
                     .Select(o => o.Layer).ToList();
             }
         }
+        public List<string> GetAllLayers(Database db)
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Use(db))
+            {
+                return LayerInfos
+                    .Where(o => acadDb.Layers.Contains(o.Layer))
+                    .Select(o => o.Layer).ToList();
+            }
+        }
     }
     public enum BeamEngineOps
     {

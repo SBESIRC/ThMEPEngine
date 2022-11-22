@@ -437,10 +437,12 @@ namespace ThMEPTCH.Services
             string prjId = "";
             string prjName = "测试项目";
             var jsonConfig = new Dictionary<string, List<ThEditStoreyInfo>>();
+            var thPrj = new ThTCHProjectData();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 prjName = Active.DocumentName;
                 prjId = Active.Document.UnmanagedObject.ToString();
+                thPrj.ProjectPath = Active.Document.Name;
                 jsonConfig = GetStoreyJsonFile(Active.Document.Name);
             }
             if (jsonConfig.Count == 0)
@@ -448,7 +450,6 @@ namespace ThMEPTCH.Services
                 Active.Database.GetEditor().WriteMessage("未找到项目文件对应的楼层配置，请检查。");
                 return null;
             }
-            var thPrj = new ThTCHProjectData();
             thPrj.Root = new ThTCHRootData()
             {
                 GlobalId = prjId,
@@ -719,7 +720,7 @@ namespace ThMEPTCH.Services
                 thTCHBuildingData.Storeys.Add(buildingStorey);
             }
             thSite.Buildings.Add(thTCHBuildingData);
-            thPrj.Site = thSite;
+            thPrj.Sites.Add(thSite);
             return thPrj;
         }
 

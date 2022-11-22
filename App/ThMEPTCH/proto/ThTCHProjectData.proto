@@ -4,5 +4,9 @@ import "ThTCHSiteData.proto";
 
 message ThTCHProjectData {
     ThTCHRootData root = 1;
-    ThTCHSiteData site = 2;
+    repeated ThTCHSiteData sites = 2;
+    string project_id = 3;
+    string project_sub_id = 4;
+    string project_path = 5;
+    string binding_name = 6;
 }

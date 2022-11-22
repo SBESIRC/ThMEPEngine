@@ -131,58 +131,6 @@ namespace ThPlatform3D.ArchitecturePlane.Service
             }
             return datas;
         }
-        public static Point3d? ToPoint3d(this string point)
-        {
-            double x, y, z;
-            var values = point.Split(',');
-            if (point.IndexOf(",") > 0)
-            {
-                values = point.Split(',');
-            }
-            else
-            {
-                values = point.Split(' ');
-            }
-            if (values.Length == 2)
-            {
-                if (double.TryParse(values[0].Trim(), out x) && double.TryParse(values[1].Trim(), out y))
-                {
-                    return new Point3d(x, y, 0);
-                }
-            }
-            if (values.Length == 3)
-            {
-                if (double.TryParse(values[0].Trim(), out x) &&
-                    double.TryParse(values[1].Trim(), out y) &&
-                    double.TryParse(values[2].Trim(), out z))
-                {
-                    return new Point3d(x, y, z);
-                }
-            }
-            return null;
-        }
-        public static Vector3d? ToVector3d(this string point)
-        {
-            double x, y, z;
-            var values = point.Split(',');
-            if (values.Length == 2)
-            {
-                if (double.TryParse(values[0], out x) && double.TryParse(values[1], out y))
-                {
-                    return new Vector3d(x, y, 0);
-                }
-            }
-            if (values.Length == 3)
-            {
-                if (double.TryParse(values[0], out x) &&
-                    double.TryParse(values[1], out y) &&
-                    double.TryParse(values[2], out z))
-                {
-                    return new Vector3d(x, y, z);
-                }
-            }
-            return null;
-        }
         public static bool IsVertical(this Vector3d first, Vector3d second, double angTolerance = 1.0)
         {
             var ang = first.GetAngleTo(second).RadToAng() % 180.0;
