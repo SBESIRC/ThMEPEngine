@@ -1,5 +1,6 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
+using Linq2Acad;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -576,12 +577,13 @@ namespace TianHua.Hvac.UI.UI
         }
         List<FanDataViewModel> GetDocnmentFanData() 
         {
-            var m_DocumentLock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument();
-            fanDocument.CheckAndUpdataCopyBlock();
-            var allFans = fanDocument.DocumentAreaFanToFanModels(null);
-            var calcViewModels = FanModelToViewModels(allFans,true);
-            m_DocumentLock.Dispose();
-            return calcViewModels;
+            using (var docLock = Active.Document.LockDocument())
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                fanDocument.CheckAndUpdataCopyBlock();
+                var allFans = fanDocument.DocumentAreaFanToFanModels(null);
+                return FanModelToViewModels(allFans, true);
+            }
         }
         void CopyRowItemFans(FanDataViewModel selectFan) 
         {
@@ -859,33 +861,35 @@ namespace TianHua.Hvac.UI.UI
             var pline = select.SelectWindowRect();
             if (null == pline)
                 return resList;
-            var m_DocumentLock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument();
-            fanDocument.CheckAndUpdataCopyBlock();
-            var allFans = fanDocument.DocumentAreaFanToFanModels(pline);
-            if (allFans.Count < 1)
+            using (var docLock = Active.Document.LockDocument())
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                fanDocument.CheckAndUpdataCopyBlock();
+                var allFans = fanDocument.DocumentAreaFanToFanModels(pline);
+                if (allFans.Count > 0)
+                {
+                    var tempViewModels = FanModelToViewModels(allFans);
+                    foreach (var item in tempViewModels)
+                    {
+                        if (!exportTypes.Any(c => c == item.fanDataModel.Scenario))
+                            continue;
+                        if (item.fanDataModel.DragModel != null)
+                            item.fanDataModel.DragModel.RefeshData();
+                        resList.Add(item.fanDataModel);
+                    }
+                    foreach (var item in tempViewModels)
+                    {
+                        if (!item.IsChildFan)
+                            continue;
+                        var pModel = tempViewModels.Where(c => !c.IsChildFan && c.fanDataModel.ID == item.fanDataModel.PID).FirstOrDefault();
+                        if (null == pModel)
+                            continue;
+                        item.fanDataModel.FanSelectionStateMsg = new FanSelectionStateInfo();
+                        RefreshFanModel(item);
+                    }
+                }
                 return resList;
-            var tempViewModels = FanModelToViewModels(allFans);
-            foreach (var item in tempViewModels) 
-            {
-                if (!exportTypes.Any(c => c == item.fanDataModel.Scenario))
-                    continue;
-                if (item.fanDataModel.DragModel != null)
-                    item.fanDataModel.DragModel.RefeshData();
-                resList.Add(item.fanDataModel);
             }
-            foreach (var item in tempViewModels)
-            {
-                //continue;
-                if (!item.IsChildFan)
-                    continue;
-                var pModel = tempViewModels.Where(c => !c.IsChildFan && c.fanDataModel.ID == item.fanDataModel.PID).FirstOrDefault();
-                if (null == pModel)
-                    continue;
-                item.fanDataModel.FanSelectionStateMsg = new FanSelectionStateInfo();
-                //item.SelectModelPicker = pModel.SelectModelPicker;
-                RefreshFanModel(item);
-            }
-            return resList;
         }
         private List<ExportFanParaModel> GetListExportFanPara(List<FanDataModel> targetFans)
         {

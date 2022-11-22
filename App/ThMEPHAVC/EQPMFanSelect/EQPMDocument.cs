@@ -13,25 +13,19 @@ namespace ThMEPHVAC.EQPMFanSelect
         public void CheckAndUpdataCopyBlock() 
         {
             var allBlocks = GetDocumentAllFanBlocks(null);
-            if (allBlocks.Count < 1)
-                return;
-            using (var acdb = AcadDatabase.Active())
+            foreach (ObjectId item in allBlocks)
             {
-                // 获取原模型对象
-                foreach (ObjectId item in allBlocks)
+                var pModel = FanDataModelExtension.ReadBlockAllFanData(item, out FanDataModel cModel, out bool isCopy);
+                if (null == pModel || !isCopy)
+                    continue;
+                pModel.ID = Guid.NewGuid().ToString();
+                if (null != cModel)
                 {
-                    var pModel = FanDataModelExtension.ReadBlockAllFanData(item, out FanDataModel cModel, out bool isCopy);
-                    if (null == pModel || !isCopy)
-                        continue;
-                    pModel.ID = Guid.NewGuid().ToString();
-                    if (null != cModel)
-                    {
-                        cModel.ID = Guid.NewGuid().ToString();
-                        cModel.PID = pModel.ID;
-                    }
-                    int.TryParse(pModel.InstallFloor, out int number);
-                    item.SetModelIdentifier(pModel.XDataValueList(number, cModel, item.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
+                    cModel.ID = Guid.NewGuid().ToString();
+                    cModel.PID = pModel.ID;
                 }
+                int.TryParse(pModel.InstallFloor, out int number);
+                item.SetModelIdentifier(pModel.XDataValueList(number, cModel, item.Handle.ToString()), ThHvacCommon.RegAppName_FanSelectionEx);
             }
         }
         public List<FanDataModel> DocumentAreaFanToFanModels(Polyline selectArea)
