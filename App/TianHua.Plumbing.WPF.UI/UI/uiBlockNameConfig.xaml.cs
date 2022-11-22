@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.PlottingServices;
 using DotNetARX;
 using ICSharpCode.SharpZipLib.Zip;
 using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -93,9 +94,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             try
             {
+                var selectArea = ThMEPWSS.Assistant.DrawUtils.TrySelectRangeEx();
+                if (selectArea is null)
+                {
+                    return;
+                }
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Start();
-                var zipFile = Block2Pic.GenerateBlockPic(out Dictionary<string, List<double>> blockSizeDic);
+                var zipFile = Block2Pic.GenerateBlockPic(selectArea, out Dictionary<string, List<double>> blockSizeDic);
                 stopwatch.Stop();
                 Active.Editor.WriteMessage("生成图片用时: " + stopwatch.Elapsed.Seconds + " s\n");
                 stopwatch.Reset();
@@ -109,8 +115,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 stopwatch.Stop();
                 Active.Editor.WriteMessage("写入用时: " + stopwatch.Elapsed.Seconds + " s\n");
             }
-            catch
+            catch(Exception ex)
             {
+                ;
             }
         }
 

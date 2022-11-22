@@ -16,6 +16,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
     public class BlockExtractService
     {
+        public static DBObjectCollection ExtractBlocks(Database db)
+        {
+            Func<Entity, bool> IsBlkNameQualified = (e) =>
+            {
+                return e is BlockReference;
+            };
+            var blkVisitor = new ThBlockReferenceExtractionVisitor();
+            blkVisitor.CheckQualifiedLayer = (e) => true;
+            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
+
+            var extractor = new ThWSSDistributionElementExtractor();
+            extractor.Accept(blkVisitor);
+            extractor.Extract(db); // 提取块中块(包括外参)
+            extractor.ExtractFromMS(db); // 提取本地块
+
+            using (var acadDb = AcadDatabase.Use(db))
+            {
+                blkVisitor.Results.ForEach(e =>
+                {
+                    var attribute = e.Data;
+                });
+            }
+            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
+        }
         public static DBObjectCollection ExtractBlocks(Database db, string blockName)
         {
             Func<Entity, bool> IsBlkNameQualified = (e) =>

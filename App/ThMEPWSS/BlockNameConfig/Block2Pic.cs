@@ -1,27 +1,25 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Windows.Data;
+using Dreambuild.AutoCAD;
+using ICSharpCode.SharpZipLib.Zip;
+using Linq2Acad;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using Dreambuild.AutoCAD;
+using ThCADCore.NTS;
 using ThCADExtension;
-using ICSharpCode.SharpZipLib.Zip;
-using System.Drawing;
-using System;
-using System.Windows.Documents;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.MacroRecorder;
-using Autodesk.AutoCAD.ApplicationServices;
-using Linq2Acad;
-using ThMEPWSS.DrainageSystemAG.Models;
 
 namespace ThMEPWSS.BlockNameConfig
 {
     public static class Block2Pic
     {
-        public static string GenerateBlockPic(out Dictionary<string, List<double>> blockSizeDic)
+        public static string GenerateBlockPic(Point3dCollection selectArea, out Dictionary<string, List<double>> blockSizeDic)
         {
             blockSizeDic = new Dictionary<string, List<double>>();
             var stopWatch = new Stopwatch();
@@ -29,52 +27,36 @@ namespace ThMEPWSS.BlockNameConfig
 
             Document doc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
             string iconPath;
+            using (var docLock = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             {
                 var path = Path.GetDirectoryName(doc.Name);
                 var name = Path.GetFileName(doc.Name);
                 iconPath = path + "\\" + name + " icons";
-                blockSizeDic = ExtractThumbnails(acadDb,iconPath);
+                blockSizeDic = ExtractThumbnails(acadDb, selectArea,iconPath);
             }
             new FastZip().CreateZip(iconPath + ".zip", iconPath, true, "");
             return iconPath + ".zip";
         }
 
-        private static Dictionary<string, List<double>> ExtractThumbnails(AcadDatabase acadDb, string iconPath)
+        private static Dictionary<string, List<double>> ExtractThumbnails(AcadDatabase acadDb, Point3dCollection selectArea, string iconPath)
         {
             var blockSizeDic = new Dictionary<string, List<double>>();
-            var blockTableDic = new Dictionary<string,BlockTableRecord>();
-            var blackNames = new List<string>();
-            blackNames.Add("重力流雨水斗");
-            int numIcons = 0;
-            var blockTable = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId);
             if (Directory.Exists(iconPath)) Directory.Delete(iconPath, true);
-            foreach (var btrId in blockTable)
+            var blocks = ThMEPWSS.UndergroundFireHydrantSystem.Extract.BlockExtractService.ExtractBlocks(acadDb.Database);
+            
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(blocks);
+            var blocksInRect = spatialIndex.SelectCrossingPolygon(selectArea);
+            var blockList = new Dictionary<string,BlockTableRecord>();
+            int numIcons = 0;
+            foreach (var obj in blocksInRect)
             {
-                var btr = acadDb.Element<BlockTableRecord>(btrId);
+                var btr = acadDb.Element<BlockTableRecord>((obj as BlockReference).BlockTableRecord);//acadDb.Element<BlockTableRecord>((obj as BlockReference).Id);
                 var blkName = btr.Name.Split('|').Last().Split('$').Last();
                 var upperName = blkName.ToUpper();
                 if (upperName == "*MODEL_SPACE" || upperName == "*PAPER_SPACE" || upperName.Contains("LAYOUT"))
                     continue;
-                
-                if (upperName.Contains("AI"))  continue;
-                if (blkName.IsBlackName(blackNames)) continue;
-                if (blockSizeDic.ContainsKey(blkName)) continue;
-                var ids = btr.GetObjectIds();
-                var idsCount = ids.Count();
-                if (idsCount == 0) continue;
-                
-                bool isBlockReference = false;
-                foreach (var id in ids)
-                {
-                    var entity = acadDb.Element<Entity>(id);
-                    if (entity is not DBText)
-                    {
-                        isBlockReference = true;
-                        break;
-                    }
-                }
-                if (!isBlockReference) continue;
+    
                 var extents = new Extents3d();
                 try
                 {
@@ -90,29 +72,35 @@ namespace ThMEPWSS.BlockNameConfig
                 {
                     continue;
                 }
-                if (btr.IsLayout || btr.IsAnonymous) continue;
+                if (blockSizeDic.ContainsKey(blkName)) continue;
+                blockList.Add(blkName, btr);
                 blockSizeDic.Add(blkName, new List<double>() { length, width });
-                
-                Directory.CreateDirectory(iconPath);
-                blockTableDic.Add(blkName,btr);
-                
             }
-            foreach(var item in blockTableDic)
+            Directory.CreateDirectory(iconPath);
+            foreach (var item in blockList)
             {
-                var btr = item.Value;
-                var imgsrc = CMLContentSearchPreviews.GetBlockTRThumbnail(btr);
-                var bmp = ImageSourceToGDI(imgsrc as System.Windows.Media.Imaging.BitmapSource);
-                var reverseBmp = GrayReverse(new Bitmap(bmp));
-                var fname = iconPath + "\\" + item.Key + ".jpg";
-                if (File.Exists(fname))
-                    File.Delete(fname);
-                reverseBmp.Save(fname);
-                numIcons++;
+                try
+                {
+                    var btr = item.Value;
+                    var imgsrc = CMLContentSearchPreviews.GetBlockTRThumbnail(btr);
+                    var bmp = ImageSourceToGDI(imgsrc as System.Windows.Media.Imaging.BitmapSource);
+                    var reverseBmp = GrayReverse(new Bitmap(bmp));
+                    var fname = iconPath + "\\" + item.Key + ".jpg";
+                    if (File.Exists(fname))
+                        File.Delete(fname);
+                    reverseBmp.Save(fname);
+                    numIcons++;
+                }
+                catch(Exception ex)
+                {
+                    ;
+                }
             }
-            Active.Editor.WriteMessage("图块个数： "+numIcons.ToString()+"\n");
+            
+            Active.Editor.WriteMessage("图块个数： " + numIcons.ToString() + "\n");
+           
             return blockSizeDic;
         }
-
      
 
         public static bool IsBlackName(this string name,List<string> blackNames)

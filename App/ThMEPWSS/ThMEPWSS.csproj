@@ -428,6 +428,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Command\FireHydrantAcross.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\BlockExtractService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\StoreyRect.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Extract\ThDistributionElementExtractor.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Model\SimpleText.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\StrTools.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Utils.cs" />
