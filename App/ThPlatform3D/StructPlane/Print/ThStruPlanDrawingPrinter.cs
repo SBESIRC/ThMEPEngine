@@ -101,7 +101,7 @@ namespace ThPlatform3D.StructPlane.Print
                 _geos.GetBeamMarks()
                     .Select(o => o.Boundary)
                     .OfType<DBText>()
-                    .ForEach(o => beamMarkOriginTextPos.Add(o, o.GetCenterPointByOBB()));
+                    .ForEach(o => beamMarkOriginTextPos.Add(o, o.AlignmentPoint));
 
                 // 对双梁文字调整位置(后处理)  
                 AdjustDblRowMarkPos(acadDb, dblRowBeamMarkIds, beamLines);
