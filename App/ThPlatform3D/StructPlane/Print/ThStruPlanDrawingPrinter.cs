@@ -178,6 +178,12 @@ namespace ThPlatform3D.StructPlane.Print
                 var slabPatternTblRightUpBasePt = new Point3d(elevationTblBasePt.X, elevationTblBasePt.Y - 1000.0, 0);
                 Append(PrintSlabPatternTable(acadDb, slabPatternTblRightUpBasePt, slabHatchConfigs));
 
+                // 插入基点
+                var basePointId = InsertBasePoint(acadDb, _printParameter.BasePoint);
+                Append(basePointId);
+                AppendToBlockObjIds(basePointId);
+
+
                 // 删除不要的文字
                 Erase(acadDb, removedTexts);
                 Erase(acadDb, dwgExistedElements);
@@ -185,7 +191,42 @@ namespace ThPlatform3D.StructPlane.Print
                 // 过滤无效Id
                 ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
                 ObjIds = Difference(ObjIds);
+
+                // 成块的对象
+                AppendToBlockObjIds(GetBlockObjIds(acadDb, ObjIds));
             }
+        }
+
+        private ObjectIdCollection GetBlockObjIds(AcadDatabase acadDb, ObjectIdCollection floorObjIds)
+        {
+            var blkIds = new ObjectIdCollection();
+            if (floorObjIds.Count == 0)
+            {
+                return blkIds;
+            }
+            floorObjIds.OfType<ObjectId>().ForEach(o =>
+            {
+                var entity = acadDb.Element<Entity>(o);
+                if (entity.Layer == ThPrintLayerManager.BeamLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowColumnLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowColumnHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.ColumnLayerName ||
+                entity.Layer == ThPrintLayerManager.ColumnHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowShearWallLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowShearWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.ShearWallLayerName ||
+                entity.Layer == ThPrintLayerManager.ShearWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.ConstructColumnLayerName ||
+                entity.Layer == ThPrintLayerManager.ConstructColumnHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.PassHeightWallLayerName ||
+                entity.Layer == ThPrintLayerManager.PassHeightWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.WindowWallLayerName ||
+                entity.Layer == ThPrintLayerManager.WindowWallHatchLayerName)
+                {
+                    blkIds.Add(o);
+                }
+            });
+            return blkIds;
         }
 
         private Point3d GetElevationBasePt(AcadDatabase acadDb)
@@ -417,7 +458,7 @@ namespace ThPlatform3D.StructPlane.Print
             {
                 var beamIds = new ObjectIdCollection();
                 Vector3d textMoveDir = new Vector3d();
-                int i = 1;
+                //int i = 1;
                 g.ForEach(o =>
                 {
                     if (o.Boundary is DBText dbText)
@@ -426,8 +467,8 @@ namespace ThPlatform3D.StructPlane.Print
                         {
                             textMoveDir = o.Properties.GetDirection().ToVector();
                         }
-                        dbText.TextString = dbText.TextString + "（" + i++ + "）";  
-                        if(dbText.ObjectId==ObjectId.Null)
+                        //dbText.TextString = dbText.TextString;//+ "（" + i++ + "）"
+                        if (dbText.ObjectId==ObjectId.Null)
                         {
                             beamIds.AddRange(ThAnnotationPrinter.Print(acadDb, dbText, _beamTextConfig));
                         }                     

@@ -54,6 +54,21 @@ namespace ThPlatform3D.StructPlane.Service
                 return layers.Distinct().ToList();
             }
         }
+        /// <summary>
+        /// 从高到低
+        /// </summary>
+        public static List<string> PriorityLayers
+        {
+            get
+            {
+                // 其它的图层都高于这些
+                return new List<string> {
+                ShearWallHatchLayerName,
+                ColumnHatchLayerName,
+                BelowShearWallHatchLayerName,
+                BelowColumnHatchLayerName};
+            }
+        }
     }
     internal class ThPrintStyleManager
     {

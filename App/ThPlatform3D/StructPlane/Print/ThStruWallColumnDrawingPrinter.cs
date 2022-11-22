@@ -30,12 +30,47 @@ namespace ThPlatform3D.StructPlane.Print
                 Append(textRes.Item1);
                 Append(textRes.Item2);
 
+                // 插入基点
+                var basePointId = InsertBasePoint(acadDb, _printParameter.BasePoint);
+                Append(basePointId);
+                AppendToBlockObjIds(basePointId);
+
                 // 打印层高表
                 //PrintElevationTable(acadDb);
 
                 // 过滤无效Id
                 ObjIds = ObjIds.OfType<ObjectId>().Where(o => o.IsValid && !o.IsErased).ToCollection();
+
+                // 成块的对象
+                AppendToBlockObjIds(GetBlockObjIds(acadDb, ObjIds));
             }
+        }
+
+        private ObjectIdCollection GetBlockObjIds(AcadDatabase acadDb, ObjectIdCollection floorObjIds)
+        {
+            var blkIds = new ObjectIdCollection();
+            if (floorObjIds.Count == 0)
+            {
+                return blkIds;
+            }
+            floorObjIds.OfType<ObjectId>().ForEach(o =>
+            {
+                var entity = acadDb.Element<Entity>(o);
+                if (entity.Layer == ThPrintLayerManager.BeamLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowColumnLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowColumnHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.ColumnLayerName ||
+                entity.Layer == ThPrintLayerManager.ColumnHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowShearWallLayerName ||
+                entity.Layer == ThPrintLayerManager.BelowShearWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.ShearWallLayerName ||
+                entity.Layer == ThPrintLayerManager.ShearWallHatchLayerName
+                )
+                {
+                    blkIds.Add(o);
+                }
+            });
+            return blkIds;
         }
 
         private void PrintGeos(AcadDatabase acadDb)
