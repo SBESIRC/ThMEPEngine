@@ -340,10 +340,35 @@ namespace ThPlatform3D.StructPlane
             var buildAreaSevice = new ThWallBuildAreaService();
             var passGeos = buildAreaSevice.BuildArea(svgInput.Geos);
             svgInput.Geos = passGeos;
-            
+
+            // 用PCwall Difference StandardWall
+            PCWallDifferenceStandardWall(svgInput.Geos);
+
             var printer = new ThStruWallColumnDrawingPrinter(svgInput, PrintParameter);
             printer.Print(Active.Database);
             return printer;
+        }
+
+        private void PCWallDifferenceStandardWall(List<ThGeometry> geos)
+        {
+            var upperPCWallGeos = geos.GetUpperPCWallGeos();
+            var belowPCWallGeos = geos.GetBelowPCWallGeos();
+            geos = geos.Except(upperPCWallGeos).ToList();
+            geos = geos.Except(belowPCWallGeos).ToList();
+            var belowStandardWalls = geos.GetBelowStandardShearwallGeos()
+                .Select(o => o.Boundary).ToCollection();
+            using (var processor = new ThPCWallProcessService(belowStandardWalls))
+            {
+                belowPCWallGeos.ForEach(o =>
+                {
+                    var newPcWalls = processor.Difference(o.Boundary);
+                    newPcWalls.OfType<Entity>().ForEach(e =>
+                    {
+                        var newPcWallGeo = ThGeometry.Create(e, o.Properties);
+                        geos.Add(newPcWallGeo);
+                    });
+                });
+            }  
         }
 
         private ThStruDrawingPrinter PrintStructurePlan(string svgFile,int flrNaturalNumber)

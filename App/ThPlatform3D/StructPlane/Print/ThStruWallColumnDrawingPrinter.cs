@@ -106,7 +106,11 @@ namespace ThPlatform3D.StructPlane.Print
                             {
                                 Append(PrintUpperShearWall(acadDb, o));
                             }
-                        }                                               
+                        }
+                        else if(description.IsPCWall())
+                        {
+                            Append(PrintPCWall(acadDb, o));
+                        }
                     }
                 }
             });

@@ -112,5 +112,22 @@ namespace ThPlatform3D.StructPlane.Print
                 LayerName = ThPrintLayerManager.WindowWallHatchLayerName,
             };
         }
+
+        public static PrintConfig GetPCWallConfig()
+        {
+            return new PrintConfig
+            {
+                LayerName = ThPrintLayerManager.PCWallLayer,
+            };
+        }
+        public static HatchPrintConfig GetPCWallHatchConfig()
+        {
+            return new HatchPrintConfig
+            {
+                LayerName = ThPrintLayerManager.PCWallHatchLayer,
+                PatternName = "ANSI34",
+                PatternScale = 20.0,
+            };
+        }
     }
 }

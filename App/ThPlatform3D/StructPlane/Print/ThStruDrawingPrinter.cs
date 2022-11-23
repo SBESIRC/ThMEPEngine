@@ -139,6 +139,24 @@ namespace ThPlatform3D.StructPlane.Print
             }
         }
 
+        protected ObjectIdCollection PrintPCWall(AcadDatabase acadDb, ThGeometry pcWall)
+        {
+            var outlineConfig = ThShearwallPrinter.GetPCWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetPCWallHatchConfig();
+            if (pcWall.Boundary is Polyline polyline)
+            {
+                return ThShearwallPrinter.Print(acadDb, polyline, outlineConfig, hatchConfig);
+            }
+            else if (pcWall.Boundary is MPolygon mPolygon)
+            {
+                return ThShearwallPrinter.Print(acadDb, mPolygon, outlineConfig, hatchConfig);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+
         protected ObjectIdCollection PrintWindowWall(AcadDatabase acadDb, ThGeometry shearwall)
         {
             var outlineConfig = ThShearwallPrinter.GetWindowWallConfig();
