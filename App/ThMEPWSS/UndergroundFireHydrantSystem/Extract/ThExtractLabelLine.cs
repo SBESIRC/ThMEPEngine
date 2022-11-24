@@ -3,20 +3,18 @@ using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Uitl;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
-    public class ThExtractLabelLine//引线提取
+    public class ThExtractLabelLine
     {
-        public double LengthThresh = 200;//线长最小阈值
+        public double LengthThresh = 200;
         public DBObjectCollection LabelLineCollection { get; private set; }
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
         {
@@ -90,32 +88,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 }
             }
 
-#if DEBUG
-
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            {
-                string layerName = "标注线图层";
-                try
-                {
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, layerName, 30);
-                }
-                catch { }
-                foreach (var line in LabelPosition)
-                {
-                    line.LayerId = DbHelper.GetLayerId(layerName);
-                    currentDb.CurrentSpace.Add(line);
-                }
-            }
-#endif
             return LabelPosition;
         }
         private void ExplodeLabelLine(Entity ent, DBObjectCollection dBObjects)
         {
-            if (NotNeedDeal(ent))//炸出不需要关注对象就退出
+            if (NotNeedDeal(ent))
             {
                 return;
             }
-            if (ent is Line line)// Line 直接添加
+            if (ent is Line line)
             {
                 if(line.Length > LengthThresh)
                 {
@@ -150,18 +131,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             return false;
         }
-        private bool NotNeedDeal(Entity ent)//
+        private bool NotNeedDeal(Entity ent)
         {
             if (ent == null ||
-                ent is AlignedDimension ||//
-                ent is Arc ||//弧
-                ent is DBText ||//文字
-                ent is Circle ||//圆
-                ent.IsTCHText() ||//天正单行文字
-                ent.IsTCHValve() ||//天正阀
-                ent is DBPoint ||//db点
-                ent is Hatch ||//填充
-                ent is BlockReference)//块
+                ent is AlignedDimension ||
+                ent is Arc ||
+                ent is DBText ||
+                ent is Circle ||
+                ent.IsTCHText() ||
+                ent.IsTCHValve() ||
+                ent is DBPoint ||
+                ent is Hatch ||
+                ent is BlockReference)
             {
                 return true;
             }

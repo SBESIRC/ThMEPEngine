@@ -27,7 +27,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 q.Enqueue(pt);
                 HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
                 visited.Add(pt);
-                int level = 0;
                 var ptLevelDic = new Dictionary<Point3dEx, int>();//每个点及其level
 
                 while (q.Count > 0)
@@ -44,12 +43,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                             flowPts.Add(pt);
                         }
                     }
-                    //if (sprayIn.ThroughPt.Contains(curPt))//当前点是楼层穿越点
-                    //{
-                    //    termPts.Add(curPt);
-                    //    sprayIn.CurThroughPt.AddItem(curPt);
-                    //    continue;
-                    //}
                     if(!sprayIn.PtDic.ContainsKey(curPt))
                     {
                         break;
@@ -70,11 +63,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
                         visited2.Add(adj);
                         q.Enqueue(adj);
-                        if(ptLevelDic.ContainsKey(adj))
-                        {
-                            ;
-                        }
-                        else
+                        if(!ptLevelDic.ContainsKey(adj))
                         {
                             if (adjs.Count == 3)
                             {
@@ -85,7 +74,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 ptLevelDic.Add(adj, ptLevelDic[curPt]);
                             }
                         }
-
                     }
                 }
                 if (termPts.Count != 0)
@@ -149,7 +137,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
                 if (sprayIn.PtTypeDic[branchLoop[i]].Contains("AlarmValve"))
                 {
-                    bool hasFireArea = false;
                     alarmNums += 1;
                     var termPts = new List<Point3dEx>();
                     var valvePts = new List<Point3dEx>();
@@ -158,7 +145,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     q.Enqueue(pt);
                     HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
                     visited.Add(pt);
-                    int level = 0;
                     var ptLevelDic = new Dictionary<Point3dEx, int>();//每个点及其level
                     while (q.Count > 0)
                     {
@@ -189,13 +175,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
                         foreach (var adj in adjs)
                         {
-                            if (branchLoop.Contains(adj))
-                                continue;
-
-                            if (visited2.Contains(adj))
-                            {
-                                continue;
-                            }
+                            if (branchLoop.Contains(adj)) continue;
+                            if (visited2.Contains(adj)) continue;
+                            
 
                             visited2.Add(adj);
                             q.Enqueue(adj);
@@ -212,28 +194,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     if (termPts.Count != 0)
                     {
                         fireAreaNums += termPts.Count;
-                        //foreach (var tpt in termPts)
-                        //{
-                        //    if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
-                        //    {
-                        //        if (sprayIn.TermPtTypeDic[tpt] == 1) //防火分区
-                        //        {
-                        //            hasFireArea = true;
-                        //            fireAreaNums += 1;
-                        //        }
-                        //    }
-                        //}
-                        //if (!hasFireArea)
-                        //{
-                        //    fireAreaNums += 1;
-                        //}
                         if (spraySystem.BranchDic.ContainsKey(pt))
                         {
                             continue;
                         }
                         termPts = termPts.OrderBy(p => ptLevelDic[p]).ToList();
                         spraySystem.BranchDic.Add(pt, termPts);
-
                     }
                 }
             }

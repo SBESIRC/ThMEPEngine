@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace ThMEPWSS.UndergroundSpraySystem.General
 {
-    public static class PlineToLines
+    public static class PlineTool
     {
         public static List<Line> Pline2Lines(this Polyline pline)
         {

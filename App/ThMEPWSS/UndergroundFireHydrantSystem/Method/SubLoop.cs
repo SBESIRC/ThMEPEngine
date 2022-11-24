@@ -18,10 +18,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 {
                     continue;
                 }
-                //if (!mainPathList.First().Contains(nd[0]) && !mainPathList.First().Contains(nd[1]))
-                //{
-                //    continue;
-                //}
                 var subTempPath = new List<Point3dEx>();//次环路临时路径
                 var subRstPath = new List<Point3dEx>();//次环路临时路径
 
@@ -30,7 +26,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 var stopwatch = new Stopwatch();
                 stopwatch.Start();
                 //次环路深度搜索
-                DepthFirstSearch.DfsSubLoop(nd[0], subTempPath, visited, ref subPathList, nd[1], fireHydrantSysIn, stopwatch);
+                DepthFirstSearch.DfsSubLoop(nd[0], subTempPath, visited, ref subPathList, nd[1], fireHydrantSysIn);
                 stopwatch.Stop();
                 visited.Remove(visited.Last());//删除占用的点，避免干扰其他次环的遍历
             }

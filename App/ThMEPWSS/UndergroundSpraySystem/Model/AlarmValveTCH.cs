@@ -7,18 +7,18 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
     internal class AlarmValveTCH
     {
-        //现有的报警阀块提取不支持从天正对象拿东西，因此暂时用之前的提取替代
         public DBObjectCollection DBObjs { get; set; }
+
         public AlarmValveTCH()
         {
             DBObjs = new DBObjectCollection();
         }
+
         public List<Point3d> Extract(Database database, Point3dCollection polygon)
         {
             var objs = new DBObjectCollection();
@@ -66,6 +66,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
             return false;
         }
+
         private BlockReference ExplodeValve(Entity entity)
         {
             if (entity is BlockReference bkr)

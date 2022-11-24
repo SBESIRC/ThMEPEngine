@@ -41,10 +41,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                         {
                             objs.Add(blk);
                         }
-                        //dbColl.Cast<Entity>()
-                        //    .Where(e => e is BlockReference)
-                        //    .Where(e => IsValve((e as BlockReference).Name))
-                        //    .ForEach(e => objs.Add(e));
                     }
                 }
                 return objs;
@@ -78,12 +74,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             var pts = new List<Point3d>();
             foreach (var db in objs)
             {
-                var br = db as BlockReference;
-                
-                //var pt1 = br.GeometricExtents.MaxPoint;
-                //var pt2 = br.GeometricExtents.MinPoint;
-                //var pt = General.GetMidPt(pt1, pt2);
-                pts.Add(br.Position);
+                pts.Add((db as BlockReference).Position);
             }
             return pts;
         }

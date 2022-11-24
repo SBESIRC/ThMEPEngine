@@ -26,10 +26,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     {
                         var ptj = pts[j];
                         if (usedPts.Contains(ptj)) continue;
-                        var tempPath = new List<Point3dEx>();
-                        tempPath.Add(pti);
-                        var visited = new HashSet<Point3dEx>();
-                        visited.Add(pti);
+                        var tempPath = new List<Point3dEx> { pti };
+                        var visited = new HashSet<Point3dEx> { pti };
                         var rstPath = new List<Point3dEx>();
                         var stopwatch = new Stopwatch();
 
@@ -65,12 +63,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             foreach (Point3dEx p in neighbors)
             {
                 if (visited.Contains(p)) continue;
-                if (sprayIn.ThroughPt.Contains(p) && !target.Equals(p)) 
-                    continue;
-                if (!sprayIn.PtTypeDic.ContainsKey(p))
-                    ;
-                if (sprayIn.PtTypeDic[p].Contains("AlarmValve"))
-                    continue;
+                if (sprayIn.ThroughPt.Contains(p) && !target.Equals(p)) continue;
+                if (sprayIn.PtTypeDic[p].Contains("AlarmValve")) continue;
                 tempPath.Add(p);
                 visited.Add(p);
 

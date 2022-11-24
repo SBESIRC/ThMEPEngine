@@ -1,8 +1,5 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using GeometryExtensions;
-using NFox.Cad;
 using System.Collections.Generic;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
@@ -13,22 +10,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
     public class PipeLine
     {
-        public static bool HasSitong(FireHydrantSystemIn fireHydrantSysIn)
-        {
-            var sitong = false;
-            foreach (var pt in fireHydrantSysIn.PtDic.Keys)
-            {
-                var cnt = fireHydrantSysIn.PtDic[pt].Count;
-                if (cnt > 3)
-                {
-                    sitong = true;
-                    Active.Editor.WriteMessage($"\n在点{pt._pt.X},");
-                    Active.Editor.WriteMessage($"{pt._pt.Y}处存在四通!");
-                }
-            }
-            return sitong;
-        }
-
         public static void AddPipeLine(DBObjectCollection dbObjs, FireHydrantSystemIn fireHydrantSysIn, 
             List<Point3dEx> pointList, List<Line> lineList)
         {
@@ -46,16 +27,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
                 if(obj is Polyline pline)
                 {
-                    for (int i = 0; i < pline.NumberOfVertices-1; i++)
-                    {
-                        var pt1 = pline.GetPoint3dAt(i).Point3dZ0();
-                        var pt2 = pline.GetPoint3dAt(i+1).Point3dZ0();
-
-                        if (pt1.DistanceTo(pt2) >= tolerance)
-                        {
-                            lineList.Add(new Line(pt1, pt2));
-                        }
-                    }
+                    lineList.AddItems(pline.Pline2Lines());
                 }
             }
             lineList = PipeLineList.CleanLaneLines3(lineList);
@@ -65,12 +37,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 var pt2 = new Point3dEx(line.EndPoint);
                 pointList.Add(pt1);
                 pointList.Add(pt2);
-                ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
+                ThPointCountService.AddPoint(fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
             }
         }
 
         public static void AddValveLine(DBObjectCollection valveDB, FireHydrantSystemIn fireHydrantSysIn,  
-            List<Line> lineList, List<Line> valveList, DBObjectCollection casingPts)
+            List<Line> lineList, DBObjectCollection casingPts)
         {
             var valvePts = new List<Point3dEx>();
             foreach (var v in valveDB)
@@ -122,7 +94,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             {
                 fireHydrantSysIn.PtTypeDic.Add(pt, "Casing");
             }
-            ;
         }
 
         public static void PipeLineSplit(List<Line> pipeLineList, List<Point3dEx> pointList, 

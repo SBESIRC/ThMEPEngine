@@ -116,9 +116,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         /// <summary>
         /// 获取当前层的支环，不跨层
         /// </summary>
-        /// <param name="visited"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="spraySystem"></param>
         public static void GetInCurrentFloor(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             var mainLoop = spraySystem.MainLoop;
@@ -233,9 +230,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         /// <summary>
         /// 获取支环上的支环
         /// </summary>
-        /// <param name="visited"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="spraySystem"></param>
         public static void GetWithAcrossFloor2(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             foreach(var branchLoop in spraySystem.BranchLoops)
@@ -257,10 +251,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         /// <summary>
         /// 提取支环上的除了报警阀的所有支路点
         /// </summary>
-        /// <param name="sprayIn"></param>
-        /// <param name="bLoop"></param>
-        /// <param name="visited"></param>
-        /// <returns></returns>
         private static List<Point3dEx> Get3NeighborPts(SprayIn sprayIn, List<Point3dEx> bLoop, ref HashSet<Point3dEx> visited)
         {
             visited.Clear();
@@ -296,18 +286,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             var usedPtNUms = new List<int>();
             for (int i = 0; i < pts.Count - 1; i++)
             {
-                if (usedPtNUms.Contains(i))
-                {
-                    continue;
-                }
+                if (usedPtNUms.Contains(i)) continue;
+                
                 var pti = pts[i];
 
                 for (int j = i + 1; j < pts.Count; j++)
                 {
-                    if (usedPtNUms.Contains(j))
-                    {
-                        continue;
-                    }
+                    if (usedPtNUms.Contains(j)) continue;
+                    
                     tempPath.Clear();
                     tempPath.Add(pti);
                     visited.Add(pts[i]);
@@ -361,9 +347,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         /// <summary>
         /// 处理主环跨层
         /// </summary>
-        /// <param name="visited"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="spraySystem"></param>
         public static void GetWithMainLoopAcrossFloor(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             var  mainLoop = spraySystem.MainLoop;
@@ -384,18 +367,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             var usedPtNUms = new List<int>();
             for (int i = 0; i < pts.Count - 1; i++)
             {
-                if (usedPtNUms.Contains(i))
-                {
-                    continue;
-                }
+                if (usedPtNUms.Contains(i)) continue;
+                
                 var pti = pts[i];
 
                 for (int j = i + 1; j < pts.Count; j++)
                 {
-                    if (usedPtNUms.Contains(j))
-                    {
-                        continue;
-                    }
+                    if (usedPtNUms.Contains(j)) continue;
+                    
                     tempPath.Clear();
                     tempPath.Add(pti);
                     visited.Add(pts[i]);
@@ -412,7 +391,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         sprayIn.PtTypeDic[branchLoop.Last()] = "BranchLoop" + floorNumber;
                         break;
                     }
-                    ;
                     branchLoop.Clear();
                     int throughoutCnts = 0;//穿越点数目
                     Dfs.DfsMainLoopInOtherFloor(pti, pti, pts[j], tempPath, ref visited, ref branchLoop, sprayIn, 
@@ -422,10 +400,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         var rstMainLoop = new List<Point3dEx>();
                         rstMainLoop.AddRange(branchLoop);
                         spraySystem.MainLoopsInOtherFloor.Add(rstMainLoop);
-                        Draw.MainLoopsInOtherFloor(branchLoop);
                         usedPtNUms.Add(i);
                         usedPtNUms.Add(j);
-                        //spraySystem.BranchLoops.Add(branchLoop);
                         sprayIn.PtTypeDic[branchLoop.First()] = "MainLoopAcross";
                         sprayIn.PtTypeDic[branchLoop.Last()] = "MainLoopAcross";
                         if (j > i + 2)
@@ -434,7 +410,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         }
                         break;
                     }
-                    ;
                 }
             } 
         }

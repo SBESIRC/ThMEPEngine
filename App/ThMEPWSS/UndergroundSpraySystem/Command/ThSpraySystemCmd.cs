@@ -1,13 +1,12 @@
-﻿using System;
-using AcHelper;
+﻿using AcHelper;
+using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using System;
+using ThMEPEngineCore.Command;
+using ThMEPWSS.UndergroundSpraySystem.Method;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.ViewModel;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Command;
-using ThMEPWSS.UndergroundSpraySystem.Method;
-using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Command
 {
@@ -46,23 +45,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
+
         public override void AfterExecute()
         {
             base.AfterExecute();
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
-        }
-
-        public void Test()
-        {
-            var selectedArea = Common.Utils.SelectAreas();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var pipe = new SprayPipe();
-                pipe.Extract(acadDatabase.Database, selectedArea);//提取管道
-                var pipeLines = pipe.CreateSprayLines();//生成管道线
-                var sprayIn = new SprayIn(null);//输入参数
-                pipeLines = pipeLines.PipeLineAutoConnect(sprayIn);//自动连接
-            }
         }
 
         public void CreateAlarmValveSystem(AcadDatabase curDb)
@@ -114,10 +101,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
         /// <summary>
         /// 不存在跨楼层报警阀间
         /// </summary>
-        /// <param name="curDb"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="spraySystem"></param>
-        /// <param name="sprayOut"></param>
         public static void CmdWithoutAcrossLayers(AcadDatabase curDb, SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
         {
             var loopFlag = SpraySys.Processing(curDb, sprayIn, spraySystem);
@@ -139,10 +122,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
         /// <summary>
         /// 存在跨楼层报警阀间
         /// </summary>
-        /// <param name="curDb"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="spraySystem"></param>
-        /// <param name="sprayOut"></param>
         public static void CmdWithAcrossLayers(AcadDatabase curDb, SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)
         {
             var rstMainLoopsInOtherFloor = SpraySysWithAcrossFloor.AcrossFloorTypeCheck(curDb, sprayIn, spraySystem);

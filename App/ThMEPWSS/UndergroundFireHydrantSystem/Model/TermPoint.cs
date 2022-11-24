@@ -7,6 +7,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
@@ -17,7 +18,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Line TextLine { get; set; }//标注水平线
         public string PipeNumber { get; set; }//标注
         public string PipeNumber2 { get; set; }//标注
-        public int Type { get; set; }//1 消火栓; 2 立管; 3 无立管; 4 水泵接合器 ; 5 跨层点; 
+        public TptType Type { get; set; }//1 消火栓; 2 立管; 3 无立管; 4 水泵接合器 ; 5 跨层点; 
         public double TextWidth { get; set; }//文字标注线长度
         public double PipeWidth { get; set; }//管线长度
         private double Tolerance { get; set; }//容差
@@ -35,10 +36,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var distDic = new Dictionary<Line, double>();//线的距离字典
             foreach(var l in labelLine)
             {
-                if(l is null)
-                {
-                    continue;
-                }
+                if(l is null) continue;
                 
                 var spt = new Point3dEx(l.StartPoint);
                 var ept = new Point3dEx(l.EndPoint);
@@ -53,10 +51,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 distDic.OrderBy(o => o.Value);
                 StartLine = distDic.Keys.First();
             }
-            if(StartLine is null)
-            {
-                return;
-            }
+            if(StartLine is null) return;
+            
             if(!fireHydrantSysIn.LeadLineDic.ContainsKey(StartLine))
             {
                 return;
@@ -143,22 +139,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         {
             if(PipeNumber?.Contains("水泵接合器") == true)
             {
-                Type = 4;//水泵接合器
+                Type = TptType.WaterPump;
                 return;
             }
             if(hasHydrant)
             {
-                Type = 1;//消火栓
+                Type = TptType.Hrdrant;
                 return;
             }
-            if(hasVertical)
-            {
-                Type = 2;//立管
-            }
-            else
-            {
-                Type = 3;//无立管
-            }
+            Type = hasVertical ? TptType.Riser : TptType.NoRiser;
+           
         }
     }
 }

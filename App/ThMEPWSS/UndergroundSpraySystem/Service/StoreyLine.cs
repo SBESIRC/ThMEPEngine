@@ -50,19 +50,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         spraySystem.AlarmValveStPtY.Add(pt, insertPt.Y+6200);
                     }
                 }
-                //sprayOut.FloorLine.Add(new Line(insertPt, insertPt.OffsetX(length)));
                 string text = fNumber + "F(建筑)";
                 sprayOut.Texts.Add(new Block.Text(text, insertPt.OffsetY(200), "W-NOTE"));
                 sprayIn.floorNumberYDic.Add(fNumber, insertPt.Y);
                 insertPt = insertPt.OffsetY(height);
 
             }
-            //sprayOut.FloorLine.Add(new Line(insertPt, insertPt.OffsetX(length)));
-            string text1 = " ";
-            //if(floors.Keys.Last().Contains("B1"))
-            //{
-            text1 = "地库顶板";
-            //}
+            string text1 = "地库顶板";
+            
             sprayOut.Texts.Add(new Block.Text(text1, insertPt.OffsetY(200), "W-NOTE"));
         }
 

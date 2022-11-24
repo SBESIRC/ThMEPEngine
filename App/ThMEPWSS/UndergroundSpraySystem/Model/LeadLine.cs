@@ -9,7 +9,6 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
 
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
@@ -64,7 +63,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 }
             }
             leadLines = PipeLineList.CleanLaneLines3(leadLines);
-            Draw.LeadLines(leadLines);
             return leadLines;
         }
         private bool IsTargetLayer(string layer)

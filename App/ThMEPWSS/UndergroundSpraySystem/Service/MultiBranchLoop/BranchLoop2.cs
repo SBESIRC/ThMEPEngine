@@ -1,10 +1,9 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System.Linq;
 using ThMEPWSS.Uitl.ExtensionsNs;
-using ThMEPWSS.UndergroundSpraySystem.Model;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.UndergroundSpraySystem.Block;
-using System;
+using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
 {
@@ -13,21 +12,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
         public static void Get(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn)
         {
             double valveSize = sprayIn.ValveSize;
-
             double alarmGap = sprayIn.PipeGap;
             double valveGapX2 = 800;//存在阀门时，阀门与管道间距
             double floorHeight = sprayIn.FloorHeight;
-
-            int currentFloor = Convert.ToInt32(sprayOut.CurrentFloor.Last());
 
             foreach (var rstPath in spraySystem.BranchLoops2)
             {
                 var firstPt = rstPath.First();
                 var lastPt = rstPath.Last();
-                var ptType = sprayIn.PtTypeDic[firstPt];
-                var typeNum = Convert.ToInt32(ptType.Last());
 
-                double valveGapX = 50;
                 int fireAreaIndex = 0;//当前支管的防火分区index
                 int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
 
@@ -124,8 +117,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop
 
                 }
                 sprayOut.PipeLine.Add(new Line(curPt, ePt2));
-
-
             }
         }
     }

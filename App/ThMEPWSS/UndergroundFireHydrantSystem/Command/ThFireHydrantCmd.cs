@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using ThMEPWSS.ViewModel;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+﻿using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
-using Linq2Acad;
-using AcHelper;
-using ThMEPEngineCore.Command;
-using GeometryExtensions;
-using ThMEPWSS.UndergroundFireHydrantSystem.Method;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
-using ThMEPEngineCore.Algorithm;
-using ThMEPWSS.UndergroundFireHydrantSystem.Command;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using Linq2Acad;
+using System;
+using System.Collections.Generic;
+using ThMEPEngineCore.Command;
+using ThMEPWSS.UndergroundFireHydrantSystem.Command;
+using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
+using ThMEPWSS.UndergroundFireHydrantSystem.Method;
+using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.ViewModel;
 
 namespace ThMEPWSS.Command
 {
@@ -76,8 +74,8 @@ namespace ThMEPWSS.Command
             var storeyRect = new StoreyRect();
             storeyRect.Extract(selectArea);
 
-            var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace, storeyRect);//输入参数
-            var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
+            var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace, storeyRect);
+            var fireHydrantSysOut = new FireHydrantSystemOut();
             {
                 var opt = Active.Editor.GetPoint("\n指定消火栓系统图插入点");
                 if (opt.Status != PromptStatus.OK)
@@ -94,14 +92,14 @@ namespace ThMEPWSS.Command
                 return exArea;
             }
 
-            var inputFlag = GetInput.GetFireHydrantSysInput(curDb, fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
+            var inputFlag = GetInput.GetFireHydrantSysInput(curDb, fireHydrantSysIn, selectArea, loopStartPt);
             DbHelper.EnsureLayerOn("W-辅助");
             if (!inputFlag)
             {
                 return null;
             }
 
-            var mainPathList = MainLoop.Get(fireHydrantSysIn);//主环提取
+            var mainPathList = MainLoop.Get(fireHydrantSysIn);
             if (mainPathList.Count == 0)
             {
                 Active.Editor.WriteMessage("没找到主环");
@@ -131,33 +129,9 @@ namespace ThMEPWSS.Command
             GetFireHydrantPipe.GetSubLoop(fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic, across,0,ValveDic);//次环路获取
             GetFireHydrantPipe.GetBranch(fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
 
-            fireHydrantSysOut.Draw(across);//绘制系统图
+            fireHydrantSysOut.Draw();//绘制系统图
 
             return null;
-        }
-
-
-        public void Test()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                PromptNestedEntityOptions nestedEntOpt = new PromptNestedEntityOptions("\nPick nested entity in block:");
-                var dwg = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
-                Editor ed = dwg.Editor;
-                PromptNestedEntityResult nestedEntRes = ed.GetNestedEntity(nestedEntOpt);
-
-                var entId = nestedEntRes.ObjectId;
-                var dbObj = acadDatabase.Element<Entity>(entId);
-                var name = dbObj.GetRXClass().DxfName;
-                var rst = dbObj.IsTCHPipe();
-                ;
-                //dynamic X = dbObj.AcadObject;
-                var objs = new DBObjectCollection();
-                dbObj.Explode(objs);
-                var objs1 = new DBObjectCollection();
-                ;
-
-            }
         }
     }
 }

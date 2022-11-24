@@ -192,6 +192,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             {
                                 fireAreaNum++;//防火分区数+1
                             }
+                            else if(sprayIn.TermPtDic[tpt].Type == 2)//端点类型是跨层
+                            {
+                                foreach (var cpt in spraySystem.BranchThroughDic[tpt])
+                                {
+                                    fireAreaNum++;//防火分区数+1
+                                }
+                            }
                         }
                     }
                 }

@@ -39,7 +39,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 try
                 {
                     var pt = rstPath[i];
-                    if (usedPts.Contains(pt)) 
+                    if (usedPts.Contains(pt))
                         continue;
                     var nextPt = rstPath[i + 1];
                     var line = new Line(pt._pt, nextPt._pt);
@@ -103,11 +103,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         }
                         if (typeNum < currentFloor)//楼层号是上一层
                         {
-                            stPt = GetBranchLoopPtUpper(pt, stPt, sprayOut, ref flag, floorHeight, spraySystem, sprayIn,
+                            stPt = GetBranchLoopPtUpper(pt, stPt, sprayOut, ref flag, spraySystem, sprayIn,
                                 LastBranchLoopIndex, ref LastBranchLoopAlarmLength, ref curFloorMaxSite, ref upperFloorMaxSite, ref curMaxSite);
                             LastBranchLoopIndex = 1;
                         }
-                        if(typeNum > currentFloor)//楼层号是下一层
+                        if (typeNum > currentFloor)//楼层号是下一层
                         {
                             stPt = GetBranchLoopPtDown(pt, stPt, sprayOut, ref flag, floorHeight, spraySystem, sprayIn,
                                 LastBranchLoopIndex, ref LastBranchLoopAlarmLength, ref curFloorMaxSite, ref upperFloorMaxSite, ref curMaxSite);
@@ -117,8 +117,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     }
                     if (ptType.Contains("Branch"))
                     {
-                        stPt = GetBranchPt(pt, stPt, sprayOut, spraySystem, sprayIn.PtTypeDic[nextPt],
-                            400, sprayIn, lastPtIsBranchLoop, LastBranchLoopAlarmLength);
+                        stPt = GetBranchPt(pt, stPt, sprayOut, spraySystem, 400, sprayIn);
                         lastPtIsBranchLoop = false;
                         continue;
                     }
@@ -136,7 +135,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             }
             GetDetail(stPt1, stPt, sprayOut, sprayIn, 600);
-
         }
 
         public static void GetInOtherFloor(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn, int mainLoopIndex = 0)
@@ -144,15 +142,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var rstPath = spraySystem.MainLoop;
             var floorHeight = sprayIn.FloorHeight;
             var stPt1 = sprayOut.PipeInsertPoint;
-            if(mainLoopIndex != 0)
+            if (mainLoopIndex != 0)
             {
                 stPt1 = spraySystem.TempMainLoopPt;
             }
-   
+
             var stPt = stPt1;
             int flag = 1;//支环类型
             int acrossFlag = 1;//跨层主环类型
-            int currentFloor = Convert.ToInt32(sprayOut.CurrentFloor.Last());
             double LastBranchLoopAlarmLength = 0;//前一个环路的报警阀间长度
             bool lastPtIsBranchLoop = false;//上一个点的类型是环路点
             int LastBranchLoopIndex = 100;//默认100(基本用不到)，上一层 +1，下一层 -1
@@ -171,15 +168,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     var line = new Line(pt._pt, nextPt._pt);
                     var lineEx = new LineSegEx(line);
                     var pipeDn = "";
-                    if(sprayIn.PtDNDic.ContainsKey(lineEx))
+                    if (sprayIn.PtDNDic.ContainsKey(lineEx))
                     {
                         pipeDn += sprayIn.PtDNDic[lineEx];
                     }
 
-                    foreach(var slptEx in sprayIn.SlashDic.Keys)
+                    foreach (var slptEx in sprayIn.SlashDic.Keys)
                     {
                         var slpt = slptEx._pt;
-                        if(line.GetClosestPointTo(slpt,false).DistanceTo(slpt) < 10.0)
+                        if (line.GetClosestPointTo(slpt, false).DistanceTo(slpt) < 10.0)
                         {
                             pipeDn += sprayIn.SlashDic[slptEx];
                             break;
@@ -195,9 +192,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         stPt = GetMainPt(stPt, ref sprayOut);
                     }
                     if (!sprayIn.PtTypeDic.ContainsKey(pt)) continue;
-                    
+
                     var ptType = sprayIn.PtTypeDic[pt];//当前点类型
-                    if(ptType.Contains("MainLoopAcross"))
+                    if (ptType.Contains("MainLoopAcross"))
                     {
                         if (spraySystem.LoopPtPairs.ContainsKey(pt))
                         {
@@ -212,20 +209,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         }
                     }
                     if (ptType.Contains("MainLoop")) continue;
-                    
+
                     if (ptType.Contains("BranchLoop"))
                     {
                         lastPtIsBranchLoop = true;
-         
-                        stPt = GetBranchLoopPt(pt, stPt, sprayOut, ref flag, spraySystem, sprayIn, LastBranchLoopIndex, 
+
+                        stPt = GetBranchLoopPt(pt, stPt, sprayOut, ref flag, spraySystem, sprayIn, LastBranchLoopIndex,
                                 ref LastBranchLoopAlarmLength, ref curFloorMaxSite, lastPtIsBranchLoop, upperFloorMaxSite, curMaxSite);
-                            LastBranchLoopIndex = 0;
+                        LastBranchLoopIndex = 0;
                         continue;
                     }
                     if (ptType.Contains("Branch"))
                     {
-                        stPt = GetBranchPt(pt, stPt, sprayOut, spraySystem, sprayIn.PtTypeDic[nextPt],
-                            400, sprayIn, lastPtIsBranchLoop, LastBranchLoopAlarmLength);
+                        stPt = GetBranchPt(pt, stPt, sprayOut, spraySystem, 400, sprayIn);
                         lastPtIsBranchLoop = false;
                         continue;
                     }
@@ -246,7 +242,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
         }
 
-      
+
         private static Point3d GetMainPt(Point3d stPt, ref SprayOut sprayOut)
         {
             var pt = stPt.OffsetX(500);
@@ -257,55 +253,39 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         /// <summary>
         /// 实现跨层主环的逻辑
         /// </summary>
-        /// <param name="stPt"></param>
-        /// <param name="sprayOut"></param>
-        /// <returns></returns>
         private static Point3d GetAcrossMainLoop(Point3d stPt, SprayOut sprayOut, SpraySystem spraySystem, double floorHeight, ref int acrossFlag, bool newDrawing = false)
         {
             var offsetVal = 0.0;
-            if(newDrawing)
+            if (newDrawing)
             {
                 offsetVal = -600.0;
             }
-            
-            
-                if (acrossFlag == 1)
-                {
-                    var pt = stPt.OffsetX(600);
-                    sprayOut.PipeLine.Add(new Line(stPt, pt));
-                    sprayOut.PipeLine.Add(new Line(stPt.OffsetY(offsetVal), stPt.OffsetY(-floorHeight - 600)));
-                    sprayOut.PipeLine.Add(new Line(stPt.OffsetXY(600, -floorHeight - 600), stPt.OffsetY(-floorHeight - 600)));
-                    acrossFlag = -1;
-                    return pt;
-                }
-                else
-                {
-                    var pt = stPt.OffsetX(1200);
-                    sprayOut.PipeLine.Add(new Line(stPt, pt));
-                    sprayOut.PipeLine.Add(new Line(stPt.OffsetY(offsetVal), stPt.OffsetY(-floorHeight)));
-                    acrossFlag = 1;
-                    spraySystem.TempMainLoopPt = stPt.OffsetY(-floorHeight);
-                    return pt;
-                }
-            
 
-
+            if (acrossFlag == 1)
+            {
+                var pt = stPt.OffsetX(600);
+                sprayOut.PipeLine.Add(new Line(stPt, pt));
+                sprayOut.PipeLine.Add(new Line(stPt.OffsetY(offsetVal), stPt.OffsetY(-floorHeight - 600)));
+                sprayOut.PipeLine.Add(new Line(stPt.OffsetXY(600, -floorHeight - 600), stPt.OffsetY(-floorHeight - 600)));
+                acrossFlag = -1;
+                return pt;
+            }
+            else
+            {
+                var pt = stPt.OffsetX(1200);
+                sprayOut.PipeLine.Add(new Line(stPt, pt));
+                sprayOut.PipeLine.Add(new Line(stPt.OffsetY(offsetVal), stPt.OffsetY(-floorHeight)));
+                acrossFlag = 1;
+                spraySystem.TempMainLoopPt = stPt.OffsetY(-floorHeight);
+                return pt;
+            }
         }
 
         /// <summary>
         /// 向上分支的支路
         /// </summary>
-        /// <param name="curPt"></param>
-        /// <param name="stPt"></param>
-        /// <param name="sprayOut"></param>
-        /// <param name="flag"></param>
-        /// <param name="floorHeight"></param>
-        /// <param name="spraySystem"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="LastBranchLoopIndex"></param>
-        /// <returns></returns>
         private static Point3d GetBranchLoopPtUpper(Point3dEx curPt, Point3d stPt, SprayOut sprayOut, ref int flag,
-           double floorHeight, SpraySystem spraySystem, SprayIn sprayIn, int LastBranchLoopIndex, 
+           SpraySystem spraySystem, SprayIn sprayIn, int LastBranchLoopIndex,
            ref double LastBranchLoopAlarmLength, ref double curFloorMaxSite, ref double upperFloorMaxSite, ref double curMaxSite)
         {
             double height = -550;
@@ -375,15 +355,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         /// <summary>
         /// 向下分支的支路
         /// </summary>
-        /// <param name="curPt"></param>
-        /// <param name="stPt"></param>
-        /// <param name="sprayOut"></param>
-        /// <param name="flag"></param>
-        /// <param name="floorHeight"></param>
-        /// <param name="spraySystem"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="LastBranchLoopIndex"></param>
-        /// <returns></returns>
         private static Point3d GetBranchLoopPtDown(Point3dEx curPt, Point3d stPt, SprayOut sprayOut, ref int flag,
            double floorHeight, SpraySystem spraySystem, SprayIn sprayIn, int LastBranchLoopIndex,
            ref double LastBranchLoopAlarmLength, ref double curFloorMaxSite, ref double upperFloorMaxSite, ref double curMaxSite)
@@ -428,7 +399,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000)));
                     stPt = stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000);
                 }
-                var pt1 = stPt.OffsetY(-height-floorHeight);
+                var pt1 = stPt.OffsetY(-height - floorHeight);
                 sprayOut.PipeLine.Add(new Line(stPt, pt1));
                 spraySystem.BranchLoopPtDic.Add(curPt, pt1);//保存支环的起始点
                 pt = spraySystem.TempSubLoopStartPt;
@@ -456,16 +427,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         /// <summary>
         /// 本层支路
         /// </summary>
-        /// <param name="curPt"></param>
-        /// <param name="stPt"></param>
-        /// <param name="sprayOut"></param>
-        /// <param name="flag"></param>
-        /// <param name="spraySystem"></param>
-        /// <param name="sprayIn"></param>
-        /// <param name="LastBranchLoopIndex"></param>
-        /// <returns></returns>
         private static Point3d GetBranchLoopPt(Point3dEx curPt, Point3d stPt, SprayOut sprayOut, ref int flag,
-            SpraySystem spraySystem, SprayIn sprayIn, int LastBranchLoopIndex, 
+            SpraySystem spraySystem, SprayIn sprayIn, int LastBranchLoopIndex,
             ref double LastBranchLoopAlarmLength, ref double curFloorMaxSite, bool lastPtIsBranchLoop, double upperFloorMaxSite, double curMaxSite)
         {
             double height = 1200;
@@ -483,10 +446,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             }
             if (flag == 1)
             {
-                if(LastBranchLoopIndex == 1 && lastPtIsBranchLoop)//当前层的上一层
+                if (LastBranchLoopIndex == 1 && lastPtIsBranchLoop)//当前层的上一层
                 {
                     var branchLoopCross = HasVerticalCrossUpperFloor(curPt, spraySystem, sprayIn);
-                    if(branchLoopCross)
+                    if (branchLoopCross)
                     {
                         var dist1 = curFloorMaxSite;//  当前层移动到的位置的X值
                         var BranchLoopLength = GetBranchLoopLength(curPt, spraySystem, sprayIn, alarmNums, branchLoopNums);
@@ -505,7 +468,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         var curSiteX = Math.Max(Math.Max(dist1, dist2), dist3);//取三者最大（右）值
                         stPt = new Point3d(curSiteX, stPt.Y, 0);
                     }
-                    
+
                 }
                 sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(-height)));
                 pt = stPt.OffsetX(1200);
@@ -533,7 +496,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 {
                     foreach (var num in spraySystem.SubLoopFireAreasDic[curPt])
                     {
-                        fireNums += Math.Max(num,1);
+                        fireNums += Math.Max(num, 1);
                     }
                     pt = pt.OffsetX(fireNums * 5500 - 2500 * branchLoopNums + 1500);
                 }
@@ -551,7 +514,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             ref double LastBranchLoopAlarmLength, ref double curFloorMaxSite, bool lastPtIsBranchLoop, double upperFloorMaxSite, double curMaxSite)
         {
             double height = 1200;
-            double heigth15 = height*1.5;
+            double heigth15 = height * 1.5;
             double pipeLen = 6000;
             var alarmNums = 0;//当前支环（报警阀间）上的报警阀数目
             var branchLoopNums = 0;
@@ -610,7 +573,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     stPt = stPt.OffsetX(branchNums * sprayIn.PipeGap);
                 }
 
-                
+
                 pt = spraySystem.TempSubLoopStartPt;
                 if (spraySystem.SubLoopAlarmsDic.ContainsKey(curPt))//支路的报警阀数目
                 {
@@ -650,9 +613,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 var firstPt = rstPath.First();
                 if (curPt.Equals(firstPt))//找到当前点的支环
                 {
-                    foreach(var pt in rstPath)//遍历当前支环
+                    foreach (var pt in rstPath)//遍历当前支环
                     {
-                        if(spraySystem.BranchDic.ContainsKey(pt))//判断包含支路的点
+                        if (spraySystem.BranchDic.ContainsKey(pt))//判断包含支路的点
                         {
                             var tpts = spraySystem.BranchDic[pt];//获取支路的终点
                             foreach (var tpt in tpts)
@@ -662,7 +625,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     continue;
                                 }
                                 var type = sprayIn.TermPtDic[tpt].Type;
-                                if(type == 3 || type == 4)//存在穿楼层的点
+                                if (type == 3 || type == 4)//存在穿楼层的点
                                 {
                                     return true;
                                 }
@@ -701,15 +664,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             return waterPumpNum;
         }
-        
-        private static double GetBranchLoopLength(Point3dEx curPt, SpraySystem spraySystem, SprayIn sprayIn, 
+
+        private static double GetBranchLoopLength(Point3dEx curPt, SpraySystem spraySystem, SprayIn sprayIn,
             int alarmNums, int branchLoopNums)
         {
             double length = 0;
             var fireNums = 0;//当前支环（报警阀间）上的防火分区数目
             if (spraySystem.SubLoopAlarmsDic.ContainsKey(curPt))//支路的报警阀数目
             {
-                length+= 5150 * branchLoopNums + sprayIn.PipeGap * (alarmNums - 1) + 2500;
+                length += 5150 * branchLoopNums + sprayIn.PipeGap * (alarmNums - 1) + 2500;
             }
             if (spraySystem.SubLoopFireAreasDic.ContainsKey(curPt))//支路的防火分区数目
             {
@@ -722,10 +685,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             return length;
         }
-        
+
 
         private static Point3d GetBranchPt(Point3dEx curPt, Point3d stPt, SprayOut sprayOut,
-            SpraySystem spraySystem, string nextPtType, double height, SprayIn sprayIn, bool lastPtIsBranchLoop, double LastBranchLoopAlarmLength)
+            SpraySystem spraySystem, double height, SprayIn sprayIn)
         {
             if (spraySystem.BranchDic[curPt].Count == 1)//单支路
             {

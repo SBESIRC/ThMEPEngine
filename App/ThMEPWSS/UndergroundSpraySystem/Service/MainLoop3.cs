@@ -40,12 +40,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     }
                     if (sprayIn.PtTypeDic[pt].Contains("BranchLoop"))
                     {
-                        stPt = GetBranchLoopPt(pt, stPt, sprayOut, ref flag, floorHeight, spraySystem, sprayIn);
+                        stPt = GetBranchLoopPt(pt, stPt, sprayOut, ref flag, spraySystem, sprayIn);
                         continue;
                     }
                     if (sprayIn.PtTypeDic[pt].Contains("Branch"))
                     {
-                        stPt = GetBranchPt(pt, stPt, sprayOut, spraySystem, sprayIn.PtTypeDic[nextPt],
+                        stPt = GetBranchPt(pt, stPt, sprayOut, spraySystem,
                             400, sprayIn);
                         continue;
                     }
@@ -68,7 +68,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             }
             GetDetail(stPt, sprayOut, sprayIn, 600);
-
         }
 
         private static Point3d GetMainPt(Point3d stPt, ref SprayOut sprayOut)
@@ -78,7 +77,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             return pt;
         }
         private static Point3d GetBranchLoopPt(Point3dEx curPt, Point3d stPt, SprayOut sprayOut, ref int flag,
-            double floorHeight, SpraySystem spraySystem, SprayIn sprayIn)
+             SpraySystem spraySystem, SprayIn sprayIn)
         {
             double height = 1200;
             var pt = stPt;
@@ -95,14 +94,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             {
                 foreach (var num in spraySystem.SubLoopAlarmsDic[curPt])
                 {
-                    if (num == 0)
-                    {
-                        alarmNums += 1;
-                    }
-                    else
-                    {
-                        alarmNums += num;
-                    }
+                    alarmNums += Math.Max(num, 1);
                     branchLoopNums += 1;
                 }
             }
@@ -151,7 +143,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             return pt;
         }
         private static Point3d GetBranchPt(Point3dEx curPt, Point3d stPt, SprayOut sprayOut,
-            SpraySystem spraySystem, string nextPtType, double height, SprayIn sprayIn)
+            SpraySystem spraySystem, double height, SprayIn sprayIn)
         {
             if (spraySystem.BranchDic[curPt].Count == 1)//单支路
             {
@@ -163,10 +155,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
             }
             double dist = sprayIn.PipeGap;
-            //if (nextPtType.Contains("Branch"))
-            //{
-            //    dist = sprayIn.PipeGap;
-            //}
             var pt = stPt.OffsetX(dist);
             sprayOut.PipeLine.Add(new Line(stPt, pt));
             sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(height)));
@@ -207,11 +195,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
             }
         }
+
         private static void GetDetail(Point3d stPt, SprayOut sprayOut, SprayIn sprayIn, double height)
         {
             sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(-height)));
             sprayOut.PipeLine.Add(new Line(sprayOut.PipeInsertPoint.OffsetY(-height), stPt.OffsetY(-height)));
-
 
             //绘制楼板线
             var floors = sprayIn.FloorRectDic;

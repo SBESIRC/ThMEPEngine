@@ -1,11 +1,9 @@
 ﻿using Linq2Acad;
 using System.Collections.Generic;
-using ThMEPWSS.UndergroundSpraySystem.Model;
-using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Method;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
-using ThMEPWSS.Uitl.ExtensionsNs;
+using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
 {
@@ -24,13 +22,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             Dfs.DfsMainLoopWithMainLoopAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
             DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
             spraySystem.MainLoop.AddRange(mainPathList[0]);
-            Draw.MainLoop(acadDatabase, mainPathList);
             BranchLoopDeal.GetWithMainLoopAcrossFloor(ref visited, sprayIn, spraySystem);
-            Draw.BranchLoop(acadDatabase, spraySystem);
-
-            //DicTools.SetPointType(sprayIn, spraySystem.MainLoopsInOtherFloor, extraNodes);
-            //BranchLoopDeal.GetWithMainLoopAcrossFloor(ref visited, sprayIn, spraySystem, 0);
-
 
             BranchDealWithAcorssFloor.Get(ref visited, sprayIn, spraySystem);
             BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
@@ -47,9 +39,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             spraySystem.BranchLoops.Clear();
             spraySystem.BranchDic.Clear();
             spraySystem.MainLoop.AddRange(acrossMainLoop);
-            Draw.MainLoop(acadDatabase, acrossMainLoop, "跨层主环");
             BranchLoopDeal.GetWithMainLoopAcrossFloor(ref visited, sprayIn, spraySystem);
-            Draw.BranchLoop(acadDatabase, spraySystem, "跨层支环");
 
             BranchDealWithAcorssFloor.Get(ref visited, sprayIn, spraySystem);
             BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
@@ -74,6 +64,5 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             BranchAcrossFloor.GetInOtherFloor(sprayOut, spraySystem, sprayIn);
             PipeLine.Split(sprayOut);
         }
-
     }
 }

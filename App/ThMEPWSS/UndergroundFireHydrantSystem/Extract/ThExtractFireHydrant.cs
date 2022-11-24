@@ -1,20 +1,15 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Engine;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
@@ -41,7 +36,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 {
                     var block = dbObjs[i] as BlockReference;
                     var pt = GetCenter(block.GeometricExtents);
-                    var pline = CreatePolyline(pt, 1000);
+                    var pline = pt.GetRect(1000);
                     var res = verticalSpatialIndex.SelectCrossingPolygon(pline).ToArray();
                     if (res.Count() == 0)
                     {
@@ -74,25 +69,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             var dbObjs = new DBObjectCollection();
             foreach (var pt in verticals)
             {
-                var pline = CreatePolyline(pt._pt);
+                var pline = pt._pt.GetRect(50);
                 dbObjs.Add(pline);
             }
             return dbObjs;
         }
-
-        private static Polyline CreatePolyline(Point3d c, int tolerance = 50)
-        {
-            var pl = new Polyline();
-            var pts = new Point2dCollection();
-            pts.Add(new Point2d(c.X - tolerance, c.Y - tolerance)); // low left
-            pts.Add(new Point2d(c.X - tolerance, c.Y + tolerance)); // high left
-            pts.Add(new Point2d(c.X + tolerance, c.Y + tolerance)); // high right
-            pts.Add(new Point2d(c.X + tolerance, c.Y - tolerance)); // low right
-            pts.Add(new Point2d(c.X - tolerance, c.Y - tolerance)); // low left
-            pl.CreatePolyline(pts);
-            return pl;
-        }
-
-       
     }
 }

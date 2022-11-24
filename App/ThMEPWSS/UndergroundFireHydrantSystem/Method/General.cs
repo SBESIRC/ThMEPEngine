@@ -14,63 +14,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
             return new Point3d(x, y, 0);
         }
 
-        public static Point3d GetMidPt(DBText dBText)//获取文字的中心点
+        public static Point3d GetMidPt(DBText dBText)
         {
             var pt1 = dBText.GeometricExtents.MaxPoint;
             var pt2 = dBText.GeometricExtents.MinPoint;
             return GetMidPt(pt1, pt2);
         }
 
-        public static Polyline GetRect(this DBText br)
-        {
-            var minPt = br.GeometricExtents.MinPoint;
-            var maxPt = br.GeometricExtents.MaxPoint;
-            var pline = new Polyline();
-            var point2dColl = new Point2dCollection();
-            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
-            point2dColl.Add(new Point2d(minPt.X, maxPt.Y));
-            point2dColl.Add(new Point2d(maxPt.X, maxPt.Y));
-            point2dColl.Add(new Point2d(maxPt.X, minPt.Y));
-            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
-            pline.CreatePolyline(point2dColl);
-            return pline;
-        }
-
-        public static Polyline GetRect(this BlockReference br)
-        {
-            var minPt = br.GeometricExtents.MinPoint;
-            var maxPt = br.GeometricExtents.MaxPoint;
-            var pline = new Polyline();
-            var point2dColl = new Point2dCollection();
-            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
-            point2dColl.Add(new Point2d(minPt.X, maxPt.Y));
-            point2dColl.Add(new Point2d(maxPt.X, maxPt.Y));
-            point2dColl.Add(new Point2d(maxPt.X, minPt.Y));
-            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
-            pline.CreatePolyline(point2dColl);
-            return pline;
-        }
-
-        /// <summary>
-        /// 获取点为中心的包围框
-        /// </summary>
-        /// <param name="centerPt"></param>
-        /// <param name="tolerance"></param>
-        /// <returns></returns>
-        public static Polyline GetRect(this Point3d centerPt, double tolerance = 100)
-        {
-            var pl = new Polyline();
-            var pts = new Point2dCollection();
-            pts.Add(new Point2d(centerPt.X - tolerance, centerPt.Y - tolerance)); // low left
-            pts.Add(new Point2d(centerPt.X - tolerance, centerPt.Y + tolerance)); // high left
-            pts.Add(new Point2d(centerPt.X + tolerance, centerPt.Y + tolerance)); // high right
-            pts.Add(new Point2d(centerPt.X + tolerance, centerPt.Y - tolerance)); // low right
-            pts.Add(new Point2d(centerPt.X - tolerance, centerPt.Y - tolerance)); // low left
-
-            pl.CreatePolyline(pts);
-
-            return pl;
-        }
         
         public static double GetLinesDist(this Line l1, Line l2)
         {

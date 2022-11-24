@@ -1,7 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
-using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -9,9 +8,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
@@ -198,14 +197,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
             {
-                try
-                {
-                    CreateTermPtDic2(pt, fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
-                }
-                catch(Exception ex)
-                {
-                    ;
-                }
+                CreateTermPtDic2(pt, fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
             }
 
             foreach(var pt in fireHydrantSysIn.PtDic.Keys)
@@ -219,10 +211,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         break;
                     }
                 }
-                if(ignore)
-                {
-                    continue;
-                }
+                if(ignore) continue;
+                
                 if (fireHydrantSysIn.PtDic[pt].Count == 1)//邻接点数为1
                 {
                     if(!fireHydrantSysIn.TermPointDic.ContainsKey(pt))//且没有标记
@@ -239,7 +229,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
         }
-
 
 
         private static void CreateTermPtDic2(Point3dEx pt, FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
@@ -269,7 +258,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 if (OriginTermStartPtDic.ContainsKey(pt))
                 {
                     termPoint.PipeNumber = OriginTermStartPtDic[pt].TextString;
-                    termPoint.Type = 2;
+                    termPoint.Type = TptType.Riser;
                     var dbText = ThTextSet.ThText(new Point3d(), termPoint.PipeNumber);
                     double textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
                     if (textWidth > 1300)
@@ -289,7 +278,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 if (OriginTermStartPtDic.ContainsKey(pt))
                 {
                     termPoint.PipeNumber = OriginTermStartPtDic[pt].TextString;
-                    termPoint.Type = 2;
+                    termPoint.Type = TptType.Riser;
                     var dbText = ThTextSet.ThText(new Point3d(), termPoint.PipeNumber);
                     double textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
                     if (textWidth > 1300)
@@ -795,23 +784,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             var adjs = fireHydrantSysIn.PtDic[curPt];
                             if (adjs.Count == 1)
                             {
-                                //if(fireHydrantSysIn.TermPointDic.ContainsKey(curPt))
-                                {
-                                    termPts.Add(curPt);
-                                }
+                                termPts.Add(curPt);
                                 continue;
                             }
 
                             foreach (var adj in adjs)
                             {
-                                if (rstPath.Contains(adj))
-                                    continue;
-
-                                if (visited2.Contains(adj))
-                                {
-                                    continue;
-                                }
-
+                                if (rstPath.Contains(adj)) continue;
+                                if (visited2.Contains(adj)) continue;
                                 visited2.Add(adj);
                                 q.Enqueue(adj);
                             }

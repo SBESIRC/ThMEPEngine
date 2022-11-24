@@ -89,26 +89,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
                 var eLine = pt2.GetClosestLine(pipeLine);
                 if (eLine.Equals(new Line())) continue;
-                var spt = new Point3dEx();
-                var ept = new Point3dEx();
-
-                if (sprayIn.PtDic[new Point3dEx(sLine.StartPoint)].Count == 1)
-                {
-                    spt = new Point3dEx(sLine.StartPoint);
-                }
-                else
-                {
-                    spt = new Point3dEx(sLine.EndPoint);
-                }
-
-                if (sprayIn.PtDic[new Point3dEx(eLine.StartPoint)].Count == 1)
-                {
-                    ept = new Point3dEx(eLine.StartPoint);
-                }
-                else
-                {
-                    ept = new Point3dEx(eLine.EndPoint);
-                }
+                var spt = sprayIn.PtDic[new Point3dEx(sLine.StartPoint)].Count == 1? new Point3dEx(sLine.StartPoint): new Point3dEx(sLine.EndPoint);
+                var ept = sprayIn.PtDic[new Point3dEx(eLine.StartPoint)].Count == 1? new Point3dEx(eLine.StartPoint): new Point3dEx(eLine.EndPoint);
 
                 if (pt1.DistanceTo(startPt) < pt2.DistanceTo(startPt))
                 {

@@ -10,12 +10,9 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Engine;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using ThMEPEngineCore;
-using DotNetARX;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
@@ -61,7 +58,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 ExplodeDWLG(db as BlockReference, DBobjsResults);//添加定位立管
             }
         }
-
         
         private static bool IsTargetLayer(string layer)//立管图层
         {
@@ -116,6 +112,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             return false;
         }
+
         public List<Point3dEx> CreatePointList()
         {
             VerticalPts = new List<Point3dEx>();
@@ -128,29 +125,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     VerticalPts.Add(pt);
                 }
             }
-#if DEBUG
-            var layer = "立管标记";
-            using (AcadDatabase acad = AcadDatabase.Active())
-            {
-                if (!acad.Layers.Contains(layer))
-                {
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, layer, 2);
-                }
-            }
 
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                foreach (var pt in VerticalPts)
-                {
-                    var c = new Circle(pt._pt, new Vector3d(0, 0, 1), 200);
-                    c.LayerId = DbHelper.GetLayerId(layer);
-                    acadDatabase.CurrentSpace.Add(c);
-                }
-            }
-#endif
             return VerticalPts;
         }
     }
-
-   
 }

@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Runtime;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -26,7 +27,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(results.ToCollection());
                 var dBObjs = spatialIndex.SelectCrossingPolygon(polygon);
                 var dbTextCollection = new DBObjectCollection();
-
+                
                 foreach (var obj in dBObjs)
                 {
                     if (obj is Entity ent)
@@ -54,18 +55,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                         catch { }
                     }
                 }
-#if DEBUG
-                Dreambuild.AutoCAD.DbHelper.EnsureLayerOn("文字框");
-                foreach (var obj in dbTextCollection)
-                {
-                    var text = obj as DBText;
-                    var rect = text.GetRect();
-                    rect.Layer = "文字框";
-                    var text2 = TCHDeal.CreateText(text.Position,text.TextString);
-                    acadDatabase.CurrentSpace.Add(rect);
-                    acadDatabase.CurrentSpace.Add(text2);
-                }
-#endif
+
                 return dbTextCollection;
             }
         }
@@ -109,7 +99,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
                 var dBText = CreateText(insertPt, str);//创建成标准文字
                 dBObjects.Add(dBText);
-                ThMEPWSS.UndergroundSpraySystem.Method.Draw.Rect(insertPt.GetRect(), "文字test");
                 return;
             }
         }
@@ -154,7 +143,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
                 dynamic acadObject = ent.AcadObject;
                 var text = acadObject;
-                //return CreateText(pts.FirstOrDefault(), text);
             }
         }
         public static void AddImpEntity(this Entity ent, Database database, DBObjectCollection dbTextCollection)

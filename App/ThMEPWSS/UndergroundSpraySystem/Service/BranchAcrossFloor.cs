@@ -231,8 +231,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         Tool.DrawAutoValve(stPt, ref textRecord, sprayOut);
                     }
 
-                    bool signelBranch = true;//第一个 type 4 标志
-
                     bool firstFireAlarmVisited = false;//访问过第一个防火分区
                     foreach (var tpt in tpts)// tpt 支路端点
                     {
@@ -398,8 +396,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             int index = 0;
             var lastFirePt = new Point3d();
             bool textRecord = false; //记录是否标记排气阀
-            int currentFloor = Convert.ToInt32(sprayOut.CurrentFloor.Last());
-            double floorHeight = sprayIn.FloorHeight;//楼层高度
             foreach (var pt in spraySystem.BranchDic.Keys)//pt 支路起始点
             {
                 if (sprayIn.ThroughPt.Contains(pt))

@@ -13,14 +13,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
     {
         public static List<List<Point3dEx>> Get(FireHydrantSystemIn fireHydrantSysIn)
         {
-            var mainPathList = new List<List<Point3dEx>>();//主环路最终路径
-            var visited = new HashSet<Point3dEx>();//访问标志
-            var extraNodes = new List<Point3dEx>();//主环路连通阀点集
-            var tempPath = new List<Point3dEx>();//主环路临时路径
+            var mainPathList = new List<List<Point3dEx>>();
+            var visited = new HashSet<Point3dEx>();
+            var extraNodes = new List<Point3dEx>();
+            var tempPath = new List<Point3dEx>();
             visited.Add(fireHydrantSysIn.StartEndPts[0]);
             tempPath.Add(fireHydrantSysIn.StartEndPts[0]);
-            //主环路深度搜索
-            var mainLoopFlag = DepthFirstSearch.dfsMainLoop(fireHydrantSysIn.StartEndPts[0], fireHydrantSysIn.StartEndPts[1], tempPath, visited,
+            DepthFirstSearch.DfsMainLoop(fireHydrantSysIn.StartEndPts[0], fireHydrantSysIn.StartEndPts[1], tempPath, visited,
                 ref mainPathList, fireHydrantSysIn, ref extraNodes);
             ThPointCountService.SetPointType(ref fireHydrantSysIn, mainPathList);
 
@@ -40,8 +39,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
                 var endPt = throughPts[1];
                 visited.Add(startPt);
                 tempPath.Add(startPt);
-                //主环路深度搜索
-                var mainLoopFlag = DepthFirstSearch.dfsMainLoop(startPt, endPt, tempPath, visited,
+                DepthFirstSearch.DfsMainLoop(startPt, endPt, tempPath, visited,
                     ref mainPathList, fireHydrantSysIn, ref extraNodes);
                 ThPointCountService.SetPointType(ref fireHydrantSysIn, mainPathList);
             }

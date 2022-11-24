@@ -9,8 +9,6 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using ThMEPWSS.UndergroundSpraySystem.General;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
@@ -57,13 +55,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 var dbObjs3 = spatialIndex3.SelectCrossingPolygon(selectArea);
 
                 dbObjs1.Cast<Entity>().ForEach(e => ExplodeTchPipe(e));
-
                 dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(map[e as Polyline]));
-
                 dbObjs3.Cast<Entity>().ForEach(e => ExplodeBlock(e));
                 
                 sprayIn.Verticals = GetVerticals();
-                Draw.Verticals(sprayIn.Verticals);
             }
         }
 
@@ -72,7 +67,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             var rst1 = layer.Contains("W-FRPT") && layer.Contains("SPRL-EQPM");
             var rst2 = layer.Contains("W-FRPT") && layer.Contains("XTG");
             var rst3 = layer.Contains("W-FRPT") && layer.Contains("EXT");
-            return rst1 || rst2 || rst3;
+            var rst4 = layer=="W-FRPT-SPRL-VPIPE";
+            return rst1 || rst2 || rst3 || rst4;
         }
 
         private bool IsCircleLayer(string layer)

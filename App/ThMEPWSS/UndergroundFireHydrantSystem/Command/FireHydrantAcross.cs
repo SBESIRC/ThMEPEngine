@@ -1,9 +1,8 @@
-﻿using System;
+﻿using Linq2Acad;
+using System;
 using System.Collections.Generic;
-using ThMEPWSS.UndergroundFireHydrantSystem.Model;
-using Linq2Acad;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
-using System.Linq;
+using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Command
@@ -13,20 +12,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Command
         public static bool Cmd(AcadDatabase curDb, FireHydrantSystemIn fireHydrantSysIn, FireHydrantSystemOut fireHydrantSysOut,
             double pipeLen1, int subPathLsCnt)
         {
-            var mainPathList = MainLoop.GetAcross(fireHydrantSysIn);//主环提取
+            var mainPathList = MainLoop.GetAcross(fireHydrantSysIn);
             if (mainPathList.Count == 0)
             {
                 return false;
             }
 
-            var subPathList = SubLoop.Get(fireHydrantSysIn, mainPathList);//支环提取
+            var subPathList = SubLoop.Get(fireHydrantSysIn, mainPathList);
 
-            var visited = new HashSet<Point3dEx>();//访问标志
+            var visited = new HashSet<Point3dEx>();
             visited.AddVisit(mainPathList);
             visited.AddVisit(subPathList);
 
-            var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 端点
-            var ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 阀门点
+            var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();
+            var ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited);
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, subPathList, fireHydrantSysIn, visited);
 
@@ -35,12 +34,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Command
             checkPipe.DrawSubLoop(curDb);
             checkPipe.DrawBranchLoop(curDb, fireHydrantSysIn, branchDic);
 
-            double pepeLen2 = GetFireHydrantPipe.GetMainLoop(fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic, true);//主环路获取
-            GetFireHydrantPipe.GetSubLoop(fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic, true, subPathLsCnt);//次环路获取
-            GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
+            double pepeLen2 = GetFireHydrantPipe.GetMainLoop(fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic, true);
+            GetFireHydrantPipe.GetSubLoop(fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic, true, subPathLsCnt);
+            GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);
 
             double pipeLen = Math.Max(pipeLen1, pepeLen2) + 3000;
-            ThMEPWSS.UndergroundSpraySystem.Service.StoreyLine.Get(fireHydrantSysIn, fireHydrantSysOut, pipeLen);
+            UndergroundSpraySystem.Service.StoreyLine.Get(fireHydrantSysIn, fireHydrantSysOut, pipeLen);
             return true;
         }
     }

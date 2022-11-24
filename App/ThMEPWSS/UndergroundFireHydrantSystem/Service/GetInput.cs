@@ -1,18 +1,12 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Forms;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.General;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -36,11 +30,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
             var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
             PipeLine.AddPipeLine(dbObjs, fireHydrantSysIn, pointList, lineList);
-         
-            //if (PipeLine.HasSitong(fireHydrantSysIn))
-            //{
-            //    return false;
-            //}
 
             var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
             markEngine.Extract(acadDatabase.Database, selectArea);
@@ -73,7 +62,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             var valveEngine = new ThExtractValveService();//提取阀
             var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
-            var valveList = new List<Line>();
 
             var gateValveEngine = new ThExtractGateValveService();//提取闸阀
             var gateValveDB = gateValveEngine.Extract(acadDatabase.Database, selectArea);
@@ -82,7 +70,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var casingEngine = new ThExtractCasing();//提取套管
             var casingPts = casingEngine.Extract(acadDatabase.Database, selectArea);
 
-            PipeLine.AddValveLine(valveDB, fireHydrantSysIn, lineList, valveList, casingPts);
+            PipeLine.AddValveLine(valveDB, fireHydrantSysIn, lineList, casingPts);
             
             var nodeEngine = new ThExtractNodeTag();//提取消火栓环管节点标记
             nodeEngine.Extract(acadDatabase.Database, selectArea);
@@ -90,17 +78,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             
             PtDic.CreatePtDic(fireHydrantSysIn, lineList);//字典对更新
             
-            //double textWidth = 1300;
-            string textModel = "";
             var textEngine = new ThExtractLabelText();//提取文字
             var textCollection = textEngine.Extract(acadDatabase.Database, selectArea);
             
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
-            var dbText = ThTextSet.ThText(new Point3d(), textModel);
-            //if(dbText.TextString.Trim().Count()!=0)
-            //{
-            //    textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
-            //}
             
             var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线
             DNLineEngine.Extract(acadDatabase.Database, selectArea);
@@ -175,11 +156,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                         fireHydrantSysIn.ThroughPt.AddItem(pt1);
                         fireHydrantSysIn.ThroughPt.AddItem(pt2);
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
-                        {
-                            Draw.ThroughPt(currentDb, pt1);
-                            Draw.ThroughPt(currentDb, pt2);
-                        }
+     
 
                         usedPt.Add(pt1);
                         usedPt.Add(pt2);
@@ -192,7 +169,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 if (fireHydrantSysIn.TermPointDic.ContainsKey(pt))
                 {
-                    fireHydrantSysIn.TermPointDic[pt].Type = 5;
+                    fireHydrantSysIn.TermPointDic[pt].Type = TptType.CrossStorey;
                 }
             }
         }

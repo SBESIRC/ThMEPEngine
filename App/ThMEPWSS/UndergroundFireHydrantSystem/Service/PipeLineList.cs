@@ -1,20 +1,17 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.General;
-using ThMEPWSS.UndergroundFireHydrantSystem;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -33,7 +30,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
 
             var GLineConnectList = GeoFac.AutoConn(GLineSegList, 880, 1).ToList();//打断部分 自动连接
-            for(int i =GLineConnectList.Count()-1;i>=0;i--)
+            for (int i = GLineConnectList.Count() - 1; i >= 0; i--)
             {
                 var gl = GLineConnectList[i];
                 var pt1 = new Point3d(gl.StartPoint.X, gl.StartPoint.Y, 0);
@@ -46,67 +43,29 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     GLineConnectList.RemoveAt(i);
             }
 
-            //var GLineConnectList2 = GeoFac.AutoConn(GLineSegList, 20, 30);//打断部分 自动连接
             foreach (var gl in GLineConnectList)
             {
-                try
+                var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
+                var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+                if (pt1.DistanceToEx(pt2) > 1000 || pt1.DistanceToEx(pt2) < 1)
                 {
-                    var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
-                    var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
-                    if (pt1.DistanceToEx(pt2) > 1000 || pt1.DistanceToEx(pt2) < 1)
+                    continue;
+                }
+                if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
+                {
+                    if (fireHydrantSysIn.PtDic[pt1].Count >= 2 || fireHydrantSysIn.PtDic[pt2].Count >= 2)
                     {
                         continue;
                     }
-                    if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
-                    {
-                        if (fireHydrantSysIn.PtDic[pt1].Count >= 2 || fireHydrantSysIn.PtDic[pt2].Count >= 2)
-                        {
-                            continue;
-                        }
-                    }
+                }
 
-                    var line = new Line(pt1._pt, pt2._pt);
-                    lineList.Add(line);
-                }
-                catch
-                {
-                    ;
-                }
-                
+                var line = new Line(pt1._pt, pt2._pt);
+                lineList.Add(line);
             }
-            //foreach (var gl in GLineConnectList2)
-            //{
-            //    try
-            //    {
-            //        var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
-            //        var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
-                    
-            //        if (pt1.DistanceToEx(pt2) > 20 || pt1.DistanceToEx(pt2) < 1)
-            //        {
-            //            continue;
-            //        }
-            //        if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
-            //        {
-            //            if (fireHydrantSysIn.PtDic[pt1].Count >= 2 || fireHydrantSysIn.PtDic[pt2].Count >= 2)
-            //            {
-            //                continue;
-            //            }
-            //        }
-
-            //        var line = new Line(pt1._pt, pt2._pt);
-            //        lineList.Add(line);
-            //    }
-            //    catch
-            //    {
-            //        ;
-            //    }
-
-            //}
-            //lineList = CleanLaneLines3(lineList);
         }
 
         public static void PipeLineAutoConnect(ref List<Line> lineList)
-         {
+        {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
             lineList = CleanLaneLines3(lineList);
             foreach (var l in lineList)
@@ -115,7 +74,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 GLineSegList.Add(GLineSeg);
             }
 
-            var GLineConnectList = GeoFac.AutoConn(GLineSegList,  1000, 1);//打断部分 自动连接
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1000, 1);//打断部分 自动连接
 
             foreach (var l in GLineConnectList)
             {
@@ -137,7 +96,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             foreach (var line in lineList.ToArray())//删除两个点都是端点的线段
             {
-                if(line.Length>200)
+                if (line.Length > 200)
                 {
                     if (PtInPtList.PtIsTermLine(line, hydrantPosition))
                     {
@@ -157,9 +116,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var sePts = fireHydrantSysIn.StartEndPts;
             foreach (var ver in fireHydrantSysIn.VerticalPosition)
             {
-                foreach(var sept in sePts)
+                foreach (var sept in sePts)
                 {
-                    if(ver.DistanceToEx(sept)< 120)
+                    if (ver.DistanceToEx(sept) < 120)
                     {
                         continue;//到起始终止点距离小于tor的立管直接删除
                     }
@@ -182,22 +141,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     if (cl.Length > 1.0 && cl.Length < 120)
                     {
                         lineList.Add(cl);
-#if DEBUG
-                        //using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        //{
-                        //    var layerNames = "立管和支管的单链接线";
-                        //    if (!acadDatabase.Layers.Contains(layerNames))
-                        //    {
-                        //        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
-                        //    }
-                        //    cl.LayerId = DbHelper.GetLayerId(layerNames);
-                        //    cl.ColorIndex = (int)ColorIndex.Red;
-                        //    acadDatabase.CurrentSpace.Add(cl);
-
-                        //}
-#endif
                     }
-
                 }
             }
 
@@ -207,21 +151,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public static void ConnectClosedPt(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
         {
             var pts = new List<Point3dEx>();
-            foreach(var pt in fireHydrantSysIn.PtDic.Keys)
+            foreach (var pt in fireHydrantSysIn.PtDic.Keys)
             {
-                if(fireHydrantSysIn.PtDic[pt].Count == 1)
+                if (fireHydrantSysIn.PtDic[pt].Count == 1)
                 {
                     pts.Add(pt);
                 }
             }
             var usedPts = new HashSet<int>();
-            for(int i = 0; i < pts.Count - 1; i++)
+            for (int i = 0; i < pts.Count - 1; i++)
             {
-                if(usedPts.Contains(i))
+                if (usedPts.Contains(i))
                 {
                     continue;
                 }
-                for(int j = i + 1; j < pts.Count; j++)
+                for (int j = i + 1; j < pts.Count; j++)
                 {
                     if (usedPts.Contains(j))
                     {
@@ -238,20 +182,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
             var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
-            for(int i = 0; i < pts.Count; i++)
+            for (int i = 0; i < pts.Count; i++)
             {
+                if (usedPts.Contains(i)) continue;
                 
-                if(usedPts.Contains(i))
-                {
-                    continue;
-                }
                 var pt = pts[i];
                 var rect = pt._pt.GetRect(10);
                 var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
-                var line = GetNeighborLine(rst,pt._pt, out Point3d closedPt);
-                if(line is not null)
+                var line = GetNeighborLine(rst, pt._pt, out Point3d closedPt);
+                if (line is not null)
                 {
-                    //var closedPt = line.GetClosestPointTo(pt._pt, false);
                     lineList.Remove(line);
                     lineList.Add(new Line(closedPt, pt._pt));
                     lineList.Add(new Line(line.StartPoint, closedPt));
@@ -262,12 +202,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
         private static Line GetNeighborLine(DBObjectCollection objs, Point3d pt, out Point3d closedPt)
         {
-            foreach(var obj in objs)
+            foreach (var obj in objs)
             {
                 var line = obj as Line;
                 closedPt = line.GetClosestPointTo(pt, false);
                 var dist = closedPt.DistanceTo(pt);
-                if(dist<10 && dist >1)
+                if (dist < 10 && dist > 1)
                 {
                     return line;
                 }
@@ -375,8 +315,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
 
                 if (alreadyContains) continue;
-                
-                var colinerSegs = lineSegs.Where(l =>l.IsParallelTo(tmpLineSeg,new Tolerance(0.001,0.001))).ToHashSet();
+
+                var colinerSegs = lineSegs.Where(l => l.IsParallelTo(tmpLineSeg, new Tolerance(0.001, 0.001))).ToHashSet();
                 lineSegGroups.Add(colinerSegs);
                 lineSegs = lineSegs.Except(colinerSegs).ToList();
             }
@@ -392,7 +332,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         private static List<Line> MergeGroupLines(HashSet<LineSegment2d> lineGroup)
         {
             var rstLines = new List<Line>();
-            while(lineGroup.Count != 0)
+            while (lineGroup.Count != 0)
             {
                 var l = lineGroup.First();
                 lineGroup.Remove(l);
@@ -406,7 +346,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             Line rstLine = new Line();
 
-            MergeLineEx(ref l,ref lineGroup);
+            MergeLineEx(ref l, ref lineGroup);
             rstLine.StartPoint = l.StartPoint.ToPoint3d();
             rstLine.EndPoint = l.EndPoint.ToPoint3d();
             return rstLine;
@@ -433,12 +373,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        private static HashSet<LineSegment2d> IsOverlapLine( LineSegment2d line,  HashSet<LineSegment2d> lineGroup)
+        private static HashSet<LineSegment2d> IsOverlapLine(LineSegment2d line, HashSet<LineSegment2d> lineGroup)
         {
             HashSet<LineSegment2d> overlapLine = new HashSet<LineSegment2d>();
-            foreach(var l in lineGroup)
+            foreach (var l in lineGroup)
             {
-                if(IsOverlapLine(line,l))
+                if (IsOverlapLine(line, l))
                 {
                     overlapLine.Add(l);
                 }
@@ -449,7 +389,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
         private static bool IsOverlapLine(LineSegment2d firLine, LineSegment2d secLine)
         {
-            var overlapedSeg = firLine.Overlap(secLine,new Tolerance(0.01,0.01));
+            var overlapedSeg = firLine.Overlap(secLine, new Tolerance(0.01, 0.01));
             if (overlapedSeg != null)
             {
                 return true;
@@ -462,7 +402,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 ptSet.Add(new Point3dEx(firLine.EndPoint.X, firLine.EndPoint.Y, 0.0, tol));
                 ptSet.Add(new Point3dEx(secLine.StartPoint.X, secLine.StartPoint.Y, 0.0, tol));
                 ptSet.Add(new Point3dEx(secLine.EndPoint.X, secLine.EndPoint.Y, 0.0, tol));
-                if(ptSet.Count() == 3)
+                if (ptSet.Count() == 3)
                 {
                     return true;
                 }
@@ -475,7 +415,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             List<Point3d> pts = new List<Point3d>();
             pts.Add(line.StartPoint.ToPoint3d());
             pts.Add(line.EndPoint.ToPoint3d());
-            foreach(var l in overlapLines)
+            foreach (var l in overlapLines)
             {
                 pts.Add(l.StartPoint.ToPoint3d());
                 pts.Add(l.EndPoint.ToPoint3d());

@@ -8,11 +8,11 @@ using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
-using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
@@ -21,12 +21,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         public static void CreateTermPt(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
             bool acrossFloor = false)
         {
-            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(sprayIn.LeadLines.ToCollection());
-
             foreach (var pt in sprayIn.PtDic.Keys)
             {
-                if (pt._pt.DistanceTo(new Point3d(339464.9, 655739.4,0)) < 10)
-                    ;
                 bool flag = false;
                 if (sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                 {
@@ -58,10 +54,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 if (!sprayIn.TermPtTypeDic.ContainsKey(pt))
                                 {
                                     sprayIn.TermPtTypeDic.Add(pt, sprayIn.TermPtTypeDic[v]);
-                                }
-                                else
-                                {
-                                    ;
                                 }
                             }
                             if (sprayIn.TermPtDic.ContainsKey(v))
@@ -96,8 +88,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         public static void CreateTermPt(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex, 
             ThCADCoreNTSSpatialIndex flowSpatialIndex, bool acrossFloor = false)
         {
-            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(sprayIn.LeadLines.ToCollection());
-
             foreach (var pt in sprayIn.PtDic.Keys)
             {
                 bool flag = false;
@@ -132,10 +122,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 {
                                     sprayIn.TermPtTypeDic.Add(pt, sprayIn.TermPtTypeDic[v]);
                                 }
-                                else
-                                {
-                                    ;
-                                }
                             }
                             if (sprayIn.TermPtDic.ContainsKey(v))
                             {
@@ -156,7 +142,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     var rst = flowSpatialIndex.SelectCrossingPolygon(pt._pt.GetRect(200));
                     if(rst.Count>0)
                     {
-                        var rect = rst[0] as Polyline;
                         tpt.Type = 1;
                         tpt.SetLines(sprayIn);
                         tpt.SetPipeNumber(textSpatialIndex);
@@ -166,7 +151,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         tpt.SetLines(sprayIn);
                         tpt.SetPipeNumber(textSpatialIndex);
                         tpt.SetType(sprayIn, acrossFloor);
-
                     }
 
                     
@@ -206,8 +190,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     var tpt = new TermPoint2(new Point3dEx(leadPt));
                     tpt.SetLines(sprayIn);
                     tpt.SetPipeNumber(textSpatialIndex);
-                    if (tpt.PipeNumber.Equals(""))
-                        ;
                     tpt.SetType(sprayIn);
                     var strs = new List<string>() { tpt.PipeNumber, tpt.PipeNumber2 };
                     sprayIn.PtTextDic?.Remove(pt);
@@ -218,7 +200,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     sprayIn.TermPtDic.Add(pt, tpt);
                 }
             }
-            ;
         }
 
         private static Point3d GetLeadLineSpt(List<Point3dEx> flowPts, Point3dEx pt, SprayIn sprayIn)
@@ -237,14 +218,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         var leadline = rst2[0] as Line;
                         var spt = leadline.StartPoint;
                         var ept = leadline.EndPoint;
-                        if (spt.DistanceTo(fpt) < ept.DistanceTo(fpt))
-                        {
-                            return spt;
-                        }
-                        else
-                        {
-                            return ept;
-                        }
+                        return spt.DistanceTo(fpt) < ept.DistanceTo(fpt) ? spt : ept;
                     }
                     else
                     {
@@ -253,14 +227,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         var leadline = rst[0] as Line;
                         var spt = leadline.StartPoint;
                         var ept = leadline.EndPoint;
-                        if (spt.DistanceTo(fpt) < ept.DistanceTo(fpt))
-                        {
-                            return spt;
-                        }
-                        else
-                        {
-                            return ept;
-                        }
+                        return spt.DistanceTo(fpt) < ept.DistanceTo(fpt) ? spt : ept;
                     }
                     
                 }
@@ -272,65 +239,20 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         public static void CreateTermPtDicWithAcrossFloor(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
             ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
-            //var dbPts = new List<DBPoint>();
-            //sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
-            //var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
             foreach (var vpt in sprayIn.Verticals.Keys)
             {
-                GetCollectiveLabelDic(vpt, null, ref sprayIn, textSpatialIndex, pipeDNSpatialIndex, true);
-            }
-            foreach (var pt in sprayIn.PtDic.Keys)
-            {
-                GetNoVerticalLabelDic(pt, ref sprayIn);
+                GetCollectiveLabelDic(vpt, sprayIn, textSpatialIndex, pipeDNSpatialIndex, true);
             }
         }
 
 
-        public static void CreateTermPtDic(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
-            ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
-        {
-            var dbPts = new List<DBPoint>();
-            sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
-            var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
-            foreach (var pt in sprayIn.Verticals.Keys)
-            {
-                if (sprayIn.PtDic.ContainsKey(pt))
-                {
-                    if (sprayIn.PtDic[pt].Count > 1)
-                    {
-                        continue;
-                    }
-                }
-                var rect = pt._pt.GetRect(150);//
-                var leadLineSpatialIndex = new ThCADCoreNTSSpatialIndex(sprayIn.LeadLines.ToCollection());
-                if (leadLineSpatialIndex.SelectCrossingPolygon(rect).Count == 0)
-                {
-                    continue;
-                }
-                GetCollectiveLabelDic(pt, dbPtSpatialIndex, ref sprayIn, textSpatialIndex, pipeDNSpatialIndex);
-            }
-            foreach (var pt in sprayIn.PtDic.Keys)
-            {
-                GetNoVerticalLabelDic(pt, ref sprayIn);
-            }
-        }
-
-        public static void GetCollectiveLabelDic(Point3dEx vpt, ThCADCoreNTSSpatialIndex dbPtSpatialIndex, ref SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
+      
+        public static void GetCollectiveLabelDic(Point3dEx vpt, SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex,
             ThCADCoreNTSSpatialIndex pipeDNSpatialIndex, bool acrossFloor = false)
         {
-            //var ptex = GetClosedPt(vpt, dbPtSpatialIndex);
-            //if(ptex.Equals(new Point3dEx()))
-            //{
-            //    return;
-            //}
-            //集体标注处理
             if (sprayIn.PtTextDic.ContainsKey(vpt))
             {
-                if (sprayIn.PtTextDic[vpt].First() is null || sprayIn.PtTextDic[vpt].First().Equals(""))
-                {
-                    ;
-                }
-                else
+                if (sprayIn.PtTextDic[vpt].First() != null && !sprayIn.PtTextDic[vpt].First().Equals(""))
                 {
                     return;
                 }
@@ -344,13 +266,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 tpt.SetType(sprayIn, acrossFloor);
                 var strs = new List<string>() { tpt.PipeNumber, tpt.PipeNumber2 };
      
-                if(sprayIn.PtTextDic.ContainsKey(vpt))
-                {
-                    ;
-
-                }
-
-                else
+                if(!sprayIn.PtTextDic.ContainsKey(vpt))
                 {
                     sprayIn.PtTextDic.Add(vpt, strs);
                     sprayIn.TermPtTypeDic.Add(vpt, tpt.Type);
@@ -362,11 +278,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 var tpt = new TermPoint2(pt2);
                 tpt.PipeNumber = OriginTermStartPtDic[pt2].TextString;
                 tpt.SetType(sprayIn, acrossFloor);
-                if (sprayIn.PtTextDic.ContainsKey(pt2))
-                {
-                    ;
-                }
-                else
+                if (!sprayIn.PtTextDic.ContainsKey(pt2))
                 {
                     sprayIn.PtTextDic.Add(pt2, new List<string>() { tpt.PipeNumber, tpt.PipeNumber2 });
                     sprayIn.TermPtTypeDic.Add(pt2, tpt.Type);
@@ -375,19 +287,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
-        public static void GetNoVerticalLabelDic(Point3dEx pt, ref SprayIn sprayIn)
-        {
-            //无立管标注的处理
-            //ToDo
-        }
-
         private static Dictionary<Point3dEx, DBText> GetOriginTermStartPtEx(SprayIn sprayIn, Point3dEx termPtEx,
             ThCADCoreNTSSpatialIndex textIndex, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
             var verPipeCenters = sprayIn.Verticals;
             var verPipeBounds = verPipeCenters.Keys.Select(c =>
             {
-                Polyline pl = CreatePolyline(c);
+                Polyline pl = c._pt.GetRect(50);
                 return pl;
             }
             );
@@ -409,7 +315,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             //get terminal origin point
             var termStartPtEx = new Point3dEx(Point3d.Origin);
-            var termPtPolyline = CreatePolyline(termPtEx, 100);
+            var termPtPolyline = termPtEx._pt.GetRect(100);
             var selected = verPipeBoundSpatialIndex.SelectCrossingPolygon(termPtPolyline);
 
             if (selected.Count > 0)
@@ -427,14 +333,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     {
                         var curPt = q.Dequeue();
                         visited2.Add(curPt);
-                        var curPtBounds2 = CreatePolyline(new Point3dEx(curPt));
+                        var curPtBounds2 = curPt.GetRect(50);
                         var selectedLines = leaderLineSpatialIndex.SelectCrossingPolygon(curPtBounds2);
 
                         if (selectedLines.Count == 1)
                         {
                             curLine = selectedLines[0] as Line;
                             var ptEx = new Point3dEx(curLine.StartPoint);
-                            termPtPolyline = CreatePolyline(ptEx, 120);
+                            termPtPolyline = ptEx._pt.GetRect(120);
                             selected = verPipeBoundSpatialIndex.SelectCrossingPolygon(termPtPolyline);
                             if (selected.Count == 1)
                             {
@@ -443,7 +349,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                             }
 
                             ptEx = new Point3dEx(curLine.EndPoint);
-                            termPtPolyline = CreatePolyline(ptEx, 120);
+                            termPtPolyline = ptEx._pt.GetRect(120);
                             selected = verPipeBoundSpatialIndex.SelectCrossingPolygon(termPtPolyline);
                             if (selected.Count == 1)
                             {
@@ -458,7 +364,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         }
                         else
                         {
-                            var adjs = new List<Point3d>();
                             foreach (var l in selectedLines)
                             {
                                 curLine = l as Line;
@@ -482,7 +387,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             var rstText2PipeBoundDic = new Dictionary<Point3dEx, DBText>();
 
             //map vertical pipe point to text
-            var originPtExBounds = CreatePolyline(termStartPtEx);
+            var originPtExBounds = termStartPtEx._pt.GetRect();
             var selectedLeaderLines = leaderLineSpatialIndex.SelectCrossingPolygon(originPtExBounds);
 
             if (selectedLeaderLines.Count == 1)
@@ -596,18 +501,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
             return rstText2PipeBoundDic;
         }
-        private static Polyline CreatePolyline(Point3dEx c, int tolerance = 50)
-        {
-            var pl = new Polyline();
-            var pts = new Point2dCollection();
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y - tolerance)); // low left
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y + tolerance)); // high left
-            pts.Add(new Point2d(c._pt.X + tolerance, c._pt.Y + tolerance)); // high right
-            pts.Add(new Point2d(c._pt.X + tolerance, c._pt.Y - tolerance)); // low right
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y - tolerance)); // low left
-            pl.CreatePolyline(pts);
-            return pl;
-        }
+
 
         private static Polyline CreateLineHalfBuffer(Line line, int tolerance = 50)
         {
