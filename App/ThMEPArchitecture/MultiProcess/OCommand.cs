@@ -113,8 +113,8 @@ namespace ThMEPArchitecture.MultiProcess
                         {
                             saveDoc = false;
                             //RunDirect(currentDb);
-                            FireZoneTest2(currentDb);
-                            //FireZoneTest3(currentDb);
+                            //FireZoneTest2(currentDb);
+                            FireZoneTest3(currentDb);
                         }
                         else if (ParameterViewModel.CommandType == CommandTypeEnum.RunWithIteration)
                         {
@@ -218,7 +218,7 @@ namespace ThMEPArchitecture.MultiProcess
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
                     var creator = new FireLineCreator(blk, Logger);
-                    creator.Skeletons.ForEach(l => l.ToDbLine().AddToCurrentSpace());
+                    var result = creator.Generate();
                 }
             }
         }

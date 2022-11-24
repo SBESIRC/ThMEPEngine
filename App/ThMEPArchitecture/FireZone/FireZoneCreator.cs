@@ -54,7 +54,7 @@ namespace ThMEPArchitecture.FireZone
         }
         private void _UpdateBounds()
         {
-            var buildingtol = 2000;
+            var buildingtol = 3000;
             var buffered = new MultiPolygon(Obstacles.ToArray()).Buffer(buildingtol, MitreParam).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
             BuildingBounds = new MultiPolygon(buffered.ToArray()).Buffer(-buildingtol + 10, MitreParam).Get<Polygon>(true);
         }

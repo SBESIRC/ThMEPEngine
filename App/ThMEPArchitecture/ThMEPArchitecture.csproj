@@ -27,9 +27,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreateAllSeglinesCmd.cs" />
+    <Compile Include="FireZone\CarWallLineCreator.cs" />
     <Compile Include="FireZone\FireLineCreator.cs" />
+    <Compile Include="FireZone\FireLineGenerator.cs" />
     <Compile Include="FireZone\FireZoneCreator.cs" />
     <Compile Include="FireZone\ShearWallLineCreator.cs" />
+    <Compile Include="FireZone\ShutterLineCreator.cs" />
     <Compile Include="MultiProcess\MPCommand.cs" />
     <Compile Include="MultiProcess\Converter.cs" />
     <Compile Include="MultiProcess\OCommand.cs" />

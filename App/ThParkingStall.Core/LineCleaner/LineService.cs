@@ -45,9 +45,9 @@ namespace ThParkingStall.Core.LineCleaner
         public List<LineSegment> MergeParalle(List<LineSegment> inputLines)//把平行（角度小于delta）且相交(距离小于tol）的线合并
         {
             var groups = GroupByParalle(inputLines);
-            return groups.Select(g => inputLines.Slice(g).Merge()).ToList();
+            return groups.Select(g => inputLines.Slice(g).MergeParalle()).ToList();
         }
-        private List<List<int>> GroupByParalle(List<LineSegment> lines)//把所有平行且距离小于tol的线基于idx分组
+        public List<List<int>> GroupByParalle(List<LineSegment> lines)//把所有平行且距离小于tol的线基于idx分组
         {
             var LineIdxEngine = new STRtree<int>();
             var envelops = new List<Envelope>();
