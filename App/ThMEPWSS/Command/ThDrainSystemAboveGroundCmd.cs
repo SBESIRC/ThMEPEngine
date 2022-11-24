@@ -249,7 +249,7 @@ namespace ThMEPWSS.Command
                                 continue;
                             if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId))
                             {
-                                item.tag = "FL";
+                                item.tag = "FyL";
                                 item.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;
                             }
                         }
@@ -379,10 +379,11 @@ namespace ThMEPWSS.Command
                 ConvertToTCHSymbMultiLeader(ref createBasicElems, ref createTextElems, ref symbMultiLeaders);
                 createBasicElems = createBasicElems.Where(c => !notCreateLineIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
                 createTextElems = createTextElems.Where(c => !notCreateTextIds.Any(x => x == c.uid))/*.Where(e => !e.ConvertToTCHElement)*/.ToList();
+                createBlockInfos = createBlockInfos.Except(pipeElems).ToList();
                 ConvertCoordinateToWCS(ref createBlockInfos, ref createBasicElems, ref createTextElems, Active.Editor.UCS2WCS());
-                //var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
-                //var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
-                //var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
+                var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
+                var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
+                var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
                 ConvertTCHPipeToWCS(ref verPipes, Active.Editor.UCS2WCS());
                 ConvertSymbMultiLeadersToWCS(ref symbMultiLeaders, Active.Editor.UCS2WCS());
                 tchPipeService.InitPipe(verPipes);
