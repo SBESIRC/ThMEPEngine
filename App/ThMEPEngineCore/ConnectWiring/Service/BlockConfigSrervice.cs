@@ -74,7 +74,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service
 
             DataTable table = dataSet.Tables[tableName];
             List<BlockConfigModel> blockModels = new List<BlockConfigModel>();
-            for (int i = 1; i < table.Rows.Count; i++)
+            for (int i = 0; i < table.Rows.Count; i++)
             {
                 DataRow dataRow = table.Rows[i];
                 BlockConfigModel model = new BlockConfigModel();
