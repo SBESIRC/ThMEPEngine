@@ -149,6 +149,7 @@ namespace ThPlatform3D.StructPlane.Print
             hatchPairs.ForEach(h =>
             {
                 results.Add(h.Item2);
+                h.Item2.Layer = h.Item1.LayerName;
                 var rectId = acadDb.ModelSpace.Add(h.Item2);
                 var objIds = new ObjectIdCollection { rectId };
                 var hatchId = objIds.Print(acadDb.Database, h.Item1);

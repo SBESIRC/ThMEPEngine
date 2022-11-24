@@ -48,6 +48,55 @@ namespace ThPlatform3D.StructPlane.Print
             return results;
         }
 
+        public static bool IsSlabEdge(Entity entity)
+        {
+            if(entity is Polyline || entity is MPolygon)
+            {
+                return entity.Layer == ThPrintLayerManager.SlabLayerName;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool IsSlabHatch(Entity entity)
+        {
+            if (entity is Hatch)
+            {
+                return entity.Layer == ThPrintLayerManager.SlabHatchLayerName;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool IsSlabTableEntity(Entity entity)
+        {
+            if (entity is BlockReference br)
+            {
+                return br.GetEffectiveName() == "S-demo-H2" &&
+                    br.Layer == ThPrintLayerManager.SlabPatternTableTextLayerName;
+            }
+            else if(entity is DBText)
+            {
+                return entity.Layer == ThPrintLayerManager.SlabPatternTableTextLayerName;
+            }
+            else if(entity is Hatch)
+            {
+                return entity.Layer == ThPrintLayerManager.SlabHatchLayerName;
+            }
+            else if (entity is Polyline)
+            {
+                return entity.Layer == ThPrintLayerManager.SlabHatchLayerName;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public static PrintConfig GetSlabConfig()
         {
             return new PrintConfig()

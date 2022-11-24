@@ -35,5 +35,9 @@ namespace ThPlatform3D.Common
         /// </summary>
 
         public Point3d BasePoint { get; set; } = Point3d.Origin;
+        /// <summary>
+        /// 显示楼板填充和标记
+        /// </summary>
+        public bool ShowSlabHatchAndMark { get; set; } = true;
     }
 }

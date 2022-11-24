@@ -83,6 +83,7 @@ namespace Tianhua.Platform3D.UI.Command
                 printParameter.DrawingScale = ThDrawingParameterConfig.Instance.DrawingScale;
                 printParameter.DefaultSlabThick = ThDrawingParameterConfig.Instance.DefaultSlabThick;
                 printParameter.FloorSpacing = ThDrawingParameterConfig.Instance.FloorSpacing;
+                printParameter.ShowSlabHatchAndMark = ThDrawingParameterConfig.Instance.ShowSlabHatchAndMark;
                 if (ThDrawingParameterConfig.Instance.IsAllStorey)
                 {
                     generator.SetStdFlrNo("");

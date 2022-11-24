@@ -55,6 +55,10 @@ namespace ThPlatform3D.StructPlane
         /// 文件格式
         /// </summary>
         public string DrawingType { get; set; } = "";
+        /// <summary>
+        /// 显示楼板填充和标记
+        /// </summary>
+        public bool ShowSlabHatchAndMark { get; set; } = true;
 
         /// <summary>
         /// 获取

@@ -404,14 +404,24 @@ namespace ThPlatform3D.StructPlane
                 beamMarkGeos.Select(o => o.Boundary).ToCollection());
             passGeos.AddRange(newBeamGeos);
 
-            // 处理空调板
-            if (PrintParameter.IsFilterCantiSlab)
+            if(PrintParameter.ShowSlabHatchAndMark)
             {
-                passGeos = ThSlabFilter.FilterCantiSlabs(passGeos);
-            }
+                // 处理空调板
+                if (PrintParameter.IsFilterCantiSlab)
+                {
+                    passGeos = ThSlabFilter.FilterCantiSlabs(passGeos);
+                }
 
-            // 过滤指定厚度的楼板标注
-            passGeos = ThSlabFilter.FilterSpecifiedThickSlabs(passGeos, PrintParameter.DefaultSlabThick);
+                // 过滤指定厚度的楼板标注
+                passGeos = ThSlabFilter.FilterSpecifiedThickSlabs(passGeos, PrintParameter.DefaultSlabThick);
+            }
+            else
+            {
+                var slabGeos = passGeos.GetSlabGeos();
+                var slabMarkGeos = passGeos.GetSlabMarks();
+                passGeos = passGeos.Except(slabGeos).ToList();
+                passGeos = passGeos.Except(slabMarkGeos).ToList();
+            }
             #endregion
 
             // 打印
