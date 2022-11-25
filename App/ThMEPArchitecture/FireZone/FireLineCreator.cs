@@ -54,6 +54,7 @@ namespace ThMEPArchitecture.FireZone
             Logger = logger;
             Extract(block);
             UpdateBasement();
+            UpdateLanes();
             Logger?.Information($"数据提取用时{_stopwatch.Elapsed.TotalSeconds - t_pre}s");
         }
         #region 输入处理
@@ -180,7 +181,10 @@ namespace ThMEPArchitecture.FireZone
             }
             if (layerName.Contains("车道"))
             {
-
+                if (ent is Line line)
+                {
+                    CAD_Lanes.Add(line);
+                }
             }
         }
         #endregion
@@ -199,6 +203,8 @@ namespace ThMEPArchitecture.FireZone
                 if (!acad.Layers.Contains("卷帘门"))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "卷帘门", 0);
             }
+            Generator.CarFireLines.ForEach(l => l.ToDbLine(1, "防火墙").AddToCurrentSpace());
+            Generator.BuildingFireLines.ForEach(l => l.ToDbLine(0, "防火墙").AddToCurrentSpace());
             Generator.FireWalls.ForEach(w => w.ToDbLine(1,"防火墙").AddToCurrentSpace());
             Generator.Shutters.ForEach(w => w.ToDbLine(5, "卷帘门").AddToCurrentSpace());
             return (fireWalls, shutters);
