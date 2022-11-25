@@ -29,6 +29,7 @@ namespace ThPlatform3D.StructPlane.Print
                 var textRes = PrintHeadText(acadDb);
                 Append(textRes.Item1);
                 Append(textRes.Item2);
+                AppendToBlockObjIds(textRes.Item2);
 
                 // 插入基点
                 var basePointId = InsertBasePoint(acadDb, _printParameter.BasePoint);

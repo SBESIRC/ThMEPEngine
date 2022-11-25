@@ -171,6 +171,7 @@ namespace ThPlatform3D.StructPlane.Print
                 var textRes = PrintHeadText(acadDb);
                 Append(textRes.Item1);
                 Append(textRes.Item2);
+                AppendToBlockObjIds(textRes.Item2);
 
                 // 打印柱表
                 var elevationTblBasePt = GetElevationBasePt(acadDb);
