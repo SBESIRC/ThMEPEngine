@@ -202,11 +202,28 @@ namespace ThMEPArchitecture.FireZone
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "防火墙", 0);
                 if (!acad.Layers.Contains("卷帘门"))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "卷帘门", 0);
+                if (!acad.Layers.Contains("发射点0"))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "发射点0", 0);
+                if (!acad.Layers.Contains("发射点1"))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "发射点1", 0);
+                if (!acad.Layers.Contains("发射点2"))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "发射点2", 0);
+                if (!acad.Layers.Contains("发射点3"))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "发射点3", 0);
             }
             Generator.CarFireLines.ForEach(l => l.ToDbLine(1, "防火墙").AddToCurrentSpace());
             Generator.BuildingFireLines.ForEach(l => l.ToDbLine(0, "防火墙").AddToCurrentSpace());
             Generator.FireWalls.ForEach(w => w.ToDbLine(1,"防火墙").AddToCurrentSpace());
             Generator.Shutters.ForEach(w => w.ToDbLine(5, "卷帘门").AddToCurrentSpace());
+
+            Generator.StartPoints.Where(pt => pt.Directions.Count() == 0).
+                ForEach(pt => pt.StartPoint.MarkPoint(2000, "发射点0",0));
+            Generator.StartPoints.Where(pt => pt.Directions.Count() == 1).
+                ForEach(pt => pt.StartPoint.MarkPoint(2000, "发射点1", 1));
+            Generator.StartPoints.Where(pt => pt.Directions.Count() == 2).
+                ForEach(pt => pt.StartPoint.MarkPoint(2000, "发射点2", 2));
+            Generator.StartPoints.Where(pt => pt.Directions.Count() == 3).
+                ForEach(pt => pt.StartPoint.MarkPoint(2000, "发射点3", 3));
             return (fireWalls, shutters);
         }
         #endregion

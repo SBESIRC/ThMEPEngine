@@ -758,7 +758,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                 lineSeg.P1.MarkPoint(Radius, LayerName);
             }
         }
-        public static void MarkPoint(this Coordinate coor, double Radius = 5000, string LayerName = "AI-提示")
+        public static void MarkPoint(this Coordinate coor, double Radius = 5000, string LayerName = "AI-提示",int colorIdx = 2)
         {
             using (AcadDatabase acad = AcadDatabase.Active())
             {
@@ -766,7 +766,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.PreProcess
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, LayerName, 1);
                 var circle = GetCADCircle(coor.GetCADPoint3d(), Radius);
                 circle.Layer = LayerName;
-                circle.ColorIndex = 2;
+                circle.ColorIndex = colorIdx;
                 circle.AddToCurrentSpace();
             }
         }

@@ -31,6 +31,7 @@ namespace ThMEPArchitecture.FireZone
         public Polygon Basement;//地库
         private STRtree<int> ObstacleEngine = new STRtree<int>();// 障碍物空间索引
         private STRtree<LineSegment> WallLineEngine = new STRtree<LineSegment>();//边界线空间索引
+        private STRtree<LineSegment> BasementEngine = new STRtree<LineSegment>();//地库所有线索引
         private STRtree<LineSegment> EdgeLineEngine = new STRtree<LineSegment>();//边界以及障碍物,以及车道(polygon)所有线的索引
         #endregion
 
@@ -47,6 +48,10 @@ namespace ThMEPArchitecture.FireZone
         #region 车位线相关
         //private STRtree<Polygon> LaneEngine = new STRtree<Polygon>();//车道矩形框索引
         public List<LineSegment> CarFireLines = new List<LineSegment> ();//车位防火线
+        #endregion
+
+        #region 发射线相关
+        public List<FireLineStartPoint> StartPoints = new List<FireLineStartPoint>();
         #endregion
 
         #region 辅助变量
@@ -66,7 +71,6 @@ namespace ThMEPArchitecture.FireZone
         #region 输入处理
         private void Preprocess(double tol = 75)
         {
-            
             //輸入简化
             Basement = InputBasement.Buffer(-tol, MitreParam).Union().
                 Buffer(2 * tol, MitreParam).Buffer(-tol, MitreParam).
@@ -81,13 +85,20 @@ namespace ThMEPArchitecture.FireZone
                 ObstacleLines.Add(i, lsegs);
                 ObstacleEngine.Insert(obstacle.EnvelopeInternal, i);
                 foreach (var seg in lsegs)
-                    EdgeLineEngine.Insert(new Envelope(seg.P0, seg.P1), seg);
+                {
+                    var envelop = new Envelope(seg.P0, seg.P1);
+                    EdgeLineEngine.Insert(envelop, seg);
+                    BasementEngine.Insert(envelop, seg);
+                }
+                    
             }
             var wallLines = WallLine.Shell.ToLineSegments();
             foreach(var line in wallLines)
             {
-                EdgeLineEngine.Insert(new Envelope(line.P0, line.P1), line);
-                WallLineEngine.Insert(new Envelope(line.P0, line.P1), line);
+                var envelop = new Envelope(line.P0, line.P1);
+                EdgeLineEngine.Insert(envelop, line);
+                WallLineEngine.Insert(envelop, line);
+                BasementEngine.Insert(envelop, line);
             }
             var buildingtol = 3000;
             BuildingBounds = new MultiPolygon(Obstacles.ToArray()).Buffer(buildingtol, MitreParam).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
@@ -112,6 +123,7 @@ namespace ThMEPArchitecture.FireZone
             
             CarFireLines = GenerateLinesOfCars();
             BuildingFireLines = GenerateLinesInsideBuildings();
+            StartPointsCreateFireLines();
         }
         #endregion
         #region 障碍物连线
@@ -347,6 +359,58 @@ namespace ThMEPArchitecture.FireZone
             return fireLines.SliceExcept(invaildIdxs);
         }
         #endregion
+
+        #region 端点发射线
+        public void StartPointsCreateFireLines()
+        {
+            CreateStartPoints();
+        }
+        private void CreateStartPoints()//生成端点
+        {
+            var coordinates = new HashSet<Coordinate>();
+            var carFireLineEngine = new STRtree<int>();
+            for(int i = 0;i<CarFireLines.Count;i++)
+            {
+                var line = CarFireLines[i];
+                coordinates.Add(line.P0);
+                coordinates.Add(line.P1);
+                carFireLineEngine.Insert(new Envelope(line.P0, line.P1), i);
+            }
+            foreach(var coor in coordinates)
+            {
+                var envelop = new Envelope(coor);
+                envelop.ExpandBy(5);
+                if (BasementEngine.Query(envelop).Count > 0) continue;
+                var startPt = new FireLineStartPoint(coor, CarFireLines.Slice(carFireLineEngine.Query(envelop)));
+                if(startPt.Directions.Count > 0)StartPoints.Add(startPt);
+            }
+        }
+        private LineSegment BestLineToPoints(
+            Coordinate startPt,Vector2D direction,double depth,double width, STRtree<Point> engine,double tol = 5)
+        {
+            var bottomPt = direction.Multiply(depth).Translate(startPt);
+            var p0 = direction.Multiply(width).RotateByQuarterCircle(1).Translate(bottomPt);
+            var p1 = direction.Multiply(width).RotateByQuarterCircle(-1).Translate(bottomPt);
+            var triAngle =new Polygon(new LinearRing(new Coordinate[] {p0,p1,startPt,p0}));
+            var queried = engine.Query(triAngle.EnvelopeInternal).
+                Where(pt => pt.Coordinate.Distance(startPt) > tol&& triAngle.Contains(pt)).
+                OrderBy(p =>p.Coordinate.Distance(startPt));
+            if (queried.Count() == 0) return null;
+            else return new LineSegment(startPt, queried.First().Coordinate);
+        }
+        private LineSegment BestLineToLines(
+    Coordinate startPt, Vector2D direction, double depth, STRtree<LineSegment> engine, double tol = 5)
+        {
+            var tempLine = new LineSegment(startPt,direction.Multiply(depth).Translate(startPt));
+            var envelop = new Envelope(tempLine.P0, tempLine.P1);
+            var queried = engine.Query(envelop).
+                Where(l => l.Distance(startPt) > tol).Select(l => l.Intersection(tempLine)).
+                Where(pt => pt != null).OrderBy(pt => pt.Distance(startPt));
+            if (queried.Count() == 0) return null;
+            else return new LineSegment(startPt, queried.First());
+        }
+
+        #endregion
     }
     public class SWConnection//两个障碍物(或边界 -1)之间连接关系
     {
@@ -369,6 +433,48 @@ namespace ThMEPArchitecture.FireZone
         public override int GetHashCode()
         {
             return Idx1 ^ Idx2;
+        }
+    }
+
+    public class FireLineStartPoint//防火线发射端点
+    {
+        public Coordinate StartPoint;//起始点
+        public HashSet<Vector2D> Directions = new HashSet<Vector2D>();
+        static double AngleTol = Math.PI / 3;
+        public FireLineStartPoint(Coordinate startpoint)
+        {
+            StartPoint = startpoint;
+        }
+        public FireLineStartPoint(Coordinate startpoint,IEnumerable<LineSegment> connectedLines)
+        {
+            StartPoint=startpoint;
+            if (connectedLines.Count() == 0) return;
+            var baseDir = connectedLines.OrderBy(l =>l.Length).Last().DirVector();
+            var temDirections = new List<Vector2D>(4);
+            for(int i = 0; i < 4; i++)
+            {
+                temDirections.Add(baseDir.RotateByQuarterCircle(i));
+            }
+            var vectors = new List<Vector2D>();
+            foreach (var line in connectedLines)
+            {
+                var vec0 = new Vector2D(StartPoint, line.P0);
+                var vec1 = new Vector2D(StartPoint, line.P1);
+                if(vec0.Length() > 1)vectors.Add(vec0);
+                if(vec1.Length() > 1)vectors.Add(vec1);
+            }
+            foreach(var dir in temDirections)
+            {
+                if (!vectors.Any(v => v.Angle(dir) < AngleTol)) Add(dir); 
+            }
+        }
+        public void Add(Vector2D vector)
+        {
+            Directions.Add(vector);
+        }
+        public void Remove(Vector2D vector)
+        {
+            Directions.Remove(vector);
         }
     }
 }
