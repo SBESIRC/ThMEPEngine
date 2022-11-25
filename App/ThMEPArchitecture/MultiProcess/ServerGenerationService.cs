@@ -83,7 +83,7 @@ namespace ThMEPArchitecture.MultiProcess
             string pageHtml = "";
             WebClientEx MyWebClient = new WebClientEx();
             MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
-            MyWebClient.Timeout = 10 * 60 * 1000;
+            MyWebClient.Timeout = 11 * 60 * 1000;
             Task.Factory.StartNew(() =>
             {
                 pageData = MyWebClient.DownloadData(appHttp).ToList();
@@ -94,7 +94,10 @@ namespace ThMEPArchitecture.MultiProcess
                 if (pageHtml.Contains("服务器繁忙"))
                 {
                     msg = "服务器繁忙";
-
+                }
+                else if (pageHtml.Contains("图纸数据或程序发送错误"))
+                {
+                    msg = "很抱歉！计算超时，图纸数据或程序发送错误。请将CAD图纸反馈至产品经理处理。";
                 }
                 return solution;
             }

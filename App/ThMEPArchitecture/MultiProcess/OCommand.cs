@@ -221,6 +221,12 @@ namespace ThMEPArchitecture.MultiProcess
                         DisplayLogger.Information("服务器繁忙中，请稍后再试");
                         break;
                     }
+                    else if (msg.Contains("图纸数据或程序发送错误"))
+                    {
+                        DisplayLogger.Information("很抱歉！计算超时，图纸数据或程序发送错误。请将CAD图纸反馈至产品经理处理。");
+                        MessageBox.Show("很抱歉！计算超时，图纸数据或程序发送错误。请将CAD图纸反馈至产品经理处理。");
+                        break;
+                    }
                 }
             }
             ShowDisplayInfo(blks.Count());
