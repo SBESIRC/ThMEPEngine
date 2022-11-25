@@ -123,8 +123,11 @@ namespace TianHua.Electrical.PDS.Project.Module.Configure.ComponentFactory
             }
             if (breaker.GetCascadeRatedCurrent() < _calculateCurrentMagnification)
             {
-                var ratedCurrent = breaker.GetRatedCurrents().First(o => double.Parse(o) > _calculateCurrentMagnification);
-                breaker.SetRatedCurrent(ratedCurrent);
+                var ratedCurrent = breaker.GetRatedCurrents().FirstOrDefault(o => double.Parse(o) > _calculateCurrentMagnification);
+                if (ratedCurrent != null)
+                    breaker.SetRatedCurrent(ratedCurrent);
+                else
+                    breaker.SetMagnificationRatedCurrent(_calculateCurrentMagnification);
             }
             _maxCalculateCurrent =  Math.Max(_maxCalculateCurrent, breaker.GetCascadeRatedCurrent());
             return breaker;
