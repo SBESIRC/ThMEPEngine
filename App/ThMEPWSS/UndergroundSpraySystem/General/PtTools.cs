@@ -12,6 +12,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 {
     public static class PtTools
     {
+        public static Point3d Point3dZ0(this Point3d pt)
+        {
+            return new Point3d(pt.X, pt.Y, 0);
+        }
+
         public static bool AddNewPtDic(this SprayIn sprayIn, DBObjectCollection objs, Point3dEx pt, ref List<Line> lines)
         {
             if(objs.Count != 2) return false;//不是两根线，不必进行连接
@@ -35,7 +40,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             bool isMiddleRiser)
         {
             double tolerance = 120;
-            if (objs.Count <= 1) return false;//立管连接的管线数目小于2，直接pass
             if (objs.Count != 2)
             {
                 //不是两根线，不必进行连接
@@ -45,24 +49,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             var l1 = objs[0] as Line;
             var l2 = objs[1] as Line;
 
-            Point3dEx pt1, pt2;
             //找出和立管的连接点
-            if (l1.StartPoint.DistanceTo(pt) < tolerance)
-            {
-                pt1 = new Point3dEx(l1.StartPoint);
-            }
-            else
-            {
-                pt1 = new Point3dEx(l1.EndPoint);
-            }
-            if (l2.StartPoint.DistanceTo(pt) < tolerance)
-            {
-                pt2 = new Point3dEx(l2.StartPoint);
-            }
-            else
-            {
-                pt2 = new Point3dEx(l2.EndPoint);
-            }
+            var pt1 = l1.StartPoint.DistanceTo(pt) < tolerance ? new Point3dEx(l1.StartPoint) : new Point3dEx(l1.EndPoint);
+            var pt2 = l2.StartPoint.DistanceTo(pt) < tolerance ? new Point3dEx(l2.StartPoint) : new Point3dEx(l2.EndPoint);
             //点集中不存在，就算了
             if (!fireHydrantSysIn.PtDic.ContainsKey(pt1) || !fireHydrantSysIn.PtDic.ContainsKey(pt2))
             {
@@ -113,7 +102,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             {
             }
             return 999;
-
         }
 
         public static bool IsOnLine(this Point3d pt, Line line, double tolerance = 10)
@@ -164,7 +152,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
         public static Point3d OffsetXReverseY(this Point3d pt, double x, double y)
         {
             return new Point3d(pt.X - x, pt.Y + y, 0);
-
         }
     }
 }

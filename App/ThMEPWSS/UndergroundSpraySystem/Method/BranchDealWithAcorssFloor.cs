@@ -1,9 +1,6 @@
-﻿using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Method
@@ -13,7 +10,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         public static void Get(ref HashSet<Point3dEx> visited, SprayIn sprayIn, SpraySystem spraySystem)
         {
             MainLoopGet(ref visited, sprayIn, spraySystem);
-            //CrossMainLoopGet(ref visited, sprayIn, spraySystem);
             if(spraySystem.BranchLoops.Count > 0)
             {
                 BranchLoopGet(1, ref visited, sprayIn, spraySystem);
@@ -43,10 +39,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             for (int i = 1; i < mainLoop.Count - 1; i++)
             {
                 var pt = mainLoop[i];
-                if(branchLoopStartEndPts.Contains(pt))
-                {
-                    continue;
-                }
+                if(branchLoopStartEndPts.Contains(pt)) continue;
+                
                 if (sprayIn.PtTypeDic[mainLoop[i]].Equals("Branch"))
                 {
                     MainLoopBranchBfs(pt, ref visited, sprayIn, spraySystem);
@@ -92,7 +86,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
                 BranchDeal.SubLoopAdd(spraySystem, subLoop, branchLoop, alarmNums, fireAreaNums);
                 
-
                 foreach (var branchLoopPt in branchLoop)
                 {
                     if (!spraySystem.SubLoopAlarmsDic.ContainsKey(branchLoopPt))
@@ -134,16 +127,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 if (adjs.Count == 1)
                 {
                     var vpt = GetVerticalPt(curPt, sprayIn);
-                    if(vpt is null)
+                    if(vpt != null)
                     {
-                        ;
-                    }
-                    else
-                    {
-                        ;
-                        if(sprayIn.TermPtDic.ContainsKey(curPt))
+                        if (sprayIn.TermPtDic.ContainsKey(curPt))
                         {
-                            ;
                             sprayIn.TermPtDic[curPt] = sprayIn.TermPtDic[vpt];
                         }
                         else

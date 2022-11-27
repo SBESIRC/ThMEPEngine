@@ -24,20 +24,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
                 if (sprayIn.PtTypeDic[pt].Contains("SubLoop"))
                 {
-                    if (flag)
+                    sePts.Add(pt);
+
+                    if (!flag)
                     {
-                        sePts.Add(pt);
-                        flag = false;
-                        continue;
-                    }
-                    else
-                    {
-                        sePts.Add(pt);
                         subLoopPts.Add(new List<Point3dEx>(sePts));
                         sePts.Clear();
-                        flag = true;
-                        continue;
                     }
+                    flag = !flag;
                 }
             }
 

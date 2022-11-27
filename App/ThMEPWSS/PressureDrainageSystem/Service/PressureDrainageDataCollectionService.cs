@@ -621,7 +621,17 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                foreach (var br in Entities.OfType<BlockReference>().Where(e => e.ObjectId.IsValid && e.GetEffectiveName().Contains("集水井提资表表身")))
+                foreach (var br in Entities.OfType<BlockReference>().Where(e =>
+                {
+                    try
+                    {
+                        return e.ObjectId.IsValid && e.GetEffectiveName().Contains("集水井提资表表身");
+                    }
+                    catch (Exception ex)
+                    {
+                        return false;
+                    }
+                }))
                 {
                     if (viewmodel.InfoRegion.IsPointIn(br.Bounds.Value.CenterPoint()))
                     {

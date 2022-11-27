@@ -87,7 +87,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
             }
 
-            return new Point3dEx();
+            return null;
         }
 
         public static bool PointIsLineTerm(Point3d pt1, Line line, double tolerance = 10.0)

@@ -8,7 +8,6 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Method;
 using Autodesk.AutoCAD.EditorInput;
 using GeometryExtensions;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
 using System.Diagnostics;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
@@ -97,7 +96,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                 if (LoopCheck.IsSingleLoop(spraySystem, sprayIn))//主环上存在报警阀
                 {
-                    Draw.MainLoops(acadDatabase, mainPathList);
                     foreach (var path in mainPathList)
                     {
                         var ls = new List<Point3dEx>();
@@ -116,13 +114,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             mainPathList.Add(mainPath);
             spraySystem.MainLoop.AddRange(mainPathList[0]);
             DicTools.SetPointType(sprayIn, mainPathList);
-            Draw.MainLoop(acadDatabase, mainPathList);
             var hasSubLoop = SubLoopDeal.Get(ref visited, mainPathList, sprayIn, spraySystem);
             if(hasSubLoop)
             {
-                Draw.SubLoop(acadDatabase, spraySystem);
                 BranchLoopDeal.Get(ref visited, sprayIn, spraySystem);
-                Draw.BranchLoop(acadDatabase, spraySystem);
                 SubLoopDeal.SetType(sprayIn, spraySystem);
                 BranchDeal.Get(ref visited, sprayIn, spraySystem);
                 BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
@@ -131,7 +126,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             else
             {
                 BranchLoopDeal.GetOnMainLoop(visited, sprayIn, spraySystem);
-                Draw.BranchLoop(acadDatabase, spraySystem);
                 BranchDeal.Get(ref visited, sprayIn, spraySystem);
                 BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
                 return 3;

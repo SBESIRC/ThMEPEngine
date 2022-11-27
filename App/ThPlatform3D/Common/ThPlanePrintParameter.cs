@@ -35,11 +35,9 @@ namespace ThPlatform3D.Common
         /// </summary>
 
         public Point3d BasePoint { get; set; } = Point3d.Origin;
-
-        public Point3d GetFloorBasePoint(int naturalIndex)
-        {
-            //naturalIndex从1开始
-            return BasePoint + new Vector3d(0, (naturalIndex - 1) * FloorSpacing, 0);
-        }
+        /// <summary>
+        /// 显示楼板填充和标记
+        /// </summary>
+        public bool ShowSlabHatchAndMark { get; set; } = true;
     }
 }

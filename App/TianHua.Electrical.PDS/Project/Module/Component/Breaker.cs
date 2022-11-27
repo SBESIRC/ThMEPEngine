@@ -591,6 +591,30 @@ namespace TianHua.Electrical.PDS.Project.Module.Component
                 }
             }
         }
+
+        /// <summary>
+        /// 修改放大倍数
+        /// </summary>
+        /// <param name="ratedCurrentStr"></param>
+        public void SetMagnificationRatedCurrent(double calculateCurrentMagnification)
+        {
+            var breaker = Breakers.FirstOrDefault(o => o.Poles == PolesNum
+            && o.FrameSize == FrameSpecification
+            && (o.Characteristics.IsNullOrWhiteSpace() || o.Characteristics.Contains(Characteristics))
+            && o.TripDevice == TripUnitType
+            && o.Amps >= calculateCurrentMagnification
+            && o.IcuConfig == Icu);
+            if(breaker != null)
+            {
+                SetModel(breaker.Model);
+                SetRatedCurrent(breaker.Amps.ToString());
+            }
+            else
+            {
+                SetRatedCurrent(AlternativeRatedCurrent.Last());
+            }
+        }
+
         public List<string> GetRatedCurrents()
         {
             return AlternativeRatedCurrent;

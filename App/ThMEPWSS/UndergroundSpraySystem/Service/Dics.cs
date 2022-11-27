@@ -44,11 +44,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             sprayIn.LeadLineDic.AddItem(l1, l2);
                             continue;
                         }
-                        else
-                        {
-                            ;
-                        }
-                            
                     }
                 }
             }

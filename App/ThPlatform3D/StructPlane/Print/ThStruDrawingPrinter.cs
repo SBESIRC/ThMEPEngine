@@ -8,6 +8,8 @@ using ThMEPEngineCore.IO.SVG;
 using ThPlatform3D.StructPlane.Service;
 using System.Linq;
 using System;
+using Dreambuild.AutoCAD;
+using DotNetARX;
 
 namespace ThPlatform3D.StructPlane.Print
 {
@@ -24,6 +26,10 @@ namespace ThPlatform3D.StructPlane.Print
         /// 收集所有当前图纸打印的物体
         /// </summary>
         public ObjectIdCollection ObjIds { get; protected set; }
+        /// <summary>
+        /// 要打块的对象，是ObjIds的子集
+        /// </summary>
+        public ObjectIdCollection BlockObjIds { get; protected set; }
         #endregion
         /// <summary>
         /// 楼层底部标高
@@ -41,6 +47,7 @@ namespace ThPlatform3D.StructPlane.Print
             _docProperties = input.DocProperties;
             _componentInfos = input.ComponentInfos;
             ObjIds = new ObjectIdCollection();
+            BlockObjIds = new ObjectIdCollection();
             _printParameter = printParameter;            
             _flrHeight = _docProperties.GetFloorHeight();
             if(_docProperties.ContainsKey(ThSvgPropertyNameManager.FloorBottomElevationPropertyName))
@@ -132,6 +139,24 @@ namespace ThPlatform3D.StructPlane.Print
             }
         }
 
+        protected ObjectIdCollection PrintPCWall(AcadDatabase acadDb, ThGeometry pcWall)
+        {
+            var outlineConfig = ThShearwallPrinter.GetPCWallConfig();
+            var hatchConfig = ThShearwallPrinter.GetPCWallHatchConfig();
+            if (pcWall.Boundary is Polyline polyline)
+            {
+                return ThShearwallPrinter.Print(acadDb, polyline, outlineConfig, hatchConfig);
+            }
+            else if (pcWall.Boundary is MPolygon mPolygon)
+            {
+                return ThShearwallPrinter.Print(acadDb, mPolygon, outlineConfig, hatchConfig);
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+
         protected ObjectIdCollection PrintWindowWall(AcadDatabase acadDb, ThGeometry shearwall)
         {
             var outlineConfig = ThShearwallPrinter.GetWindowWallConfig();
@@ -181,11 +206,31 @@ namespace ThPlatform3D.StructPlane.Print
         protected void Append(ObjectIdCollection objIds)
         {
             // 把objIds添加到 ObjIds 中，用于返回
-            foreach (ObjectId objId in objIds)
+            objIds.OfType<ObjectId>().ForEach(o => Append(o));
+        }
+
+        protected void Append(ObjectId objId)
+        {
+            if(objId.IsValid)
             {
                 ObjIds.Add(objId);
             }
         }
+
+        protected void AppendToBlockObjIds(ObjectIdCollection objIds)
+        {
+            // 把objIds添加到 ObjIds 中，用于返回
+            objIds.OfType<ObjectId>().ForEach(o => AppendToBlockObjIds(o));
+        }
+
+        protected void AppendToBlockObjIds(ObjectId objId)
+        {
+            if (objId.IsValid)
+            {
+                BlockObjIds.Add(objId);
+            }
+        }
+
         protected List<ElevationInfo> GetElevationInfos()
         {
             var results = new List<ElevationInfo>();
@@ -228,6 +273,25 @@ namespace ThPlatform3D.StructPlane.Print
                 }
             }
             return dict.Keys.ToObjectIdCollection();
+        }
+
+        protected ObjectId InsertBasePoint(AcadDatabase acadDb, Point3d basePoint)
+        {
+            if (acadDb.Blocks.Contains(ThPrintBlockManager.BasePointBlkName) &&
+                    acadDb.Layers.Contains(ThPrintLayerManager.DefpointsLayerName))
+            {
+                DbHelper.EnsureLayerOn(ThPrintLayerManager.DefpointsLayerName);
+                return acadDb.ModelSpace.ObjectId.InsertBlockReference(
+                               ThPrintLayerManager.DefpointsLayerName,
+                               ThPrintBlockManager.BasePointBlkName,
+                               basePoint,
+                               new Scale3d(1.0),
+                               0.0);
+            }
+            else
+            {
+                return ObjectId.Null;
+            }
         }
     }
 }

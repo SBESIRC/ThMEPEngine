@@ -12,44 +12,38 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Model;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
 
 
 namespace ThMEPWSS.UndergroundSpraySystem.General
 {
     public static class LineTools
     {
+        public static Line LineZ0(this Line line)
+        {
+            return new Line(line.StartPoint.Point3dZ0(), line.EndPoint.Point3dZ0());
+        }
+
         public static Point3d GetClosedPt(this Line line, Point3dEx verticalPt)
         {
             var spt = line.StartPoint;
             var ept = line.EndPoint;
             var sdist = spt.DistanceTo(verticalPt._pt);
             var edist = ept.DistanceTo(verticalPt._pt);
-            if(sdist < edist)
-            {
-                return spt;
-            }
-            else
-            {
-                return ept;
-            }
+            return sdist < edist ? spt : ept;
         }
 
         public static List<Line> DealPipeLines(List<Line> pipeLines, List<Point3d> alarmPts, SprayIn sprayIn)
         {
-            pipeLines = PipeLineAutoConnect2(pipeLines, sprayIn);//1. 对齐的线自动连接
+            pipeLines = PipeLineAutoConnect(pipeLines, sprayIn);//1. 对齐的线自动连接
             pipeLines = ConnectVerticalLine(pipeLines, sprayIn);//2. 依靠立管的线连接
-
             pipeLines = ConnectWithAlarmValve(pipeLines, sprayIn, alarmPts);//3. 连接报警阀连接的线
-
             pipeLines = PipeLineSplit(pipeLines);//4. 节点处打断
-
             return pipeLines;
         }
 
-        public static List<Line> PipeLineAutoConnect2(List<Line> lineList, SprayIn sprayIn)
+        public static List<Line> PipeLineAutoConnect(List<Line> lineList, SprayIn sprayIn)
         {
-            var ptDic = sprayIn.PtDic;
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
             var verticals = new List<Polyline>();
             foreach(var vpt in sprayIn.Verticals.Keys)
             {
@@ -67,43 +61,29 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
             foreach (var gl in GLineConnectList)
             {
-                var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
-                var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+                var pt1 = new Point3d(gl.StartPoint.X, gl.StartPoint.Y, 0);
+                var pt2 = new Point3d(gl.EndPoint.X, gl.EndPoint.Y, 0);
 
-                if (pt1.DistanceToEx(pt2) < 1) continue;
+                if (pt1.DistanceTo(pt2) < 1) continue;
 
-                if (ptDic.ContainsKey(pt1) && ptDic.ContainsKey(pt2))
+                var rect1 = pt1.GetRect(5);
+                var rect2 = pt2.GetRect(5);
+
+                var vrst1 = verticalSpatialIndex.SelectCrossingPolygon(rect1);
+                var vrst2 = verticalSpatialIndex.SelectCrossingPolygon(rect2);
+                if (vrst1.Count > 0 || vrst2.Count > 0) continue;
+
+                var rst1 = lineSpatialIndex.SelectCrossingPolygon(rect1);
+                var rst2 = lineSpatialIndex.SelectCrossingPolygon(rect2);
+                
+                if (rst1.Count==1||rst2.Count==1)
                 {
-                    if (ptDic[pt1].Count > 1 && ptDic[pt2].Count > 1)
-                    {
-                        continue;//邻接点数都大于1，跳过
-                    }
-                }
-                var line = new Line(pt1._pt, pt2._pt);
-                var rst = verticalSpatialIndex.SelectFence(line);
-                if(rst.Count<=1)
-                {
+                    var line = new Line(pt1, pt2);
                     lineList.Add(line);
                 }
             }
-
-            ////处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-            //if (GLineConnectList.Count() > 0)
-            //{
-            //    ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
-            //    var lineColl = cleanServiec.CleanNoding(lineList.ToCollection());
-            //    var tmpLines = new List<Line>();
-            //    foreach (var l in lineColl)
-            //    {
-            //        tmpLines.Add(l as Line);
-            //    }
-            //    var cleanLines = LineMerge.CleanLaneLines(tmpLines);
-            //    return cleanLines;
-            //}
-
-            return lineList;//merge
+            return lineList;
         }
-
 
         public static List<Line> ConnectVerticalLine(List<Line> pipeLines, SprayIn sprayIn)
         {
@@ -145,7 +125,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 var rst = leadLineSpatialIndex.SelectCrossingPolygon(rect);
                 if(rst.Count == 0)
                 {
-                    Draw.RemovedVerticalPt(cv);
                     sprayIn.Verticals.Remove(cv);
                 }
             }
@@ -196,7 +175,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             return pts;
         }
 
-
         public static List<Line> PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, ThCADCoreNTSSpatialIndex verticalSpatialIndex = null)
         {
             var GLineSegList = new List<GLineSegment>();//line 转 GLineSegment
@@ -237,8 +215,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                         lineList.Add(line);
                     }
                 }
-
-
             }
 
             //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
@@ -272,7 +248,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 {
                     var l = obj as Line;
                     lineList.Remove(l);
-                    Draw.Lines(new List<Line>() { l},"删除线");
                     pts.Add(l.StartPoint);
                     pts.Add(l.EndPoint);
                 }
@@ -282,10 +257,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     lineList.Add(new Line(apt, orderPts[0]));
                     lineList.Add(new Line(apt, orderPts[1]));
                     lineList.Add(new Line(apt, orderPts[2]));
-                }
-                else
-                {
-                    ;
                 }
             }
 

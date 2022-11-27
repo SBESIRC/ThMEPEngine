@@ -685,7 +685,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                     var mlInfos = new List<MLeaderInfo>(THESAURUSREPERCUSSION);
                     var shootHints = new List<Point3dEx>();
                     {
-                        mlInfos.AddRange(ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is THESAURUSHOUSING).Select(x => x.PtEx).Distinct().Select(x => x._pt).Select(pt => MLeaderInfo.Create(pt, THESAURUSDEPLORE)));
+                        mlInfos.AddRange(ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => (int)x.Type is THESAURUSHOUSING).Select(x => x.PtEx).Distinct().Select(x => x._pt).Select(pt => MLeaderInfo.Create(pt, THESAURUSDEPLORE)));
                         const double tol = QUOTATIONWITTIG;
                         var pts = mlInfos.Select(x => x.BasePoint.ToNTSPoint(x)).Distinct().ToList();
                         var getNearest = GeoFac.NearestNeighbourGeometryF(pts);
@@ -1168,7 +1168,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                         var targetsf = GeoFac.CreateIntersectsSelector(adb.ModelSpace.OfType<Entity>().SelectMany(getTargets).ToList());
                         IEnumerable<Point2d> getShooters()
                             {
-                                foreach (var kv in ctx.FireHydrantSystemIn.TermPointDic.Where(kv => kv.Value.Type is THESAURUSHOUSING))
+                                foreach (var kv in ctx.FireHydrantSystemIn.TermPointDic.Where(kv => (int)kv.Value.Type is THESAURUSHOUSING))
                                 {
                                     var pt = kv.Value;
                                     if (@case is THESAURUSPERMUTATION or QUOTATIONEDIBLE)
@@ -1206,7 +1206,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                     var data = CollectData(adb, selectArea.ToGRect());
                     {
                         var t0 = DateTime.Now;
-                        var targets = ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is THESAURUSHOUSING).Select(x => x.PtEx._pt).ToHashSet();
+                        var targets = ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => (int)x.Type is THESAURUSHOUSING).Select(x => x.PtEx._pt).ToHashSet();
                         var range = data.Range.ToPolygon().ToIPreparedGeometry();
                         range = new MultiPoint(targets.Select(x => x.ToNTSPoint()).Where(x => range.Contains(x)).ToArray()).ToGRect().Expand(maxRadius + THESAURUSNOTORIETY).ToPolygon().ToIPreparedGeometry();
                         var rdls = GeoFac.GetManyLineStrings(data.redlines.Select(x => x.ToLineString()).Where(x => range.Intersects(x))).ToList();

@@ -90,7 +90,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             var SlashPts = new List<Point3d>();
             foreach (var line in DBObjResults)
             {
-                var angle = line.Angle.RadianToDegree();
                 if (PointAngle.IsSplashLine(line))
                 {
                     var pt1 = line.StartPoint;
@@ -104,7 +103,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         public Dictionary<Line, List<Point3d>> ExtractleadLine(List<Point3d> SlashPts)
         {
-            var leadLines = new List<Line>();
             var leadLineDic = new Dictionary<Line, List<Point3d>>();
             foreach (var line in DBObjResults)
             {

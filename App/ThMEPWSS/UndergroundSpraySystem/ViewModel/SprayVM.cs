@@ -137,8 +137,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                     }
                 }
             }
-            
-            
         }
     }
 }

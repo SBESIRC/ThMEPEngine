@@ -3,9 +3,11 @@ using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Block;
+using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.Service.BranchFunc;
 
@@ -158,7 +160,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         {
             var branchWithFireNums = 0;//
             int throughIndex = 0;
-            int index = 0;
+            int index = 0;//穿越点数目
             var lastFirePt = new Point3d();
             bool textRecord = false; //记录是否标记排气阀
             foreach (var pt in spraySystem.BranchDic.Keys)//pt 支路起始点
@@ -168,22 +170,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     continue;
                 }
                 BranchPtDraw(pt, ref textRecord, ref lastFirePt, ref branchWithFireNums, ref throughIndex, ref index, sprayOut, spraySystem, sprayIn);
-
             }
         }
+
         public static void BranchPtDraw(Point3dEx pt, ref bool textRecord, ref Point3d lastFirePt, ref int branchWithFireNums, ref int throughIndex, ref int index,
     SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn)
         {
             if (!spraySystem.FireAreaStPtDic.ContainsKey(pt))//环路上的点
             {
                 NoAlarmBranchPtDraw(pt, ref textRecord, ref lastFirePt, ref branchWithFireNums, ref throughIndex, ref index, sprayOut, spraySystem, sprayIn);
-
             }
             else//报警阀上的点
             {
                 AlarmBranchPtDraw(pt, ref textRecord, ref lastFirePt, ref branchWithFireNums, ref throughIndex, ref index, sprayOut, spraySystem, sprayIn);
             }
         }
+
         public static void NoAlarmBranchPtDraw(Point3dEx pt, ref bool textRecord, ref Point3d lastFirePt, ref int branchWithFireNums, ref int throughIndex, ref int index,
     SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn)
         {
@@ -229,7 +231,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 fireNums = spraySystem.SubLoopFireAreasDic[pt][0];
             }
             var stPt = spraySystem.BranchPtDic[pt];//图纸绘制起始点
-            var stPt4 = spraySystem.BranchPtDic[pt];//图纸绘制支路4起始点
 
             var tpts = spraySystem.BranchDic[pt];
             tpts.Reverse();
@@ -279,6 +280,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
                 if (termPt.Type == 2)//其他楼层
                 {
+                    int currentFloor = Convert.ToInt32(sprayOut.CurrentFloor.Last().ToString());
+
                     if (!spraySystem.FireAreaStPtDic.ContainsKey(pt))
                     {
                         continue;
@@ -287,16 +290,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     {
                         continue;
                     }
+
                     foreach (var cpt in spraySystem.BranchThroughDic[tpt])
                     {
+                        var ptFloor = Convert.ToInt32(cpt._pt.GetFloor(sprayIn.FloorRectDic).Last().ToString());//获取当前点的楼层号
+                        firePt = new Point3d(fireStpt.X+ 5500*2 + 5500* throughIndex, fireStpt.Y + (currentFloor - ptFloor) * sprayIn.FloorHeight, 0);//firePt.OffsetY((currentFloor - ptFloor) * sprayIn.FloorHeight);
+
                         if (!sprayIn.TermPtDic.ContainsKey(cpt))
                         {
                             continue;
                         }
                         var termPt1 = sprayIn.TermPtDic[cpt];
-                        //var firePt = fireStpt.OffsetXY(-throughIndex * 5500 - sprayIn.PipeGap, -sprayIn.FloorHeight);
-                        var pt1 = new Point3d(fireStpt.X - 500 * (index + 1), stPt.Y, 0);
-                        var pt2 = new Point3d(pt1.X, firePt.Y + 600 * (index + 1), 0);
+                        var pt1X = fireStpt.X - 500 * (index + 1);
+                        if(currentFloor> ptFloor) pt1X = fireStpt.X + 500 * (index + 1);//向上跨层
+                        var pt1 = new Point3d(pt1X, stPt.Y, 0);
+                        var pt2Y = firePt.Y + 600 * (index + 1);
+                        var pt2 = new Point3d(pt1.X, pt2Y, 0);
                         var pt3 = new Point3d(firePt.X, pt2.Y, 0);
                         sprayOut.PipeLine.Add(new Line(stPt, pt1));
                         sprayOut.PipeLine.Add(new Line(pt1, pt2));
@@ -314,6 +323,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         sprayOut.FireDistrictLefts.Add(fireDistrict);
                     }
                     index++;
+
 
                     sprayOut.SupportLines.Add(new Line(fireStpt, tpt._pt));
                 }
@@ -350,15 +360,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     {
                         spraySystem.MaxOffSetX = pt3.X;
                     }
-
-
                     sprayOut.SupportLines.Add(new Line(pt3, tpt._pt));
-
-                    
                 }
-
-                branchWithFireNums++;//无论怎样，每遍历一个支路起点，消火栓num+1
-
+                branchWithFireNums++;//每遍历一个支路起点，消火栓num+1
             }
         }
 

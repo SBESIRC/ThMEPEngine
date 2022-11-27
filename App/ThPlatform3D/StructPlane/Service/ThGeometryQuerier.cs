@@ -40,6 +40,27 @@ namespace ThPlatform3D.StructPlane.Service
                 .Where(g => g.Properties.GetDescription().IsStandardWall())
                 .ToList();
         }
+
+        public static List<ThGeometry> GetPCWallGeos(this List<ThGeometry> geos)
+        {
+            return geos.GetAllWallGeos()
+                .Where(g => g.Properties.GetDescription().IsPCWall())
+                .ToList();
+        }
+
+        public static List<ThGeometry> GetBelowPCWallGeos(this List<ThGeometry> geos)
+        {
+            return geos.GetPCWallGeos()
+                .Where(g => g.IsBelowFloorShearWall())
+                .ToList();
+        }
+        public static List<ThGeometry> GetUpperPCWallGeos(this List<ThGeometry> geos)
+        {
+            return geos.GetPCWallGeos()
+                .Where(g => g.IsUpperFloorShearWall())
+                .ToList();
+        }
+
         public static List<ThGeometry> GetPassHeightGeos(this List<ThGeometry> geos)
         {
             // 获取type=IfcWall,description="S_CONS_通高墙"
@@ -172,6 +193,11 @@ namespace ThPlatform3D.StructPlane.Service
         public static bool IsStandardWall(this string description)
         {
             return string.IsNullOrEmpty(description);
+        }
+
+        public static bool IsPCWall(this string description)
+        {
+            return description.ToUpper().Contains("PCWALL");
         }
 
         public static bool IsPassHeightWall(this string description)

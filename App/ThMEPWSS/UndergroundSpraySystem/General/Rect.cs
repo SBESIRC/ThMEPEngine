@@ -2,9 +2,6 @@
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using System;
-using System.Collections.Generic;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using ThMEPWSS.UndergroundSpraySystem.Model;
 using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.UndergroundSpraySystem.General
@@ -51,30 +48,20 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
         public static Polyline GetRect(this Point3d pt, double tolerance = 100)
         {
-            var pl = new Polyline();
-            var pts = new Point2dCollection();
-
-            pts.Add(pt.OffsetXY(-tolerance, tolerance).ToPoint2D());
-            pts.Add(pt.OffsetXY(tolerance, tolerance).ToPoint2D());
-            pts.Add(pt.OffsetXY(tolerance, -tolerance).ToPoint2D());
-            pts.Add(pt.OffsetXY(-tolerance, -tolerance).ToPoint2D());
-            pts.Add(pt.OffsetXY(-tolerance, tolerance).ToPoint2D());
-
-            pl.CreatePolyline(pts);
-
-            return pl;
+            return GetRect(pt.OffsetXY(-tolerance, -tolerance), pt.OffsetXY(tolerance, tolerance));
         }
 
         public static Polyline GetRect(Point3d pt1, Point3d pt2)
         {
             var pl = new Polyline();
-            var pts = new Point2dCollection();
-
-            pts.Add(new Point2d(pt1.X, pt1.Y));
-            pts.Add(new Point2d(pt1.X, pt2.Y));
-            pts.Add(new Point2d(pt2.X, pt2.Y));
-            pts.Add(new Point2d(pt2.X, pt1.Y));
-            pts.Add(new Point2d(pt1.X, pt1.Y));
+            var pts = new Point2dCollection
+            {
+                new Point2d(pt1.X, pt1.Y),
+                new Point2d(pt1.X, pt2.Y),
+                new Point2d(pt2.X, pt2.Y),
+                new Point2d(pt2.X, pt1.Y),
+                new Point2d(pt1.X, pt1.Y)
+            };
 
             pl.CreatePolyline(pts);
 

@@ -13,7 +13,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
     class GetPipePart
     {
         public static Point3d GetMainLoopPoint(FireHydrantSystemOut fireHydrantSysOut, int i, Point3d stPt, 
-            List<Point3dEx> rstPath, FireHydrantSystemIn fireHydrantSysIn, double valveWidth, double pipeLength)
+            List<Point3dEx> rstPath, FireHydrantSystemIn fireHydrantSysIn, double pipeLength)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

@@ -37,6 +37,28 @@ namespace ThCADCore.NTS
                 SpatialFunction.Difference).ToDbCollection(true);
         }
 
+        public static DBObjectCollection Difference(this Entity polygon, DBObjectCollection polygons,bool keepHole=false)
+        {
+            if(polygon is Polyline poly)
+            {
+                return OverlayNGRobust.Overlay(
+                poly.ToNTSPolygon(),
+                polygons.UnionGeometries(),
+                SpatialFunction.Difference).ToDbCollection(keepHole);
+            }
+            else if(polygon is MPolygon mPolygon)
+            {
+                return OverlayNGRobust.Overlay(
+                mPolygon.ToNTSPolygon(),
+                polygons.UnionGeometries(),
+                SpatialFunction.Difference).ToDbCollection(keepHole);
+            }
+            else
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
         public static DBObjectCollection Intersection(this AcPolygon polygon, DBObjectCollection curves)
         {
             return polygon.ToNTSPolygon().Intersection(curves.UnionGeometries()).ToDbCollection();

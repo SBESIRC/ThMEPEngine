@@ -22,6 +22,8 @@ namespace ThPlatform3D.StructPlane.Service
         public static string PassHeightWallHatchLayerName = "S_CONS_通高墙填充";
         public static string WindowWallLayerName = "S_CONS_窗台墙";
         public static string WindowWallHatchLayerName = "S_CONS_窗台墙填充";
+        public static string PCWallLayer = "PC_YZ_WALL";
+        public static string PCWallHatchLayer = "PC_YZ_WALL_HACH";
         public static string SlabLayerName = "S_PLAN_HACH";
         public static string SlabHatchLayerName = "S_PLAN_HACH";
         public static string BeamTextLayerName = "S_BEAM_TEXT_VERT";
@@ -46,12 +48,28 @@ namespace ThPlatform3D.StructPlane.Service
                     BelowShearWallLayerName,BelowShearWallHatchLayerName,
                     PassHeightWallLayerName,PassHeightWallHatchLayerName,
                     WindowWallLayerName,WindowWallHatchLayerName,
+                    PCWallLayer,PCWallHatchLayer,
                     HoleLayerName,HoleHatchLayerName,
                     SlabLayerName,SlabHatchLayerName,BeamTextLayerName,
                     SlabTextLayerName,ElevationTableLineLayerName,ElevationTableTextLayerName,
                     SlabPatternTableTextLayerName,HeadTextLayerName,HeadTextDownLineLayerName,
                 StairSlabCornerLineLayerName,StairSlabCornerTextLayerName,DefpointsLayerName};
                 return layers.Distinct().ToList();
+            }
+        }
+        /// <summary>
+        /// 从高到低
+        /// </summary>
+        public static List<string> PriorityLayers
+        {
+            get
+            {
+                // 其它的图层都高于这些
+                return new List<string> {
+                ShearWallHatchLayerName,
+                ColumnHatchLayerName,
+                BelowShearWallHatchLayerName,
+                BelowColumnHatchLayerName};
             }
         }
     }

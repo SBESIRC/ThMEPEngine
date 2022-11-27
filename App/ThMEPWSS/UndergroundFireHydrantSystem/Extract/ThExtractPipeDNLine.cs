@@ -12,6 +12,7 @@ using ThCADExtension;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
@@ -54,13 +55,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                         }
                         else if (db is Polyline pline)//多段线打断添加
                         {
-
-                            for (int i = 0; i < pline.NumberOfVertices - 1; i++)
-                            {
-                                var pt1 = pline.GetPoint3dAt(i).ToPoint2D().ToPoint3d();
-                                var pt2 = pline.GetPoint3dAt(i + 1).ToPoint2D().ToPoint3d();
-                                DBObjResults.Add(new Line(pt1, pt2));
-                            }
+                            DBObjResults.AddItems(pline.Pline2Lines());
                         }
                         else
                         {
@@ -107,7 +102,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
         public Dictionary<Line, List<Point3d>> ExtractleadLine(List<Point3d> SlashPts)
         {
-            var leadLines = new List<Line>();
             var leadLineDic = new Dictionary<Line, List<Point3d>>();
             foreach (var line in DBObjResults)
             {

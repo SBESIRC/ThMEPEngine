@@ -17,7 +17,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             double floorHeight = sprayIn.FloorHeight;
             foreach (var rstPath in spraySystem.SubLoops)
             {
-                if(!spraySystem.SubLoopPtDic.ContainsKey(rstPath.First()))
+                if (!spraySystem.SubLoopPtDic.ContainsKey(rstPath.First()))
                 {
                     continue;
                 }
@@ -33,7 +33,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 bool firstBranch = true;
                 int branchLoopNum = 0;
                 int branchIndex = 1;//次环上的支路索引
-                
+
                 bool waterPumpFlag = false;
                 var branchs = new List<Point3dEx>();
                 var branchLoopPtDic = new Dictionary<Point3dEx, Point3d>();
@@ -76,49 +76,35 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         }
                         if (type.Equals("SignalValve"))
                         {
-                            stPt = GetValve(stPt, "遥控信号阀", ref sprayOut, sprayIn);
+                            stPt = GetValve(stPt, "遥控信号阀", ref sprayOut);
                         }
                         if (type.Equals("Branch"))
                         {
                             branchs.Add(pt);
                         }
-                        
+
                         if (nextType.Equals("SubLoop"))
                         {
-                            if(i != rstPath.Count - 2)
+                            if (i != rstPath.Count - 2)
                             {
                                 sprayOut.PipeLine.Add(new Line(stPt, spraySystem.SubLoopPtDic[rstPath[i + 1]]));
 
                             }
-                            else
-                            {
-                                ;
-                            }
                         }
-                        
                     }
                     catch
                     {
                         ;
                     }
                 }
-                
-                
-                
-                for(int i = branchLoopPtDic.Count - 1; i >= 0; i--)
+
+
+
+                for (int i = branchLoopPtDic.Count - 1; i >= 0; i--)
                 {
-                    try
-                    {
-                        spraySystem.BranchLoopPtDic.Add(branchLoopPtDic.ElementAt(i).Key, branchLoopPtDic.ElementAt(i).Value);
-                        spraySystem.BranchPtDic.Add(branchPtDic.ElementAt(i).Key, branchPtDic.ElementAt(i).Value);
-                    }
-                    catch (Exception ex)
-                    {
-                        
-                    }
-                    
+                    spraySystem.BranchLoopPtDic.Add(branchLoopPtDic.ElementAt(i).Key, branchLoopPtDic.ElementAt(i).Value);
+                    spraySystem.BranchPtDic.Add(branchPtDic.ElementAt(i).Key, branchPtDic.ElementAt(i).Value);
                 }
-                
             }
         }
         private static Point3d GetPrussureValve(Point3d stPt, SprayOut sprayOut, double floorHeight, ref bool pressure)
@@ -139,7 +125,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pressure = !pressure;
             return pt;
         }
-        private static Point3d GetBranchLoopPt(Point3dEx curPt, Point3d stPt, SprayOut sprayOut, SpraySystem spraySystem, 
+
+        private static Point3d GetBranchLoopPt(Point3dEx curPt, Point3d stPt, SprayOut sprayOut, SpraySystem spraySystem,
             SprayIn sprayIn, int branchLoopNum, List<Point3dEx> rstPath)
         {
             double xGap = 500;
@@ -165,7 +152,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             spraySystem.BranchLoopPtDic.Add(curPt, stPt.OffsetY(-height));
             return stPt.OffsetX(xGap);
         }
-        private static Point3d GetValve(Point3d stPt, string valve, ref SprayOut sprayOut, SprayIn sprayIn)
+
+        private static Point3d GetValve(Point3d stPt, string valve, ref SprayOut sprayOut)
         {
             double valveSize = 300;
             double GapX = 500;
@@ -173,29 +161,27 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayOut.PipeLine.Add(new Line(stPt.OffsetX(valveSize), stPt.OffsetX(valveSize + GapX)));
             return stPt.OffsetX(valveSize + GapX);
         }
-        private static bool GetBranchPt(Point3dEx curPt, Point3d stPt, SprayOut sprayOut, SpraySystem spraySystem, 
+
+        private static bool GetBranchPt(Point3dEx curPt, Point3d stPt, SprayOut sprayOut, SpraySystem spraySystem,
             SprayIn sprayIn, ref bool firstBranch, int branchIndex, bool waterPumpFlag, bool firstFlag,
             ref Dictionary<Point3dEx, Point3d> branchLoopPtDic, ref Dictionary<Point3dEx, Point3d> branchPtDic)
         {
-            var height = 400;//sprayIn.FloorHeight * 0.06;
-            double gap = -branchIndex * sprayIn.PipeGap - 3200 * Convert.ToInt32(waterPumpFlag);
-            if (firstFlag)
-            {
-                gap = -3600;//
-            }
+            var height = 400;
+            double gap = firstFlag ?-3600:- branchIndex * sprayIn.PipeGap - 3200 * Convert.ToInt32(waterPumpFlag);
+
             var pt = stPt.OffsetX(gap);
             sprayOut.PipeLine.Add(new Line(pt, pt.OffsetY(height)));
             branchLoopPtDic.Add(curPt, pt.OffsetY(height));
             branchPtDic.Add(curPt, pt.OffsetY(height));
             firstBranch = false;
-            if(!spraySystem.BranchDic.ContainsKey(curPt))
+            if (!spraySystem.BranchDic.ContainsKey(curPt))
             {
                 return false;
             }
             if (spraySystem.BranchDic[curPt].Count == 1)//单支路
             {
                 var tpt = spraySystem.BranchDic[curPt][0];
-                if(!sprayIn.TermPtTypeDic.ContainsKey(tpt))
+                if (!sprayIn.TermPtTypeDic.ContainsKey(tpt))
                 {
                     return false;
                 }

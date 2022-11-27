@@ -1,14 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.General;
-using AcHelper;
-using GeometryExtensions;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Block
 {
@@ -48,7 +48,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertLine(acadDatabase, StPt.OffsetXReverse(600), StPt.OffsetXReverse(650), "W-FRPT-SPRL-PIPE");
 
             objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水流指示器",
-                    StPt.OffsetXReverse(770+350), new Scale3d(-1, 1, 1), 0);
+                    StPt.OffsetXReverse(770), new Scale3d(-1, 1, 1), 0);
             objID.SetDynBlockValue("可见性", FlowType);
             blk = acadDatabase.Element<BlockReference>(objID);
             blk.TransformBy(U2WMat);
@@ -124,7 +124,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
 
             InsertLine(acadDatabase, StPt.OffsetXReverse(1640), StPt.OffsetXReverseY(1640, -410), "W-FRPT-DRAI-PIPE");
 
-            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-DIMS", "标高", StPt.OffsetXReverseY(3690, -1500),
+            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-DIMS", "标高", StPt.OffsetXReverseY(3190, -1500),
                 new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "标高", "h+1.50" } });
             blk = acadDatabase.Element<BlockReference>(objID);
             blk.TransformBy(U2WMat);
@@ -161,7 +161,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
 
         private void InsertSolid(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, Point3d pt3, string layer = "W-FRPT-NOTE")
         {
-            Solid solid = new Solid(pt1, pt2, pt3)
+            Solid solid = new(pt1, pt2, pt3)
             {
                 LayerId = DbHelper.GetLayerId(layer),
                 ColorIndex = (int)ColorIndex.BYLAYER

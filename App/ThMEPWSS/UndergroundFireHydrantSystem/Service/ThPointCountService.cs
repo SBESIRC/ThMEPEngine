@@ -22,6 +22,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             Tolerance = tol;
         }
 
+        public Point3dEx(Point2d pt, double tol = 1)
+        {
+            _pt = new Point3d(pt.X, pt.Y, 0);
+            Tolerance = tol;
+        }
+
         public Point3dEx(double x, double y, double z,double tol = 1)
         {
             _pt = new Point3d(x, y, z);
@@ -65,8 +71,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         public bool Equals(LineSegEx other)
         {
             var tolerance = 5; //mm
-            return (this._spt.DistanceTo(_spt) < tolerance && this._ept.DistanceTo(_ept) < tolerance) ||
-                   (this._spt.DistanceTo(_ept) < tolerance && this._ept.DistanceTo(_spt) < tolerance);
+            return (other._spt.DistanceTo(_spt) < tolerance && other._ept.DistanceTo(_ept) < tolerance) ||
+                   (other._spt.DistanceTo(_ept) < tolerance && other._ept.DistanceTo(_spt) < tolerance);
         }
 
         public bool IsTermPt(Point3d pt)
@@ -78,7 +84,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
     class ThPointCountService
     {
-        public static void AddPoint(ref FireHydrantSystemIn fireHydrantSysIn, ref Point3dEx pt1, ref Point3dEx pt2, string type)
+        public static void AddPoint(FireHydrantSystemIn fireHydrantSysIn, ref Point3dEx pt1, ref Point3dEx pt2, string type)
         {
             if (fireHydrantSysIn.PtDic.Count == 0)
             {
@@ -128,7 +134,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
         public static void AddPoint(ref FireHydrantSystemIn fireHydrantSysIn, ref Point3dEx pt1, ref Point3dEx pt2)
         {
-            if(pt1.Equals(pt2))//起点和终点相同的情况（比如手痒加了个圆）
+            if(pt1.Equals(pt2))
             {
                 return;
             }

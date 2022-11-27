@@ -128,30 +128,73 @@ namespace ThParkingStall.Host.Controllers
             //    }
             //    httpWebResponse.Close();
             //}
-            var isinhost = IsHost(server);
-            var isinhost_str = isinhost ? "1" : "0";
-            var appHttp = $"{server}:{GlobalParas.tcp_app}/Cal/RunParkingStall?filename={file}&guid={guid}&isinHost={isinhost_str}";
-            SetCertificatePolicy();
-            List<Byte> pageData = new List<byte>();
             string pageHtml = "";
-            WebClientEx MyWebClient = new WebClientEx();
-            MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
-            MyWebClient.Timeout = 10 * 60 * 1000;
-            Task.Factory.StartNew(() =>
+            try
             {
-                pageData = MyWebClient.DownloadData(appHttp).ToList();
-            }).Wait(-1);
-            pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
-
-            //结果从对应服务器返回host服务器
-            if (pageHtml.Contains("success") && !IsHost(server))
-            {
-                using (WebClient client = new WebClient())
+                var isinhost = IsHost(server);
+                var isinhost_str = isinhost ? "1" : "0";
+                var appHttp = $"{server}:{GlobalParas.tcp_app}/Cal/RunParkingStall?filename={file}&guid={guid}&isinHost={isinhost_str}";
+                SetCertificatePolicy();
+                List<Byte> pageData = new List<byte>();
+                WebClientEx MyWebClient = new WebClientEx();
+                MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
+                MyWebClient.Timeout = 10 * 60 * 1000;
+                Task.Factory.StartNew(() =>
                 {
-                    client.Credentials = new NetworkCredential("upload", "Thape123123");
-                    client.DownloadFile($"{server}:{GlobalParas.tcp_data}/genome/genome_{guid}.dat", data_dir + $"\\genome\\genome_{guid}.dat");
-                    client.DownloadFile($"{server}:{GlobalParas.tcp_data}/log/MPLog_{guid}.txt", data_dir + $"\\log\\MPLog_{guid}.txt");
+                    pageData = MyWebClient.DownloadData(appHttp).ToList();
+                }).Wait(10 * 60 * 1000);
+                pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
+
+                //结果从对应服务器返回host服务器
+                if (pageHtml.Contains("success") && !IsHost(server))
+                {
+                    using (WebClient client = new WebClient())
+                    {
+                        client.Credentials = new NetworkCredential("upload", "Thape123123");
+                        client.DownloadFile($"{server}:{GlobalParas.tcp_data}/genome/genome_{guid}.dat", data_dir + $"\\genome\\genome_{guid}.dat");
+                        client.DownloadFile($"{server}:{GlobalParas.tcp_data}/log/MPLog_{guid}.txt", data_dir + $"\\log\\MPLog_{guid}.txt");
+                    }
                 }
+                else if (!pageHtml.Contains("success"))
+                {
+                    //杀死可能存在的多余进程
+                    try
+                    {
+                        Process[] processes = System.Diagnostics.Process.GetProcesses();
+                        foreach (var process in processes)
+                        {
+                            if (process.ProcessName.Contains("ThParkingStallServer.Core") || process.ProcessName.Contains("ThParkingStall.Core"))
+                                process.Kill();
+                        }
+                    }
+                    catch { }
+                    //释放服务器资源
+                    lock (obj)
+                    {
+                        GlobalParas.SERVERS.Enqueue(server);
+                    }
+                    return "很抱歉！计算超时，图纸数据或程序发送错误。请将CAD图纸反馈至产品经理处理。";
+                }
+            }
+            catch (Exception ex)
+            {
+                //杀死可能存在的多余进程
+                try
+                {
+                    Process[] processes = System.Diagnostics.Process.GetProcesses();
+                    foreach (var process in processes)
+                    {
+                        if (process.ProcessName.Contains("ThParkingStallServer.Core") || process.ProcessName.Contains("ThParkingStall.Core"))
+                            process.Kill();
+                    }
+                }
+                catch { }
+                //释放服务器资源
+                lock (obj)
+                {
+                    GlobalParas.SERVERS.Enqueue(server);
+                }
+                return "很抱歉！计算超时，图纸数据或程序发送错误。请将CAD图纸反馈至产品经理处理。";
             }
             //释放服务器资源
             lock (obj)

@@ -37,15 +37,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 for (int i = branchLoop.Count()-1; i >=0; i--)
                 {
                     var pt = branchLoop[i];
-
-                    //if (!sprayIn.PtTypeDic[pt].Contains("AlarmValve") && sprayIn.PtDic[pt].Count < 3)
-                    //{
-                    //    branchLoop.Remove(pt);
-                    //}
-                    //else
-                    //{
-                        GetAlarmText(pt, sprayIn);
-                    //}
+                    GetAlarmText(pt, sprayIn);
                 }
 
                 for (int i = 0; i < branchLoop.Count; i++)
@@ -62,7 +54,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         q.Enqueue(pt);
                         HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
                         visited.Add(pt);
-                        int level = 0;
                         var ptLevelDic = new Dictionary<Point3dEx, int>();//每个点及其level
                         while (q.Count > 0)
                         {
@@ -116,16 +107,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         }
                         if (termPts.Count != 0)
                         {
-                            //foreach (var tpt in termPts)
-                            //{
-                            //    if (sprayIn.TermPtTypeDic.ContainsKey(tpt))
-                            //    {
-                            //        if (sprayIn.TermPtTypeDic[tpt] == 1) //防火分区
-                            //        {
-                            //            fireAreaNums += 1;
-                            //        }
-                            //    }
-                            //}
                             fireAreaNums += termPts.Count;
                             if (spraySystem.BranchDic.ContainsKey(pt))
                             {
@@ -186,12 +167,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
     SprayIn sprayIn, ref bool hasValve, ref bool hasFlow, Stopwatch stopwatch, bool flag,ref string flowType)
         {
             if (!flag) return;
-            if(stopwatch.Elapsed.TotalSeconds > 5)
-            {
-                //stopwatch.Stop();
-                //flag = false;
-                //return;
-            }
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
                 for (int i = 1; i < tempPath.Count; i++)

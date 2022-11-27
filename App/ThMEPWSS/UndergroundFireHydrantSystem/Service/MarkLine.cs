@@ -35,7 +35,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var ept = fireHydrantSysIn.StartEndPts[1];
             var sPt = PointCompute.PointOnLine(spt._pt, lineList, markAngleDic[spt], 30);
             var ePt = PointCompute.PointOnLine(ept._pt, lineList, markAngleDic[ept], 30);
-            if(sPt.Equals(new Point3dEx()) || ePt.Equals(new Point3dEx()))
+            if(sPt == null || ePt == null)
             {
                 return false;
             }

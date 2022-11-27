@@ -9,18 +9,17 @@ using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPEngineCore.Algorithm;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
 
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
     public class LeadLineNew
     {
-        public List<Line> DBObjs { get; set; }
+        public List<Line> LeadLines { get; set; }
         public DBObjectCollection TextDbObjs { get; set; }//存放提取的文字，避免二次操作
         public LeadLineNew()
         {
-            DBObjs = new List<Line>();
+            LeadLines = new List<Line>();
             TextDbObjs = new DBObjectCollection();
         }
         public void Extract(Database database, Point3dCollection polygon)
@@ -49,36 +48,27 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 {
                     if(ent is Line l)
                     {
-                        DBObjs.Add(l);
+                        LeadLines.Add(l);
                     }
                     else
                     {
-                        var pline = ent as Polyline;
-                        var lines = pline.Pline2Lines();
-                        foreach(var line in lines)
-                        {
-                            DBObjs.Add(line);
-                        }
+                        LeadLines.AddItems((ent as Polyline).Pline2Lines());
                     }
                 }
-                dbObjs2.Cast<Entity>().ForEach(e => DBObjs.Add(e as Line));
             }
         }
 
         public List<Line> GetLines()
         {
             var leadLines = new List<Line>();
-            foreach(var obj in DBObjs)
+            foreach(var obj in LeadLines)
             {
-                if(!(obj is Line))
+                if(obj is  Line)
                 {
-                    continue;
+                    leadLines.Add(obj);
                 }
-                var line = obj as Line;
-                leadLines.Add(line);
             }
             leadLines = PipeLineList.CleanLaneLines3(leadLines);
-            Draw.LeadLines(leadLines);
             return leadLines;
         }
 
@@ -99,12 +89,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 var ent = obj as Entity;
                 if(ent is Line line)
                 {
-                    DBObjs.Add(line);
+                    LeadLines.Add(line);
                 }
                 if(ent is Polyline pline)
                 {
-                    var lines = pline.Pline2Lines();
-                    lines.ForEach(l => DBObjs.Add(l));
+                    LeadLines.AddItems(pline.Pline2Lines());
                 }
                 if(ent is DBText || ent.IsTCHText())
                 {

@@ -29,5 +29,22 @@ namespace ThPlatform3D.StructPlane.Print
             }            
             return results;
         }
+        public static bool IsSlabAnnotation(Entity entity)
+        {
+            if(entity is BlockReference br)
+            {
+                return br.GetEffectiveName() == ThPrintBlockManager.BthBlkName &&
+                    br.Layer == ThPrintLayerManager.SlabTextLayerName;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool IsSlabTableText(Entity entity)
+        {
+            return entity is DBText && entity.Layer == ThPrintLayerManager.SlabPatternTableTextLayerName;
+        }
     }
 }

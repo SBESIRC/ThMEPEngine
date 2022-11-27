@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.9.48.0")]
-[assembly: AssemblyFileVersion("1.9.48.0")]
+[assembly: AssemblyVersion("1.9.49.0")]
+[assembly: AssemblyFileVersion("1.9.49.0")]
 
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAFASCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThElectricalLoadCalculationCmd))]

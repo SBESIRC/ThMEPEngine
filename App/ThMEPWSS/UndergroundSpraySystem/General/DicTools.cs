@@ -9,8 +9,6 @@ using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Model;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
-
 
 namespace ThMEPWSS.UndergroundSpraySystem.General
 {
@@ -18,7 +16,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
     {
         public static void AddPtDicItem(SprayIn sprayIn, Point3dEx pt1, Point3dEx pt2)
         {
-            if(sprayIn.PtDic.ContainsKey(pt1))//包含pt1
+            if (sprayIn.PtDic.ContainsKey(pt1))//包含pt1
             {
                 if (!sprayIn.PtDic[pt1].Contains(pt2))
                 {
@@ -70,7 +68,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
         public static void AddItem(this List<Point3dEx> ptls, Point3dEx pt)
         {
-            if(ptls?.Contains(pt) == false)
+            if (ptls?.Contains(pt) == false)
             {
                 ptls.Add(pt);
             }
@@ -138,10 +136,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             sprayIn.PtDic.Keys.ToList().ForEach(p => dbPts.Add(new DBPoint(p._pt)));
             var dbPtSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
 
-            foreach(var pt in sprayIn.Verticals.Keys)
+            foreach (var pt in sprayIn.Verticals.Keys)
             {
                 var rstGetPt = GetPipePt(pt, dbPtSpatialIndex);
-                if(!rstGetPt)
+                if (!rstGetPt)
                 {
                     continue;
                 }
@@ -156,7 +154,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     continue;
                 }
                 if (f1.Equals("B0")) f1 = "B1M";
-                if(!sprayIn.FloorPtDic.ContainsKey(f1))
+                if (!sprayIn.FloorPtDic.ContainsKey(f1))
                 {
                     continue;
                 }
@@ -165,21 +163,21 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 ptOffsetDic.Add(pt, offsetPt);
             }
             var usedPt = new List<Point3dEx>();
-            foreach(var pt1 in ptOffsetDic.Keys)
+            foreach (var pt1 in ptOffsetDic.Keys)
             {
                 if (usedPt.Contains(pt1)) continue;
-                
+
                 if (!sprayIn.PtTextDic.ContainsKey(pt1)) continue;
-                
+
                 var str1 = sprayIn.PtTextDic[pt1].First();
                 foreach (var pt2 in ptOffsetDic.Keys)
                 {
                     if (usedPt.Contains(pt2)) continue;
                     if (!sprayIn.PtTextDic.ContainsKey(pt2)) continue;
-                    
+
                     var str2 = sprayIn.PtTextDic[pt2].First();
                     //两点case1
-                    if (  pt1._pt.DistanceTo(pt2._pt) > maxDist 
+                    if (pt1._pt.DistanceTo(pt2._pt) > maxDist
                        && ptOffsetDic[pt1].DistanceTo(ptOffsetDic[pt2]) < minDist
                        && str1.Equals(str2))
                     {
@@ -187,12 +185,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
                         sprayIn.ThroughPt.AddItem(pt1);
                         sprayIn.ThroughPt.AddItem(pt2);
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
-                        {
-                            Draw.ThroughPt(currentDb,pt1);
-                            Draw.ThroughPt(currentDb,pt2);
-                        }
-                
+  
+
                         usedPt.Add(pt1);
                         usedPt.Add(pt2);
 
@@ -200,9 +194,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     }
                 }
             }
-            foreach(var pt in sprayIn.ThroughPt)
+            foreach (var pt in sprayIn.ThroughPt)
             {
-                if(sprayIn.TermPtDic.ContainsKey(pt))
+                if (sprayIn.TermPtDic.ContainsKey(pt))
                 {
                     sprayIn.TermPtDic[pt].Type = 2;
                 }
@@ -211,7 +205,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
         public static void CreatePtTypeDic(List<Point3dEx> pts, string ptType, SprayIn sprayIn)
         {
-            foreach(var pt in pts)
+            foreach (var pt in pts)
             {
                 sprayIn.PtTypeDic.AddType(pt, ptType);
             }
@@ -241,13 +235,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                     }
                 }
             }
-            foreach(var pt2 in restPts)
+            foreach (var pt2 in restPts)
             {
-                foreach(var pt in sprayIn.PtDic.Keys)
+                foreach (var pt in sprayIn.PtDic.Keys)
                 {
                     if (pt._pt.DistanceTo(pt2) < 500)
                     {
-                        if(sprayIn.PtDic[pt].Count == 3)
+                        if (sprayIn.PtDic[pt].Count == 3)
                         {
                             sprayIn.PtTypeDic.AddType(pt, ptType);
                             break;
@@ -347,11 +341,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         ;
                     }
-                    
                 }
             }
         }
@@ -400,14 +393,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                             }
 
                         }
-                        if (typeFlag)
-                        {
-                            continue;
-                        }
-                        if (typeFlag)
-                        {
-                            continue;
-                        }
+                        if (typeFlag) continue;
+                        
                         sprayIn.PtTypeDic.AddType(pt, "Branch");
                     }
 
@@ -421,6 +408,5 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 }
             }
         }
-
     }
 }

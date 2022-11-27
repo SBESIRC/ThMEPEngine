@@ -95,11 +95,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             PipeNumber = str;
             var str2 = ExtractText(spatialIndex, CreateLineHalfBuffer(TextLine, 300));
             PipeNumber2 = str2;
-            if (PipeNumber2 is null)
-            {
-                return;
-            }
-
         }
 
         private static Polyline CreateLineHalfBuffer(Line line, int tolerance = 50)

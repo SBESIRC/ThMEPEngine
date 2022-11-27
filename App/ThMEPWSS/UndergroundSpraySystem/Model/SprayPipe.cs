@@ -15,6 +15,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     public class SprayPipe
     {
         public DBObjectCollection DBObjs { get; set; }
+
         public SprayPipe()
         {
             DBObjs = new DBObjectCollection();
@@ -48,9 +49,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 {
                     if(line.Length >10)
                     {
-                        var pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y, 0);
-                        var pt2 = new Point3d(line.EndPoint.X, line.EndPoint.Y, 0);
-                        pipeLines.Add(new Line(pt1, pt2));
+                        pipeLines.Add(line.LineZ0());
                     }
                 }
                 else if (pipe is Polyline pline)

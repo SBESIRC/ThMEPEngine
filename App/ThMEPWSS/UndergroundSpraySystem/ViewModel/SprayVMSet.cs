@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThControlLibraryWPF.ControlUtils;
+﻿using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
 {
@@ -13,10 +8,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
         {
             FloorLineSpace = 15000;
         }
+
         private double floorLineSpace { get; set; }
-        /// <summary>
-        /// 楼层线间距
-        /// </summary>
+
         public double FloorLineSpace
         {
             get { return floorLineSpace; }

@@ -84,7 +84,17 @@ namespace Tianhua.Platform3D.UI.StructurePlane
                 RaisePropertyChanged("DrawingTypeOption");
             }
         }
-        
+
+        private bool showSlabHatchAndMark = true;
+        public bool ShowSlabHatchAndMark
+        {
+            get => showSlabHatchAndMark;
+            set
+            {
+                showSlabHatchAndMark = value;
+                RaisePropertyChanged("ShowSlabHatchAndMark");
+            }
+        }
 
         public DrawingParameterSetModel()
         {
@@ -99,6 +109,7 @@ namespace Tianhua.Platform3D.UI.StructurePlane
             floorSpacing = ThDrawingParameterConfig.Instance.FloorSpacing;
             storeySelectOption = ThDrawingParameterConfig.Instance.IsAllStorey ? StoreySelectOps.All : StoreySelectOps.Single;
             drawingTypeOption = Convert(ThDrawingParameterConfig.Instance.DrawingType);
+            showSlabHatchAndMark = ThDrawingParameterConfig.Instance.ShowSlabHatchAndMark;
         }
 
         public void Write()
@@ -109,6 +120,7 @@ namespace Tianhua.Platform3D.UI.StructurePlane
             ThDrawingParameterConfig.Instance.DefaultSlabThick = defaultSlabThick;
             ThDrawingParameterConfig.Instance.IsAllStorey = storeySelectOption == StoreySelectOps.All;
             ThDrawingParameterConfig.Instance.DrawingType = Convert(drawingTypeOption);
+            ThDrawingParameterConfig.Instance.ShowSlabHatchAndMark = showSlabHatchAndMark;
         }
 
         private DrawingTypeOps Convert(string drawingTypeOption)

@@ -27,7 +27,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<Point3d> FireHydrant { get; set; }
         public Point3d InsertPoint { get; set; }
         public List<DBText> DNList { get; set; }
-
         public HashSet<Point3d> VerticalHasReelHydrant { get; set; }
         public Dictionary<Point3dEx, DBText> ExtraTextDic { get; set; }
         public List<Line> AidLines { get; set; }
@@ -50,7 +49,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             AidLines = new List<Line>();
         }
 
-        public void Draw(bool across)
+        public void Draw()
         {
             var u2wMat = Active.Editor.UCS2WCS();
             using (var acadDatabase = AcadDatabase.Active())

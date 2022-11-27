@@ -39,6 +39,13 @@ namespace ThParkingStallServer.Core
             }
             catch (Exception ex)
             {
+                string __dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+                FileStream fs = new FileStream(__dir + $"\\BUG__{filename}.txt", FileMode.Create, FileAccess.Write);
+                StreamWriter sw = new StreamWriter(fs);
+                sw.WriteLine(ex.Message);
+                sw.WriteLine(ex.StackTrace);
+                sw.Close();
+                fs.Close();
                 return;
             }
             //run GA

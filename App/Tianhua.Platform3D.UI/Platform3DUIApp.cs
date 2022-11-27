@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Windows;
+using ThPlatform3D.StructPlane;
 using Tianhua.Platform3D.UI.Command;
 using Tianhua.Platform3D.UI.EventMonitor;
 using Tianhua.Platform3D.UI.UI;
@@ -42,6 +43,14 @@ namespace Tianhua.Platform3D.UI
         public void THSMBTUI()
         {
             using (var cmd = new ThStructurePlaneCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "_THSMBTUI_Test", CommandFlags.Modal)]
+        public void _THSMBTUI_Test()
+        {
+            using (var cmd = new ThStructurePlaneCmd(true,true))
             {
                 cmd.Execute();
             }

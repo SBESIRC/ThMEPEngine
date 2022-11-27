@@ -799,6 +799,8 @@ namespace ThParkingStall.Core.MPartitionLayout
         }
         public static List<Coordinate> DivideCurveByLength(LineSegment crv, double length, ref List<LineSegment> segs)
         {
+            if (length <= 1)
+                return new List<Coordinate>() { crv.P0, crv.P1 };
             var pts = crv.GetPointsByDist(length).ToList();
             pts.Add(crv.P1);
             pts = RemoveDuplicatePts(pts);

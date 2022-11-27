@@ -70,6 +70,10 @@
                           ItemsSource="{Binding DrawingScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           Text="{Binding Model.DrawingScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
             </StackPanel>
+            <StackPanel Margin="0,5,0,0">
+                <CheckBox Content="生成板填充及厚度标记" IsThreeState="False" 
+                          IsChecked="{Binding Model.ShowSlabHatchAndMark,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,3,5">
             <Button x:Name="btnOK" Content="确定" Width="60" Height="18" Click="btnConfirm_Click"/>

@@ -262,6 +262,30 @@ namespace ThPlatform3D.Common
             }
         }
 
+        public static Dictionary<string, ObjectIdCollection> GroupByLayer(this ObjectIdCollection objIds)
+        {            
+            using (var acadDb = AcadDatabase.Active())
+            {
+                var dict = new Dictionary<string, ObjectIdCollection>();
+                objIds.OfType<ObjectId>()
+                    .Where(x => !x.IsErased)
+                    .ForEach(o =>
+                {
+                    var entity = acadDb.Element<Entity>(o);
+                    if (dict.ContainsKey(entity.Layer))
+                    {
+                        dict[entity.Layer].Add(o);
+                    }
+                    else
+                    {
+                        var subObjIds = new ObjectIdCollection() { o };
+                        dict.Add(entity.Layer, subObjIds);
+                    }
+                });
+                return dict;
+            }
+        }
+
         public static void MoveToBottom(this ObjectIdCollection objIds)
         {
             if (objIds.Count == 0)

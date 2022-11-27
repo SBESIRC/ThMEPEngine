@@ -76,7 +76,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         {
             var visited = new HashSet<Point3dEx>();
             BranchDeal.AlarmValveGet(ref visited, sprayIn, spraySystem, sprayOut);
-            //BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
         }
 
         public static void GetOutput(SprayIn sprayIn, SpraySystem spraySystem, SprayOut sprayOut)

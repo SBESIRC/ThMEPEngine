@@ -1,18 +1,16 @@
-﻿using Linq2Acad;
-using System.Collections.Generic;
-using ThMEPWSS.UndergroundSpraySystem.Model;
-using ThMEPWSS.UndergroundSpraySystem.General;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
-using ThMEPWSS.UndergroundSpraySystem.Method;
-using Draw = ThMEPWSS.UndergroundSpraySystem.Method.Draw;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThCADCore.NTS;
-using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
-using NFox.Cad;
 using Catel.Linq;
+using Linq2Acad;
+using NFox.Cad;
+using System.Collections.Generic;
+using System.Linq;
+using ThCADCore.NTS;
+using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.UndergroundSpraySystem.General;
+using ThMEPWSS.UndergroundSpraySystem.Method;
+using ThMEPWSS.UndergroundSpraySystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.Service.MultiBranchLoop;
-using System;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
 {
@@ -26,7 +24,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pipe.Extract(database, selectArea);//提取管道
             var pipeLines = pipe.CreateSprayLines();//生成管道线
           
-            pipeLines.CreatePtDic(sprayIn);//创建初始字典对
+            //pipeLines.CreatePtDic(sprayIn);//创建初始字典对
             var vertical = new VerticalPipeNew();
             vertical.Extract(database, selectArea, sprayIn);//提取竖管
 
@@ -62,12 +60,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var flowIndicator = new FlowIndicator();
             flowIndicator.Extract(database, selectArea);
             var flowPts = flowIndicator.CreatePts(sprayIn);
-            foreach(var pt in flowPts)
-            {
-                Draw.Circle(new Circle(pt._pt,new Vector3d(0,0,1),200), "水流指示器");
-            }
+ 
             var objs = flowIndicator.CreatBlocks();
-            Draw.Rects(objs,"水流指示器");
             pipeLines.PipeLineSplit(flowPts);
 
             pipeLines.CreatePtDic(sprayIn);
@@ -100,7 +94,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayIn.CreateTermPt(textSpatialIndex, true);//针对存在缺省立管的标注
             TermPtDeal.CreateTermPtWithBlock(flowPts, sprayIn, textSpatialIndex);//针对标注标在水流指示器上的case
 
-
             DicTools.CreatePtTypeDic1(alarmPts, "AlarmValve", ref sprayIn);
 
             var alarmText = new AlarmTchText();
@@ -116,7 +109,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             }
 
             DicTools.CreatePtDic(sprayIn);//针对跨层
-            //ThMEPWSS.UndergroundSpraySystem.Test.Draw.DrawLine(pipeLines, "处理后的管线2");
             return true;
         }
 
@@ -144,7 +136,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
                 ptsls.Add(pts);
             }
-            Draw.throughPtsInOtherFloor(ptsls);
             return MainLoopDeal.MainLoopDfs(ptsls, sprayIn);//判断其他楼层是否存在主环
         }
 
@@ -161,11 +152,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             //主环路提取
             Dfs.DfsMainLoopWithAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
             spraySystem.MainLoop.AddRange(mainPathList[0]);
-            Draw.MainLoop(acadDatabase, mainPathList);
             DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
 
             BranchLoopDeal.GetWithAcrossFloor(ref visited, sprayIn, spraySystem);
-            Draw.BranchLoop(acadDatabase, spraySystem);
             BranchDealWithAcorssFloor.Get(ref visited, sprayIn, spraySystem);
             BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
             return true;
@@ -194,10 +183,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             Dfs.DfsMainLoopWithAcrossFloor(sprayIn.LoopStartPt, tempPath, ref visited, ref mainPathList, sprayIn, ref extraNodes);
             DicTools.SetPointType(sprayIn, mainPathList, extraNodes);
             spraySystem.MainLoop.AddRange(mainPathList[0]);
-            Draw.MainLoop(acadDatabase, mainPathList);
             BranchLoopDeal.GetInCurrentFloor(ref visited, sprayIn, spraySystem);//获取当前层的支环，不跨层
             BranchLoopDeal.GetWithAcrossFloor2(ref visited, sprayIn, spraySystem);//获取支环上的支环
-            Draw.BranchLoop(acadDatabase, spraySystem);
             BranchDealWithAcorssFloor.Get(ref visited, sprayIn, spraySystem);
             BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
             return true;

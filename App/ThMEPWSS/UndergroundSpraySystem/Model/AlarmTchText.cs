@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
@@ -151,7 +152,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         sprayIn.AlarmTextDic.Add(pt, "");
                         break;
                     }
-                    var bounds = CreatePolyline(pt, tolerance);
+                    var bounds = pt._pt.GetRect(200);
                     var dbObjs = spatialIndex.SelectCrossingPolygon(bounds);
                     if (dbObjs.Count == 1)//只找到一个目标，直接添加
                     {
@@ -265,18 +266,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 }
             }
             return pipeNumber;
-        }
-        private static Polyline CreatePolyline(Point3dEx c, int tolerance = 50)
-        {
-            var pl = new Polyline();
-            var pts = new Point2dCollection();
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y - tolerance)); // low left
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y + tolerance)); // high left
-            pts.Add(new Point2d(c._pt.X + tolerance, c._pt.Y + tolerance)); // high right
-            pts.Add(new Point2d(c._pt.X + tolerance, c._pt.Y - tolerance)); // low right
-            pts.Add(new Point2d(c._pt.X - tolerance, c._pt.Y - tolerance)); // low left
-            pl.CreatePolyline(pts);
-            return pl;
         }
 
         private static Point3d GetMidPt(Point3d pt1, Point3d pt2)

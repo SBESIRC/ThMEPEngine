@@ -48,16 +48,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             var hisIds = new List<string>();
             foreach (var room in _toiletRooms) 
             {
-                //在内部找PL
+                //在内部找PL或WL
                 var roomOutLine = room.outLine;
-                var innerPipes = GetRoomPLPipe(roomOutLine);
+                var innerPipes = GetRoomPLWLPipe(roomOutLine);
                 if (null == innerPipes || innerPipes.Count < 1)
                 {
                     var roomOutPLine = room.outLine.BufferPL(_roomExtendFindPipeDis).Cast<Polyline>().FirstOrDefault();
-                    innerPipes = GetRoomPLPipe(roomOutPLine);
+                    innerPipes = GetRoomPLWLPipe(roomOutPLine);
                 }
                 if (null == innerPipes || innerPipes.Count < 1)
-                    //房间没有找到PL立管,不进行后续布置
+                    //房间没有找到PL或WL立管,不进行后续布置
                     continue;
                 var lines = DrainSysAGCommon.PolyLineToLines(room.outLine);
                 var maxLengthLine = lines.OrderByDescending(c => c.Length).First();
@@ -199,12 +199,13 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 canLayoutDirs.Add(maxSpaceDir);
             return canLayoutDirs;
         }
-        List<CreateBlockInfo> GetRoomPLPipe(Polyline roomOutLine) 
+        List<CreateBlockInfo> GetRoomPLWLPipe(Polyline roomOutLine) 
         {
             var retBlocks = new List<CreateBlockInfo>();
             foreach (var item in _createPipeBlocks) 
             {
-                if (string.IsNullOrEmpty(item.tag) || !item.tag.Contains("PL"))
+                var cond_contains = item.tag.Contains("PL") || item.tag.Contains("WL");
+                if (string.IsNullOrEmpty(item.tag) || !cond_contains)
                     continue;
                 if(roomOutLine.Contains(item.createPoint))
                     retBlocks.Add(item);

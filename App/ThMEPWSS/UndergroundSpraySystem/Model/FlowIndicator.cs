@@ -7,8 +7,6 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
@@ -72,7 +70,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 (blkName.Contains("VALVE") && blkName.Contains("76")) ||
                 (blkName.Contains("VALVE") && blkName.Contains("77")) ||
                 (blkName.Contains("VALVE") && blkName.Contains("27")) ||
-                blkName.Contains("信号阀+水流指示器") ;
+                (blkName.Contains("信号阀")&& blkName.Contains("水流指示器"));
         }
 
         private BlockReference ExplodeValve(Entity entity)
@@ -185,12 +183,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             pts.Add(new Point2d(x + 180, minY)); // high right
             pts.Add(new Point2d(x - 180, minY)); // low left
             pl.CreatePolyline(pts);
-#if DEBUG
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            {
-                currentDb.CurrentSpace.Add(pl);
-            }
-#endif
+
             return pl;
         }
         private Polyline GetRectX(double y, double minX, double maxX)
@@ -204,12 +197,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             pts.Add(new Point2d(maxX, y - 180)); // high right
             pts.Add(new Point2d(minX, y - 180)); // low left
             pl.CreatePolyline(pts);
-#if DEBUG
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            {
-                currentDb.CurrentSpace.Add(pl);
-            }
-#endif
+
             return pl;
         }
     }
