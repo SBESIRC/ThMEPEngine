@@ -9,4 +9,5 @@ message ThSUBuildingStoreyData {
     double height = 4;
     double elevation = 5;
     int32 stdFlr_no = 6;
+    double highest = 7;
 }
