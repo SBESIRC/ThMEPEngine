@@ -48,7 +48,7 @@ namespace ThAnalytics
             UnInitialize();
             if (AcApp.DocumentManager.MdiActiveDocument != null)
             {
-                if (!AcApp.DocumentManager.MdiActiveDocument.IsNamedDrawing)
+                if (AcApp.DocumentManager.MdiActiveDocument.IsNamedDrawing)
                 {
                     Name = new FileInfo(AcApp.DocumentManager.MdiActiveDocument.Name).FullName;
                 }
