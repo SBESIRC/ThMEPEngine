@@ -46,6 +46,7 @@
     <Compile Include="Command\ThFirstFloorDrainageCmd.cs" />
     <Compile Include="Command\ThBlockTagCmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
+    <Compile Include="Command\WTestCommand.cs" />
     <Compile Include="DrainageADPrivate\Data\ThTCHValveRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Data\ThValveRecognitionEngine.cs" />
     <Compile Include="DrainageADPrivate\Engine\ThCalculateDimEngine.cs" />

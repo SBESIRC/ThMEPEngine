@@ -49,3 +49,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPWSS.PressureDrainageSystem.DebugCommand))]
 [assembly: CommandClass(typeof(ThMEPWSS.HydrantConnectPipe.Command.ThHydrantConnectPipeConnectCmd))]
 [assembly: CommandClass(typeof(ThMEPWSS.PumpSectionalView.ThPumpSectionalCmdEntrance))]
+[assembly: CommandClass(typeof(ThMEPWSS.Command.WTestCommand))]
