@@ -1,65 +1,53 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
-using System.Collections.Generic;
-using System;
 
 namespace ThPlatform3D.StructPlane.Service
 {
-    internal class ThPCWallProcessService:IDisposable
+    internal class ThWallProcessService:IDisposable
     {
-        private double _pcWallBufferDistance = 1.0;
+        private double _pcWallBufferDistance = 2.0;
         private double _smallAreaTolerance = 1.0;
         private ThCADCoreNTSSpatialIndex _spatialIndex;
         private HashSet<DBObject> _others;
         private HashSet<DBObject> _garbageCollecter;        
-        //private DBObjectCollection _others;
-        public ThPCWallProcessService(DBObjectCollection others)
+
+        public ThWallProcessService(DBObjectCollection others)
         {
             _garbageCollecter = new HashSet<DBObject>();
             _others= others.OfType<DBObject>().ToHashSet();
             _spatialIndex = new ThCADCoreNTSSpatialIndex(others);
         }
+
         public void Dispose()
         {
             var objs = _garbageCollecter.Except(_others).ToCollection();
             objs.MDispose();
         }
-        public DBObjectCollection Difference(Entity pcWallPolygon)
+
+        public DBObjectCollection Difference(Entity wall)
         {
-            
-            // 用PcWall墙裁剪标准墙            
-            var enlargeObjs = Buffer(pcWallPolygon, _pcWallBufferDistance, true);
+            var objs = _spatialIndex.SelectCrossingPolygon(wall);
+            var enlargeObjs = new DBObjectCollection();
+            objs.OfType<Entity>().ForEach(e =>
+            {
+                enlargeObjs = enlargeObjs.Union(Buffer(e, _pcWallBufferDistance, true));
+            });
             AppendToGC(enlargeObjs);
             enlargeObjs = FilterSmallArea(enlargeObjs, _smallAreaTolerance);
 
-            var differenceObjs = new DBObjectCollection();
-            enlargeObjs.OfType<Entity>()
-                .ForEach(e =>
-                {
-                    var objs = _spatialIndex.SelectCrossingPolygon(e);
-                    var restObjs = e.Difference(objs, true);
-                    differenceObjs = differenceObjs.Union(restObjs);
-                });
-            AppendToGC(differenceObjs);
+            var restObjs = wall.Difference(enlargeObjs, true);
+            AppendToGC(restObjs);
+            restObjs = FilterSmallArea(restObjs, _smallAreaTolerance);
 
-            // 缩小
-            var innerBufferObjs = new DBObjectCollection();
-            differenceObjs.OfType<Entity>()
-                .ForEach(e =>
-                {
-                    innerBufferObjs = innerBufferObjs.Union(Buffer(e, -1.0 * _pcWallBufferDistance, true));
-                });
-            AppendToGC(innerBufferObjs);
-
-            //
             var results = new DBObjectCollection();
-            innerBufferObjs = FilterSmallArea(innerBufferObjs, _smallAreaTolerance);
-            innerBufferObjs.OfType<Entity>().ForEach(e =>
+            restObjs.OfType<Entity>().ForEach(e =>
             {
                 if (e is Polyline polyline)
                 {

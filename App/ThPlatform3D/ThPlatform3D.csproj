@@ -120,7 +120,7 @@
     <Compile Include="StructPlane\Service\ThGeometryQuerier.cs" />
     <Compile Include="StructPlane\Service\ThInsertBeamHandler.cs" />
     <Compile Include="StructPlane\Service\ThMultipleMarkFilter.cs" />
-    <Compile Include="StructPlane\Service\ThPCWallProcessService.cs" />
+    <Compile Include="StructPlane\Service\ThWallProcessService.cs" />
     <Compile Include="StructPlane\Service\ThPrintDrawingHeadService.cs" />
     <Compile Include="StructPlane\Service\ThPrintLayerManager.cs" />
     <Compile Include="StructPlane\Service\ThSlabFilter.cs" />

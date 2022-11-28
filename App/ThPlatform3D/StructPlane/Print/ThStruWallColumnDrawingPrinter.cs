@@ -65,7 +65,9 @@ namespace ThPlatform3D.StructPlane.Print
                 entity.Layer == ThPrintLayerManager.BelowShearWallLayerName ||
                 entity.Layer == ThPrintLayerManager.BelowShearWallHatchLayerName ||
                 entity.Layer == ThPrintLayerManager.ShearWallLayerName ||
-                entity.Layer == ThPrintLayerManager.ShearWallHatchLayerName
+                entity.Layer == ThPrintLayerManager.ShearWallHatchLayerName ||
+                entity.Layer == ThPrintLayerManager.PCWallLayer ||
+                entity.Layer == ThPrintLayerManager.PCWallHatchLayer 
                 )
                 {
                     blkIds.Add(o);

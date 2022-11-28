@@ -50,7 +50,7 @@ namespace Tianhua.Platform3D.UI
         [CommandMethod("TIANHUACAD", "_THSMBTUI_Test", CommandFlags.Modal)]
         public void _THSMBTUI_Test()
         {
-            using (var cmd = new ThStructurePlaneCmd(true,true))
+            using (var cmd = new ThStructurePlaneCmd(true))
             {
                 cmd.Execute();
             }

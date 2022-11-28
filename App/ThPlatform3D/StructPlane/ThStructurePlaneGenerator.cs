@@ -341,34 +341,39 @@ namespace ThPlatform3D.StructPlane
             var passGeos = buildAreaSevice.BuildArea(svgInput.Geos);
             svgInput.Geos = passGeos;
 
-            // 用PCwall Difference StandardWall
-            PCWallDifferenceStandardWall(svgInput.Geos);
+            // 用下层StandardWall Difference PCWall
+            var belowPCWallBoundaries = svgInput.Geos
+               .GetBelowPCWallGeos()
+               .Select(o => o.Boundary)
+               .ToCollection();
+            if(belowPCWallBoundaries.Count>0)
+            {
+                var belowStandardWallGeos = svgInput.Geos.GetBelowStandardShearwallGeos();
+                svgInput.Geos = svgInput.Geos.Except(belowStandardWallGeos).ToList();
+                svgInput.Geos.AddRange(BelowStandardWallDifferencePCWall(belowStandardWallGeos, belowPCWallBoundaries));
+            }
 
             var printer = new ThStruWallColumnDrawingPrinter(svgInput, PrintParameter);
             printer.Print(Active.Database);
             return printer;
         }
 
-        private void PCWallDifferenceStandardWall(List<ThGeometry> geos)
+        private List<ThGeometry> BelowStandardWallDifferencePCWall(
+            List<ThGeometry> belowStandardWallGeos,DBObjectCollection belowPCWallBoundaries)
         {
-            var upperPCWallGeos = geos.GetUpperPCWallGeos();
-            var belowPCWallGeos = geos.GetBelowPCWallGeos();
-            geos = geos.Except(upperPCWallGeos).ToList();
-            geos = geos.Except(belowPCWallGeos).ToList();
-            var belowStandardWalls = geos.GetBelowStandardShearwallGeos()
-                .Select(o => o.Boundary).ToCollection();
-            using (var processor = new ThPCWallProcessService(belowStandardWalls))
+            var results = new List<ThGeometry>();
+            using (var processor = new ThWallProcessService(belowPCWallBoundaries))
             {
-                belowPCWallGeos.ForEach(o =>
+                belowStandardWallGeos.ForEach(o =>
                 {
-                    var newPcWalls = processor.Difference(o.Boundary);
-                    newPcWalls.OfType<Entity>().ForEach(e =>
+                    var newWalls = processor.Difference(o.Boundary);
+                    newWalls.OfType<Entity>().ForEach(e =>
                     {
-                        var newPcWallGeo = ThGeometry.Create(e, o.Properties);
-                        geos.Add(newPcWallGeo);
+                        results.Add(ThGeometry.Create(e, o.Properties));
                     });
                 });
-            }  
+            }
+            return results;
         }
 
         private ThStruDrawingPrinter PrintStructurePlan(string svgFile,int flrNaturalNumber)

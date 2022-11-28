@@ -1,5 +1,4 @@
 ﻿using AcHelper.Commands;
-using RestSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,14 +6,12 @@ using System.IO.MemoryMappedFiles;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization;
 using System.Threading;
-using System.Threading.Tasks;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO.SVG;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using ThPlatform3D.Common;
 using ThPlatform3D.StructPlane;
-using ThPlatform3D.StructPlane.Service;
 using Tianhua.Platform3D.UI.StructurePlane;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using AcHelper;
@@ -25,16 +22,14 @@ namespace Tianhua.Platform3D.UI.Command
     public class ThStructurePlaneCmd : IAcadCommand, IDisposable
     {
         private bool _flag;
-        private bool _userSelectFile;
         public ThStructurePlaneCmd()
         {
             _flag = false;
-            _userSelectFile = false;
+
         }
-        public ThStructurePlaneCmd(bool flag,bool userSelectFile)
+        public ThStructurePlaneCmd(bool flag)
         {
             _flag = flag;
-            _userSelectFile = userSelectFile;
         }
         public void Dispose()
         {
@@ -43,7 +38,7 @@ namespace Tianhua.Platform3D.UI.Command
         public void Execute()
         {
             Active.Document.Window.Focus();
-            var fileName =_userSelectFile?SelectMiddleFile():SelectFile(_flag);
+            var fileName =SelectFile(_flag);
             if (string.IsNullOrEmpty(fileName) || fileName == "error")
             {
                 return;
@@ -71,15 +66,13 @@ namespace Tianhua.Platform3D.UI.Command
             ThDrawingParameterConfig.Instance.Storeies = ReadStoreys(storeyFile);
             // 序列化以当前名结尾的Storey.json
 
-
             // 打开成图参数设置
-            var parameterUI = new DrawingParameterSetUI();
-            AcadApp.ShowModalWindow(parameterUI);
-            if (parameterUI.IsGoOn)
+            if(_flag)
             {
+                // for demo
                 ThStopWatchService.Start();
                 // 更新 printParameter，将生成的Svg打印到图纸上
-                generator.SetDrawingType(ThDrawingParameterConfig.Instance.DrawingType); // 把成图类型传入到Generator
+                generator.SetDrawingType(ThStructurePlaneCommon.WallColumnDrawingName); // 把成图类型传入到Generator
                 printParameter.DrawingScale = ThDrawingParameterConfig.Instance.DrawingScale;
                 printParameter.DefaultSlabThick = ThDrawingParameterConfig.Instance.DefaultSlabThick;
                 printParameter.FloorSpacing = ThDrawingParameterConfig.Instance.FloorSpacing;
@@ -95,6 +88,32 @@ namespace Tianhua.Platform3D.UI.Command
                 generator.Generate();
                 ThStopWatchService.Stop();
                 ThStopWatchService.Print("成图打印时间：");
+            }
+            else
+            {
+                var parameterUI = new DrawingParameterSetUI();
+                AcadApp.ShowModalWindow(parameterUI);
+                if (parameterUI.IsGoOn)
+                {
+                    ThStopWatchService.Start();
+                    // 更新 printParameter，将生成的Svg打印到图纸上
+                    generator.SetDrawingType(ThDrawingParameterConfig.Instance.DrawingType); // 把成图类型传入到Generator
+                    printParameter.DrawingScale = ThDrawingParameterConfig.Instance.DrawingScale;
+                    printParameter.DefaultSlabThick = ThDrawingParameterConfig.Instance.DefaultSlabThick;
+                    printParameter.FloorSpacing = ThDrawingParameterConfig.Instance.FloorSpacing;
+                    printParameter.ShowSlabHatchAndMark = ThDrawingParameterConfig.Instance.ShowSlabHatchAndMark;
+                    if (ThDrawingParameterConfig.Instance.IsAllStorey)
+                    {
+                        generator.SetStdFlrNo("");
+                    }
+                    else
+                    {
+                        generator.SetStdFlrNo(ThDrawingParameterConfig.Instance.StdFlrNo);
+                    }
+                    generator.Generate();
+                    ThStopWatchService.Stop();
+                    ThStopWatchService.Print("成图打印时间：");
+                }
             }
         }
 
@@ -139,21 +158,7 @@ namespace Tianhua.Platform3D.UI.Command
         private string SelectFile(bool flag=false)
         {
            return Program.Run(flag);
-        }
-        private string SelectMiddleFile()
-        {
-            var pofo = new PromptOpenFileOptions("\n选择要成图中间文件");
-            pofo.Filter = "Ifc files (*.get)|*.get";
-            var pfnr = Active.Editor.GetFileNameForOpen(pofo);
-            if (pfnr.Status == PromptStatus.OK)
-            {
-                return pfnr.StringResult;
-            }
-            else
-            {
-                return "";
-            }
-        }
+        }        
     }
 
     static class Program
