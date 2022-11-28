@@ -23,15 +23,16 @@ public static partial class ThSUBuildingStoreyDataReflection {
     byte[] descriptorData = global::System.Convert.FromBase64String(
         string.Concat(
           "ChxUaFNVQnVpbGRpbmdTdG9yZXlEYXRhLnByb3RvGhNUaFRDSFJvb3REYXRh",
-          "LnByb3RvGh1UaFNVQnVpbGRpbmdFbGVtZW50RGF0YS5wcm90byKpAQoWVGhT",
+          "LnByb3RvGh1UaFNVQnVpbGRpbmdFbGVtZW50RGF0YS5wcm90byK6AQoWVGhT",
           "VUJ1aWxkaW5nU3RvcmV5RGF0YRIcCgRyb290GAEgASgLMg4uVGhUQ0hSb290",
           "RGF0YRIrCglidWlsZGluZ3MYAiADKAsyGC5UaFNVQnVpbGRpbmdFbGVtZW50",
           "RGF0YRIOCgZudW1iZXIYAyABKAUSDgoGaGVpZ2h0GAQgASgBEhEKCWVsZXZh",
-          "dGlvbhgFIAEoARIRCglzdGRGbHJfbm8YBiABKAViBnByb3RvMw=="));
+          "dGlvbhgFIAEoARIRCglzdGRGbHJfbm8YBiABKAUSDwoHaGlnaGVzdBgHIAEo",
+          "AWIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { global::ThTCHRootDataReflection.Descriptor, global::ThSUBuildingElementDataReflection.Descriptor, },
         new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUBuildingStoreyData), global::ThSUBuildingStoreyData.Parser, new[]{ "Root", "Buildings", "Number", "Height", "Elevation", "StdFlrNo" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::ThSUBuildingStoreyData), global::ThSUBuildingStoreyData.Parser, new[]{ "Root", "Buildings", "Number", "Height", "Elevation", "StdFlrNo", "Highest" }, null, null, null, null)
         }));
   }
   #endregion
@@ -78,6 +79,7 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
     height_ = other.height_;
     elevation_ = other.elevation_;
     stdFlrNo_ = other.stdFlrNo_;
+    highest_ = other.highest_;
     _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
   }
 
@@ -158,6 +160,18 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
     }
   }
 
+  /// <summary>Field number for the "highest" field.</summary>
+  public const int HighestFieldNumber = 7;
+  private double highest_;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+  public double Highest {
+    get { return highest_; }
+    set {
+      highest_ = value;
+    }
+  }
+
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
   public override bool Equals(object other) {
@@ -179,6 +193,7 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
     if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Height, other.Height)) return false;
     if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Elevation, other.Elevation)) return false;
     if (StdFlrNo != other.StdFlrNo) return false;
+    if (!pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.Equals(Highest, other.Highest)) return false;
     return Equals(_unknownFields, other._unknownFields);
   }
 
@@ -192,6 +207,7 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
     if (Height != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Height);
     if (Elevation != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Elevation);
     if (StdFlrNo != 0) hash ^= StdFlrNo.GetHashCode();
+    if (Highest != 0D) hash ^= pbc::ProtobufEqualityComparers.BitwiseDoubleEqualityComparer.GetHashCode(Highest);
     if (_unknownFields != null) {
       hash ^= _unknownFields.GetHashCode();
     }
@@ -231,6 +247,10 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
       output.WriteRawTag(48);
       output.WriteInt32(StdFlrNo);
     }
+    if (Highest != 0D) {
+      output.WriteRawTag(57);
+      output.WriteDouble(Highest);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(output);
     }
@@ -262,6 +282,10 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
       output.WriteRawTag(48);
       output.WriteInt32(StdFlrNo);
     }
+    if (Highest != 0D) {
+      output.WriteRawTag(57);
+      output.WriteDouble(Highest);
+    }
     if (_unknownFields != null) {
       _unknownFields.WriteTo(ref output);
     }
@@ -287,6 +311,9 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
     }
     if (StdFlrNo != 0) {
       size += 1 + pb::CodedOutputStream.ComputeInt32Size(StdFlrNo);
+    }
+    if (Highest != 0D) {
+      size += 1 + 8;
     }
     if (_unknownFields != null) {
       size += _unknownFields.CalculateSize();
@@ -318,6 +345,9 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
     }
     if (other.StdFlrNo != 0) {
       StdFlrNo = other.StdFlrNo;
+    }
+    if (other.Highest != 0D) {
+      Highest = other.Highest;
     }
     _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
   }
@@ -361,6 +391,10 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
           StdFlrNo = input.ReadInt32();
           break;
         }
+        case 57: {
+          Highest = input.ReadDouble();
+          break;
+        }
       }
     }
   #endif
@@ -401,6 +435,10 @@ public sealed partial class ThSUBuildingStoreyData : pb::IMessage<ThSUBuildingSt
         }
         case 48: {
           StdFlrNo = input.ReadInt32();
+          break;
+        }
+        case 57: {
+          Highest = input.ReadDouble();
           break;
         }
       }

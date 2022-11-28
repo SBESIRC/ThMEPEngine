@@ -37,6 +37,12 @@ namespace ThMEPHVAC.Command
         List<ObjectId> delEntityIds = new List<ObjectId>();
         List<IndoorFanVentBlock> hisIndoorFanVents;
         List<IndoorFanBlock> hisIndoorFans;
+        List<string> airSupplyOutlet = new List<string>
+        {
+            "送风口",
+            "散流器",
+            "圆形风口"
+        };
         public IndoorFanChange(Dictionary<Polyline, List<Polyline>> selectRoomLines) 
         {
             CommandName = "THSNJJHXG";
@@ -343,7 +349,7 @@ namespace ThMEPHVAC.Command
             //根据线获取长度，获取风口中心点位置
             foreach (var vent in hisIndoorFanVents)
             {
-                if (string.IsNullOrEmpty(vent.VentName) || !vent.VentName.Contains("散流器"))
+                if (string.IsNullOrEmpty(vent.VentName) || !airSupplyOutlet.Any(c=>vent.VentName.Contains(c)))
                     continue;
                 if (!ThPointVectorUtil.PointInLineSegment(vent.BlockPosion, pipeCenterLine, 1, 100))
                     continue;
@@ -358,7 +364,7 @@ namespace ThMEPHVAC.Command
             var fanReturnVentPoints = new List<Point3d>();//风口一般是只有一个
             foreach (var vent in hisIndoorFanVents)
             {
-                if (string.IsNullOrEmpty(vent.VentName) || !vent.VentName.Contains("回风口"))
+                if (string.IsNullOrEmpty(vent.VentName) || !vent.VentName.Contains("回"))
                     continue;
                 var prjPoint = ThPointVectorUtil.PointToLine(vent.BlockPosion, fanStartPoint, dir);
                 if (prjPoint.DistanceTo(vent.BlockPosion) > 100)
