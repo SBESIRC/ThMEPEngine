@@ -86,7 +86,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
                 line = line.Translation(k.Vec.Normalize() * ObliqueMPartition.DisLaneWidth / 2);
                 var line_align_backback_rest = new LineSegment();
                 tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec.Normalize(), ObliqueMPartition.DisVertCarWidth, ObliqueMPartition.DisVertCarLength
-                    , ref line_align_backback_rest, true, false, false, false, true, true, false, false, false, true, false, false, false, true);
+                    , ref line_align_backback_rest, true, false, false, false, false, false, false, false, false, false, false, false, false, true);
             }
             tmpro.UpdateLaneBoxAndSpatialIndexForGenerateVertLanes();
             vertlanes = tmpro.GeneratePerpModuleLanes(ObliqueMPartition.DisParallelCarWidth + ObliqueMPartition.DisLaneWidth / 2, ObliqueMPartition.DisParallelCarLength, false);
@@ -99,7 +99,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
                 line = line.Translation(k.Vec.Normalize() * ObliqueMPartition.DisLaneWidth / 2);
                 var line_align_backback_rest = new LineSegment();
                 tmpro.GenerateCarsAndPillarsForEachLane(line, k.Vec, ObliqueMPartition.DisParallelCarLength, ObliqueMPartition.DisParallelCarWidth
-                    , ref line_align_backback_rest, true, false, false, false, true, true, false);
+                    , ref line_align_backback_rest, true, false, false, false, false, false, false,false,false,false);
             }
             _cars.AddRange(tmpro.Cars.Select(e => e.Polyline));
             _columns.AddRange(tmpro.Pillars);
@@ -109,8 +109,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         public void DeformLanes()
         {
             //return;
-            InitLaneDeformationParas();
             var vehiclesdata = new VehicleLaneData(VehicleLanes);
+            vehiclesdata.VehicleLaneWidth = ObliqueMPartition.DisLaneWidth / 2;
+            vehiclesdata.Boundary = BOUND;
+            vehiclesdata.Blocks = obstacles;
 
             //序列化
             var dir = Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -153,9 +155,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout.OPostProcess
         }
         void InitLaneDeformationParas()
         {
-            VehicleLane.VehicleLaneWidth = ObliqueMPartition.DisLaneWidth / 2;
-            VehicleLane.Boundary = BOUND;
-            VehicleLane.Blocks = obstacles;
+
         }
         public Polygon CalBound()
         {

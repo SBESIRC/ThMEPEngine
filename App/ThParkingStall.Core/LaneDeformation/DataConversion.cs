@@ -45,6 +45,9 @@ namespace ThParkingStall.Core.LaneDeformation
             VehicleLanes=vehicleLanes;
         }
         public List<VehicleLane> VehicleLanes = new List<VehicleLane>();
+        public double VehicleLaneWidth;       //这个放这里和放VehicleLane类里面都可以
+        public Polygon Boundary;      //地库外框
+        public List<Polygon> Blocks;   //墙体等障碍物
     }
 
     //车道
@@ -65,9 +68,6 @@ namespace ThParkingStall.Core.LaneDeformation
                                                                               //public double Width;//最小车道宽度 
         //static:方便数据传递
         //车道线宽度的一半
-        static public double VehicleLaneWidth;       //这个放这里和放VehicleLane类里面都可以
-        static public Polygon Boundary;      //地库外框
-        static public List<Polygon> Blocks;   //墙体等障碍物
     }
     //车位的集合块
     [Serializable]
