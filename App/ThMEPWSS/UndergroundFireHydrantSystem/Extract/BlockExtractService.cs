@@ -190,7 +190,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         {
             if (ent is BlockReference br)
             {
-                return xclip.Contains(br.GeometricExtents.ToRectangle());
+                try
+                {
+                    return xclip.Contains(br.GeometricExtents.ToRectangle());
+                }
+                catch (Exception ex)
+                {
+                    return false; ;
+                }
             }
             else
             {
