@@ -232,7 +232,7 @@ namespace ThPlatform3D.StructPlane.Service
                     continue;
                 }
                 // 根据文字中心、文字移动方向和宽度,获取标注两边的线
-                var textCenter = beamText.GetCenterPointByOBB();
+                var textCenter = beamText.AlignmentPoint; //GetCenterPointByOBB
                 var envelop = textCenter.CreateRectangle(markMoveDir, beamWidth * 1.1, 1.0);
                 var beamCurves = GetMarkAndLinePair(envelop, beamWidth);
                 results.Add(beamText, beamCurves);

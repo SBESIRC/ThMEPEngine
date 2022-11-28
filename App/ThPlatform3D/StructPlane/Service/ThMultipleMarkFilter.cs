@@ -45,15 +45,9 @@ namespace ThPlatform3D.StructPlane.Service
                 .Where(o=>o.Count>1) // 如果只有一个标注就不要过滤了
                 .ForEach(o =>
             {
-                // 把具有相邻线的文字找出来
-                var beamMarks = o.Keys.ToCollection();
+                // 把具有相邻线的文字找出来               
                 var beamSides = new DBObjectCollection();
                 o.ForEach(m => beamSides.AddRange(m.Value));
-
-                if (beamMarks.OfType<DBText>().Where(k => k.GetCenterPointByOBB().DistanceTo(new Point3d(75447.7215, 55596.0808, 0)) <= 200.0).Any())
-                {
-                    // for debug
-                }
 
                 // 把相同梁标注的边线分成两组
                 var sideGroups = new List<DBObjectCollection>();
@@ -79,13 +73,23 @@ namespace ThPlatform3D.StructPlane.Service
                             //.OfType<DBText>()
                             //.OrderBy(d => d.Position.GetProjectPtOnLine(res.Item1, res.Item2)
                             //    .DistanceTo(res.Item1)).ToCollection();
-                            // 保留第一个                    
-                            for (int i = 1; i < beamMarks.Count; i++)
+                            // 保留第一个
+                            var bearmMarkGroups = o.Keys
+                            .OfType<DBText>()
+                            .GroupBy(x => x.TextString);
+                            bearmMarkGroups.ForEach(g =>
                             {
-                                removeTexts.Add(beamMarks[i]);
-                            }
-                            // 把保留的第一个文字居中
-                            Move(beamMarks.OfType<DBText>().First(), commonPart.Item1, commonPart.Item2);
+                               var group = g.ToCollection(); // 具有相同标注的一组
+                               if(group.Count>1)
+                                {
+                                    for (int i = 1; i < group.Count; i++)
+                                    {
+                                        removeTexts.Add(group[i]);
+                                    }
+                                    // 把保留的第一个文字居中
+                                    Move(group.OfType<DBText>().First(), commonPart.Item1, commonPart.Item2);
+                                }
+                            });
                         }
                     }
                 }
@@ -198,7 +202,7 @@ namespace ThPlatform3D.StructPlane.Service
 
         private static void Move(DBText text, Point3d lineSp, Point3d lineEp)
         {
-            var center = text.GetCenterPointByOBB();
+            var center = text.AlignmentPoint;
             var projectionpt = center.GetProjectPtOnLine(lineSp, lineEp);
             var midPt = lineSp.GetMidPt(lineEp);
             var mt = Matrix3d.Displacement(projectionpt.GetVectorTo(midPt));

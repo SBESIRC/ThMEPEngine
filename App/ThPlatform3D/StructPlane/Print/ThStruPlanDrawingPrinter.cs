@@ -64,7 +64,6 @@ namespace ThPlatform3D.StructPlane.Print
             // 双梁是要单独处理的
             var dblRowBeamMarks = FilterDoubleRowBeamMarks(_geos.GetBeamMarks());
             _geos = _geos.Except(dblRowBeamMarks.SelectMany(o => o)).ToList();
-            dblRowBeamMarks.SelectMany(o => o).ForEach(o => UpdateBeamText(o));
             #endregion
 
             // 转换成块的文字集合

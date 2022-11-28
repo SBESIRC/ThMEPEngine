@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
-using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -14,43 +13,52 @@ namespace ThPlatform3D.StructPlane.Service
     {
         public List<DBObjectCollection> Handle(DBObjectCollection beamTexts)
         {
-            var groups = Group(beamTexts);
-            return groups
-                .Where(g => g.Count > 1)
-                .Where(g => IsDoubleRowBeamMark(g)) // 按标高不同来判断是不是双梁
-                .Select(g => Sort(g))
-                .ToList();
+            try
+            {           
+                var groups = Group(beamTexts);
+                return groups
+                    .Where(g => g.Count > 1)
+                    .Where(g => IsDoubleRowBeamMark(g)) // 按标高不同来判断是不是双梁
+                    .Select(g => Sort(g))
+                    .ToList();
+            }
+            catch
+            {
+            }
+            return new List<DBObjectCollection>();
         }
 
         private bool IsDoubleRowBeamMark(DBObjectCollection beamTexts)
         {
             // 业务叫双梁标注，但实际Case会有三梁或，四梁
-            try
+            var elevations = beamTexts
+                   .OfType<DBText>()
+                   .Select(o => GetBeamElevation(o.TextString))
+                   .ToList();
+            bool isSameElevaton = true;
+            for (int i = 1; i < elevations.Count; i++)
             {
-                var elevations = beamTexts.OfType<DBText>().Select(o => o.TextString.GetElevation().Value).ToList();
-                bool isSameElevaton = true;
-                for (int i = 1; i < elevations.Count; i++)
+                if (Math.Abs(elevations[i] - elevations[0]) > 1.0)
                 {
-                    if (Math.Abs(elevations[i] - elevations[0]) > 1.0)
-                    {
-                        isSameElevaton = false;
-                        break;
-                    }
+                    isSameElevaton = false;
+                    break;
                 }
-                return !isSameElevaton;
             }
-            catch
-            {
-            }
-            return false;
+            return !isSameElevaton;
         }
 
         private DBObjectCollection Sort(DBObjectCollection beamTexts)
         {
             return beamTexts
                 .OfType<DBText>()
-                .OrderByDescending(o => o.TextString.GetElevation().Value)
+                .OrderByDescending(o => GetBeamElevation(o.TextString))
                 .ToCollection();
+        }
+
+        private double GetBeamElevation(string beamSpec)
+        {
+            var elevation = beamSpec.GetElevation();
+            return elevation.HasValue ? elevation.Value : 0.0;
         }
 
         private List<DBObjectCollection> Group(DBObjectCollection texts)
@@ -64,21 +72,19 @@ namespace ThPlatform3D.StructPlane.Service
     {
         private double TextParallelTolerance = 1.0; // 文字平行容差
         private double ClosestDistanceTolerance = 50.0; // 文字中心到文字中心的距离范围
-        private Dictionary<DBText, Point3d> TextCenterDict { get; set; }
+        private Dictionary<DBText, Point3d> _textCenterDict;
         public List<DBObjectCollection> Groups { get; private set; }
         public ThFullOverlapBeamMarkGrouper(DBObjectCollection beamMarks)
         {
             Groups = new List<DBObjectCollection>();
-            TextCenterDict = GetTextCenter(beamMarks)
-                .Where(o => o.Value.HasValue)
-                .ToDictionary(item=>item.Key,item=>item.Value.Value);            
+            _textCenterDict = GetTextCenter(beamMarks);     
         }
         public void Group()
         {
             // 按文字中心靠近
-            foreach(var item in TextCenterDict)
+            foreach(var item in _textCenterDict)
             {
-                if(IsGrouped(item.Key))
+                if (IsGrouped(item.Key))
                 {
                     continue;
                 }                
@@ -93,7 +99,7 @@ namespace ThPlatform3D.StructPlane.Service
 
         private DBObjectCollection GetCloseObjs(Point3d textCenter,double radius)
         {
-            return TextCenterDict
+            return _textCenterDict
                 .Where(o => o.Value.DistanceTo(textCenter) <= radius)
                 .Select(o => o.Key)
                 .ToCollection();
@@ -104,35 +110,12 @@ namespace ThPlatform3D.StructPlane.Service
             return Groups.Where(o => o.Contains(text)).Any();
         }
 
-        private DBObjectCollection Query(ThCADCoreNTSSpatialIndex spatialIndex, Polyline outline)
+        private Dictionary<DBText,Point3d> GetTextCenter(DBObjectCollection texts)
         {
-            return spatialIndex.SelectCrossingPolygon(outline);
-        }
-
-        private Polyline CreateEnvelope(Point3d center,double length,double width)
-        {
-            return center.CreateRectangle(length,width);
-        }
-
-        private Point3d? TextCenter(DBText dbtext)
-        {
-            Point3d? result = null;
-            var obb = dbtext.TextOBB();
-            if (obb.Closed && obb.NumberOfVertices >= 4)
-            {
-                result = obb.GetPoint3dAt(0).GetMidPt(obb.GetPoint3dAt(2));
-            }
-            obb.Dispose();
-            return result;
-        }
-        private Dictionary<DBText,Point3d?> GetTextCenter(DBObjectCollection texts)
-        {
-            var results = new Dictionary<DBText,Point3d?>();
-            texts.OfType<DBText>().ForEach(e =>
-            {
-                var center = TextCenter(e);
-                results.Add(e, center);
-            });
+            var results = new Dictionary<DBText,Point3d>();
+            texts
+                .OfType<DBText>()
+                .ForEach(e => results.Add(e, e.AlignmentPoint));
             return results;
         }
     }

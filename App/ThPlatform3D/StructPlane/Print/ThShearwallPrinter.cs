@@ -90,7 +90,7 @@ namespace ThPlatform3D.StructPlane.Print
             return new HatchPrintConfig
             {
                 PatternName = "S_ASPHALTUM",
-                PatternScale = 20.0,
+                PatternScale = 30.0,
                 LayerName = ThPrintLayerManager.PassHeightWallHatchLayerName,
             };
         }
@@ -108,7 +108,7 @@ namespace ThPlatform3D.StructPlane.Print
             return new HatchPrintConfig
             {
                 PatternName = "CROSS",
-                PatternScale = 10.0,
+                PatternScale = 50.0,
                 LayerName = ThPrintLayerManager.WindowWallHatchLayerName,
             };
         }
