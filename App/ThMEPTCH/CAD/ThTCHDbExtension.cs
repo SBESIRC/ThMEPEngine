@@ -228,6 +228,34 @@ namespace ThMEPTCH.CAD
             }
         }
 
+        public static void LoadText(this Database database, ObjectId tch, out Point3d location, out string content)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                content = "";
+                location = Point3d.Origin;
+                var dxfData = GetDXFData(tch);
+                foreach (TypedValue tv in dxfData.AsArray())
+                {
+                    switch ((DxfCode)tv.TypeCode)
+                    {
+                        case (DxfCode)1:
+                            {
+                                content = (string)tv.Value;
+                            }
+                            break;
+                        case (DxfCode)10:
+                            {
+                                location = (Point3d)tv.Value;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
         private static void Override(TArchWall wall, ObjectId tch)
         {
             // 从XData获取墙高和底高

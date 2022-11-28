@@ -483,7 +483,7 @@ namespace ThMEPTCH.Services
                 var thisFloorDoors = floorEntitys.OfType<DoorEntity>().Select(c => c.DBArchEntity).Cast<TArchDoor>().ToList();
                 var thisFloorWindows = floorEntitys.OfType<WindowEntity>().Select(c => c.DBArchEntity).Cast<TArchWindow>().ToList();
                 var walls = entityConvert.WallDataDoorWindowRelation(thisFloorWalls, thisFloorDoors, thisFloorWindows, moveVector);
-                floor.FloorEntitys.AddRange(walls);                
+                floor.FloorEntitys.AddRange(walls);
 
                 var allSlabs = new List<ThTCHSlabData>();
                 var thisRailingEntitys = new Dictionary<Polyline, ThTCHRailingData>();
@@ -555,11 +555,11 @@ namespace ThMEPTCH.Services
                         room.BuildElement.Root.GlobalId = prjId + item.Id;
                         rooms.Add(room);
                     }
-                    else if(item.EntitySystem.Contains("轴网"))
+                    else if (item.EntitySystem.Contains("轴网"))
                     {
-                        var aixEntity = new FloorCurveEntity(item.Id, 
+                        var aixEntity = new FloorCurveEntity(item.Id,
                             item.EntityCurve.GetTransformedCopy(matrix),
-                            item.EntitySystem,item.Property);
+                            item.EntitySystem, item.Property);
                         floor.FloorEntitys.Add(aixEntity);// 轴网需要构建出来
                     }
                 }
@@ -760,14 +760,13 @@ namespace ThMEPTCH.Services
                     addSlab.WrapSurfaceThickness = desProp.WrapSurfaceThickness;
                 }
                 var insertText = slabTextSpIndex.SelectCrossingPolygon(item);
-                var insertText1 = slabTextSpIndex.SelectWindowPolygon(item);
                 if (insertText.Count < 1)
                 {
                     allSlabs.Add(addSlab);
                     continue;
                 }
                 var height = 0.0;
-                foreach (var obj in insertText)
+                foreach (Entity obj in insertText)
                 {
                     if (obj is DBText text)
                     {
@@ -783,6 +782,15 @@ namespace ThMEPTCH.Services
                             continue;
                         hisCoordinates.Add(mText.Location);
                         double.TryParse(mText.Contents, out height);
+                        break;
+                    }
+                    else if (obj.IsTCHText())
+                    {
+                        obj.Database.LoadText(obj.ObjectId, out Point3d location, out string content);
+                        if (hisCoordinates.Any(c => c == location))
+                            continue;
+                        hisCoordinates.Add(location);
+                        double.TryParse(content, out height);
                         break;
                     }
                 }
@@ -803,6 +811,12 @@ namespace ThMEPTCH.Services
                 {
                     var innerSlab = allSlabs[j];
                     var pLine = innerSlab.OutPolyline;
+                    // 根据图层名提前返回楼板
+                    if (pLine.Layer.Equals("TH-楼板"))
+                    {
+                        continue;
+                    }
+
                     if (pLine.Area < 10)
                     {
                         hisIndex.Add(j);
@@ -920,7 +934,7 @@ namespace ThMEPTCH.Services
             {
                 var axisLineEngine = new ThTCHAxisLineExtractionEngine();
                 axisLineEngine.Extract(acadDb.Database);
-                cadCurveEntities.AddRange(axisLineEngine.Results.Select(o=>o.Data).OfType<FloorCurveEntity>());
+                cadCurveEntities.AddRange(axisLineEngine.Results.Select(o => o.Data).OfType<FloorCurveEntity>());
 
                 var axisGridDimensionEngine = new ThTCHAxisGridDimensionExtractionEngine();
                 axisGridDimensionEngine.Extract(acadDb.Database);

@@ -63,7 +63,12 @@ namespace ThMEPTCH.Services
                 }
             }
 
-            // 没有位于边缘的顶点/仅有一点位于边缘位置
+            if (endIndex < startIndex)
+            {
+                (endIndex, startIndex) = (startIndex, endIndex);
+            }
+
+            // 有两个及以上顶点位于边缘
             if (startIndex != -1 && startIndex != endIndex && !(startIndex == 0 && endIndex == vertices.Count - 1))
             {
                 OnBoundary = true;
@@ -75,7 +80,7 @@ namespace ThMEPTCH.Services
                     {
                         newVertices.Add(vertices[i]);
                     }
-                    for (var i = vertices.Count - 1; i >= endIndex; i--)
+                    for (var i = vertices.Count - 2; i >= endIndex; i--)
                     {
                         newVertices.Add(vertices[i]);
                     }
@@ -88,7 +93,14 @@ namespace ThMEPTCH.Services
                     }
                 }
                 // 楼板内部Polyline
-                DescendingFix = newVertices.CreatePolyline(false);
+                if (newVertices.Count > 0)
+                {
+                    DescendingFix = newVertices.CreatePolyline(false);
+                }
+                else
+                {
+                    OnBoundary = false;
+                }
             }
         }
 

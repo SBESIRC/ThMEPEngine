@@ -1,8 +1,8 @@
-﻿using System;
-using ThMEPEngineCore.Engine;
+﻿using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPTCH.CAD
 {
@@ -33,12 +33,19 @@ namespace ThMEPTCH.CAD
                     Geometry = e.GetTransformedCopy(matrix),
                 });
             }
+            else if(e.IsTCHText() && CheckLayerValid(e))
+            {
+                results.Add(new ThRawIfcAnnotationElementData()
+                {
+                    Geometry = e,
+                });
+            }
             return results;
         }
 
         public override bool IsAnnotationElement(Entity e)
         {
-            return (e is DBText) || (e is MText);
+            return (e is DBText) || (e is MText) ;
         }
     }
 }
