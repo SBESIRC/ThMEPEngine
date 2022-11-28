@@ -62,7 +62,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var flowPts = flowIndicator.CreatePts(sprayIn);
  
             var objs = flowIndicator.CreatBlocks();
-            pipeLines.PipeLineSplit(flowPts);
+            pipeLines.PipeLineSplit(flowPts,1.0,100);
 
             pipeLines.CreatePtDic(sprayIn);
             DicTools.CreatePtTypeDic(flowPts, "Flow", sprayIn);

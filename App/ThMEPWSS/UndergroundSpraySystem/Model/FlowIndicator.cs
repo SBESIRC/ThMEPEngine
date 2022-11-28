@@ -119,7 +119,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 if (db is BlockReference br)
                 {
-                    result.Add(GetFlowRect(br));
+                    var rect = GetFlowRect(br);
+                    using (AcadDatabase currentDb = AcadDatabase.Active())
+                    {
+                        currentDb.CurrentSpace.Add(rect);
+                    }
+                        result.Add(rect);
                 }
             }
             return result;

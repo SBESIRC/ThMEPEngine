@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NPOI.HSSF.UserModel;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using ThMEPWSS.Uitl.ExtensionsNs;
@@ -285,6 +286,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 q.Enqueue(pt);
                 HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
                 visited.Add(pt);
+                bool hasFlow = false;
                 while (q.Count > 0)
                 {
                     var curPt = q.Dequeue();
@@ -297,6 +299,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         if (sprayIn.PtTypeDic[curPt].Contains("Flow"))
                         {
                             flowPts.Add(pt);
+
                         }
                     }
 
@@ -325,6 +328,25 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         visited2.Add(adj);
                         q.Enqueue(adj);
                     }
+                }
+                string flowType="";
+                if (hasFlow)
+                {
+                    foreach(var tpt in termPts)
+                    {
+                        
+                        foreach (var fpt in sprayIn.FlowTypeDic.Keys)
+                        {
+                            if (fpt._pt.DistanceTo(tpt._pt) < 1000)
+                            {
+                                flowType = sprayIn.FlowTypeDic[fpt];
+                                break;
+                            }
+                        }
+                        if (!flowType.Equals(""))
+                            spraySystem.FlowDIc.Add(tpt, flowType);
+                    }
+                    
                 }
                 if (termPts.Count != 0)
                 {

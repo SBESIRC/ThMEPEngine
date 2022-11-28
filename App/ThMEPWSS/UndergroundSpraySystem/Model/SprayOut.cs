@@ -25,7 +25,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         public List<AlarmValveSys> AlarmValves { get; set; }
         public List<FireDistrictRight> FireDistricts { get; set; }
-        public List<FireDistrictLeft> FireDistrictLefts { get; set; }
         public List<WaterPump>  WaterPumps{ get; set; }
         public List<Line> SupportLines { get; set; }
         public SprayOut(Point3d insertPt)
@@ -40,7 +39,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             SprayBlocks = new List<SprayBlock>();
             AlarmValves = new List<AlarmValveSys>();
             FireDistricts = new List<FireDistrictRight>();
-            FireDistrictLefts = new List<FireDistrictLeft>();
             WaterPumps = new List<WaterPump>();
             SupportLines = new List<Line>();
         }
@@ -88,10 +86,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 alarmValve.Insert(acadDatabase);
             }
             foreach(var fire in FireDistricts)
-            {
-                fire.InsertBlock(acadDatabase);
-            }
-            foreach (var fire in FireDistrictLefts)
             {
                 fire.InsertBlock(acadDatabase);
             }

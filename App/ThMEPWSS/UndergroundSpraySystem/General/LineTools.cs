@@ -340,6 +340,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                         }
                     }
                 }
+                else
+                    ;
             }
 
             return pipeLineList;

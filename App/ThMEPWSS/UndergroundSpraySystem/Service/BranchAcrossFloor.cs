@@ -159,8 +159,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     flowType = spraySystem.FlowDIc[tpt];
                                 }
 
-                                var fireDistrict = new FireDistrictLeft(firePt, termPt1,DN,hasFlow,flowType);
-                                sprayOut.FireDistrictLefts.Add(fireDistrict);
+                                var fireDistrict = new FireDistrictRight(firePt, termPt1,DN,hasFlow,flowType);
+                                sprayOut.FireDistricts.Add(fireDistrict);
                             }
                             index++;
                         }
@@ -341,8 +341,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                         hasFlow = true;
                                         flowType = spraySystem.FlowDIc[tpt];
                                     }
-                                    var fireDistrict = new FireDistrictLeft(firePt, termPt1, "", hasFlow, flowType);
-                                    sprayOut.FireDistrictLefts.Add(fireDistrict);
+                                    var fireDistrict = new FireDistrictRight(firePt, termPt1, "", hasFlow, flowType);
+                                    sprayOut.FireDistricts.Add(fireDistrict);
                                 }
 
                             }
@@ -514,8 +514,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 hasFlow = true;
                                 flowType = spraySystem.FlowDIc[tpt];
                             }
-                            var fireDistrict = new FireDistrictLeft(firePt, termPt1,"",hasFlow,flowType);
-                            sprayOut.FireDistrictLefts.Add(fireDistrict);
+                            var fireDistrict = new FireDistrictRight(firePt, termPt1,"",hasFlow,flowType);
+                            sprayOut.FireDistricts.Add(fireDistrict);
                         }
                         index++;
                     }

@@ -871,7 +871,6 @@
     <Compile Include="UndergroundFireHydrantSystem\Service\ThPointCountService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Service\ThTextSet.cs" />
     <Compile Include="UndergroundSpraySystem\Block\AlarmValveSys.cs" />
-    <Compile Include="UndergroundSpraySystem\Block\FireDistrictLeft.cs" />
     <Compile Include="UndergroundSpraySystem\Block\FireDistrictRight.cs" />
     <Compile Include="UndergroundSpraySystem\Block\SprayBlock.cs" />
     <Compile Include="UndergroundSpraySystem\Block\Text.cs" />

@@ -113,8 +113,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 hasFlow = true;
                                 flowType = spraySystem.FlowDIc[tpt];
                             }
-                            var fireDistrict = new FireDistrictLeft(firePt, termPt1,"",hasFlow,flowType);
-                            sprayOut.FireDistrictLefts.Add(fireDistrict);
+                            var fireDistrict = new FireDistrictRight(firePt, termPt1,"",hasFlow,flowType);
+                            sprayOut.FireDistricts.Add(fireDistrict);
                         }
                         index++;
                         sprayOut.SupportLines.Add(new Line(fireStpt, tpt._pt));
@@ -293,14 +293,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                     foreach (var cpt in spraySystem.BranchThroughDic[tpt])
                     {
+                        var termPt1 = sprayIn.TermPtDic[cpt];
+                        if (termPt1.PipeNumber.IsNullOrEmpty()) continue;
                         var ptFloor = Convert.ToInt32(cpt._pt.GetFloor(sprayIn.FloorRectDic).Last().ToString());//获取当前点的楼层号
-                        firePt = new Point3d(fireStpt.X+ 5500*2 + 5500* throughIndex, fireStpt.Y + (currentFloor - ptFloor) * sprayIn.FloorHeight, 0);//firePt.OffsetY((currentFloor - ptFloor) * sprayIn.FloorHeight);
+                        firePt = new Point3d(fireStpt.X+ 5500 + 5500* throughIndex, fireStpt.Y + (currentFloor - ptFloor) * sprayIn.FloorHeight, 0);//firePt.OffsetY((currentFloor - ptFloor) * sprayIn.FloorHeight);
 
                         if (!sprayIn.TermPtDic.ContainsKey(cpt))
                         {
                             continue;
                         }
-                        var termPt1 = sprayIn.TermPtDic[cpt];
                         var pt1X = fireStpt.X - 500 * (index + 1);
                         if(currentFloor> ptFloor) pt1X = fireStpt.X + 500 * (index + 1);//向上跨层
                         var pt1 = new Point3d(pt1X, stPt.Y, 0);
@@ -314,13 +315,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         throughIndex++;
                         bool hasFlow = false;
                         string flowType = "";
-                        if (spraySystem.FlowDIc.ContainsKey(tpt))
+                        if (spraySystem.FlowDIc.ContainsKey(cpt))
                         {
                             hasFlow = true;
-                            flowType = spraySystem.FlowDIc[tpt];
+                            flowType = spraySystem.FlowDIc[cpt];
                         }
-                        var fireDistrict = new FireDistrictLeft(firePt, termPt1,"",hasFlow,flowType);
-                        sprayOut.FireDistrictLefts.Add(fireDistrict);
+                        var fireDistrict = new FireDistrictRight(firePt, termPt1,"",hasFlow,flowType);
+                        sprayOut.FireDistricts.Add(fireDistrict);
                     }
                     index++;
 
