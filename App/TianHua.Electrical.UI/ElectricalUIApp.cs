@@ -9,6 +9,7 @@ using TianHua.Electrical.UI.EarthingGrid;
 using TianHua.Electrical.UI.BlockConvert;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using TianHua.Electrical.UI.UI;
 
 namespace TianHua.Electrical.UI
 {
@@ -16,17 +17,21 @@ namespace TianHua.Electrical.UI
     {
         private fmSmokeLayout SmokeLayoutUI { get; set; }
         private BlockConvertUI UiCapitalConverter { get; set; }
+        private ChargerDistributionUI ChargerDistributionUI { get; set; }
+
 
         public void Initialize()
         {
             SmokeLayoutUI = null;
             UiCapitalConverter = null;
+            ChargerDistributionUI = null;
         }
 
         public void Terminate()
         {
             SmokeLayoutUI = null;
             UiCapitalConverter = null;
+            ChargerDistributionUI = null;
         }
 
         [CommandMethod("TIANHUACAD", "THYWG", CommandFlags.Modal)]
@@ -134,6 +139,20 @@ namespace TianHua.Electrical.UI
                 cmd.Execute();
             }
         }
+
+        /// <summary>
+        /// 充电桩配电平面
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THCDZPD", CommandFlags.Modal)]
+        public void THParkLightUI()
+        {
+            if (ChargerDistributionUI == null)
+            {
+                ChargerDistributionUI = new ChargerDistributionUI();
+            }
+            AcadApp.ShowModelessWindow(ChargerDistributionUI);
+        }
+
         /// <summary>
         /// 防雷接地网
         /// </summary>

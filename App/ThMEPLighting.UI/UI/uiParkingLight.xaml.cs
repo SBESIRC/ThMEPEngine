@@ -36,6 +36,7 @@ namespace ThMEPLighting.UI.UI
         {
             PickParkingBlockLayers(true);
         }
+
         private void btnPickBlockModel_Click(object sender, RoutedEventArgs e)
         {
             PickParkingBlockNames(false);
@@ -45,6 +46,7 @@ namespace ThMEPLighting.UI.UI
         {
             PickParkingBlockNames(true);
         }
+
         private void PickParkingBlockLayers(bool isExternal)
         {
             var strLayer = PickParkingBlockLayerName(isExternal, out string blockName);
@@ -81,6 +83,7 @@ namespace ThMEPLighting.UI.UI
             if (isAddToView)
                 parkingLightView.PickBlockNames.Add(new MultiCheckItem(blockName, blockName, true));
         }
+
         string PickParkingBlockLayerName(bool isExternal,out string blockName) 
         {
             string layerName = string.Empty;
@@ -125,6 +128,7 @@ namespace ThMEPLighting.UI.UI
         {
             BtnClick(false);
         }
+
         private void BtnClick(bool isLight) 
         {
             if (!base.CheckInputData())
@@ -151,6 +155,7 @@ namespace ThMEPLighting.UI.UI
                 FormUtil.EnableForm(gridForm);
             }
         }
+
         private void SetConfig(bool isLight) 
         {
             if (isLight)
@@ -181,6 +186,7 @@ namespace ThMEPLighting.UI.UI
                 ThParkingStallService.Instance.GroupMaxLightCount = parkingLightView.GroupMaxCount;
             }
         }
+
         void AddBlockNames() 
         {
             if (parkingLightView.PickBlockNames != null && parkingLightView.PickBlockNames.Count > 0)
@@ -193,6 +199,7 @@ namespace ThMEPLighting.UI.UI
                 }
             }
         }
+
         void AddLayerNames()
         {
             if (parkingLightView.PickLayerNames != null && parkingLightView.PickLayerNames.Count > 0)
@@ -205,6 +212,7 @@ namespace ThMEPLighting.UI.UI
                 }
             }
         }
+
         void FocusToCAD()
         {
             //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
@@ -236,6 +244,7 @@ namespace ThMEPLighting.UI.UI
             }
             return errorMsg;
         }
+
         bool HaveSelectBlock() 
         {
             bool haveSelectBlock = false;
@@ -249,6 +258,7 @@ namespace ThMEPLighting.UI.UI
             }
             return haveSelectBlock;
         }
+
         bool HaveSelectLayer() 
         {
             bool haveSelectLayer = false;
@@ -272,6 +282,7 @@ namespace ThMEPLighting.UI.UI
         {
             HideLayer("AI-车位照度", true);
         }
+
         /// <summary>
         /// 图层的显隐
         /// </summary>

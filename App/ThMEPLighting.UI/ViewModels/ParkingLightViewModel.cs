@@ -131,6 +131,7 @@ namespace ThMEPLighting.UI.ViewModels
             get { return _selectScale; }
             set { _selectScale = value;this.RaisePropertyChanged(); }
         }
+
         private ObservableCollection<MultiCheckItem> _pickLayerNames = new ObservableCollection<MultiCheckItem>();
         public ObservableCollection<MultiCheckItem> PickLayerNames 
         {
@@ -151,6 +152,7 @@ namespace ThMEPLighting.UI.ViewModels
                 this.RaisePropertyChanged();
             }
         }
+
         RelayCommand<string> listCheckedChange;
         public ICommand ListCheckedChange
         {

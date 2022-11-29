@@ -111,6 +111,9 @@
     <Compile Include="ThBroadcast\ThBroadcastUI.xaml.cs">
       <DependentUpon>ThBroadcastUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\ChargerDistributionUI.xaml.cs">
+      <DependentUpon>ChargerDistributionUI.xaml</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="fmSmokeLayout.resx">
       <DependentUpon>fmSmokeLayout.cs</DependentUpon>
     </EmbeddedResource>
@@ -288,6 +291,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="ThBroadcast\ThBroadcastUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\ChargerDistributionUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
