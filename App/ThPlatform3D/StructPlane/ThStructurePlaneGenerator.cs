@@ -308,6 +308,7 @@ namespace ThPlatform3D.StructPlane
             var btr = new BlockTableRecord()
             {                
                 Name = blkName,
+                Explodable=false,
             };
             objs.OfType<Entity>().ForEach(o => btr.AppendEntity(o));
             var blkId = bt.Add(btr);
