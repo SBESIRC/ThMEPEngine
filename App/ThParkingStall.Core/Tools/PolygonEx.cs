@@ -28,5 +28,15 @@ namespace ThParkingStall.Core.Tools
             var y = polygon.Coordinates.Average(coor => coor.Y);
             return new Coordinate(x, y);
         }
+        public static List<LineSegment> ToLineSegments(this Polygon polygon)
+        {
+            var lineSegs = polygon.Shell.ToLineSegments();
+            foreach(var hole in polygon.Holes)
+            {
+                lineSegs.AddRange(hole.ToLineSegments());
+            }
+            return lineSegs;
+
+        }
     }
 }

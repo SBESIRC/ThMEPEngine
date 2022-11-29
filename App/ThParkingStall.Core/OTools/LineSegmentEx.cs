@@ -108,6 +108,9 @@ namespace ThParkingStall.Core.OTools
 
             return dirThis.Distance(dirOther) < tol || dirThis.Distance(dirOther.Negate()) < tol;
         }
-
+        public static Envelope GetEnvelope(this LineSegment lineSegment)
+        {
+            return new Envelope(lineSegment.P0, lineSegment.P1);
+        }
     }
 }
