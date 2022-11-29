@@ -144,6 +144,12 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" Guid="{3A4804C4-979C-4633-9E0E-CF2FD79D86C2}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" Source="$(var.AutoloaderContentsPath)\Support\加气混凝土.pat" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PAT_S_CROSS" Guid="{F698AACF-A9AE-4F3A-A684-9A41D8F58DD2}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PAT_S_CROSS" Source="$(var.AutoloaderContentsPath)\Support\S_CROSS.pat" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_PAT_S_ASPHALTUM" Guid="{53BD9328-DFE0-4D00-8E5A-B839FBF2B440}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_PAT_S_ASPHALTUM" Source="$(var.AutoloaderContentsPath)\Support\S_ASPHALTUM.pat" KeyPath="yes" />
+            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_SuperBoundaryConfig" Guid="{0FCFE576-2968-4A42-8EAD-4DD44B9F948B}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_SuperBoundaryConfig" Source="$(var.AutoloaderContentsPath)\Support\SuperBoundaryConfig.ini" KeyPath="yes" />
             </Component>
@@ -328,6 +334,9 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Parking_Stall_Table_Path" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Reinforced_Concrete" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_Aerated_Concrete" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_S_CROSS" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_PAT_S_ASPHALTUM" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_SuperBoundaryConfig" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_VF_Pump" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fire_Pump" />
