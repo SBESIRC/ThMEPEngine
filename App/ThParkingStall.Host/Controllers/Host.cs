@@ -54,8 +54,6 @@ namespace ThParkingStall.Host.Controllers
             //
             var server = "";
             var file = "";
-            var waitServerTime = 0.1 * 60;//unit:s
-            var curWaitServerTime = 0;
             lock (obj)
             {
                 GlobalParas.FILES.Enqueue(filename);
@@ -84,22 +82,9 @@ namespace ThParkingStall.Host.Controllers
                     {
                         GlobalParas.FILES.Dequeue();
                         return "服务器繁忙中，等待超时,请稍候再试。";
-                        //if (curWaitServerTime > waitServerTime)
-                        //{
-                        //    GlobalParas.FILES.Dequeue();
-                        //    curWaitServerTime = -1;
-                        //    break;
-                        //}
-                        //Thread.Sleep(2 * 1000);
-                        //curWaitServerTime += 10;
                     }
                 }
             }
-            if (curWaitServerTime == -1)
-            {
-                return "服务器繁忙中，等待超时,请稍候再试。";
-            }
-
 
             //把文件发送到对应服务器
             var data_dir = @"C:\AIIIS\DATAIIS";
@@ -116,18 +101,6 @@ namespace ThParkingStall.Host.Controllers
             }
 
             //对应服务器开始计算
-            //var responseContent = "";
-            //HttpWebRequest httpWebRequest = WebRequest.Create($"{server}Cal/RunParkingStall?filename={file}") as HttpWebRequest;
-            //httpWebRequest.Method = "GET";
-            //HttpWebResponse httpWebResponse = httpWebRequest.GetResponse() as HttpWebResponse; // 获取响应
-            //if (httpWebResponse != null)
-            //{
-            //    using (StreamReader sr = new StreamReader(httpWebResponse.GetResponseStream()))
-            //    {
-            //        responseContent = sr.ReadToEnd();
-            //    }
-            //    httpWebResponse.Close();
-            //}
             string pageHtml = "";
             try
             {
@@ -138,11 +111,11 @@ namespace ThParkingStall.Host.Controllers
                 List<Byte> pageData = new List<byte>();
                 WebClientEx MyWebClient = new WebClientEx();
                 MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
-                MyWebClient.Timeout = 10 * 60 * 1000;
+                MyWebClient.Timeout = 30 * 60 * 1000;
                 Task.Factory.StartNew(() =>
                 {
                     pageData = MyWebClient.DownloadData(appHttp).ToList();
-                }).Wait(10 * 60 * 1000);
+                }).Wait(-1);
                 pageHtml = Encoding.UTF8.GetString(pageData.ToArray());
 
                 //结果从对应服务器返回host服务器

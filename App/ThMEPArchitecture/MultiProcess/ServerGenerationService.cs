@@ -83,7 +83,7 @@ namespace ThMEPArchitecture.MultiProcess
             string pageHtml = "";
             WebClientEx MyWebClient = new WebClientEx();
             MyWebClient.Credentials = new NetworkCredential("upload", "Thape123123");
-            MyWebClient.Timeout = 11 * 60 * 1000;
+            MyWebClient.Timeout = 31 * 60 * 1000;
             Task.Factory.StartNew(() =>
             {
                 pageData = MyWebClient.DownloadData(appHttp).ToList();

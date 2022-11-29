@@ -499,6 +499,24 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                     break;
                 }
             }
+            //2/3车位碰车位
+            var crossed_opposite_cars_coords_dist = double.PositiveInfinity;
+            var crossed_opposite_cars = CarSpatialIndex.SelectCrossingGeometry(rec).Cast<Polygon>().Where(o => Boundary.Contains(o.Centroid.Coordinate));
+            //只拿垂直于车道（类似背靠背车位但有缝隙的情景）
+            crossed_opposite_cars = crossed_opposite_cars.Where(e =>
+             {
+                 var ed = e.GetEdges().OrderBy(t => t.Length).First();
+                 var v = Vector(ed);
+                 return (IsParallelVector(v, Vector(line)));
+             }).ToList();
+            var crossed_opposite_cars_coords = new List<Coordinate>();
+            foreach (var pl in crossed_opposite_cars)
+            {
+                crossed_opposite_cars_coords.AddRange(pl.Coordinates);
+            }
+            crossed_opposite_cars_coords = crossed_opposite_cars_coords.Where(p => line.ClosestPoint(p).Distance(p) - DisCarAndHalfLane > 1).ToList();
+            var crossed_opposite_cars_coords_dists = crossed_opposite_cars_coords.Select(p => line.ClosestPoint(p).Distance(p) - DisCarAndHalfLane).OrderBy(e => e).ToList();
+            crossed_opposite_cars_coords_dist = crossed_opposite_cars_coords_dists.Any() ? crossed_opposite_cars_coords_dists.First() : double.PositiveInfinity;
             //车道
             var offset_line_buffer = PolyFromLines(line, line.Translation(vec.Normalize() * maxLength));
             offset_line_buffer = offset_line_buffer.Scale(ScareFactorForCollisionCheck);
@@ -643,7 +661,7 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
             #endregion
 
             double res = 0;
-            var min = new double[] { dis_vert_obstacle, dis_lane_obstacle, dis_lane_modules, dis_parallel_car }.Min();
+            var min = new double[] { dis_vert_obstacle, dis_lane_obstacle, dis_lane_modules, dis_parallel_car , crossed_opposite_cars_coords_dist }.Min();
             if (min != double.PositiveInfinity && min != double.NegativeInfinity)
                 res = min;
             else if (min == double.PositiveInfinity)

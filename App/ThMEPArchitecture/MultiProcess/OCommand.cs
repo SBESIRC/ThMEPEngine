@@ -223,8 +223,8 @@ namespace ThMEPArchitecture.MultiProcess
                     }
                     else if (msg.Contains("图纸数据或程序发送错误"))
                     {
-                        DisplayLogger.Information("很抱歉！计算超时，图纸数据或程序发送错误。请将CAD图纸反馈至产品经理处理。");
-                        MessageBox.Show("很抱歉！计算超时，图纸数据或程序发送错误。请将CAD图纸反馈至产品经理处理。");
+                        DisplayLogger.Information("抱歉出错了，请 重新运行 并 联系产品经理。");
+                        MessageBox.Show("抱歉出错了，请 重新运行 并 联系产品经理。");
                         break;
                     }
                 }
