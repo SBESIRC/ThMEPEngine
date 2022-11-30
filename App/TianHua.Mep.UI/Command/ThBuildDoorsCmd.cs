@@ -59,7 +59,7 @@ namespace TianHua.Mep.UI.Command
             _doorBlkNames = doorBlkNames;
             _wallThickness = new HashSet<int> { 250, 300, 350, 400, 500, 600 };
             _columnThickness = new HashSet<int> { 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000 };
-            _shearwallSpacing = new HashSet<int> { 5500, 5600, 6000, 7000 };
+            _shearwallSpacing = new HashSet<int> { };
             _OtherwallSpacing = new HashSet<int> { 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100, 1150, 1200, 1250, 1300, 1350, 1400, 1450, 1500, 1550, 1600, 1800, 2000, 2100, 3600, 5500, 5600, 6000, 7000 };
         }
         public override void SubExecute()
