@@ -19,7 +19,7 @@ namespace Tianhua.Platform3D.UI
         public static Platform3DMainService Instace = new Platform3DMainService();
         Platform3DMainService() 
         {
-            mainPaletteSet = new PaletteSet("天华三维设计面板");
+            mainPaletteSet = new PaletteSet("天华结构三维设计");
             platformMainUI = new PlatformMainUI();
             mainPaletteSet.AddVisual("", platformMainUI);
             mainPaletteSet.KeepFocus = true;

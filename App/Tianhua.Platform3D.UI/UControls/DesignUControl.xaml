@@ -67,14 +67,14 @@
                 <ColumnDefinition Width="4*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="0"></RowDefinition>
+                <RowDefinition Height="0"></RowDefinition>
+                <RowDefinition Height="0"></RowDefinition>
+                <RowDefinition Height="0"></RowDefinition>
+                <RowDefinition Height="0"></RowDefinition>
+                <RowDefinition Height="0"></RowDefinition>
+                <RowDefinition Height="0"></RowDefinition>
             </Grid.RowDefinitions>
             <!--视图行 start-->
             <Border BorderThickness="0,0,1,1" Grid.Row="0" Grid.Column="0" Style="{StaticResource DesignBorder}"/>
