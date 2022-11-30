@@ -2,6 +2,8 @@
 using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
+using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
@@ -19,7 +21,21 @@ namespace ThMEPTCH.Services
         }
 
         public static void Set(List<FloorCurveEntity> rooms, List<ThIfcTextNote> roomMarks)
-        {           
+        {
+            roomMarks.ForEach(o =>
+            {
+                if(o.Geometry.Area>0.0)
+                {
+                    // Mark的Geometry是矩形框
+                    var pts = o.Geometry.Vertices();
+                    if(pts.Count>3)
+                    {
+                        var center = pts[0].GetMidPt(pts[2]);
+                        var mt = Matrix3d.Scaling(0.5, center);
+                        o.Geometry.TransformBy(mt);
+                    }
+                }
+            });
             var textOutlines = roomMarks.Select(o => o.Geometry).ToCollection();
             var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(textOutlines);
             rooms.ForEach(r =>
