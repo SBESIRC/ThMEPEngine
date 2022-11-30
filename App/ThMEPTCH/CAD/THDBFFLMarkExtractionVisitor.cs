@@ -3,6 +3,8 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using System.Linq;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPTCH.CAD
 {
@@ -33,11 +35,16 @@ namespace ThMEPTCH.CAD
                     Geometry = e.GetTransformedCopy(matrix),
                 });
             }
-            else if(e.IsTCHText() && CheckLayerValid(e))
+            else if (e.IsTCHText() && CheckLayerValid(e))
             {
-                results.Add(new ThRawIfcAnnotationElementData()
+                var text = new DBObjectCollection();
+                e.Explode(text);
+                text.OfType<DBText>().ForEach(o =>
                 {
-                    Geometry = e,
+                    results.Add(new ThRawIfcAnnotationElementData()
+                    {
+                        Geometry = o.GetTransformedCopy(matrix),
+                    });
                 });
             }
             return results;
@@ -45,7 +52,7 @@ namespace ThMEPTCH.CAD
 
         public override bool IsAnnotationElement(Entity e)
         {
-            return (e is DBText) || (e is MText) ;
+            return (e is DBText) || (e is MText);
         }
     }
 }
