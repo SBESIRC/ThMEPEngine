@@ -44,21 +44,44 @@ namespace TianHua.Mep.UI.Data
             if (xclip.IsValid)
             {
                 xclip.TransformBy(matrix);
-                elements.RemoveAll(o =>
+                if(xclip.Inverted)
                 {
-                    if (o.Geometry is Polyline polyline)
+                    elements.RemoveAll(o =>
                     {
-                        return !xclip.Contains(polyline);
-                    }
-                    else if (o.Geometry is MPolygon mPolygon)
+                        if (o.Geometry is Polyline polyline)
+                        {
+                            return xclip.Contains(polyline);
+                        }
+                        else if (o.Geometry is MPolygon mPolygon)
+                        {
+                            return xclip.Contains(mPolygon);
+                        }
+                        else
+                        {
+                            //throw new NotSupportedException();
+                            return true;
+                        }
+                    });
+                }
+                else
+                {
+                    elements.RemoveAll(o =>
                     {
-                        return !xclip.Contains(mPolygon);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
-                });
+                        if (o.Geometry is Polyline polyline)
+                        {
+                            return !xclip.Contains(polyline);
+                        }
+                        else if (o.Geometry is MPolygon mPolygon)
+                        {
+                            return !xclip.Contains(mPolygon);
+                        }
+                        else
+                        {
+                            //throw new NotSupportedException();
+                            return true;
+                        }
+                    });
+                }
             }
         }
 

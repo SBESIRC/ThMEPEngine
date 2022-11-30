@@ -31,14 +31,7 @@ namespace ThMEPEngineCore.Algorithm
                             {
                                 if (fil != null && fil.Definition.Enabled)
                                 {
-#if ACAD2012 || ACAD2014
-                                    bool isInverted = false;
-#else
-                                    bool isInverted = fil.Inverted;
-#endif
-
-                                    // 暂时只支持裁剪外部
-                                    xClipInfo.Inverted = false;
+                                    xClipInfo.Inverted = fil.Inverted;
                                     xClipInfo.Polygon = XClipPolygon(fil);
                                 }
                             }
