@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Include>
     <!-- The name of the product -->
-    <?define Name = "天华BIM设计平台" ?>
+    <?define Name = "天华结构三维平台" ?>
     <!-- The Description of the product -->
-    <?define Description = "为设计师提供高效BIM三维设计解决方案" ?>
+    <?define Description = "为设计师提供高效结构三维设计解决方案" ?>
     <!-- The manufacturer, for setup package publisher and folder info -->
     <?define Manufacturer = "天华AI研究中心" ?>
     <!-- The version number of this setup package-->
