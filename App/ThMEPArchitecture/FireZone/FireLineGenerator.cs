@@ -19,17 +19,20 @@ namespace ThMEPArchitecture.FireZone
     public class FireLineGenerator
     {
         #region 输入
-        private Polygon InputBasement;//地库
+        private Polygon InWallLine;
+        private List<Polygon> InObstacles;
         private List<LineSegment> Lanes;//车道
-        private List<InfoCar> Cars;//车位
+        private List<InfoCar> InCars;//车位
         #endregion
 
         #region 处理后输入
+        private List<InfoCar> Cars;//车位
+        public List<LineSegment> CarLines = new List<LineSegment>();
         public Polygon WallLine;//处理后边界
         public List<Polygon> BuildingBounds;//建筑聚合框
         public List<Polygon> Obstacles;//处理后障碍物
         public Polygon Basement;//地库
-        public STRtree<LineSegment> CarBaseLineEngine = new STRtree<LineSegment>();
+        public STRtree<LineSegment> CarEngine = new STRtree<LineSegment>();//车位碰撞框（非原始车位）
         private STRtree<int> ObstacleEngine = new STRtree<int>();// 障碍物空间索引
         private STRtree<LineSegment> WallLineEngine = new STRtree<LineSegment>();//边界线空间索引
         private STRtree<LineSegment> BasementEngine = new STRtree<LineSegment>();//地库所有线索引
@@ -58,28 +61,46 @@ namespace ThMEPArchitecture.FireZone
         #endregion
 
         #region 辅助变量
+        private int Mod;
         private Stopwatch _stopwatch = new Stopwatch();
         private double t_pre = 0;
         public Serilog.Core.Logger Logger = null;
         static BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
         double LaneWidth = 2750;
         #endregion
-        public FireLineGenerator(Polygon basement, List<LineSegment> lanes, List<InfoCar> cars)
+
+        public FireLineGenerator(Polygon wallLine,List<Polygon> obstacles, List<LineSegment> lanes,List<InfoCar> cars)
         {
-            InputBasement = basement;
+            InWallLine = wallLine;
+            InObstacles = obstacles;
             Lanes = lanes;
-            Cars = cars;
+            InCars = cars;
+            Cars = InCars.ToList();
+            var polys = obstacles.ToList();
+            polys.Add(wallLine);
+            double tol = 75;
+            WallLine = new MultiPolygon(polys.ToArray()).Buffer(tol, MitreParam).Union().
+                Buffer(-tol, MitreParam).Get<Polygon>(true).OrderBy(p =>p.Area).Last();//求解出的边界
+            
+            // 障碍物聚类
+            var buildingtol = 3000;
+            BuildingBounds = new MultiPolygon(obstacles.ToArray()).Buffer(buildingtol+1, MitreParam).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
+            BuildingBounds = new MultiPolygon(BuildingBounds.ToArray()).Buffer(-buildingtol, MitreParam).Get<Polygon>(true);
+            UpdateCarEngine();
+            UpdateBuildingBounds();
+            Basement =WallLine.Difference(new MultiPolygon(BuildingBounds.ToArray())).Get<Polygon>(false).OrderBy(p =>p.Area).Last();
+            Obstacles = Basement.Holes.Select(r =>new Polygon(r)).ToList();
+            WallLine =new Polygon( Basement.Shell);
             Preprocess();
         }
+
         #region 输入处理
-        private void Preprocess(double tol = 75)
+        private void Preprocess()
         {
-            //輸入简化
-            Basement = InputBasement.Buffer(-tol, MitreParam).Union().
-                Buffer(2 * tol, MitreParam).Buffer(-tol, MitreParam).
-                Get<Polygon>(false).OrderBy(p => p.Area).Last();
-            WallLine = new Polygon(Basement.Shell);
-            Obstacles = Basement.Holes.Select(r => new Polygon(r)).ToList();
+            //建筑外扩 + 内缩
+            //建筑减去车位
+            //剪掉的车位忽略车位线生成
+            //剪掉的车位不忽略判断线
             #region 剪力墻連綫部分
             for (int i = 0; i < Obstacles.Count; i++)
             {
@@ -93,22 +114,18 @@ namespace ThMEPArchitecture.FireZone
                     EdgeLineEngine.Insert(envelop, seg);
                     BasementEngine.Insert(envelop, seg);
                 }
-                    
             }
             var wallLines = WallLine.Shell.ToLineSegments();
-            foreach(var line in wallLines)
+            foreach (var line in wallLines)
             {
                 var envelop = new Envelope(line.P0, line.P1);
                 EdgeLineEngine.Insert(envelop, line);
                 WallLineEngine.Insert(envelop, line);
                 BasementEngine.Insert(envelop, line);
             }
-            var buildingtol = 3000;
-            BuildingBounds = new MultiPolygon(Obstacles.ToArray()).Buffer(buildingtol, MitreParam).Union().Get<Polygon>(true);//每一个polygong内部为一个建筑物
-            BuildingBounds = new MultiPolygon(BuildingBounds.ToArray()).Buffer(-buildingtol, MitreParam).Get<Polygon>(true);
             #endregion
             #region 车位线部分
-            foreach(var lane in Lanes)
+            foreach (var lane in Lanes)
             {
                 var poly = lane.OGetRect(LaneWidth);
                 var lsegs = poly.Shell.ToLineSegments();
@@ -118,28 +135,52 @@ namespace ThMEPArchitecture.FireZone
             }
             #endregion
             #region 车位发射部分
-            foreach(var car in Cars)
-            {
-                var pt = car.Point;
-                var center = car.Polyline.Centroid.Coordinate;
-                var vector = new Vector2D(pt,center).Normalize();
-                var dist = 2*pt.Distance(center)-10;
-                var baseLine = new LineSegment(vector.Multiply(-500).Translate(pt),
-                    vector.Multiply(dist).Translate(pt)).OExtend(5);
-                CarBaseLineEngine.Insert(baseLine.GetEnvelope(), baseLine);
-            }
-            foreach(var lane in Lanes)
+            foreach (var lane in Lanes)
             {
                 LaneEngine.Insert(lane.GetEnvelope(), lane);
             }
             #endregion
         }
-        #endregion
 
+        private void UpdateCarEngine()
+        {
+            foreach(var car in Cars)
+            {
+                var collisionBox = car.GetCollisionBox();
+                var lsegs = collisionBox.Shell.ToLineSegments();
+                CarLines.AddRange(lsegs);
+                foreach (var lseg in lsegs)
+                {
+                    CarEngine.Insert(lseg.GetEnvelope(), lseg);
+                }
+            }
+        }
+        private void UpdateBuildingBounds()
+        {
+            var buildingBounds = new List<Polygon>();
+            var carIdxEngine = new STRtree<int>();
+            for(int i = 0; i < Cars.Count; i++)
+            {
+                var poly = Cars[i].Polyline;
+                carIdxEngine.Insert(poly.EnvelopeInternal, i);
+            }
+            var InnerCarIdx = new List<int>();
+            for(int i = 0; i < BuildingBounds.Count; i++)
+            {
+                var bound = BuildingBounds[i] as Geometry;
+                var queriedIdx = carIdxEngine.Query(bound.EnvelopeInternal).
+                    Where(id => Cars[id].Polyline.Intersects(bound));
+                InnerCarIdx.AddRange(queriedIdx);
+                Cars.Slice(queriedIdx).ForEach(c => { bound = bound.Difference(c.OffsetBaseLine(10000)); });
+                buildingBounds.AddRange(bound.Get<Polygon>(true));
+            }
+            BuildingBounds = buildingBounds;
+            Cars = Cars.SliceExcept(InnerCarIdx);
+        }
+        #endregion
         #region 防火线以及卷帘生成
         public void Generate()
         {
-            
             CarFireLines = GenerateLinesOfCars();
             BuildingFireLines = GenerateLinesInsideBuildings();
             StartPointsCreateFireLines();
@@ -176,15 +217,15 @@ namespace ThMEPArchitecture.FireZone
             var InvalidIdxs = new HashSet<int>();
             //去除与车位线距离较近且平行的线，或者相交的线
             var carLineEngine = new STRtree<LineSegment>();
-            foreach(var cLine in CarFireLines) carLineEngine.Insert(new Envelope(cLine.P0,cLine.P1), cLine);
+            foreach (var cLine in CarFireLines) carLineEngine.Insert(new Envelope(cLine.P0, cLine.P1), cLine);
             for (int i = 0; i < lines.Count; i++)
             {
                 var line = lines[i];
                 var envelop = new Envelope(line.P0, line.P1);
                 envelop.ExpandBy(1000);
                 var invaild = carLineEngine.Query(envelop).
-                    Any(l =>l.Intersection(line)!= null || (l.ParallelTo(line) && l.Distance(line) < 1000));
-                if(invaild) InvalidIdxs.Add(i);
+                    Any(l => l.Intersection(line) != null || (l.ParallelTo(line) && l.Distance(line) < 1000));
+                if (invaild) InvalidIdxs.Add(i);
             }
             lines = lines.SliceExcept(InvalidIdxs);
             //去除相交线
@@ -204,7 +245,7 @@ namespace ThMEPArchitecture.FireZone
             }
             return lines.SliceExcept(InvalidIdxs);
         }
-        private List<LineSegment> GenerateLines(int idx,double maxLength)
+        private List<LineSegment> GenerateLines(int idx, double maxLength)
         {
             var centroid = Obstacles[idx].Centroid.Coordinate;
             var lines = ObstacleLines[idx];
@@ -228,7 +269,7 @@ namespace ThMEPArchitecture.FireZone
         {
             return SortestLine(inLine, WallLineEngine.Query(new Envelope(inLine.P0, inLine.P1)));
         }
-        private LineSegment SortestLine(LineSegment inLine,IEnumerable<LineSegment> others)
+        private LineSegment SortestLine(LineSegment inLine, IEnumerable<LineSegment> others)
         {
             var coors = new List<Coordinate>();
             foreach (var line in others)
@@ -245,7 +286,7 @@ namespace ThMEPArchitecture.FireZone
             var minLength = double.MaxValue;
             int sortestIdx = -2;
             LineSegment sortestLine = SortestLine(inLine);
-            if(sortestLine!= null)
+            if (sortestLine != null)
             {
                 minLength = sortestLine.Length;
                 sortestIdx = -1;
@@ -416,8 +457,8 @@ namespace ThMEPArchitecture.FireZone
         {
             switch (mod)
             {
-                case 0: return BestLineToPoints(startPt,direction,7800,560,engine, lineEngine,tol);
-                case 1: return BestLineToPoints(startPt,direction,7800,560,engine, lineEngine,tol);
+                case 0: return BestLineToPoints(startPt,direction,7000,300,engine, lineEngine,tol);
+                case 1: return BestLineToPoints(startPt,direction,9000,650,engine, lineEngine,tol);
                 default: throw new NotImplementedException();
             }
         }
@@ -445,8 +486,8 @@ namespace ThMEPArchitecture.FireZone
         {
             switch (mod)
             {
-                case 0: return BestLineToLines(startPt,direction,7800.0,engine,tol);
-                case 1: return BestLineToLines(startPt,direction,7800.0,engine,tol);
+                case 0: return BestLineToLines(startPt,direction,9000.0,engine,tol);
+                case 1: return BestLineToLines(startPt,direction,9000.0,engine,tol);
                 default: throw new NotImplementedException();
             }
         }
@@ -484,6 +525,10 @@ namespace ThMEPArchitecture.FireZone
 
             foreach (var sp in StartPoints)
             {
+                if(sp.StartPoint.Distance(new Coordinate(342038.6582, 5812263.8672)) < 10)
+                {
+                    ;
+                }
                 bool founded = false;
                 foreach(var dir in sp.Directions)
                 {
@@ -495,7 +540,7 @@ namespace ThMEPArchitecture.FireZone
                     }
                     var envelop = tempLine.GetEnvelope();
                     //判断是否与车位基线相交
-                    var queriedBaseLines = CarBaseLineEngine.Query(envelop).Where(l =>l.Intersection(tempLine)!=null);
+                    var queriedBaseLines = CarEngine.Query(envelop).Where(l =>l.Intersection(tempLine)!=null);
                     if (queriedBaseLines.Count() != 0) continue;
                     //判断是否与车道中心线相交
                     var queriedLanes = LaneEngine.Query(envelop).Where(l => l.Intersection(tempLine) != null);
@@ -503,8 +548,7 @@ namespace ThMEPArchitecture.FireZone
                     //判断是否可被之前的防火线替代
                     var CFtol = 500;
                     envelop.ExpandBy(CFtol);
-                    var canBeReplaced = CFLineEngine.Query(envelop).Any(l =>
-                        l.Distance(tempLine.P0) < CFtol&& l.Distance(tempLine.P1)<CFtol);
+                    var canBeReplaced = CFLineEngine.Query(envelop).Any(l =>tempLine.DominatedBy(l));
                     if(canBeReplaced) continue;
                     founded = true;
                     RayFireLines.Add(tempLine);
@@ -549,7 +593,7 @@ namespace ThMEPArchitecture.FireZone
                     if (queriedLanes.Count() == 0) continue;
 
                     //判断是否与车位基线相交
-                    var queriedBaseLines = CarBaseLineEngine.Query(envelop).Where(l => l.Intersection(tempLine) != null);
+                    var queriedBaseLines = CarEngine.Query(envelop).Where(l => l.Intersection(tempLine) != null);
                     if (queriedBaseLines.Count() != 0) continue;
                     Shutters.Add(tempLine);
                     //控制密度可以每个点仅生成一个卷帘
@@ -592,7 +636,7 @@ namespace ThMEPArchitecture.FireZone
                 {
                     if (idx == i) continue;
                     var l = inputLines[idx];
-                    if(l.Distance(line.P0) < tol && l.Distance(line.P1) < tol)
+                    if(line.DominatedBy(l,tol))
                     {
                         IsDominted = true;
                         dominter.Add(idx);
@@ -669,6 +713,61 @@ namespace ThMEPArchitecture.FireZone
         public void Remove(Vector2D vector)
         {
             Directions.Remove(vector);
+        }
+    }
+
+    public static class InfoCarEx
+    {
+        static BufferParameters MitreParam = new BufferParameters(8, EndCapStyle.Flat, JoinStyle.Mitre, 5.0);
+        //构造一个车位，延长基
+        public static Polygon OffsetBaseLine(this InfoCar car,double distance,double tol = 1)
+        {
+            var poly = car.Polyline;
+            if (poly.Coordinates.Count() != 5) throw new ArgumentException("InfoCar must have 5 coordinates!");
+            var pt = car.Point;
+            var center = car.Polyline.Centroid.Coordinate;
+            var vector = new Vector2D(center, pt).Normalize().Multiply(distance);
+            var coordinates = poly.Coordinates.ToArray();
+            var founded = false;
+            for(int i = 0; i < coordinates.Length-1; i++)
+            {
+                var coor1 = coordinates[i];
+                var coor2 = coordinates[i + 1];
+
+                var lseg = new LineSegment(coor1, coor2);
+                if(lseg.Distance(pt) < tol)
+                {
+                    if (founded) throw new Exception("Already have one line founded");
+                    coordinates[i] = vector.Translate(coor1);
+                    coordinates[i + 1] = vector.Translate(coor2);
+                    if (i == 0) coordinates[coordinates.Length - 1] = coordinates[0];
+                    else if (i + 1 == coordinates.Length - 1) 
+                        coordinates[0] = coordinates[coordinates.Length - 1];
+                    founded = true;
+                }
+            }
+            if (!founded) throw new Exception("No Line Founded!");
+            var ring = new LinearRing(coordinates);
+            return new Polygon(ring);
+        }
+        //获取碰撞框
+        public static Polygon GetCollisionBox(this InfoCar car, double distance = 600, double buffersize = -100)
+        {
+            var offSetted = car.OffsetBaseLine(distance);
+            return offSetted.Buffer(buffersize, MitreParam) as Polygon;
+        }
+
+        public static bool DominatedBy(this LineSegment line,LineSegment other,
+            double distTol = 500,double angleTol = 0.1)
+        {
+            if(!line.ParallelTo(other, angleTol)) return false;
+            var d0 = other.Distance(line.P0);
+            var d1 = other.Distance(line.P1);
+            if(d0 > distTol || d1 > distTol) return false;
+            var abs = Math.Abs(d0 - d1);
+            if (abs < 5) return true;
+            if(abs/line.Length > angleTol) return false;
+            return true;
         }
     }
 }

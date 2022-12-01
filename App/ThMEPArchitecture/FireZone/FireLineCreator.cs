@@ -34,6 +34,8 @@ namespace ThMEPArchitecture.FireZone
 
         #region 转译后数据
         public Polygon Basement;
+        public Polygon WallLine;
+        public List<Polygon> Obstacles;
         public List<InfoCar> Cars = new List<InfoCar>();
         public List<LineSegment> Lanes = new List<LineSegment>();
         #endregion
@@ -60,18 +62,18 @@ namespace ThMEPArchitecture.FireZone
         #region 输入处理
         private void UpdateBasement()//提取地库
         {
-            var obstacles = new List<Polygon>();
+            Obstacles = new List<Polygon>();
             if (CAD_Obstacles.Count > 0)
             {
                 //输入打成线+求面域+union
                 var UnionedObstacles = new MultiPolygon(CAD_Obstacles.Select(pl => 
                     pl.ToNTSLineString()).ToList().GetPolygons().ToArray()).Buffer(0.1, MitreParam).Union();
                 //求和地库交集
-                obstacles = UnionedObstacles.Get<Polygon>(true);
+                Obstacles = UnionedObstacles.Get<Polygon>(true);
             }
-            Basement = CAD_WallLines.OrderBy(wl => wl.Area).Last().ToNTSPolygon();
-            var holes = new MultiPolygon(obstacles.ToArray());
-            Basement = Basement.Difference(holes).Get<Polygon>(false).OrderBy(p => p.Area).Last();
+            WallLine = CAD_WallLines.OrderBy(wl => wl.Area).Last().ToNTSPolygon();
+            var holes = new MultiPolygon(Obstacles.ToArray());
+            Basement = WallLine.Difference(holes).Get<Polygon>(false).OrderBy(p => p.Area).Last();
 
         }
         private void UpdateLanes()//车道转换
@@ -194,7 +196,7 @@ namespace ThMEPArchitecture.FireZone
         {
             var fireWalls = new List<LineSegment>();
             var shutters = new List<LineSegment>();
-            Generator = new FireLineGenerator(Basement, Lanes, Cars);
+            Generator = new FireLineGenerator(WallLine,Obstacles, Lanes, Cars);
             Generator.Generate();
             using (AcadDatabase acad = AcadDatabase.Active())
             {
@@ -212,13 +214,18 @@ namespace ThMEPArchitecture.FireZone
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "发射点2", 0);
                 if (!acad.Layers.Contains("发射点3"))
                     ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "发射点3", 0);
+                if (!acad.Layers.Contains("地库"))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "地库", 0);
+                if (!acad.Layers.Contains("车位线"))
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acad.Database, "车位线", 0);
             }
             Generator.CarFireLines.ForEach(l => l.ToDbLine(1, "防火墙").AddToCurrentSpace());
             Generator.BuildingFireLines.ForEach(l => l.ToDbLine(0, "防火墙").AddToCurrentSpace());
             Generator.RayFireLines.ForEach(l => l.ToDbLine(2, "射线防火墙").AddToCurrentSpace());
             //Generator.FireWalls.ForEach(w => w.ToDbLine(1,"防火墙").AddToCurrentSpace());
             Generator.Shutters.ForEach(w => w.ToDbLine(3, "卷帘门").AddToCurrentSpace());
-
+            Generator.Basement.ToDbMPolygon(0,"地库").AddToCurrentSpace();
+            Generator.CarLines.ForEach(l => l.ToDbLine(4, "车位线").AddToCurrentSpace());
             //Generator.StartPoints.Where(pt => pt.Directions.Count() == 0).
             //    ForEach(pt => pt.StartPoint.MarkPoint(2000, "发射点0", 0));
             //Generator.StartPoints.Where(pt => pt.Directions.Count() == 1).
