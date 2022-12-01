@@ -122,8 +122,8 @@
     <Compile Include="UI\HydrantLayoutUI.xaml.cs">
       <DependentUpon>HydrantLayoutUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UI\uiExercise.xaml.cs">
-      <DependentUpon>uiExercise.xaml</DependentUpon>
+    <Compile Include="UI\uiExerciseplus.xaml.cs">
+      <DependentUpon>uiExerciseplus.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiSprinklerDim.xaml.cs">
       <DependentUpon>uiSprinklerDim.xaml</DependentUpon>
@@ -304,7 +304,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="UI\uiExercise.xaml">
+    <Page Include="UI\uiExerciseplus.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -469,7 +469,11 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="UI\XMLSchema1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\jianshao-xian.png" />
     <Resource Include="Images\xinzeng-xian.png" />

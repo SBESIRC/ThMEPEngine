@@ -195,7 +195,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THOOOOOOOOOOOOOOO", CommandFlags.Modal)]
         public void ThCreateuiExercise()
         {
-            var ui = new uiExercise();
+            var ui = new uiExercisePlus();
             AcadApp.ShowModelessWindow(ui);
         }
 

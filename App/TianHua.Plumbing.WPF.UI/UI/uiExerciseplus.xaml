@@ -1,0 +1,37 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiExercisePlus"
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    Title="练习" MinWidth="150"
+                    xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    mc:Ignorable="d" SizeToContent="WidthAndHeight">
+    <Grid Margin="5" x:Name="gridForm">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Vertical">
+                <cus:ImageButton Height="50" Content="读取楼层" Margin="0" Name="btnReadFloor" Click="btnReadFloor_Click"></cus:ImageButton>
+            </StackPanel>
+            <TextBox Grid.Column="1" HorizontalAlignment="Left" Margin="42,23,0,0" TextWrapping="Wrap"  Text="{Binding ReadText,Mode=TwoWay}" VerticalAlignment="Top" Width="120"/>
+
+        </Grid>
+        <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,0">
+            <Border BorderThickness="0,1,0,0"></Border>
+            <Label Content="楼层表：" FontWeight="Black"></Label>
+            <ListBox Grid.Row="1" Height="200" BorderThickness="0" ItemsSource="{Binding UndpdsFloorListDatas}" SelectionChanged="ListBox_SelectionChanged"/>
+            <Border BorderThickness="0,1,0,0"></Border>
+        </StackPanel>
+        <Grid Grid.Row="2" Margin="0,30,0,0">
+            <cus:ImageButton Content="生成" Width="60" HorizontalAlignment="Left" TextMargin="5" Name="btnLayoutPipe" Click="btnLayoutPipe_Click"></cus:ImageButton>
+        </Grid>
+    </Grid>
+</cus:ThCustomWindow>
