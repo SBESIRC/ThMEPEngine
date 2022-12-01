@@ -179,34 +179,54 @@ namespace ThPlatform3D.Common
         public static Extents2d ToExtents2d(this DBObjectCollection objs)
         {
             var extents = new Extents2d();
-            double minX = double.MaxValue, minY = double.MaxValue,
-                maxX = double.MinValue, maxY = double.MinValue;
-            objs.OfType<Entity>()
-                .Where(o => o is Curve || o is DBText)
-                .ForEach(entity =>
+            if(objs.Count==0)
             {
-                if (!entity.IsErased && entity.GeometricExtents != null)
+                return extents;
+            }
+            else
+            {
+                var geoObjs = objs.OfType<Entity>().Where(e => e.Bounds.HasValue).ToCollection();
+                if(geoObjs.Count==0)
                 {
-                    if (entity.GeometricExtents.MinPoint.X < minX)
-                    {
-                        minX = entity.GeometricExtents.MinPoint.X;
-                    }
-                    if (entity.GeometricExtents.MinPoint.Y < minY)
-                    {
-                        minY = entity.GeometricExtents.MinPoint.Y;
-                    }
-                    if (entity.GeometricExtents.MaxPoint.X > maxX)
-                    {
-                        maxX = entity.GeometricExtents.MaxPoint.X;
-                    }
-                    if (entity.GeometricExtents.MaxPoint.Y > maxY)
-                    {
-                        maxY = entity.GeometricExtents.MaxPoint.Y;
-                    }
+                    return extents;
                 }
-            });
-            extents = new Extents2d(minX, minY, maxX, maxY);
-            return extents;
+                else
+                {
+                    double minX = 0.0, minY = 0.0, maxX = 0.0, maxY = 0.0;
+                    int i = 0;
+                    geoObjs.OfType<Entity>().ForEach(e =>
+                    {
+                        if(i++==0)
+                        {
+                            minX = e.GeometricExtents.MinPoint.X;
+                            minY = e.GeometricExtents.MinPoint.Y;
+                            maxX = e.GeometricExtents.MaxPoint.X;
+                            maxY = e.GeometricExtents.MaxPoint.Y;
+                        }
+                        else
+                        {
+                            if (e.GeometricExtents.MinPoint.X < minX)
+                            {
+                                minX = e.GeometricExtents.MinPoint.X;
+                            }
+                            if (e.GeometricExtents.MinPoint.Y < minY)
+                            {
+                                minY = e.GeometricExtents.MinPoint.Y;
+                            }
+                            if (e.GeometricExtents.MaxPoint.X > maxX)
+                            {
+                                maxX = e.GeometricExtents.MaxPoint.X;
+                            }
+                            if (e.GeometricExtents.MaxPoint.Y > maxY)
+                            {
+                                maxY = e.GeometricExtents.MaxPoint.Y;
+                            }
+                        }
+                    });
+                    extents = new Extents2d(minX, minY, maxX, maxY);
+                    return extents;
+                }
+            }
         }
         public static DBObjectCollection ToDBObjectCollection(this ObjectIdCollection objIds,Database db)
         {

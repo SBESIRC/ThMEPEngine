@@ -172,6 +172,11 @@ namespace ThPlatform3D.StructPlane.Print
                 Append(textRes.Item2);
                 AppendToBlockObjIds(textRes.Item2);
 
+                // 插入基点
+                var basePointId = InsertBasePoint(acadDb, _printParameter.BasePoint);
+                Append(basePointId);
+                AppendToBlockObjIds(basePointId);
+
                 // 打印柱表
                 var elevationTblBasePt = GetElevationBasePt(acadDb);
                 var elevationInfos = GetElevationInfos();
@@ -186,12 +191,6 @@ namespace ThPlatform3D.StructPlane.Print
                     Append(PrintSlabPatternTable(acadDb, slabPatternTblRightUpBasePt, slabHatchConfigs));
                 }
                 
-                // 插入基点
-                var basePointId = InsertBasePoint(acadDb, _printParameter.BasePoint);
-                Append(basePointId);
-                AppendToBlockObjIds(basePointId);
-
-
                 // 删除不要的文字
                 Erase(acadDb, removedTexts);
                 Erase(acadDb, dwgExistedElements);
