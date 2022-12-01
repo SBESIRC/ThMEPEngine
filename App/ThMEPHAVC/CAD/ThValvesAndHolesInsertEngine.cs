@@ -63,15 +63,15 @@ namespace ThMEPHVAC.CAD
                                                             { "标高", "洞底标高：h+" + holeEle }};
                 // 设置框的角度
                 var obj = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                    layerName, blockName, HoleModel.ValvePosition + holeSelfEleVec, new Scale3d(1, 1, 1), -service.ucsAngle, attr);
+                    layerName, blockName, HoleModel.ValvePosition + holeSelfEleVec, new Scale3d(1, 1, 1), service.ucsAngle, attr);
                 // 设置框内字的角度
-                ThMEPHVACService.SetAttr(obj, attr, -service.ucsAngle);
+                ThMEPHVACService.SetAttr(obj, attr, service.ucsAngle);
                 obj.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
                 obj.SetValveHeight(200, HoleModel.LengthPropertyName);// 洞口固定宽为200
                 obj.SetValveModel(HoleModel.ValveVisibility);
                 // 洞口块本身问题：
                 // 洞口标注的旋转角度会影响洞口块本身的旋转角度，所以此处插洞口块时需要减去洞口标注的旋转角度
-                obj.SetValveTextRotate(HoleModel.RotationAngle + service.ucsAngle, ThHvacCommon.AI_HOLE_ROTATION);
+                obj.SetValveTextRotate(HoleModel.RotationAngle - service.ucsAngle, ThHvacCommon.AI_HOLE_ROTATION);
                 obj.SetValveTextHeight(GetTextHeight(service.dimService.scale), ThHvacCommon.AI_HOLE_TEXT_HEIGHT);
 
                 // 返回图块

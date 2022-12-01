@@ -86,7 +86,7 @@ namespace ThMEPHVAC.Model
         {
             var ucs = Active.Editor.CurrentUserCoordinateSystem;
             ucsAngle = Vector3d.XAxis.GetAngleTo(ucs.CoordinateSystem3d.Xaxis);
-            ucsFlag = ucs.CoordinateSystem3d.Xaxis.Z > 0;
+            ucsFlag = ucs.CoordinateSystem3d.Xaxis.Z >= 0;
         }
         private void SetLayer(string scenario)
         {
