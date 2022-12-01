@@ -134,7 +134,7 @@ namespace ThMEPWSS.Command
             }
         }
         public void Dispose() { }
-        public override void SubExecute()
+        public override void SubExecute()//override必须重载父类的虚函数
         {
             try
             {
@@ -146,7 +146,7 @@ namespace ThMEPWSS.Command
                 {
                     //所有的楼层框 必须有顶层，没有时不进行后续的生成
                     _wcs2UCS = Active.Editor.WCS2UCS();
-                    _roomEngine = new ThRoomDataEngine();
+                    _roomEngine = new ThRoomDataEngine();//new 一个roomEngine
                     var tempRooms = _roomEngine.GetAllRooms(new Point3dCollection());
                     if (!CheckData(floorFrameds))
                     {

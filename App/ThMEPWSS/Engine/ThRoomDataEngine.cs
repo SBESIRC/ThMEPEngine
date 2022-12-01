@@ -22,7 +22,7 @@ namespace ThMEPWSS.Engine
         /// <summary>
         /// 管道井，烟道井最大面积㎡，这里烟道井，管道井都不考虑太大面积的
         /// </summary>
-        private double maxTubeFuleRoomArea=2*1000000;
+         private double maxTubeFuleRoomArea=2*1000000;
         /// <summary>
         /// 最大管道井面积㎡
         /// </summary>

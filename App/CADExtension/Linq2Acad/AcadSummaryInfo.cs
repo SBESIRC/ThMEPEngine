@@ -39,7 +39,7 @@ namespace Linq2Acad
     /// Creates a new instance of AcadSummaryInfo.
     /// </summary>
     /// <param name="database">The drawing database to use.</param>
-    internal AcadSummaryInfo(Database database)
+    internal AcadSummaryInfo(Database database)//被编译到同一个dll或exe中的程序就是处于同一个程序集中，在不同的dll或exe文件中的程序就是处于不同的程序集中
     {
       this.database = database;
     }

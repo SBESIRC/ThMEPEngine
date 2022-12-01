@@ -14,22 +14,79 @@ using System.Threading.Tasks;
 using System.Windows;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPWSS.CADExtensionsNs;
 
 namespace ThMEPWSS.Command
 {
     public class WTestCommand
     {
         [CommandMethod("TIANHUACAD", "WTestGCicle", CommandFlags.Modal)]
-        public void GenerateCicleFromLine()
+        public void GenerateCicleFromLinePlus()
         {
-            var lines = readLine();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())//使用命名空间Linq2Acad的类的一个方法叫做active
+            {
+                var ents= acadDatabase.ModelSpace.OfType<Entity>().ToList();//取出cad数据库的所有元素的列表A
+                var ents_in_bound = ents.Where(e => e.Layer.Equals("bound")).ToList();//在列表A里面找到名字是bound的图层的列表
+                var ents_in_block= ents.Where(e => e.Layer.Equals("block")).ToList();//在列表A里面找到名字是block的图层的列表
+                var blks_in_block = ents_in_block.Where(e => e is BlockReference).Select(e => (BlockReference)e).ToList();
+                //找到block图层里面的具有块属性的元素B
+                var ply = (Polyline)ents_in_bound[0];
+                blks_in_block = blks_in_block.Where(e=> ply.Contains(e.Position)).ToList();//矩形里面容纳具有块属性的元素B
+                
+                var lines = new List<Line>();
+                foreach (var br in blks_in_block)
+                {
+                    var objs=br.ExplodeToDBObjectCollection().Cast<Entity>().ToList();
+                    ;
+                    foreach (var obj in objs)
+                    {
+                        if (obj is Line)
+                            lines.Add((Line)obj);
+                    }
+                }
+                var ents_in_test = ents.Where(e => e.Layer.Equals("test")).Where(r  => r is Line).ToList();
+                foreach(Line r in ents_in_test)
+                {
+                    var newlines = new List<Line>();
+
+
+                    
+                    foreach (var li in lines)
+                    {
+                       
+                        if(li.Buffer(5000).Intersect(r,Intersect.OnBothOperands).Count>0||ply.Contains(r))
+                        {
+                            newlines.Add(li);
+                        }
+                    }
+                    GenerateCircleFromLine(newlines);
+
+                }
+                //BlockReference br;
+                //var objs=br.ExplodeToDBObjectCollection().Cast<Entity>().ToList();
+            }
+
+
+            //var lines = readLine();
+            //var cicles = new List<Circle>();
+            ////foreach (var ln in lines)
+            ////{
+            ////    var ci = GenerateCicle(ln);
+            ////    cicles.Add(ci);
+            ////}
+            //cicles= lines.Select(e => GenerateCicle(e)).ToList();
+            //cicles.AddToCurrentSpace();
+        }
+        public void GenerateCircleFromLine(List<Line> lines)
+        {
+            //var lines = readLine();
             var cicles = new List<Circle>();
             //foreach (var ln in lines)
             //{
             //    var ci = GenerateCicle(ln);
             //    cicles.Add(ci);
             //}
-            cicles= lines.Select(e => GenerateCicle(e)).ToList();
+            cicles = lines.Select(e => GenerateCicle(e)).ToList();
             cicles.AddToCurrentSpace();
         }
         public Circle GenerateCicle(Line line)
