@@ -23,12 +23,13 @@ namespace ThMEPWSS.Diagram.ViewModel
         {
         }
 
-        private string readText { get; set; }//楼层线间距
+        private string _ReadText { get; set; }//楼层线间距
         public string ReadText
         {
-            get { return readText; }
+            get { return _ReadText; }
             set
             {
+                _ReadText = value;
                 this.RaisePropertyChanged("ReadText");
             }
         }
@@ -88,7 +89,6 @@ namespace ThMEPWSS.Diagram.ViewModel
             {
                 FNumSplit.Add(f.Split(','));
             }
-
             var FloorNumList = new List<List<double>>();
 
             foreach (var f in FNumSplit)

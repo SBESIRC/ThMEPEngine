@@ -25,10 +25,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class uiExercise: ThCustomWindow
     {
-        static ExerciseViewmodel Viewmodel = new ExerciseViewmodel();
+        public static ExerciseViewmodel Viewmodel = null;
         bool _createFrame = false;
         public uiExercise()
         {
+            if (Viewmodel == null)
+            {
+                Viewmodel = new ExerciseViewmodel();
+            }
+            DataContext = Viewmodel;
             InitializeComponent();
         }
 

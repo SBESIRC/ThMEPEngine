@@ -1,4 +1,6 @@
-﻿using HandyControl.Controls;
+﻿using AcHelper;
+using HandyControl.Controls;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,13 +19,17 @@ namespace ThMEPWSS.Command
             CommandName = "THDXPSXTT";
             Viewmodel = viewModel;
         }
-        public static ExerciseViewmodel Viewmodel { get; set; }
+        public ExerciseViewmodel Viewmodel { get; set; }
         public void Dispose()
         {
         }
         public override void SubExecute()
         {
-            MessageBox.Show(Viewmodel.ReadText);
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                Active.Editor.WriteLine(Viewmodel.ReadText);
+            }
+
         }
     }
 }
