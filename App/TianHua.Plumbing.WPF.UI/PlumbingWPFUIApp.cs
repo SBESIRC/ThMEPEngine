@@ -190,6 +190,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
+        /// 测试命令
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THOOOOOOOOOOOOOOO", CommandFlags.Modal)]
+        public void ThCreateuiExercise()
+        {
+            var ui = new uiExercise();
+            AcadApp.ShowModelessWindow(ui);
+        }
+
+        /// <summary>
         /// 地下消火栓系统图
         /// </summary>
         [CommandMethod("TIANHUACAD", "THDXXHSXTT", CommandFlags.Modal)]

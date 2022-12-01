@@ -122,6 +122,9 @@
     <Compile Include="UI\HydrantLayoutUI.xaml.cs">
       <DependentUpon>HydrantLayoutUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiExercise.xaml.cs">
+      <DependentUpon>uiExercise.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiSprinklerDim.xaml.cs">
       <DependentUpon>uiSprinklerDim.xaml</DependentUpon>
     </Compile>
@@ -298,6 +301,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\FireHydrantSystemUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiExercise.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

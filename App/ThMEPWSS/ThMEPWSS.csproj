@@ -43,6 +43,7 @@
     <Compile Include="BlockNameConfig\JsonFile.cs" />
     <Compile Include="BlockNameConfig\PicInfo.cs" />
     <Compile Include="BlockNameConfig\Program.cs" />
+    <Compile Include="Command\ExerciseCommand.cs" />
     <Compile Include="Command\ThFirstFloorDrainageCmd.cs" />
     <Compile Include="Command\ThBlockTagCmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
@@ -504,6 +505,7 @@
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Service\SpraySysWithMainLoopAcrossFloor.cs" />
     <Compile Include="UndergroundSpraySystem\Test\DisplayTool.cs" />
+    <Compile Include="ViewModel\ExerciseViewModel.cs" />
     <Compile Include="ViewModel\ThStoreyFrameVM.cs" />
     <Compile Include="WaterSupplyPipeSystem\Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="WaterSupplyPipeSystem\Command\WaterSupplyCmd.cs" />
