@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA Structure 3D Platform" NameChs="天华结构三维平台" Description="AutoCAD Plugin for TIANHUA Structure 3D Platform" DescriptionChs="天华结构三维平台AutoCAD客户端" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{8855F34B-3A5B-4DC7-A2BE-FC611CC07C12}" UpgradeCode="{5108574F-42CB-42CF-A3F5-90A80EA8C29D}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA Structure 3D Platform" NameChs="天华结构三维平台" Description="AutoCAD Plugin for TIANHUA Structure 3D Platform" DescriptionChs="天华结构三维平台AutoCAD客户端" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{EB84DE35-FB7F-463A-A358-0EA1461593A8}" UpgradeCode="{5108574F-42CB-42CF-A3F5-90A80EA8C29D}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, CUI, 2016 version-->
