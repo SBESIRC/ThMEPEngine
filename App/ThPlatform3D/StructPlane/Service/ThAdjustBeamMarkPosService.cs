@@ -28,7 +28,7 @@ namespace ThPlatform3D.StructPlane.Service
                 return;
             }
             var firstText = beamMarks.OfType<DBText>().First();
-            var maximumBeamWidth = GetBeamWidth(beamMarks.OfType<DBText>().OrderByDescending(o => GetBeamWidth(o)).First());
+            var maximumBeamWidth = GetBeamWidth(beamMarks.OfType<DBText>().Where(o=>o.TextString.IsBeamSpec()).OrderByDescending(o => GetBeamWidth(o)).First());
             if(maximumBeamWidth == 0.0)
             {
                 maximumBeamWidth = ThStructurePlaneCommon.BeamDefaultCalculateWidth;
