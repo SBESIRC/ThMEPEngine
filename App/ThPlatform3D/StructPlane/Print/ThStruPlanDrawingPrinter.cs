@@ -499,27 +499,71 @@ namespace ThPlatform3D.StructPlane.Print
             {
                 var beamIds = new ObjectIdCollection();
                 Vector3d textMoveDir = new Vector3d();
-                //int i = 1;
+                for(int i=0;i<g.Count;i++)
+                {
+                    if (g[i].Boundary is DBText dbText)
+                    {
+                        if (g[i].Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName) && textMoveDir.Length <= 1e-6)
+                        {
+                            textMoveDir = g[i].Properties.GetDirection().ToVector();
+                        }                        
+                    }
+                    if(textMoveDir.Length > 1e-6)
+                    {
+                        break;
+                    }
+                }                
+                if (textMoveDir.Length <= 1e-6)
+                {
+                    foreach (var geo in g)
+                    {
+                        if (geo.Boundary is DBText dbText)
+                        {
+                            textMoveDir = Vector3d.XAxis.RotateBy(dbText.Rotation, Vector3d.ZAxis).GetPerpendicularVector().Negate();
+                            break;
+                        }
+                    }
+                }
+                if (g.Count==2 && g[0].Boundary is DBText text1 && g[1].Boundary is DBText text2)
+                {
+                    var firstSpec = text1.TextString.GetBeamSpec();
+                    var secondSpec = text2.TextString.GetBeamSpec();
+                    if(firstSpec == secondSpec)
+                    {
+                        var firstBG = text1.TextString.GetBGContent();
+                        var secondBG = text2.TextString.GetBGContent();
+                        if(string.IsNullOrEmpty(firstBG))
+                        {
+                            firstBG = "BG";
+                        }
+                        else
+                        {
+                            firstBG = firstBG.Replace("(", "");
+                            firstBG = firstBG.Replace(")", "");
+                        }
+                        if (string.IsNullOrEmpty(secondBG))
+                        {
+                            secondBG = "BG";
+                        }
+                        else
+                        {
+                            secondBG = secondBG.Replace("(", "");
+                            secondBG = secondBG.Replace(")", "");
+                        }
+                        text1.TextString = firstSpec;
+                        text2.TextString = "("+ firstBG+"、"+secondBG+")";
+                    }
+                }
                 g.ForEach(o =>
                 {
                     if (o.Boundary is DBText dbText)
                     {
-                        if (o.Properties.ContainsKey(ThSvgPropertyNameManager.DirPropertyName) && textMoveDir.Length <= 1e-6)
-                        {
-                            textMoveDir = o.Properties.GetDirection().ToVector();
-                        }
-                        //dbText.TextString = dbText.TextString;//+ "（" + i++ + "）"
-                        if (dbText.ObjectId==ObjectId.Null)
+                        if (dbText.ObjectId == ObjectId.Null)
                         {
                             beamIds.AddRange(ThAnnotationPrinter.Print(acadDb, dbText, _beamTextConfig));
-                        }                     
+                        }
                     }
-                });
-                if(textMoveDir.Length <= 1e-6 && g.Count>0)
-                {
-                    var dbText = g.First().Boundary as DBText;
-                    textMoveDir = Vector3d.XAxis.RotateBy(dbText.Rotation, Vector3d.ZAxis).GetPerpendicularVector().Negate();
-                }
+                });                
                 results.Add(Tuple.Create(beamIds,textMoveDir));
             });
             return results;
