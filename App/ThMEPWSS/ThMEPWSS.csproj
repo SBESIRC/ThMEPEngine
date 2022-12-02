@@ -72,6 +72,8 @@
     <Compile Include="DrainageSystemAG\Bussiness\TangentSymbMultiLeaderConvertion.cs" />
     <Compile Include="DrainageSystemAG\Models\StruParameters.cs" />
     <Compile Include="Engine\ThTCHWaterIndicatorExtractionVisitor.cs" />
+    <Compile Include="ExerciseProj\ExerciseModel.cs" />
+    <Compile Include="ExerciseProj\ExerciseService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Data\HandleStructService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThPipePreProcessService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Dimension\DrivepipeDimensionService.cs" />
