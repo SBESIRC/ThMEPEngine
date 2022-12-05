@@ -1,12 +1,36 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
+
+using NFox.Cad;
+using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+
+using ThCADExtension;
 
 namespace ThMEPElectrical.ChargerDistribution.Service
 {
     public class ThMinimumPolylineService
     {
-        public List<Point3d> Calculate(List<Point3d> points)
+        public static Polyline CreatePolyline(List<Point3d> points, ObjectId layerId, int colorIndex)
+        {
+            points = Calculate(points);
+            var pointCollection = points.ToCollection();
+            var pline = new Polyline();
+            if (pointCollection.Count > 1)
+            {
+                pline.CreatePolyline(pointCollection);
+            }
+            else if (pointCollection.Count == 1)
+            {
+                pline = (new Circle(pointCollection[0], Vector3d.ZAxis, 100.0)).TessellateCircleWithChord(100.0);
+            }
+            pline.LayerId = layerId;
+            pline.ColorIndex = colorIndex;
+            return pline;
+        }
+
+        private static List<Point3d> Calculate(List<Point3d> points)
         {
             // 创建距离矩阵
             var matrix = new double[points.Count, points.Count];
@@ -46,7 +70,7 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             return result;
         }
 
-        private void Add(double[,] matrix, List<int> thisIndexs, List<Point3d> points, IndexInfo info)
+        private static void Add(double[,] matrix, List<int> thisIndexs, List<Point3d> points, IndexInfo info)
         {
             if (thisIndexs.Count == points.Count && thisIndexs.First() < thisIndexs.Last())
             {
@@ -93,7 +117,7 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             }
         }
 
-        private double GetLength(List<int> indexs, double[,] matrix)
+        private static double GetLength(List<int> indexs, double[,] matrix)
         {
             var length = 0.0;
             for (var i = 1; i < indexs.Count; i++)
@@ -103,7 +127,7 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             return length;
         }
 
-        private List<int> Clone(List<int> thisIndexs)
+        private static List<int> Clone(List<int> thisIndexs)
         {
             var result = new List<int>();
             thisIndexs.ForEach(o => result.Add(o));

@@ -64,6 +64,7 @@
         <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Right">
             <cus:ImageButton ImageTextLocation="TextOnly"  Content="统计" TextMargin="3,0,3,0" Margin="0,0,10,0" Height="25" Width="40" Click="btnCount_Click"></cus:ImageButton>
             <cus:ImageButton ImageTextLocation="TextOnly"  Content="分组" TextMargin="3,0,3,0" Margin="0,0,10,0" Height="25" Width="40" Click="btnGroup_Click"></cus:ImageButton>
+            <cus:ImageButton ImageTextLocation="TextOnly"  Content="修改" TextMargin="3,0,3,0" Margin="0,0,10,0" Height="25" Width="40" Click="btnModify_Click"></cus:ImageButton>
             <cus:ImageButton ImageTextLocation="TextOnly"  Content="编号" TextMargin="3,0,3,0" Margin="0,0,0,0" Height="25" Width="40" Click="btnNumber_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>

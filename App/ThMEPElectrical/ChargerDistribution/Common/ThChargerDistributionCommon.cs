@@ -1,9 +1,16 @@
-﻿namespace ThMEPElectrical.ChargerDistribution.Common
+﻿using System.Collections.Generic;
+
+namespace ThMEPElectrical.ChargerDistribution.Common
 {
     public class ThChargerDistributionCommon
     {
         public const string Block_Name_Charging_Equipment = "E-BDB111";
         public const string Block_Layer_Charging_Equipment = "E-POWR-EQPM2";
+        public static readonly List<string> Block_Name_Filter = new List<string>
+        {
+            ThChargerDistributionCommon.Block_Name_Charging_Equipment,
+        };
+
         public const string Grouping_Layer = "AI-充电桩分组";
 
         public const string Block_Name_Dimension = "AI-回路标注";
@@ -11,6 +18,6 @@
 
         public const string Circuit_Number_1 = "回路编号1";
         public const string Circuit_Number_2 = "回路编号2";
-        
+
     }
 }

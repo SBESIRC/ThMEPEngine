@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -7,22 +6,21 @@ using Dbscan;
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
-using DotNetARX;
-using Dbscan.RBush;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
-using ThMEPElectrical.ChargerDistribution.Service;
-using ThMEPElectrical.ChargerDistribution.Common;
 using ThMEPEngineCore.Algorithm;
+using ThMEPElectrical.ChargerDistribution.Group;
+using ThMEPElectrical.ChargerDistribution.Common;
+using ThMEPElectrical.ChargerDistribution.Service;
 
 namespace ThMEPElectrical.ChargerDistribution.Command
 {
     public class ThChargerGroupingCmd : ThMEPBaseCommand
     {
-        private double MaxPoint = 9.0;
+        private int MaxPoint = 9;
 
         public override void SubExecute()
         {
@@ -31,7 +29,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
             {
                 // 获取框线
                 // 若选取多个框线，则计算所有框线内目标块数量
-                var frames = ThParkingStallUtils.GetFrames(currentDb);
+                var frames = ThChargerSelector.GetFrames(currentDb);
                 if (frames.Count == 0)
                 {
                     return;
@@ -43,65 +41,35 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     return;
                 }
 
+                // 清理
+                var layerId = currentDb.Database.CreateAILayer(ThChargerDistributionCommon.Grouping_Layer, 0);
+                frames.ForEach(frame =>
+                {
+                    ThParkingStallUtils.CleanPolyline(currentDb, frame, layerId);
+                });
+
                 // 移动到原点附近
                 //var transformer = new ThMEPOriginTransformer(Point3d.Origin);
-                var transformer = new ThMEPOriginTransformer(frames[0].StartPoint);
+                var transformer = new ThMEPOriginTransformer(frames[0].GeometricExtents.MinPoint);
                 ThParkingStallUtils.Transform(transformer, frames.ToCollection());
                 ThParkingStallUtils.Transform(transformer, chargerBlocks.ToCollection());
 
                 frames.ForEach(frame =>
                 {
                     var points = ThParkingStallUtils.SelectCrossingPolygon(frame, chargerBlocks).Select(o => o.Position).ToList();
-                    var iPoints = new List<PointInfo<SimplePoint>>();
-                    points.ForEach(o =>
-                    {
-                        var pointInfo = new PointInfo<SimplePoint>(new SimplePoint(o.X, o.Y));
-                        iPoints.Add(pointInfo);
-                    });
-                    var clusters = DbscanRBush.CalculateClusters(iPoints, epsilon: 10000.0, minimumPointsPerCluster: 1);
+                    var groupingService = new ThChargerGroupingService();
+                    var results = groupingService.Grouping(points, Point3d.Origin, MaxPoint);
 
-                    var results = new List<List<Point3d>>();
-                    for (var i = 0; i < clusters.Clusters.Count; i++)
-                    {
-                        var cluster = clusters.Clusters[i];
-                        var result = cluster.Objects.Select(o => o.Item.ToPoint3d()).ToList();
-
-                        while (result.Count > MaxPoint)
-                        {
-                            var groupCount = Math.Ceiling(result.Count / MaxPoint);
-                            var number = Math.Ceiling(result.Count / groupCount);
-
-                            var centerX = result.Sum(o => o.X) / result.Count;
-                            var centerY = result.Sum(o => o.Y) / result.Count;
-                            var center = new Point3d(centerX, centerY, 0);
-
-                            var borderPoint = result.OrderByDescending(o => o.DistanceTo(center)).FirstOrDefault();
-                            var pointList = result.OrderBy(o => o.DistanceTo(borderPoint)).ToList();
-                            var partList = new List<Point3d>();
-                            for (var j = 0; j < pointList.Count && j < number; j++)
-                            {
-                                partList.Add(pointList[j]);
-                            }
-
-                            results.Add(Sort(partList));
-                            result = result.Except(partList).ToList();
-                        }
-                        results.Add(Sort(result));
-                    }
-
-                    short k = 0;
-                    var layerName = currentDb.Database.CreateAILayer(ThChargerDistributionCommon.Grouping_Layer, 0);
-                    ThParkingStallUtils.CleanPolyline(currentDb, frame, layerName);
+                    var k = 0;
                     results.ForEach(result =>
                     {
-                        var service = new ThMinimumPolylineService();
-                        result = service.Calculate(result);
+                        if (result.Count == 0 || result.Count > 9)
+                        {
+                            return;
+                        }
 
-                        var pointCollection = result.ToCollection();
-                        var pline = new Polyline();
-                        pline.CreatePolyline(pointCollection);
-                        pline.LayerId = layerName;
-                        pline.ColorIndex = k;
+                        var pline = ThMinimumPolylineService.CreatePolyline(result, layerId, k);
+
                         // 变换回原位置
                         transformer.Reset(pline);
                         currentDb.ModelSpace.Add(pline);

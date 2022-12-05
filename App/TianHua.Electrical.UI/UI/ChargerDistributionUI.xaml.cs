@@ -183,6 +183,18 @@ namespace TianHua.Electrical.UI.UI
         }
 
         /// <summary>
+        /// 调整分组
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnModify_Click(object sender, RoutedEventArgs e)
+        {
+            FocusToCAD();
+            var cmd = new ThChargerGroupModifyCmd();
+            cmd.Execute();
+        }
+
+        /// <summary>
         /// 编号
         /// </summary>
         /// <param name="sender"></param>

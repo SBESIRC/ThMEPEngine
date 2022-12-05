@@ -33,7 +33,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
             {
                 // 获取框线
                 // 若选取多个框线，则计算所有框线内目标块数量
-                var frames = ThParkingStallUtils.GetFrames(currentDb);
+                var frames = ThChargerSelector.GetFrames(currentDb);
                 if (frames.Count == 0)
                 {
                     return;
@@ -67,7 +67,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
 
                 // 移动到原点附近
                 //var transformer = new ThMEPOriginTransformer(Point3d.Origin);
-                var transformer = new ThMEPOriginTransformer(frames[0].StartPoint);
+                var transformer = new ThMEPOriginTransformer(frames[0].GeometricExtents.MinPoint);
                 ThParkingStallUtils.Transform(transformer, chargerBlocks);
                 ThParkingStallUtils.Transform(transformer, frames.ToCollection());
                 ThParkingStallUtils.Transform(transformer, groupingPolyline.ToCollection());

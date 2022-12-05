@@ -8,82 +8,23 @@ using DotNetARX;
 using Linq2Acad;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Algorithm;
-using ThMEPElectrical.ChargerDistribution.Common;
-using ThMEPElectrical.ChargerDistribution.Model;
 using ThMEPEngineCore.Geom;
+using ThMEPEngineCore.Algorithm;
+using ThMEPElectrical.ChargerDistribution.Model;
+using ThMEPElectrical.ChargerDistribution.Common;
 
 namespace ThMEPElectrical.ChargerDistribution.Service
 {
     public static class ThParkingStallUtils
     {
-        private static readonly List<string> BlockNames = new List<string> { ThChargerDistributionCommon.Block_Name_Charging_Equipment };
-
         public static string BlockDwgPath()
         {
             return ThCADCommon.ElectricalDwgPath();
-        }
-
-        /// <summary>
-        /// 选择区域
-        /// </summary>
-        /// <returns></returns>
-        public static List<Polyline> GetFrames(AcadDatabase acad)
-        {
-            using (var acadDatabase = AcadDatabase.Use(acad.Database))
-            {
-                var resPolys = new List<Polyline>();
-                var options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var result = Active.Editor.GetSelection(options);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return resPolys;
-                }
-
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    var frame = acadDatabase.Element<Polyline>(obj);
-                    var frameFix = frame.Clone() as Polyline;
-                    if (!frameFix.Closed && frameFix.StartPoint.DistanceTo(frameFix.EndPoint) < 1000.0)
-                    {
-                        frameFix.Closed = true;
-                    }
-                    var collection = new DBObjectCollection { frameFix };
-                    var polylineArea = collection.PolygonsEx().OfType<Polyline>().OrderByDescending(o => o.Area).FirstOrDefault();
-                    var mPolygonArea = collection.PolygonsEx().OfType<MPolygon>().OrderByDescending(o => o.Area).FirstOrDefault();
-                    if (!polylineArea.IsNull() && !mPolygonArea.IsNull())
-                    {
-                        if (polylineArea.Area > mPolygonArea.Area)
-                        {
-                            resPolys.Add(polylineArea);
-                        }
-                        else
-                        {
-                            resPolys.Add(mPolygonArea.Shell());
-                        }
-                    }
-                    else if (!polylineArea.IsNull())
-                    {
-                        resPolys.Add(polylineArea);
-                    }
-                    else if (!mPolygonArea.IsNull())
-                    {
-                        resPolys.Add(mPolygonArea.Shell());
-                    }
-                }
-                return resPolys;
-            }
         }
 
         public static List<Line> LaneLineRecognize(AcadDatabase acad)
@@ -106,16 +47,27 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             return results;
         }
 
-        public static List<Polyline> GroupingPolylineRecognize(AcadDatabase acad)
+        public static List<Polyline> GroupingPolylineRecognize(AcadDatabase acad, bool clone = true)
         {
             // 分组线
-            return acad.ModelSpace.OfType<Polyline>().Where(e => e.Layer.Equals("AI-充电桩分组")).Select(e => e.Clone() as Polyline).ToList();
+            return acad.ModelSpace.OfType<Polyline>().Where(e => e.Layer.Equals("AI-充电桩分组")).Select(e =>
+            {
+                if (clone)
+                {
+                    return e.Clone() as Polyline;
+                }
+                else
+                {
+                    return e;
+                }
+
+            }).ToList();
         }
 
         public static List<BlockReference> ChargerRecognize(AcadDatabase acad)
         {
             // 充电桩
-            return acad.ModelSpace.OfType<BlockReference>().Where(e => BlockNames.Contains(e.Name)).ToList();
+            return acad.ModelSpace.OfType<BlockReference>().Where(e => ThChargerDistributionCommon.Block_Name_Filter.Contains(e.Name)).ToList();
         }
 
         public static List<BlockReference> DimensionRecognize(AcadDatabase acad)
@@ -124,10 +76,14 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             return acad.ModelSpace.OfType<BlockReference>().Where(e => e.GetEffectiveName().Equals(ThChargerDistributionCommon.Block_Name_Dimension)).ToList();
         }
 
-        public static void CleanPolyline(AcadDatabase acad, Polyline frame, ObjectId layerId)
+        public static void CleanPolyline(AcadDatabase acad, Entity frame, ObjectId layerId)
         {
-            // 充电桩
-            SelectCrossingPolygon(frame, acad.ModelSpace.OfType<Polyline>().Where(e => e.LayerId.Equals(layerId)).ToList()).ForEach(e =>
+            var polylines = acad.ModelSpace.OfType<Polyline>().Where(e => e.LayerId.Equals(layerId)).ToList();
+            polylines.Where(e => e.Length == 0).ForEach(e =>
+            {
+                Clean(e);
+            });
+            SelectCrossingPolygon(frame, polylines.Where(e => e.Length > 0).ToList()).ForEach(e =>
             {
                 Clean(e);
             });
@@ -156,31 +112,31 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             return (e is Line || e is Polyline) && e.Layer.Equals("E-LANE-CENTER");
         }
 
-        public static List<Line> SelectCrossingPolygon(Polyline frame, List<Line> lanelines)
+        public static List<Line> SelectCrossingPolygon(Entity frame, List<Line> lanelines)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(lanelines.ToCollection());
             return spatialIndex.SelectCrossingPolygon(frame).OfType<Line>().ToList();
         }
 
-        public static List<Polyline> SelectCrossingPolygon(Polyline frame, List<Polyline> lanelines)
+        public static List<Polyline> SelectCrossingPolygon(Entity frame, List<Polyline> lanelines)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(lanelines.ToCollection());
             return spatialIndex.SelectCrossingPolygon(frame).OfType<Polyline>().ToList();
         }
 
-        public static List<BlockReference> SelectCrossingPolygon(Polyline frame, List<BlockReference> blocks)
+        public static List<BlockReference> SelectCrossingPolygon(Entity frame, List<BlockReference> blocks)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(blocks.ToCollection());
             return spatialIndex.SelectCrossingPolygon(frame).OfType<BlockReference>().ToList();
         }
 
-        public static List<DBPoint> SelectCrossingPolygon(Polyline frame, List<DBPoint> points)
+        public static List<DBPoint> SelectCrossingPolygon(Entity frame, List<DBPoint> points)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(points.ToCollection());
             return spatialIndex.SelectCrossingPolygon(frame).OfType<DBPoint>().ToList();
         }
 
-        public static List<ThChargerData> SelectCrossingPolygon(Polyline frame, List<ThChargerData> data)
+        public static List<ThChargerData> SelectCrossingPolygon(Entity frame, List<ThChargerData> data)
         {
             var points = data.Select(p => new DBPoint(p.Position)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(points);
@@ -193,12 +149,25 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             return new Point3d((line.StartPoint.X + line.EndPoint.X) / 2, (line.StartPoint.Y + line.EndPoint.Y) / 2, (line.StartPoint.Z + line.EndPoint.Z) / 2);
         }
 
-        public static List<Line> Trim(this List<Line> lines, Polyline polygon)
+        public static List<Line> Trim(this List<Line> lines, Entity polygon)
         {
             var results = new List<Line>();
             lines.ForEach(l =>
             {
-                var trim = ThCADCoreNTSGeometryClipper.Clip(polygon, l);
+                Polyline frame;
+                if (polygon is Polyline p)
+                {
+                    frame = p;
+                }
+                else if (polygon is MPolygon mp)
+                {
+                    frame = mp.Shell();
+                }
+                else
+                {
+                    return;
+                }
+                var trim = ThCADCoreNTSGeometryClipper.Clip(frame, l);
                 trim.OfType<Entity>().ForEach(o =>
                 {
                     if (o is Line line)
@@ -287,21 +256,6 @@ namespace ThMEPElectrical.ChargerDistribution.Service
                     var property = br.DynamicBlockReferencePropertyCollection;
                     property.SetValue("位置1 X", -1200.0);
                     property.SetValue("翻转状态1", (short)1);
-
-                    //using (Transaction trans = acad.Database.TransactionManager.StartTransaction())
-                    //{
-                    //    // 获取块参照
-                    //    // 遍历块参照的属性，并将其属性名和属性值添加到字典中
-                    //    foreach (ObjectId attId in br.AttributeCollection)
-                    //    {
-                    //        var attRef = (AttributeReference)trans.GetObject(attId, OpenMode.ForWrite);
-                    //        if (attRef.Visible)
-                    //        {
-                    //            //attRef.Justify = AttachmentPoint.MiddleCenter;
-                    //        }
-                    //    }
-                    //    trans.Commit();
-                    //}
                 }
             }
         }
@@ -332,7 +286,7 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             return Convert.ToInt32(point.ToVector3d().DotProduct(vector));
         }
 
-        public static void BlocksClean(AcadDatabase acad, Polyline frame, List<ThChargerData> blockData, List<Polyline> geometries)
+        public static void BlocksClean(AcadDatabase acad, Entity frame, List<ThChargerData> blockData, List<Polyline> geometries)
         {
             var localDimensions = SelectCrossingPolygon(frame, geometries);
             localDimensions.ForEach(geometry =>

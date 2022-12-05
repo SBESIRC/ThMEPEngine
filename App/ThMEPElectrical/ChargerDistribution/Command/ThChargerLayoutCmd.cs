@@ -38,7 +38,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
             using (var currentDb = AcadDatabase.Active())
             {
                 // 获取框线
-                var frames = ThParkingStallUtils.GetFrames(currentDb);
+                var frames = ThChargerSelector.GetFrames(currentDb);
                 if (frames.Count == 0)
                 {
                     return;
@@ -62,7 +62,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
 
                 // 移动到原点附近
                 //var transformer = new ThMEPOriginTransformer(Point3d.Origin);
-                var transformer = new ThMEPOriginTransformer(frames[0].StartPoint);
+                var transformer = new ThMEPOriginTransformer(frames[0].GeometricExtents.MinPoint);
                 ThParkingStallUtils.Transform(transformer, frames.ToCollection());
                 ThParkingStallUtils.Transform(transformer, allLaneLines.ToCollection());
                 ThParkingStallUtils.Transform(transformer, engine.ParkingStallPolys.ToCollection());
