@@ -25,6 +25,12 @@ namespace ThMEPElectrical.ChargerDistribution.Command
 
         private readonly double AngleTolerance = Math.PI / 180.0;
 
+        public ThChargerNumberCmd()
+        {
+            ActionName = "编号";
+            CommandName = "THCDZPD";
+        }
+
         public override void SubExecute()
         {
             using (var docLock = Active.Document.LockDocument())

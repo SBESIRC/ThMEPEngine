@@ -23,6 +23,12 @@ namespace ThMEPElectrical.ChargerDistribution.Command
     {
         private int MaxCount = 9;
 
+        public ThChargerGroupModifyCmd()
+        {
+            ActionName = "调整";
+            CommandName = "THCDZPD";
+        }
+
         public override void SubExecute()
         {
             using (var docLock = Active.Document.LockDocument())

@@ -15,6 +15,12 @@ namespace ThMEPElectrical.ChargerDistribution.Command
 {
     public class ThChargerCountCmd : ThMEPBaseCommand
     {
+        public ThChargerCountCmd()
+        {
+            ActionName = "统计";
+            CommandName = "THCDZPD";
+        }
+
         public override void SubExecute()
         {
             using (var docLock = Active.Document.LockDocument())

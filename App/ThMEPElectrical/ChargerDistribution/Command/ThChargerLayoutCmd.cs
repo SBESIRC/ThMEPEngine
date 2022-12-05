@@ -31,6 +31,12 @@ namespace ThMEPElectrical.ChargerDistribution.Command
 
         private readonly string BlockLayer = ThChargerDistributionCommon.Block_Layer_Charging_Equipment;
 
+        public ThChargerLayoutCmd()
+        {
+            ActionName = "布置";
+            CommandName = "THCDZPD";
+        }
+
         public override void SubExecute()
         {
             using (var docLock = Active.Document.LockDocument())
