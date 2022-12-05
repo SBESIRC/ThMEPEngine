@@ -232,7 +232,10 @@ namespace ThParkingStall.Core.ObliqueMPartitionLayout
                             {
                                 var k = new LineSegment(e);
                                 k = TranslateReservedConnection(k, -lane.Vec.Normalize() * DisLaneWidth / 2/*(minlength < DisLaneWidth / 2? minlength : DisLaneWidth / 2)*/, false);
-                                var k_pl = PolyFromLines(k, TranslateReservedConnection(k, -lane.Vec.Normalize() * (mindistance - DisLaneWidth / 2)));
+                                //下一语句不用TranslateReservedConnection直接用Translation，该车道线被lanebuffer切了2750理论上没有连接关系了，
+                                //使用TranslateReservedConnection导致生成车道延长2750连接到车道线，在取消背靠背缩进(车位长变为5300时出错-出错原因:应该是求连接关系做TranslateReservedConnection时关系混乱)
+                                //var k_pl = PolyFromLines(k, TranslateReservedConnection(k, -lane.Vec.Normalize() * (mindistance - DisLaneWidth / 2)));
+                                var k_pl = PolyFromLines(k, k.Translation(-lane.Vec.Normalize() * (mindistance - DisLaneWidth / 2)));
                                 k_pl = k_pl.Scale(ScareFactorForCollisionCheck);
                                 foreach (var lbox in lnbox)
                                 {
