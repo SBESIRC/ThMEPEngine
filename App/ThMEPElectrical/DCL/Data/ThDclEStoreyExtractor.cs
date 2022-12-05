@@ -20,6 +20,11 @@ namespace ThMEPElectrical.DCL.Data
         {
             base.Extract(database, pts);
             Sort();
+            for (int i = 1; i <= Storeys.Count; i++)
+            {
+                if (Storeys[i - 1].StoreyNumber != "")
+                    StoreyNumberMap.Add(Storeys[i - 1].StoreyNumber, i + "F");
+            }
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -42,14 +47,8 @@ namespace ThMEPElectrical.DCL.Data
         }
         private void Sort()
         {
-            //ToDO
             Storeys = Storeys.Where(o => !(o.StoreyNumber.Contains('-') || o.StoreyNumber=="")).ToList();
-            Storeys = Storeys.OrderBy(o => double.Parse(o.StoreyNumber.Split(',')[0])).ToList();
-            for (int i = 1; i <= Storeys.Count; i++)
-            {
-                if (Storeys[i - 1].StoreyNumber != "")
-                    StoreyNumberMap.Add(Storeys[i - 1].StoreyNumber, i + "F");
-            }
+            Storeys = Storeys.OrderBy(o => double.Parse(o.StoreyNumber.Split(',')[0])).ToList();            
         }
     }
 }

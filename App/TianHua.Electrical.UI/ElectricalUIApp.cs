@@ -25,6 +25,9 @@ namespace TianHua.Electrical.UI
             SmokeLayoutUI = null;
             UiCapitalConverter = null;
             ChargerDistributionUI = null;
+            //AcadApp.DocumentManager.DocumentActivated += ThLightningProtectLeadWireCmd.DocumentActivated;
+            //AcadApp.DocumentManager.DocumentToBeDestroyed += ThLightningProtectLeadWireCmd.DocumentToBeDestroyed;
+            //AcadApp.DocumentManager.DocumentDestroyed += ThLightningProtectLeadWireCmd.DocumentDestroyed;
         }
 
         public void Terminate()
@@ -163,6 +166,18 @@ namespace TianHua.Electrical.UI
             earthGridUI.WindowStartupLocation = System.Windows.
                 WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(earthGridUI);
+        }
+
+        /// <summary>
+        /// 防雷引下线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THFLYXX", CommandFlags.Modal)]
+        public void THFLYXX()
+        {
+            using (var cmd = new ThLightningProtectLeadWireCmd())
+            {
+                //cmd.Execute();
+            }
         }
     }
 }

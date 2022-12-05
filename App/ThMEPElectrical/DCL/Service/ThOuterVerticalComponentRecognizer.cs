@@ -1,13 +1,13 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Interface;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
-using ThCADCore.NTS;
-using System.Linq;
 using NFox.Cad;
+using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using ThMEPElectrical.DCL.Data;
+using ThMEPEngineCore.Interface;
 
 namespace ThMEPElectrical.DCL.Service
 {
@@ -16,171 +16,205 @@ namespace ThMEPElectrical.DCL.Service
     /// </summary>
     public abstract class ThOuterVerticalComponentRecognizer
     {
-        public DBObjectCollection OuterShearwalls { get; protected set; }
-        public DBObjectCollection OuterColumns { get; protected set; }
-
-        public DBObjectCollection OtherShearwalls { get; protected set; }
-        public DBObjectCollection OtherColumns { get; protected set; }
-        //public Dictionary<Entity, string> OuterColumnBelongedArchOutlineID { get; set; }
-        //public Dictionary<Entity, string> OuterShearWallBelongedArchOutlineID { get; set; }
-        public Dictionary<Entity, string> OuterArchOutlineID { get; set; } //外部传入
-        public Dictionary<Entity, string> InnterArchOutlineID { get; set; } //外部传入
-
-        protected Dictionary<Polyline, Polyline> OuterOutlineBufferDic { get; set; }
-        protected Dictionary<Polyline, Polyline> InnerOutlineBufferDic { get; set; }
-
+        public Dictionary<MPolygon, HashSet<DBObject>> OuterColumnsMap { get; protected set; }
+        public Dictionary<MPolygon, HashSet<DBObject>> OuterShearWallsMap { get; protected set; }
+        public HashSet<DBObject> OtherColumns { get; protected set; }
+        public HashSet<DBObject> OtherShearWalls { get; protected set; }
+        protected double ArchOutlineOffsetLength;
         public ThOuterVerticalComponentRecognizer()
         {
-            OuterShearwalls = new DBObjectCollection();
-            OuterColumns = new DBObjectCollection();
-            OtherShearwalls = new DBObjectCollection();
-            OtherColumns = new DBObjectCollection();
-            OuterArchOutlineID = new Dictionary<Entity, string>();
-            //OuterColumnBelongedArchOutlineID = new Dictionary<Entity, string>();
-            //OuterShearWallBelongedArchOutlineID = new Dictionary<Entity, string>();
-            InnterArchOutlineID = new Dictionary<Entity, string>();
-            OuterOutlineBufferDic = new Dictionary<Polyline, Polyline>();
-            InnerOutlineBufferDic= new Dictionary<Polyline, Polyline>();
+            OtherColumns = new HashSet<DBObject>();
+            OtherShearWalls = new HashSet<DBObject>();
+            OuterColumnsMap = new Dictionary<MPolygon, HashSet<DBObject>>();
+            OuterShearWallsMap = new Dictionary<MPolygon, HashSet<DBObject>>();
         }
         public abstract void Recognize();
-        /// <summary>
-        /// 建筑框线内缩外扩的Polyline对
-        /// </summary>
-        /// <param name="outlines">原始建筑框线</param>
-        /// <param name="length">buffer的距离</param>
-        /// <returns>Key:原建筑框线, Value:内缩或外扩后的建筑框线</returns>
-        public Dictionary<Polyline, Polyline> Buffer(List<Entity> outlines, double length)
+    }
+    public class ThStruOuterVerticalComponentRecognizer : ThOuterVerticalComponentRecognizer
+    {
+        private ThStruOuterVertialComponentData _inputData { get; set; }
+        public ThStruOuterVerticalComponentRecognizer(ThOuterVertialComponentData inputData)
         {
-            var results = new Dictionary<Polyline, Polyline>();
-            IBuffer bufferService = new ThNTSBufferService();
-            outlines.ForEach(o =>
+            if (inputData is ThStruOuterVertialComponentData data)
+                _inputData = data;
+            ArchOutlineOffsetLength = 500.0;
+        }
+        public override void Recognize()
+        {
+            //实现方法
+            //外轮廓线内缩500，生成一个内缩框线，外轮廓线和内缩框线形成一个回形区域
+            //a、对于直接处于内缩框线外的竖向构件，则直接判定为外圈竖向构件
+            //b、对于回形区域内能选中的竖向构件，直接判定为外圈竖向构件
+            //c、对于回形区域能选中主梁，其向内缩框线内的一侧连接的竖向构件判定为外圈竖向构件
+            //d、对于c有一个例外，即主梁远离内缩框线的一侧连接的竖向构件如果已经判定为外圈竖向构件，
+            //且不能存在满足a/b/c的情况,则不应将其向内缩框线内的一侧连接的竖向构件判定为外圈构件，意思是a/b/c的优先级要大于d
+
+            //为了创建悬臂梁的索引，先构建悬臂梁的轮廓与悬臂梁本身的字典
+            //创建悬臂梁所有的轮廓线的DBObjectionCollection，以便创建索引
+            if (_inputData == null)
             {
-                var buffer = bufferService.Buffer(o, length);
-                if (buffer != null && o is Polyline polyline)
+                return;
+            }
+            var beamLinkMap = new Dictionary<DBObject, ThBeamLink>();
+            _inputData.PrimaryBeams.ForEach(o => o.Beams.ForEach(p => beamLinkMap.Add(p.Outline, o)));
+            _inputData.OverhangingPrimaryBeams.ForEach(o => o.Beams.ForEach(p => beamLinkMap.Add(p.Outline, o)));
+
+            //创建结构轮廓线和建筑轮廓线的字典
+            //构建索引
+            var columnSpatialIndex = new ThCADCoreNTSSpatialIndex(_inputData.Columns);
+            var shearWallSpatialIndex = new ThCADCoreNTSSpatialIndex(_inputData.Shearwalls);
+            var beamSpatialIndex = new ThCADCoreNTSSpatialIndex(beamLinkMap.Keys.ToCollection());
+
+            var outerColumnsMap = new Dictionary<MPolygon, HashSet<DBObject>>();
+            var outerShearWallsMap = new Dictionary<MPolygon, HashSet<DBObject>>();
+            IBuffer bufferService = new ThNTSBufferService();
+            _inputData.ArchOutlineAreas.OrderByDescending(o=>o.Area).ForEach(o =>
+            {
+                var innerArea = bufferService.Buffer(o, -1.0 * ArchOutlineOffsetLength); //内缩
+                if (innerArea != null && innerArea is MPolygon polygon)
                 {
-                    results.Add(polyline, buffer as Polyline);
+                    // 拿到回形区域内的元素
+                    var innerColumns = columnSpatialIndex.SelectWindowPolygon(innerArea).OfType<DBObject>().ToHashSet();
+                    var innerShearWalls = shearWallSpatialIndex.SelectWindowPolygon(innerArea).OfType<DBObject>().ToHashSet();
+
+                    var outerColumns = columnSpatialIndex.SelectCrossingPolygon(o).OfType<DBObject>().ToHashSet();
+                    var outerShearWalls = shearWallSpatialIndex.SelectCrossingPolygon(o).OfType<DBObject>().ToHashSet();
+                    outerColumns.ExceptWith(innerColumns);
+                    outerShearWalls.ExceptWith(innerShearWalls);
+
+                    var outerBeams = beamSpatialIndex.SelectCrossingPolygon(o).OfType<DBObject>().ToHashSet();
+                    var innerBeams = beamSpatialIndex.SelectWindowPolygon(innerArea).OfType<DBObject>().ToHashSet();
+                    outerBeams.ExceptWith(innerBeams); // 
+                    innerBeams.OfType<DBObject>().ForEach(e =>
+                    {
+                        var link = beamLinkMap[e];
+                        var isStartLinkVComponent = link.Start //起始端连接Vertical component
+                        .Where(s => s.Outline != null)
+                        .Where(s =>
+                        {
+                            if (s is ThIfcColumn column)
+                            {
+                                return outerColumns.Contains(column.Outline);
+                            }
+                            else if (s is ThIfcWall wall)
+                            {
+                                return outerShearWalls.Contains(wall.Outline);
+                            }
+                            else
+                            {
+                                //Unknown
+                                return false;
+                            }
+                        }).Any();
+                        var isEndLinkVComponent = link.End //末端连接Vertical component
+                        .Where(s => s.Outline != null)
+                        .Where(s =>
+                        {
+                            if (s is ThIfcColumn column)
+                            {
+                                return outerColumns.Contains(column.Outline);
+                            }
+                            else if (s is ThIfcWall wall)
+                            {
+                                return outerShearWalls.Contains(wall.Outline);
+                            }
+                            else
+                            {
+                                //Unknown
+                                return false;
+                            }
+                        }).Any();
+
+                        if (isStartLinkVComponent == false && isEndLinkVComponent == false)
+                        {
+                            link.Start.Where(s => s.Outline != null)
+                            .ForEach(s =>
+                            {
+                                if (s is ThIfcColumn)
+                                {
+                                    if (innerColumns.Contains(s.Outline))
+                                    {
+                                        outerColumns.Add(s.Outline);
+                                    }
+                                }
+                                else if (s is ThIfcWall)
+                                {
+                                    if (innerShearWalls.Contains(s.Outline))
+                                    {
+                                        outerShearWalls.Add(s.Outline);
+                                    }
+                                }
+                            });
+                        }
+                    });
+
+                    outerColumnsMap.ForEach(x => outerColumns.ExceptWith(x.Value));
+                    outerShearWallsMap.ForEach(x => outerShearWalls.ExceptWith(x.Value));
+
+                    outerColumnsMap.Add(o, outerColumns);
+                    outerShearWallsMap.Add(o, outerShearWalls);
                 }
             });
-            return results;
-        }
-        protected MPolygon BuildMPolygon(Polyline shell, Polyline hole)
-        {
-            return ThMPolygonTool.CreateMPolygon(shell, new List<Curve> { hole });
-        }
-        protected void OuterLineHandleColumn(ThCADCoreNTSSpatialIndex columnSpatialIndex, Dictionary<Polyline, Polyline> bufferres)
-        {
-            foreach (var item in bufferres)
-            {
-                var SelectedColumn = DBObjectCollectionSubtraction(columnSpatialIndex.SelectCrossingPolygon(item.Key),
-                                        columnSpatialIndex.SelectWindowPolygon(item.Value));
-                foreach (Entity col in SelectedColumn)
-                    if (!OuterColumns.Contains(col))
-                    {
-                        OuterColumns.Add(col);
-                        //OuterColumnBelongedArchOutlineID.Add(col, OuterArchOutlineID[item.Key]);
-                    }
-            }
 
-        }
-        protected DBObjectCollection DBObjectCollectionSubtraction(DBObjectCollection Polylinecollection_1, DBObjectCollection Polylinecollection_2)
-        {
-            return Polylinecollection_1
-                .Cast<Entity>()
-                .Where(o => !Polylinecollection_2.Contains(o))
-                .ToCollection();
-        }
-        protected void InnerLineHandleColumn(ThCADCoreNTSSpatialIndex columnSpatialIndex, Dictionary<Polyline, Polyline> bufferres)
-        {
-            foreach (var item in bufferres)
-            {
-                var SelectedColumn = DBObjectCollectionSubtraction(columnSpatialIndex.SelectCrossingPolygon(item.Value),
-                                        columnSpatialIndex.SelectWindowPolygon(item.Key));
-                foreach (DBObject col in SelectedColumn)
-                    if (!OuterColumns.Contains(col))
-                        OuterColumns.Add(col);
-            }
+            // 收集返回的结果
+            OuterColumnsMap = outerColumnsMap;
+            OuterShearWallsMap = outerShearWallsMap;
 
-        }
-        protected void OuterLineHandleShearWall(ThCADCoreNTSSpatialIndex shearWallSpatialIndex, Dictionary<Polyline, Polyline> bufferres)
-        {
-            foreach (var item in bufferres)
-            {
-                var SelectedShearWall = DBObjectCollectionSubtraction(shearWallSpatialIndex.SelectCrossingPolygon(item.Key),
-                                                                        shearWallSpatialIndex.SelectWindowPolygon(item.Value));
-                foreach (Entity shearwall in SelectedShearWall)
-                    if (!OuterShearwalls.Contains(shearwall))
-                    {
-                        OuterShearwalls.Add(shearwall);
-                        //OuterShearWallBelongedArchOutlineID.Add(shearwall, OuterArchOutlineID[item.Key]);
-                    }
-            }
-
-        }
-        protected void InnerLineHandleShearWall(ThCADCoreNTSSpatialIndex shearWallSpatialIndex, Dictionary<Polyline, Polyline> bufferres)
-        {
-            foreach (var item in bufferres)
-            {
-                var SelectedShearWall = DBObjectCollectionSubtraction(shearWallSpatialIndex.SelectCrossingPolygon(item.Value),
-                                                                        shearWallSpatialIndex.SelectWindowPolygon(item.Key));
-                foreach (DBObject shearwall in SelectedShearWall)
-                    if (!OuterShearwalls.Contains(shearwall))
-                        OuterShearwalls.Add(shearwall);
-            }
-
-        }
-        public virtual Dictionary<Entity,string> GetOuterColumnBelongedOutArchlineId()
-        {
-            var results = new Dictionary<Entity, string>();
-            var columnSpatialIndex = new ThCADCoreNTSSpatialIndex(OuterColumns);
-            foreach(var item in OuterArchOutlineID)
-            {
-                var objs = columnSpatialIndex.SelectCrossingPolygon(item.Key);
-               objs.Cast<Entity>().ForEach(e => results.Add(e, item.Value));
-            }
-            foreach (var item in InnerOutlineBufferDic)
-            {
-                var objs = columnSpatialIndex.SelectCrossingPolygon(item.Value);
-                objs.Cast<Entity>().ForEach(e => 
-                {
-                    if(!results.ContainsKey(e))
-                    {
-                        results.Add(e, InnterArchOutlineID[item.Key]);
-                    }
-                    else
-                    {
-                        results[e] = InnterArchOutlineID[item.Key];
-                    }
-                });
-            }
-            return results;
-        }
-
-        public virtual Dictionary<Entity, string> GetOuterShearWallBelongedOutArchlineId()
-        {
-            var results = new Dictionary<Entity, string>();
-            var shearwallSpatialIndex = new ThCADCoreNTSSpatialIndex(OuterShearwalls);
-            foreach (var item in OuterArchOutlineID)
-            {
-                var objs = shearwallSpatialIndex.SelectCrossingPolygon(item.Key);
-                objs.Cast<Entity>().ForEach(e => results.Add(e, item.Value));
-            }
-            foreach (var item in InnerOutlineBufferDic)
-            {
-                var objs = shearwallSpatialIndex.SelectCrossingPolygon(item.Value);
-                objs.Cast<Entity>().ForEach(e =>
-                {
-                    if (!results.ContainsKey(e))
-                    {
-                        results.Add(e, InnterArchOutlineID[item.Key]);
-                    }
-                    else
-                    {
-                        results[e] = InnterArchOutlineID[item.Key];
-                    }
-                });
-            }
-            return results;
+            OtherColumns = _inputData.Columns.OfType<DBObject>().ToHashSet();
+            OtherShearWalls = _inputData.Shearwalls.OfType<DBObject>().ToHashSet();
+            outerColumnsMap.ForEach(o => OtherColumns.ExceptWith(o.Value));
+            outerShearWallsMap.ForEach(o => OtherShearWalls.ExceptWith(o.Value));
         }
     }
+    public class ThArchOuterVerticalComponentRecognizer : ThOuterVerticalComponentRecognizer
+    {
+        private ThArchOuterVertialComponentData _inputData { get; set; }
+        public ThArchOuterVerticalComponentRecognizer(ThOuterVertialComponentData inputData)
+        {
+            if (inputData is ThArchOuterVertialComponentData data)
+                _inputData = data;
+            ArchOutlineOffsetLength = 2000.0;
+        }
+        public override void Recognize()
+        {
+            if (_inputData == null)
+            {
+                return;
+            }
+            //创建结构轮廓线和建筑轮廓线的字典
+            //构建索引
+            var columnSpatialIndex = new ThCADCoreNTSSpatialIndex(_inputData.Columns);
+            var shearWallSpatialIndex = new ThCADCoreNTSSpatialIndex(_inputData.Shearwalls);
 
+            var outerColumnsMap = new Dictionary<MPolygon, HashSet<DBObject>>();
+            var outerShearWallsMap = new Dictionary<MPolygon, HashSet<DBObject>>();
+            IBuffer bufferService = new ThNTSBufferService();
+            _inputData.ArchOutlineAreas.ForEach(o =>
+            {
+                var innerArea = bufferService.Buffer(o, -1.0 * ArchOutlineOffsetLength); //内缩
+                if (innerArea != null && innerArea is MPolygon polygon)
+                {
+                    // 拿到回形区域内的元素
+                    var innerColumns = columnSpatialIndex.SelectWindowPolygon(innerArea).OfType<DBObject>().ToHashSet();
+                    var innerShearWalls = shearWallSpatialIndex.SelectWindowPolygon(innerArea).OfType<DBObject>().ToHashSet();
+
+                    var outerColumns = columnSpatialIndex.SelectCrossingPolygon(o).OfType<DBObject>().ToHashSet();
+                    var outerShearWalls = shearWallSpatialIndex.SelectCrossingPolygon(o).OfType<DBObject>().ToHashSet();
+                    outerColumns.ExceptWith(innerColumns);
+                    outerShearWalls.ExceptWith(innerShearWalls);
+                    outerColumnsMap.Add(o, outerColumns);
+                    outerShearWallsMap.Add(o, outerShearWalls);
+                }
+            });
+
+            // 收集返回的结果
+            OuterColumnsMap = outerColumnsMap;
+            OuterShearWallsMap = outerShearWallsMap;
+
+            OtherColumns = _inputData.Columns.OfType<DBObject>().ToHashSet();
+            OtherShearWalls = _inputData.Shearwalls.OfType<DBObject>().ToHashSet();
+            outerColumnsMap.ForEach(o => OtherColumns.Except(o.Value));
+            outerShearWallsMap.ForEach(o => OtherShearWalls.Except(o.Value));
+        }
+    }
 }

@@ -83,6 +83,18 @@ namespace ThMEPEngineCore.Engine
             //  3. 对处理后生成的结果恢复到原点位置
             // 所以返回近原点数据
         }
+
+        public void Recognize(
+            ThColumnRecognitionEngine columnEngine, 
+            ThShearWallRecognitionEngine shearWallEngine, 
+            ThBeamBuilderEngine beamEngine)
+        {
+            BeamEngine = beamEngine;
+            ColumnEngine = columnEngine;
+            ShearWallEngine = shearWallEngine;
+            Recognize();
+        }
+
         private void Recognize()
         {
             // 预处理

@@ -9,25 +9,22 @@ namespace ThMEPElectrical.DCL.Data
     {
         public DBObjectCollection Columns { get; set; }
         public DBObjectCollection Shearwalls { get; set; }
-        public List<Entity> OuterOutlines { get; set; }
-        public List<Entity> InnerOutlines { get; set; }
+        public List<MPolygon> ArchOutlineAreas { get; set; }
 
         public ThOuterVertialComponentData()
         {
             Columns = new DBObjectCollection();
             Shearwalls = new DBObjectCollection();
-            OuterOutlines = new List<Entity>();
-            InnerOutlines = new List<Entity>();
+            ArchOutlineAreas = new List<MPolygon>();
         }
         public ThOuterVertialComponentData(ModelData modelData) :this()
         {
-            Columns = modelData._columns;
-            Shearwalls = modelData._shearWalls;
+            Columns = modelData.Columns;
+            Shearwalls = modelData.ShearWalls;
         }
     }
     public class ThArchOuterVertialComponentData : ThOuterVertialComponentData
     {
-
         //通过建筑平面数据寻找外圈竖向构件
         //输入数据：建筑外轮廓线、内庭院洞线、竖向构件(柱、剪力墙)
         public ThArchOuterVertialComponentData(ModelData modelData):base(modelData)
@@ -47,16 +44,10 @@ namespace ThMEPElectrical.DCL.Data
         }
         public ThStruOuterVertialComponentData(ModelData modelData):base(modelData)
         {
-            //PrimaryBeams = new List<ThBeamLink>();
-            //OverhangingPrimaryBeams = new List<ThBeamLink>();
-            //PrimaryBeams = extractor.ArchitectureOutlineData.BeamEngine.PrimaryBeamLinks;
-            //OverhangingPrimaryBeams = extractor.ArchitectureOutlineData.BeamEngine.OverhangingPrimaryBeamLinks;
-            PrimaryBeams = new List<ThBeamLink>();
-            OverhangingPrimaryBeams = new List<ThBeamLink>();
             if (modelData is Model2Data data)
             {
-                PrimaryBeams = data.BeamEngine.PrimaryBeamLinks;
-                OverhangingPrimaryBeams = data.BeamEngine.OverhangingPrimaryBeamLinks;
+                PrimaryBeams = data.PrimaryBeamLinks;
+                OverhangingPrimaryBeams = data.OverhangingPrimaryBeamLinks;
             }
         }
     }

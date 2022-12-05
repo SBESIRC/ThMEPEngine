@@ -18,9 +18,9 @@ namespace ThMEPElectrical.DCL.Data
         public List<Curve> DualpurposeBelts { get; set; }
         public string SpecialBeltLayer { get; set; }
         public string DualpurposeBeltLayer { get; set; }
-        private const double TesslateLength = 200.0;
         public ThLightningReceivingBeltExtractor()
         {
+            TesslateLength = 200.0;
             SpecialBelts = new List<Curve>();
             DualpurposeBelts = new List<Curve>();
             SpecialBeltLayer = "E-THUN-WIRE";

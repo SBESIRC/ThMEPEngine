@@ -24,6 +24,7 @@ namespace ThMEPEngineCore.Engine
         public ThDB3StairExtractionVisitor DB3StairVisitor { get; private set; }
         public ThDrainageWellExtractionVisitor DrainageWellVisitor { get; private set; }
         public ThVStructuralElementExtractionVisitor VStructuralElementVisitor { get; private set; }
+        public ThRawBeamExtractionVisitor RawBeamVisitor { get; private set; }
         public ThBuildingElementVisitorManager(Database database)
         {
             #region ----------非DB3-----------
@@ -41,6 +42,7 @@ namespace ThMEPEngineCore.Engine
                 LayerFilter = ThDrainageWellLayerManager.CurveXrefLayers(database).ToHashSet(),
             };
             VStructuralElementVisitor = new ThVStructuralElementExtractionVisitor();
+            RawBeamVisitor = CreateRawBeamVisitor(database);
             #endregion
             #region ----------DB3-----------
             DB3ArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
@@ -93,6 +95,13 @@ namespace ThMEPEngineCore.Engine
             };
             DB3StairVisitor = new ThDB3StairExtractionVisitor();
             #endregion
+        }
+        private ThRawBeamExtractionVisitor CreateRawBeamVisitor(Database database)
+        {
+            return new ThRawBeamExtractionVisitor()
+            {
+                LayerFilter = ThBeamLayerManager.GeometryXrefLayers(database).ToHashSet(),
+            };
         }
     }
 }

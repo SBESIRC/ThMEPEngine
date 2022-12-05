@@ -154,7 +154,6 @@
     <Compile Include="Command\ThAccessControlSystemCommand.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThEarthingGridCommand.cs" />
-    <Compile Include="Command\ThDclCommand.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGuardToourSystemCommand.cs" />
     <Compile Include="Command\ThInsertStoreyCommand.cs" />
@@ -179,8 +178,12 @@
     <Compile Include="ConnectPipe\Service\PathfindingWithDirServce.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
+    <Compile Include="DCL\Data\LightProtectLeadWireStoreyData.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
+    <Compile Include="DCL\Data\ThDclDataSetFactory.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="DCL\Service\ThLightningProtectLeadWireBuilder.cs" />
+    <Compile Include="DCL\Service\ThLightningProtectLeadWireGeoFactory.cs" />
     <Compile Include="EarthingGrid\Data\ThEarthingGridDatasetFactory.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionEngine.cs" />
     <Compile Include="EarthingGrid\Engine\ThDownConductorExtractionVisitor.cs" />
@@ -268,8 +271,6 @@
     <Compile Include="DCL\Service\ThBuildOuterOutline.cs" />
     <Compile Include="DCL\Service\ThBuildOuterStruOutline.cs" />
     <Compile Include="DCL\Service\ThDclUtils.cs" />
-    <Compile Include="DCL\Service\ThStruOuterVerticalComponentRecognizer.cs" />
-    <Compile Include="DCL\Service\ThArchOuterVerticalComponentRecognizer.cs" />
     <Compile Include="DCL\Service\ThOuterVerticalComponentRecognizer.cs" />
     <Compile Include="AFAS\Data\ThAFASEStoreyExtractor.cs" />
     <Compile Include="AFAS\Data\ThAFASArchitectureWallExtractor.cs" />
@@ -451,7 +452,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPElectricalService.cs" />
     <Compile Include="ThMEPElectricalUtils.cs" />
-    <Compile Include="ThProtectThunderCmd.cs" />
     <Compile Include="ThSecurityPlaneCmds.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\LayoutService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
@@ -489,10 +489,7 @@
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="DCL\Engine\" />
-    <Folder Include="DCL\Model\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

@@ -9,6 +9,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Service
 {
@@ -146,8 +147,12 @@ namespace ThMEPEngineCore.Service
     }
     public abstract class ModelData
     {
-        public DBObjectCollection _shearWalls;
-        public DBObjectCollection _columns; 
+        protected DBObjectCollection _shearWalls;
+        protected DBObjectCollection _columns;
+        protected DBObjectCollection _beams;
+        public DBObjectCollection Beams => _beams;
+        public DBObjectCollection Columns => _columns;
+        public DBObjectCollection ShearWalls => _shearWalls;
         public ModelData(Database database, Point3dCollection polygon)
         {
             _shearWalls = new DBObjectCollection();
@@ -169,19 +174,24 @@ namespace ThMEPEngineCore.Service
 
     public class Model1Data : ModelData
     {
-        public readonly DBObjectCollection _archWall;
-        public readonly DBObjectCollection _doors;
-        public readonly DBObjectCollection _windows;
-        public readonly DBObjectCollection _cornices;
-        public readonly DBObjectCollection _slab;
-        public readonly DBObjectCollection _beam;
+        private DBObjectCollection _archWalls;       
+        private DBObjectCollection _cornices;
+        private DBObjectCollection _doors;
+        private DBObjectCollection _slabs;
+        private DBObjectCollection _windows;
+        public DBObjectCollection ArchWalls => _archWalls;        
+        public DBObjectCollection Cornices => _cornices;
+        public DBObjectCollection Doors => _doors;
+        public DBObjectCollection Slabs => _slabs;
+        public DBObjectCollection Windows => _windows;
+
         public ThBeamConnectRecogitionEngine BeamEngine { get; private set; }
         public Model1Data(Database database, Point3dCollection polygon)
         {
-            _archWall = new DBObjectCollection();
+            _archWalls = new DBObjectCollection();
             var archWallEngine = new ThDB3ArchWallRecognitionEngine();
             archWallEngine.Recognize(database, polygon);
-            _archWall = archWallEngine.Geometries;
+            _archWalls = archWallEngine.Geometries;
             _doors = new DBObjectCollection();
             var doorEngine = new ThDB3DoorRecognitionEngine();
             doorEngine.Recognize(database, polygon);
@@ -194,13 +204,13 @@ namespace ThMEPEngineCore.Service
             var corniceEngine = new ThDB3CorniceRecognitionEngine();
             corniceEngine.Recognize(database, polygon);
             _cornices = corniceEngine.Geometries;
-            _slab = new DBObjectCollection();
+            _slabs = new DBObjectCollection();
             var slabEngine = new ThDB3SlabRecognitionEngine();
             slabEngine.Recognize(database, polygon);
-            _slab = slabEngine.Geometries;
-            _beam = new DBObjectCollection();
+            _slabs = slabEngine.Geometries;
+            _beams = new DBObjectCollection();
             BeamEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(database, polygon);
-            _beam = BeamEngine.BeamEngine.Geometries;
+            _beams = BeamEngine.BeamEngine.Geometries;
             _shearWalls = BeamEngine.ShearWallEngine.Geometries;
             _columns = BeamEngine.ColumnEngine.Geometries;
         }
@@ -210,26 +220,31 @@ namespace ThMEPEngineCore.Service
             var results = new DBObjectCollection();
             _columns.Cast<Entity>().ForEach(o => results.Add(o));
             _shearWalls.Cast<Entity>().ForEach(o => results.Add(o));
-            _archWall.Cast<Entity>().ForEach(o => results.Add(o));
+            _archWalls.Cast<Entity>().ForEach(o => results.Add(o));
             _doors.Cast<Entity>().ForEach(o => results.Add(o));
             _windows.Cast<Entity>().ForEach(o => results.Add(o));
             _cornices.Cast<Entity>().ForEach(o => results.Add(o));
-            _slab.Cast<Entity>().ForEach(o => results.Add(o));
-            _beam.Cast<Entity>().ForEach(o => results.Add(o));
+            _slabs.Cast<Entity>().ForEach(o => results.Add(o));
+            _beams.Cast<Entity>().ForEach(o => results.Add(o));
             return results;
         }
     }
     public class Model2Data : ModelData
     {
-        public readonly DBObjectCollection _beams;
-        public ThBeamConnectRecogitionEngine BeamEngine { get; private set; }
+        public List<ThBeamLink> PrimaryBeamLinks { get; set; }
+        public List<ThBeamLink> OverhangingPrimaryBeamLinks { get; set; }
+
         public Model2Data(Database database, Point3dCollection polygon)
         {
             _beams = new DBObjectCollection();
-            BeamEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(database, polygon);
-            _beams = BeamEngine.BeamEngine.Geometries;
-            _shearWalls = BeamEngine.ShearWallEngine.Geometries;
-            _columns = BeamEngine.ColumnEngine.Geometries;
+            PrimaryBeamLinks = new List<ThBeamLink>();
+            OverhangingPrimaryBeamLinks = new List<ThBeamLink>();
+            var beamEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(database, polygon);
+            _beams = beamEngine.BeamEngine.Geometries;
+            _shearWalls = beamEngine.ShearWallEngine.Geometries;
+            _columns = beamEngine.ColumnEngine.Geometries;
+            PrimaryBeamLinks.AddRange(beamEngine.PrimaryBeamLinks);
+            OverhangingPrimaryBeamLinks.AddRange(beamEngine.OverhangingPrimaryBeamLinks);
         }
 
         public override DBObjectCollection MergeData()
