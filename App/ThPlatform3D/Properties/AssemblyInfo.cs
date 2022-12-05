@@ -39,3 +39,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThPlatform3D.ThPlatform3DApp))]
 [assembly: CommandClass(typeof(ThPlatform3D.ThPlatform3DIPCCmds))]
 [assembly: CommandClass(typeof(ThPlatform3D.ThPlatform3DDrawCmds))]
+[assembly: CommandClass(typeof(ThPlatform3D.ThWallConstructionCmdEntrence))]

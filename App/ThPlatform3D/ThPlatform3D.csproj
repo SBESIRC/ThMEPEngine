@@ -137,6 +137,15 @@
     <Compile Include="ThPlatform3dDefaultContextMenuExtension.cs" />
     <Compile Include="ThPlatform3DDrawCmds.cs" />
     <Compile Include="ThPlatform3DIPCCmds.cs" />
+    <Compile Include="WallConstruction\Cmd\ThWallConstructionCmd.cs" />
+    <Compile Include="WallConstruction\Cmd\ThWallConstructionCmdEntrence.cs" />
+    <Compile Include="WallConstruction\Data\ThWallConstructionDataFactory.cs" />
+    <Compile Include="WallConstruction\Data\ThWallConstructionDataProcessService.cs" />
+    <Compile Include="WallConstruction\Data\ThWallConstructionWallExtract.cs" />
+    <Compile Include="WallConstruction\Model\ThWallConstructionViewModel.cs" />
+    <Compile Include="WallConstruction\Service\ThSelectFrameUtil.cs" />
+    <Compile Include="WallConstruction\Service\ThWallConstructionUtilServices.cs" />
+    <Compile Include="WallConstruction\ThWallConstructionCommon.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
