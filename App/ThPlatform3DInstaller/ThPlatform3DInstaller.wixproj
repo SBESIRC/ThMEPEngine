@@ -29,7 +29,6 @@
     <Compile Include="System.wxs" />
     <Compile Include="ToolkitMvvm.wxs" />
     <Compile Include="WPF.wxs" />
-    <Compile Include="XBim.wxs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\License_zh-CN.rtf" />
