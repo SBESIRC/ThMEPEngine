@@ -40,7 +40,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
         public override void SubExecute()
         {
             using (var docLock = Active.Document.LockDocument())
-            using (var blockDb = AcadDatabase.Open(ThParkingStallUtils.BlockDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (var blockDb = AcadDatabase.Open(ThChargerUtils.BlockDwgPath(), DwgOpenMode.ReadOnly, false))
             using (var currentDb = AcadDatabase.Active())
             {
                 // 获取框线
@@ -50,13 +50,13 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     return;
                 }
 
-                var allLaneLines = ThParkingStallUtils.LaneLineRecognize(currentDb);
+                var allLaneLines = ThChargerUtils.LaneLineRecognize(currentDb);
                 if (allLaneLines.Count == 0)
                 {
                     return;
                 }
 
-                var chargerBlocks = ThParkingStallUtils.ChargerRecognize(currentDb).Select(o => new ThChargerData(o)).ToList();
+                var chargerBlocks = ThChargerUtils.ChargerRecognize(currentDb).Select(o => new ThChargerData(o)).ToList();
                 var geometries = chargerBlocks.Select(o => o.Geometry).ToList();
 
                 var engine = new ThParkingStallRecognization(new Point3dCollection());
@@ -69,10 +69,14 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                 // 移动到原点附近
                 //var transformer = new ThMEPOriginTransformer(Point3d.Origin);
                 var transformer = new ThMEPOriginTransformer(frames[0].GeometricExtents.MinPoint);
-                ThParkingStallUtils.Transform(transformer, frames.ToCollection());
-                ThParkingStallUtils.Transform(transformer, allLaneLines.ToCollection());
-                ThParkingStallUtils.Transform(transformer, engine.ParkingStallPolys.ToCollection());
-                ThParkingStallUtils.Transform(transformer, geometries.ToCollection());
+                ThChargerUtils.Transform(transformer, frames.ToCollection());
+                ThChargerUtils.Transform(transformer, allLaneLines.ToCollection());
+                ThChargerUtils.Transform(transformer, engine.ParkingStallPolys.ToCollection());
+                ThChargerUtils.Transform(transformer, geometries.ToCollection());
+
+                // 车位分割
+                var splitter = new ThParkingStallSplitter();
+                splitter.Split(engine.ParkingStallPolys);
 
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(BlockName), false);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(BlockLayer), false);
@@ -80,11 +84,11 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                 frames.ForEach(frame =>
                 {
                     // 车道线
-                    var laneLines = ThParkingStallUtils.SelectCrossingPolygon(frame, allLaneLines);
+                    var laneLines = ThChargerUtils.SelectCrossingPolygon(frame, allLaneLines);
                     var trimLines = laneLines.Trim(frame);
 
                     // 车位
-                    var parkingStalls = ThParkingStallUtils.SelectCrossingPolygon(frame, engine.ParkingStallPolys);
+                    var parkingStalls = ThChargerUtils.SelectCrossingPolygon(frame, engine.ParkingStallPolys);
                     var infos = new List<ThParkingStallInfo>();
                     var service = new ThChargerCalculateService();
                     parkingStalls.ForEach(o =>
@@ -107,7 +111,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     trimLines.ForEach(o =>
                     {
                         var laneFrame = o.Buffer(LaneHalfWidth);
-                        var stalls = ThParkingStallUtils.SelectCrossingPolygon(laneFrame, parkingStalls);
+                        var stalls = ThChargerUtils.SelectCrossingPolygon(laneFrame, parkingStalls);
                         stalls.ForEach(stall =>
                         {
                             var info = infos.Where(e => e.Outline.Equals(stall)).FirstOrDefault();
@@ -204,14 +208,14 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     });
 
                     // 清空充电桩
-                    var chargers = ThParkingStallUtils.SelectCrossingPolygon(frame, geometries);
-                    ThParkingStallUtils.BlocksClean(currentDb, frame, chargerBlocks, chargers);
+                    var chargers = ThChargerUtils.SelectCrossingPolygon(frame, geometries);
+                    ThChargerUtils.BlocksClean(currentDb, frame, chargerBlocks, chargers);
                 });
 
-                ThParkingStallUtils.Reset(transformer, frames.ToCollection());
-                ThParkingStallUtils.Reset(transformer, geometries.ToCollection());
-                ThParkingStallUtils.Reset(transformer, allLaneLines.ToCollection());
-                ThParkingStallUtils.Reset(transformer, engine.ParkingStallPolys.ToCollection());
+                ThChargerUtils.Reset(transformer, frames.ToCollection());
+                ThChargerUtils.Reset(transformer, geometries.ToCollection());
+                ThChargerUtils.Reset(transformer, allLaneLines.ToCollection());
+                ThChargerUtils.Reset(transformer, engine.ParkingStallPolys.ToCollection());
             }
         }
     }

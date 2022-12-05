@@ -34,19 +34,19 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     return;
                 }
 
-                var chargerBlocks = ThParkingStallUtils.ChargerRecognize(currentDb).Select(o => new ThChargerData(o)).ToList();
+                var chargerBlocks = ThChargerUtils.ChargerRecognize(currentDb).Select(o => new ThChargerData(o)).ToList();
                 var geometries = chargerBlocks.Select(o => o.Geometry).ToList();
 
                 // 移动到原点附近
                 //var transformer = new ThMEPOriginTransformer(Point3d.Origin);
                 var transformer = new ThMEPOriginTransformer(frames[0].GeometricExtents.MinPoint);
-                ThParkingStallUtils.Transform(transformer, frames.ToCollection());
-                ThParkingStallUtils.Transform(transformer, geometries.ToCollection());
+                ThChargerUtils.Transform(transformer, frames.ToCollection());
+                ThChargerUtils.Transform(transformer, geometries.ToCollection());
 
                 var dictionary = new Dictionary<string, int>();
                 frames.ForEach(frame =>
                 {
-                    var blocks = ThParkingStallUtils.SelectCrossingPolygon(frame, geometries);
+                    var blocks = ThChargerUtils.SelectCrossingPolygon(frame, geometries);
                     blocks.ForEach(o =>
                     {
                         var blockData = chargerBlocks.Where(data => data.Geometry.Equals(o)).FirstOrDefault();
@@ -61,8 +61,8 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     });
                 });
 
-                ThParkingStallUtils.Reset(transformer, frames.ToCollection());
-                ThParkingStallUtils.Reset(transformer, geometries.ToCollection());
+                ThChargerUtils.Reset(transformer, frames.ToCollection());
+                ThChargerUtils.Reset(transformer, geometries.ToCollection());
 
                 Active.Editor.WriteLine("区域内充电设备数量如下：");
                 dictionary.ForEach(pair =>

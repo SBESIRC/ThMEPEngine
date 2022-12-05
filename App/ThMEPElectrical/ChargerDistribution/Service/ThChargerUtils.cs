@@ -20,7 +20,7 @@ using ThMEPElectrical.ChargerDistribution.Common;
 
 namespace ThMEPElectrical.ChargerDistribution.Service
 {
-    public static class ThParkingStallUtils
+    public static class ThChargerUtils
     {
         public static string BlockDwgPath()
         {
@@ -293,7 +293,7 @@ namespace ThMEPElectrical.ChargerDistribution.Service
             {
                 var data = blockData.Where(o => o.Geometry.Equals(geometry)).FirstOrDefault();
                 var blkref = acad.Element<BlockReference>(data.ObjectId);
-                ThParkingStallUtils.Clean(blkref);
+                ThChargerUtils.Clean(blkref);
             });
         }
     }

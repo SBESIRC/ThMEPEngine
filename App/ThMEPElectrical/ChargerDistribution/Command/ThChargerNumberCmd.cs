@@ -34,7 +34,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
         public override void SubExecute()
         {
             using (var docLock = Active.Document.LockDocument())
-            using (var blockDb = AcadDatabase.Open(ThParkingStallUtils.BlockDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (var blockDb = AcadDatabase.Open(ThChargerUtils.BlockDwgPath(), DwgOpenMode.ReadOnly, false))
             using (var currentDb = AcadDatabase.Active())
             {
                 // 获取框线
@@ -54,44 +54,44 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                 }
 
                 // 充电桩
-                var chargerBlocks = ThParkingStallUtils.ChargerRecognize(currentDb).Select(o => new ThChargerData(o)).ToList();
+                var chargerBlocks = ThChargerUtils.ChargerRecognize(currentDb).Select(o => new ThChargerData(o)).ToList();
                 if (chargerBlocks.Count == 0)
                 {
                     return;
                 }
 
                 // 分组线
-                var groupingPolyline = ThParkingStallUtils.GroupingPolylineRecognize(currentDb);
+                var groupingPolyline = ThChargerUtils.GroupingPolylineRecognize(currentDb);
                 if (groupingPolyline.Count == 0)
                 {
                     return;
                 }
 
                 // 标注块
-                var dimensions = ThParkingStallUtils.DimensionRecognize(currentDb).Select(o => new ThChargerData(o)).ToList();
+                var dimensions = ThChargerUtils.DimensionRecognize(currentDb).Select(o => new ThChargerData(o)).ToList();
                 var dimensionGeometries = dimensions.Select(o => o.Geometry).ToList();
 
                 // 移动到原点附近
                 //var transformer = new ThMEPOriginTransformer(Point3d.Origin);
                 var transformer = new ThMEPOriginTransformer(frames[0].GeometricExtents.MinPoint);
-                ThParkingStallUtils.Transform(transformer, chargerBlocks);
-                ThParkingStallUtils.Transform(transformer, frames.ToCollection());
-                ThParkingStallUtils.Transform(transformer, groupingPolyline.ToCollection());
-                ThParkingStallUtils.Transform(transformer, dimensionGeometries.ToCollection());
-                ThParkingStallUtils.Transform(transformer, engine.ParkingStallPolys.ToCollection());
+                ThChargerUtils.Transform(transformer, chargerBlocks);
+                ThChargerUtils.Transform(transformer, frames.ToCollection());
+                ThChargerUtils.Transform(transformer, groupingPolyline.ToCollection());
+                ThChargerUtils.Transform(transformer, dimensionGeometries.ToCollection());
+                ThChargerUtils.Transform(transformer, engine.ParkingStallPolys.ToCollection());
 
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThChargerDistributionCommon.Block_Name_Dimension), false);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThChargerDistributionCommon.Block_Layer_Dimension), false);
 
                 frames.ForEach(frame =>
                 {
-                    var blockData = ThParkingStallUtils.SelectCrossingPolygon(frame, chargerBlocks);
-                    var groups = ThParkingStallUtils.SelectCrossingPolygon(frame, groupingPolyline);
+                    var blockData = ThChargerUtils.SelectCrossingPolygon(frame, chargerBlocks);
+                    var groups = ThChargerUtils.SelectCrossingPolygon(frame, groupingPolyline);
                     var groupInfos = groups.Select(o => new ThGroupPolylineInfo(o)).ToList();
-                    var parkingStalls = ThParkingStallUtils.SelectCrossingPolygon(frame, engine.ParkingStallPolys);
+                    var parkingStalls = ThChargerUtils.SelectCrossingPolygon(frame, engine.ParkingStallPolys);
 
                     // 清理上一次的结果
-                    ThParkingStallUtils.BlocksClean(currentDb, frame, dimensions, dimensionGeometries);
+                    ThChargerUtils.BlocksClean(currentDb, frame, dimensions, dimensionGeometries);
 
                     var dictionary = new Dictionary<double, int>();
                     blockData.ForEach(o =>
@@ -172,11 +172,11 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     });
                 });
 
-                ThParkingStallUtils.Reset(transformer, chargerBlocks);
-                ThParkingStallUtils.Reset(transformer, frames.ToCollection());
-                ThParkingStallUtils.Reset(transformer, groupingPolyline.ToCollection());
-                ThParkingStallUtils.Reset(transformer, dimensionGeometries.ToCollection());
-                ThParkingStallUtils.Reset(transformer, engine.ParkingStallPolys.ToCollection());
+                ThChargerUtils.Reset(transformer, chargerBlocks);
+                ThChargerUtils.Reset(transformer, frames.ToCollection());
+                ThChargerUtils.Reset(transformer, groupingPolyline.ToCollection());
+                ThChargerUtils.Reset(transformer, dimensionGeometries.ToCollection());
+                ThChargerUtils.Reset(transformer, engine.ParkingStallPolys.ToCollection());
             }
         }
     }

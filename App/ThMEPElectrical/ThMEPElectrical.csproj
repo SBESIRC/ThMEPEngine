@@ -147,7 +147,8 @@
     <Compile Include="ChargerDistribution\Service\ThMinimumPolylineService.cs" />
     <Compile Include="ChargerDistribution\Service\ThParkingStallRecognization.cs" />
     <Compile Include="ChargerDistribution\Service\ThParkingStallService.cs" />
-    <Compile Include="ChargerDistribution\Service\ThParkingStallUtils.cs" />
+    <Compile Include="ChargerDistribution\Service\ThChargerUtils.cs" />
+    <Compile Include="ChargerDistribution\Service\ThParkingStallSplitter.cs" />
     <Compile Include="Command\ThElectricalLoadCalculationCommand.cs" />
     <Compile Include="Command\ThInsertRoomFunctionCmd.cs" />
     <Compile Include="Command\TxtStrucInfoCommand.cs" />

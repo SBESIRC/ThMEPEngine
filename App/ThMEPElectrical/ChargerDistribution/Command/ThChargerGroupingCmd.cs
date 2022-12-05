@@ -41,7 +41,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     return;
                 }
 
-                var chargerBlocks = ThParkingStallUtils.ChargerRecognize(currentDb).Select(o => new DBPoint(o.Position)).ToList();
+                var chargerBlocks = ThChargerUtils.ChargerRecognize(currentDb).Select(o => new DBPoint(o.Position)).ToList();
                 if (chargerBlocks.Count == 0)
                 {
                     return;
@@ -51,18 +51,18 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                 var layerId = currentDb.Database.CreateAILayer(ThChargerDistributionCommon.Grouping_Layer, 0);
                 frames.ForEach(frame =>
                 {
-                    ThParkingStallUtils.CleanPolyline(currentDb, frame, layerId);
+                    ThChargerUtils.CleanPolyline(currentDb, frame, layerId);
                 });
 
                 // 移动到原点附近
                 //var transformer = new ThMEPOriginTransformer(Point3d.Origin);
                 var transformer = new ThMEPOriginTransformer(frames[0].GeometricExtents.MinPoint);
-                ThParkingStallUtils.Transform(transformer, frames.ToCollection());
-                ThParkingStallUtils.Transform(transformer, chargerBlocks.ToCollection());
+                ThChargerUtils.Transform(transformer, frames.ToCollection());
+                ThChargerUtils.Transform(transformer, chargerBlocks.ToCollection());
 
                 frames.ForEach(frame =>
                 {
-                    var points = ThParkingStallUtils.SelectCrossingPolygon(frame, chargerBlocks).Select(o => o.Position).ToList();
+                    var points = ThChargerUtils.SelectCrossingPolygon(frame, chargerBlocks).Select(o => o.Position).ToList();
                     var groupingService = new ThChargerGroupingService();
                     var results = groupingService.Grouping(points, Point3d.Origin, MaxPoint);
 
@@ -83,8 +83,8 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     });
                 });
 
-                ThParkingStallUtils.Reset(transformer, frames.ToCollection());
-                ThParkingStallUtils.Reset(transformer, chargerBlocks.ToCollection());
+                ThChargerUtils.Reset(transformer, frames.ToCollection());
+                ThChargerUtils.Reset(transformer, chargerBlocks.ToCollection());
             }
         }
 

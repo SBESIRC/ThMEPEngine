@@ -46,7 +46,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
 
                 // 清理分组线
                 var dictionary = new Dictionary<Polyline, List<Point3d>>();
-                var groupingPolyline = ThParkingStallUtils.GroupingPolylineRecognize(currentDb, false);
+                var groupingPolyline = ThChargerUtils.GroupingPolylineRecognize(currentDb, false);
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(groupingPolyline.ToCollection());
                 chargers.ForEach(o =>
                 {
@@ -84,7 +84,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     {
                         return;
                     }
-                    ThParkingStallUtils.Clean(pair.Key);
+                    ThChargerUtils.Clean(pair.Key);
                     var newLine = ThMinimumPolylineService.CreatePolyline(pair.Value, layerId, k);
                     k++;
                     currentDb.ModelSpace.Add(newLine);
@@ -100,7 +100,7 @@ namespace ThMEPElectrical.ChargerDistribution.Command
                     {
                         chargers.AddRange(pline.Vertices().OfType<Point3d>());
                     }
-                    ThParkingStallUtils.Clean(pline);
+                    ThChargerUtils.Clean(pline);
                 }
                 var groupLine = ThMinimumPolylineService.CreatePolyline(chargers, layerId, k);
                 k++;
