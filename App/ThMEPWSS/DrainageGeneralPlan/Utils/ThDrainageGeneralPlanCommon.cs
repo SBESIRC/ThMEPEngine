@@ -18,10 +18,17 @@ namespace ThMEPWSS.DrainageGeneralPlan.Utils
         public static string LayerName_Rain_Out = "W-RAIN-PIPE-out";
         public static List<string> LayerList = new List<string>() { LayerName_Drai_Main, LayerName_Drai_Out, LayerName_Rain_Main, LayerName_Rain_Out };
 
+        public static double AngleRange = 5;
+        public static double OutMainRange = 7;
+        public static double OutOutRange = 0.01;
+
+
         public static List<Line> Drai_Main ;
         public static List<Polyline> Drai_Out ;
         public static List<Line> Rain_Main;
         public static List<Polyline> Rain_Out;
+
+        
 
         public static Dictionary<Line, List<Polyline>> Drai_MainToOut ;
         public static Dictionary<Line, List<Polyline>> Rain_MainToOut ;

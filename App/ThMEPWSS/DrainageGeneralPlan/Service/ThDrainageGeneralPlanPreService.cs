@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using ThMEPWSS.DrainageGeneralPlan.Utils;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -128,7 +128,7 @@ namespace ThMEPWSS.DrainageGeneralPlan.Service
             while(tempLine.Count>0)
             {
                 var line = tempLine[0];//每次拿出一个
-                var lBuffer = line.BufferPL(0.01)[0] as Polyline;//寻找可以合成polyline的line
+                var lBuffer = line.BufferPL(ThDrainageGeneralPlanCommon.OutOutRange)[0] as Polyline;//寻找可以合成polyline的line
                 var nearLine = pipeIndex.SelectCrossingPolygon(lBuffer);
                 nearLine = checkBuffer(nearLine, line);//删掉不应该被组合的线
                 if (nearLine.Count > 1)//包含别的干管
@@ -158,7 +158,7 @@ namespace ThMEPWSS.DrainageGeneralPlan.Service
         /// <param name="list"></param>
         private static DBObjectCollection checkBuffer(DBObjectCollection list,Polyline origin)
         {
-            Tolerance t = new Tolerance(0.01, 0.01);
+            Tolerance t = new Tolerance(ThDrainageGeneralPlanCommon.OutOutRange, ThDrainageGeneralPlanCommon.OutOutRange);
             List<Point3d> point3Ds = new List<Point3d>();
             DBObjectCollection temp = new DBObjectCollection();
             for (int i=0;i< origin.NumberOfVertices; i++)
@@ -189,7 +189,7 @@ namespace ThMEPWSS.DrainageGeneralPlan.Service
         private static Polyline MergeLine(DBObjectCollection list)
         {
             List<Point3d> point3Ds = new List<Point3d>();
-            Tolerance t = new Tolerance(0.01, 0.01);
+            Tolerance t = new Tolerance(ThDrainageGeneralPlanCommon.OutOutRange, ThDrainageGeneralPlanCommon.OutOutRange);
             var pl = list[0] as Polyline;
             point3Ds.Add(pl.StartPoint);
             point3Ds.Add(pl.EndPoint);
