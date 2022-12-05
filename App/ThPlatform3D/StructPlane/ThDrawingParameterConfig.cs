@@ -58,7 +58,7 @@ namespace ThPlatform3D.StructPlane
         /// <summary>
         /// 显示楼板填充和标记
         /// </summary>
-        public bool ShowSlabHatchAndMark { get; set; } = true;
+        public bool ShowSlabHatchAndMark { get; set; } = false;
 
         /// <summary>
         /// 获取

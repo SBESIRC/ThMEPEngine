@@ -369,10 +369,9 @@ namespace ThPlatform3D.StructPlane.Service
             }
             return Tuple.Create(startFloorNo, endFloorNo, stdFlrNo);
         }
-        public static string GetFloorHeightRange(this List<ThFloorInfo> floorInfos, double flrBottomEle)
+        public static Tuple<double,double> GetFloorHeightRange(this List<ThFloorInfo> floorInfos, double flrBottomEle)
         {
             // 获取楼层标高范围
-            var result = "";
             var stdFloors = floorInfos.GetFloors(flrBottomEle);
             if (stdFloors.Count() == 1)
             {
@@ -388,12 +387,11 @@ namespace ThPlatform3D.StructPlane.Service
                     {
                         double topElevation = (lastFlrBottomElevation + lastFlrHeight) / 1000.0;
                         double bottomElevation = flrBottomEle / 1000.0;
-                        result = bottomElevation.ToString("N3") +"m"+ " ~ " +
-                            topElevation.ToString("N3")+"m" + " 墙柱平面图";
+                        return Tuple.Create(bottomElevation,topElevation);
                     }
                 }
             }
-            return result;
+            return null;
         }
         public static List<ThFloorInfo> GetFloors(this List<ThFloorInfo> floorInfos, double flrBottomEle)
         {

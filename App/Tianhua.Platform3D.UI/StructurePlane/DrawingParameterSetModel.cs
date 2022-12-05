@@ -85,7 +85,7 @@ namespace Tianhua.Platform3D.UI.StructurePlane
             }
         }
 
-        private bool showSlabHatchAndMark = true;
+        private bool showSlabHatchAndMark = false;
         public bool ShowSlabHatchAndMark
         {
             get => showSlabHatchAndMark;

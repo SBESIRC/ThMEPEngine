@@ -335,6 +335,7 @@ namespace ThPlatform3D.StructPlane
                 var moveDir = new Vector3d(0, PrintParameter.FloorSpacing * (flrNaturalNumber - 1), 0);
                 var mt = Matrix3d.Displacement(moveDir);
                 svgInput.Geos.ForEach(o => o.Boundary.TransformBy(mt));
+                PrintParameter.BasePoint = Point3d.Origin + moveDir;
             }
             
             // 对剪力墙造洞

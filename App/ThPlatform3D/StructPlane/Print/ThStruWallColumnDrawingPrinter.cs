@@ -140,12 +140,19 @@ namespace ThPlatform3D.StructPlane.Print
         {
             // 打印自然层标识, eg 一层~五层结构平面层
             var flrRange = _floorInfos.GetFloorHeightRange(_flrBottomEle);
-            if (string.IsNullOrEmpty(flrRange))
+            if(flrRange==null)
             {
-                return Tuple.Create(new ObjectIdCollection(),new ObjectIdCollection());
+                return Tuple.Create(new ObjectIdCollection(), new ObjectIdCollection());
             }
-            var stdFlrInfo = _floorInfos.GetStdFlrInfo(_flrBottomEle);
-            return PrintHeadText(acadDb, flrRange, stdFlrInfo);
+            else
+            {
+                var btmElevationStr = flrRange.Item1.ToString("N3");
+                var topElevationStr = flrRange.Item2.ToString("N3");
+                var flrRangeStr = btmElevationStr + "m" + " ~ " + topElevationStr + "m" + " 墙柱平面图";
+                var stdFlrInfo = _floorInfos.GetStdFlrInfo(_flrBottomEle);
+                var newStdFlrInfo = Tuple.Create(btmElevationStr, topElevationStr, stdFlrInfo.Item3);
+                return PrintHeadText(acadDb, flrRangeStr, newStdFlrInfo);
+            }  
         }
     }
 }
