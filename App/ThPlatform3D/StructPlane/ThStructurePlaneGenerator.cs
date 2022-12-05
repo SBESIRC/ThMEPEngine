@@ -470,9 +470,9 @@ namespace ThPlatform3D.StructPlane
             {
                 var fileName = Path.GetFileNameWithoutExtension(o);
                 var strs = fileName.Split('-');
-                if(strs.Length>3)
+                if(strs.Length>=3)
                 {
-                    var str = strs[strs.Length - 3];
+                    var str = strs[strs.Length - 2];
                     if(str.IsInteger())
                     {
                         return int.Parse(str.Trim());
@@ -519,6 +519,7 @@ namespace ThPlatform3D.StructPlane
         }
         private bool IsValidSvgFile(string svgFilePath)
         {
+            // FileName - 标准层号- 自然层号 : XXXX-1-1~3,4,6
             //ifcFileName-> 0407-1
             var ifcFileName = Config.IfcFileName.ToUpper();
             // 0407-1-Floor_1-Floor_2
@@ -529,11 +530,11 @@ namespace ThPlatform3D.StructPlane
             }
             // 1-Floor_1-Floor_2
             var strs = fileName.Split('-');
-            if(strs.Length<=3)
+            if(strs.Length<3)
             {
                 return false;
             }  
-            return strs[strs.Length - 3].IsInteger();
+            return strs[strs.Length - 2].IsInteger();
         }        
     }
 }
