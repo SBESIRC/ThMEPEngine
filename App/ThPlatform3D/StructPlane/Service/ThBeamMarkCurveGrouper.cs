@@ -97,7 +97,7 @@ namespace ThPlatform3D.StructPlane.Service
 
             // 标注内容相同，且具有一条共边的就是一组
             var marks = beamMarkPairs.Keys.ToCollection();
-            var markSpatialIndex = new ThCADCoreNTSSpatialIndex(marks);
+            var markSpatialIndex = new ThCADCoreNTSSpatialIndex(marks,false,true);
             // 把具有相同标注内容的文字分组
             var textStringGroups = GroupByTextString(marks);
 

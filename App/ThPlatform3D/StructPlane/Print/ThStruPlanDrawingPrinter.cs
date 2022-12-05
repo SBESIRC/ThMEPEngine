@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
 using Linq2Acad;
+using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -14,6 +15,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO.SVG;
 using ThPlatform3D.Model.Printer;
 using ThPlatform3D.StructPlane.Service;
+using ThPlatform3D.StructPlane.Model;
 
 namespace ThPlatform3D.StructPlane.Print
 {
@@ -60,6 +62,16 @@ namespace ThPlatform3D.StructPlane.Print
             _geos = _geos.Except(removedBeamMarks).ToList();
             removedBeamMarks.Select(o => o.Boundary).ToCollection().MDispose();
 
+            // 记录梁标注文字的原始位置
+            var beamMarkOriginTextPos = new Dictionary<DBText, Point3d>();
+            _geos.GetBeamMarks()
+                .Select(o => o.Boundary)
+                .OfType<DBText>()
+                .ForEach(o => beamMarkOriginTextPos.Add(o, o.AlignmentPoint));
+
+            // 计算梁标注原始区域
+            var beamMarkAreas = ThBeamMarkOriginAreaCalculator.Calculate(_geos.GetBeamMarks(), 0.0);
+
             // 处理双梁
             // 双梁是要单独处理的
             var dblRowBeamMarks = FilterDoubleRowBeamMarks(_geos.GetBeamMarks());
@@ -67,11 +79,13 @@ namespace ThPlatform3D.StructPlane.Print
             #endregion
 
             // 转换成块的文字集合
-            var convertBlkGroups = new List<DBObjectCollection>();
+            var convertBlkGroups = new List<ThBeamMarkBlkInfo>(); // 成块的梁文字，标注原始区域，文字移动方向            
+            var updateGeneratedBeamBlks = new List<ThBeamMarkBlkInfo>();// 已生成的梁标注块，更新的梁文字组合，标注原始区域,文字移动方向
             var removedTexts = new DBObjectCollection(); 
-            var dwgExistedElements = new DBObjectCollection();
+            var dwgExistedElements = new DBObjectCollection();            
             using (var acadDb = AcadDatabase.Use(database))
             {
+                var beamTextGroupObjs = new List<ThBeamMarkBlkInfo>(); // 成块的梁文字，标注原始区域,文字移动方向
                 var geoExtents = _geos.Select(o => o.Boundary).ToCollection().ToExtents2d(); // 获取ObjIds的范围
                 geoExtents = geoExtents.Enlarge(_printParameter.FloorSpacing * 0.1); // 把范围扩大指定距离
                 dwgExistedElements = GetAllObjsInRange(acadDb, geoExtents); // 获取Dwg此范围内的所有"Major:Structure"对象
@@ -95,17 +109,14 @@ namespace ThPlatform3D.StructPlane.Print
 
                 // 打印双梁标注
                 // 用于把打印的文字转成块,最后把梁文字删除掉  
-                var beamTextGroupObjIds = new List<ObjectIdCollection>();
                 var dblRowBeamMarkIds = PrintDoubleRowBeams(acadDb, dblRowBeamMarks);
                 dblRowBeamMarkIds.ForEach(o => Append(o.Item1));
-                dblRowBeamMarkIds.ForEach(o => beamTextGroupObjIds.Add(o.Item1));
-
-                // 记录梁标注文字的原始位置
-                var beamMarkOriginTextPos = new Dictionary<DBText, Point3d>();
-                _geos.GetBeamMarks()
-                    .Select(o => o.Boundary)
-                    .OfType<DBText>()
-                    .ForEach(o => beamMarkOriginTextPos.Add(o, o.AlignmentPoint));
+                dblRowBeamMarkIds.ForEach(o =>
+                {
+                    var texts = o.Item1.ToDBObjectCollection(database);
+                    var areas = texts.OfType<DBText>().Select(x => beamMarkAreas[x].Item1).Where(x => x.Count>0).ToList();
+                    beamTextGroupObjs.Add(new ThBeamMarkBlkInfo(texts, UnionAreas(areas),o.Item2));
+                });
 
                 // 对双梁文字调整位置(后处理)  
                 AdjustDblRowMarkPos(acadDb, dblRowBeamMarkIds, beamLines);
@@ -117,14 +128,14 @@ namespace ThPlatform3D.StructPlane.Print
                 // 将生成的文字打印出来
                 adjustService.DoubleRowTexts.ForEach(x =>
                 {
+                    // item1 被分为两行字 item2 and item3, item1被删除
                     removedTexts.Add(x.Item1);
                     ObjIds.Remove(x.Item1.ObjectId);
                     var dblRowTextIds = new ObjectIdCollection();
                     dblRowTextIds.AddRange(ThAnnotationPrinter.Print(acadDb, x.Item2, _beamTextConfig));
                     dblRowTextIds.AddRange(ThAnnotationPrinter.Print(acadDb, x.Item3, _beamTextConfig));
                     Append(dblRowTextIds);
-                    beamTextGroupObjIds.Add(dblRowTextIds);
-                    // item1 被分为两行字 item2 and item3, item1被删除
+                    beamTextGroupObjs.Add(new ThBeamMarkBlkInfo(new DBObjectCollection() { x.Item2, x.Item3 }, beamMarkAreas[x.Item1].Item1, beamMarkAreas[x.Item1].Item2));
                     var item1Origin = beamMarkOriginTextPos[x.Item1];
                     beamMarkOriginTextPos.Add(x.Item2, item1Origin);
                     beamMarkOriginTextPos.Add(x.Item3, item1Origin);
@@ -132,21 +143,22 @@ namespace ThPlatform3D.StructPlane.Print
 
                 // 把不是双行标注的文字加入到beamTextObjIds中
                 beamTexts.Difference(removedTexts).OfType<DBText>()
-                    .ForEach(o => beamTextGroupObjIds.Add(new ObjectIdCollection { o.ObjectId }));
+                    .ForEach(o => beamTextGroupObjs.Add(new ThBeamMarkBlkInfo(new DBObjectCollection() {o}, beamMarkAreas[o].Item1, beamMarkAreas[o].Item2)));
 
                 // 寻找梁区域内指定范围是否已存在标注
-                var beamTextGroupObjs = beamTextGroupObjIds.Select(o => o.ToDBObjectCollection(acadDb)).ToList();
-                var existedBeamFilterRes = FilterExistedBeamMarks(beamMarkOriginTextPos, beamPolygonCenters,
-                    dwgExistedBeamMarkBlks, beamTextGroupObjs);
-                // 需要转换成块的文字组合
-                convertBlkGroups = existedBeamFilterRes.Item1;
-                
-                // 把要保留的梁标注块添加到ObjIds集合中
-                Append(existedBeamFilterRes.Item2.OfType<DBObject>().Select(o => o.ObjectId).ToCollection());
-                dwgExistedElements = dwgExistedElements.Difference(existedBeamFilterRes.Item2);
-
+                using (var filter = new ThGeneratedBeamMarkFilter(dwgExistedBeamMarkBlks))
+                {
+                    //filter.FilterBySide(beamTextGroupObjs.Select(o => o.Item1).ToList(), beamMarkOriginTextPos, beamPolygonCenters);
+                    filter.FilterByArea(beamTextGroupObjs);                    
+                    convertBlkGroups.AddRange(filter.Results); // 需要转换成块的文字组合
+                    // 把要保留的梁标注块添加到ObjIds集合中
+                    Append(filter.KeepGeneratedBeamMarkBlks.OfType<DBObject>().Select(o => o.ObjectId).ToCollection());
+                    dwgExistedElements = dwgExistedElements.Difference(filter.KeepGeneratedBeamMarkBlks);
+                    updateGeneratedBeamBlks = filter.UpdateGeneratedBeamBlks;
+                }
+                  
                 // 把梁文字装入到removedTexts中，梁文字最后要删除
-                beamTextGroupObjIds.ForEach(o => removedTexts.AddRange(o.ToDBObjectCollection(acadDb)));
+                beamTextGroupObjs.ForEach(o => removedTexts.AddRange(o.Marks));
 
                 // 释放 beamPolygonCenters
                 var beamPolygonCentersKeys = beamPolygonCenters.Keys.ToCollection();
@@ -162,9 +174,11 @@ namespace ThPlatform3D.StructPlane.Print
                 // 把梁文字转换成块                
                 var converter = new ThBeamTextBlkConverter();
                 var beamBlkIds = converter.Convert(acadDb, convertBlkGroups);
+                var updateBlkIds = converter.Update(acadDb,updateGeneratedBeamBlks);
 
                 // 把转化的块和图纸上需要保留的块加入到ObjIds中
                 Append(beamBlkIds);
+                Append(updateBlkIds);
 
                 // 打印标题
                 var textRes = PrintHeadText(acadDb);
@@ -292,17 +306,6 @@ namespace ThPlatform3D.StructPlane.Print
                     return false;
                 }
             }).Any();
-        }
-
-        private Tuple<List<DBObjectCollection>, DBObjectCollection> FilterExistedBeamMarks(
-           Dictionary<DBText, Point3d> beamMarkOriginTextPos,
-           Dictionary<Polyline, Curve> beamPolygonCenters,
-           DBObjectCollection generatedBeamMarkBlks,
-           List<DBObjectCollection> beamMarkGroups)
-        {
-            var filter = new ThGeneratedBeamMarkFilter(beamMarkOriginTextPos, beamPolygonCenters, generatedBeamMarkBlks);
-            filter.Filter(beamMarkGroups);
-            return Tuple.Create(filter.Results, filter.KeepBeamMarkBlks);
         }
 
         private DBObjectCollection CreateStairSlabCorner(DBObjectCollection tenThckSlabTexts,
@@ -489,6 +492,44 @@ namespace ThPlatform3D.StructPlane.Print
             });
 
             return Tuple.Create(beamLines, beamTexts);
+        }
+        private Point3dCollection UnionAreas(List<Point3dCollection> overlapPolygons)
+        {
+            if(overlapPolygons.Count==0)
+            {
+                return new Point3dCollection();
+            }
+            else if(overlapPolygons.Count == 1)
+            {
+                return overlapPolygons[0];
+            }
+            else
+            {
+                var polys = overlapPolygons
+                    .Select(o => o.CreatePolyline())
+                    .ToCollection();
+                if(polys.Count>0)
+                {
+                    var res = polys.FilterSmallArea(1.0).UnionPolygons(false);
+                    if (res.Count > 0 && res.OfType<Polyline>().Where(p=>p.Area>0.0).Any())
+                    {
+                        var area = res.OfType<Polyline>().OrderByDescending(p => p.Area).First();
+                        var pts = area.Vertices();
+                        res.MDispose();
+                        polys.MDispose();                        
+                        return pts;
+                    }
+                    else
+                    {
+                        polys.MDispose();
+                        return new Point3dCollection();
+                    }
+                }
+                else
+                {
+                    return new Point3dCollection();
+                }
+            }
         }
 
         private List<Tuple<ObjectIdCollection,Vector3d>> PrintDoubleRowBeams(AcadDatabase acadDb, List<List<ThGeometry>> doubleRowBeams)

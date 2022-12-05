@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThPlatform3D.StructPlane.Service;
+using ThPlatform3D.StructPlane.Model;
 
 namespace ThPlatform3D.StructPlane.Print
 {
@@ -28,51 +29,92 @@ namespace ThPlatform3D.StructPlane.Print
             this.alignmentIndex = alignmentIndex;
         }
 
-        public ObjectIdCollection Convert(AcadDatabase acadDb,List<DBObjectCollection> beamTextObjs)
-        {
-            CreateBlock(acadDb, beamTextObjs);
-            return InsertBlock(acadDb, beamTextObjs);
-        }
-
-        private ObjectIdCollection InsertBlock(AcadDatabase acadDb, List<DBObjectCollection> beamTextObjs)
+        public ObjectIdCollection Convert(AcadDatabase acadDb, List<ThBeamMarkBlkInfo> beamTextObjs)
         {
             var results = new ObjectIdCollection();
-            beamTextObjs.Where(o => o.Count > 0.0).ForEach(o =>
+            beamTextObjs
+                .Where(o=>o.Marks.Count>0)
+                .ForEach(o =>
             {
-                var blkName = o.GetMultiTextString();
-                var blkId = acadDb.CurrentSpace.ObjectId.InsertBlockReference(
-                    ThPrintLayerManager.BeamTextLayerName, blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
-                var blkObj = acadDb.Element<BlockReference>(blkId, true);
-
-                // 把块的中心移动原点
-                var blkObjOldCenter = blkObj.GeometricExtents.GetCenter();
-                var mt = Matrix3d.Displacement(blkObjOldCenter.GetVectorTo(Point3d.Origin));
-                blkObj.TransformBy(mt);
-
-                // 获取块的外包框、中心点
-                var blkFrame = GetBlkFrame(blkObj);
-                var blkCenter = GetABBCenter(blkObj);
-
-                // 调整块的角度
-                var rotation = o.OfType<DBText>().First().Rotation;
-                var rotateMt = Matrix3d.Rotation(rotation, Vector3d.ZAxis, blkCenter);
-                blkObj.TransformBy(rotateMt);
-                blkFrame.TransformBy(rotateMt);
-                var blkFrameCenter = GetFrameCenter(blkFrame);
-
-                // 让块的OBB 和 o中装的文字的OBB对齐
-                var textGroupFrame = GetParallelTextsFrame(o);
-                var textGroupCenter = GetFrameCenter(textGroupFrame);
-
-                // 把块移动到文字组的中心
-                var moveMt = Matrix3d.Displacement(blkFrameCenter.GetVectorTo(textGroupCenter));
-                blkObj.TransformBy(moveMt);
-
-                results.Add(blkId);
-                blkFrame.Dispose();
-                textGroupFrame.Dispose();
+                // o 中的文字都是平行的
+                var clones = o.Marks.Clone();
+                var blkName = clones.GetMultiTextString();
+                if (!string.IsNullOrEmpty(blkName))
+                {
+                    AdjustPosition(clones);
+                    CreateBlock(acadDb, clones, blkName);
+                    var blkId = InsertBlock(acadDb, o.Marks);
+                    ThBeamMarkXDataService.WriteBeamArea(blkId, o.OrginArea,o.TextMoveDir);
+                    results.Add(blkId);
+                }
             });
             return results;
+        }
+
+        public ObjectIdCollection Update(AcadDatabase acadDb, List<ThBeamMarkBlkInfo> generatedBeamBlks)
+        {
+            var results = new ObjectIdCollection();
+            generatedBeamBlks.ForEach(o =>
+            {
+                var newBlkName = o.Marks.GetMultiTextString();
+                if(!string.IsNullOrEmpty(newBlkName))
+                {
+                    var bt = acadDb.Element<BlockTable>(acadDb.Database.BlockTableId, false);
+                    if (!bt.Has(newBlkName))
+                    {
+                        var clones = o.Marks.Clone();
+                        AdjustPosition(clones);
+                        CreateBlock(acadDb, clones, newBlkName);
+                    }
+                    var blkId = acadDb.CurrentSpace.ObjectId.InsertBlockReference(
+                        ThPrintLayerManager.BeamTextLayerName, newBlkName, Point3d.Origin, new Scale3d(1.0), 0.0);
+                    ThBeamMarkXDataService.WriteBeamArea(blkId, o.OrginArea,o.TextMoveDir);
+                    results.Add(blkId);
+
+                    var blkObj = acadDb.Element<BlockReference>(blkId, true);
+                    var mt1 = Matrix3d.Rotation(o.GeneratedBlk.Rotation, o.GeneratedBlk.Normal,Point3d.Origin);
+                    var mt2 = Matrix3d.Displacement(Point3d.Origin.GetVectorTo(o.GeneratedBlk.Position));
+                    blkObj.TransformBy(mt1);
+                    blkObj.TransformBy(mt2);
+                }
+            });
+            return results;
+        }
+
+        private ObjectId InsertBlock(AcadDatabase acadDb, DBObjectCollection beamTextObjs)
+        {
+            var blkName = beamTextObjs.GetMultiTextString();
+            var blkId = acadDb.CurrentSpace.ObjectId.InsertBlockReference(
+                ThPrintLayerManager.BeamTextLayerName, blkName, Point3d.Origin, new Scale3d(1.0), 0.0);
+            var blkObj = acadDb.Element<BlockReference>(blkId, true);
+
+            // 把块的中心移动原点
+            var blkObjOldCenter = blkObj.GeometricExtents.GetCenter();
+            var mt = Matrix3d.Displacement(blkObjOldCenter.GetVectorTo(Point3d.Origin));
+            blkObj.TransformBy(mt);
+
+            // 获取块的外包框、中心点
+            var blkFrame = GetBlkFrame(blkObj);
+            var blkCenter = GetABBCenter(blkObj);
+
+            // 调整块的角度
+            var rotation = beamTextObjs.OfType<DBText>().First().Rotation;
+            var rotateMt = Matrix3d.Rotation(rotation, Vector3d.ZAxis, blkCenter);
+            blkObj.TransformBy(rotateMt);
+            blkFrame.TransformBy(rotateMt);
+            var blkFrameCenter = GetFrameCenter(blkFrame);
+
+            // 让块的OBB 和 o中装的文字的OBB对齐
+            var textGroupFrame = GetParallelTextsFrame(beamTextObjs);
+            var textGroupCenter = GetFrameCenter(textGroupFrame);
+
+            // 把块移动到文字组的中心
+            var moveMt = Matrix3d.Displacement(blkFrameCenter.GetVectorTo(textGroupCenter));
+            blkObj.TransformBy(moveMt);
+            blkFrame.Dispose();
+            textGroupFrame.Dispose();
+
+            return blkId;
         }
 
         private Point3d GetFrameCenter(Polyline frame)
@@ -110,21 +152,6 @@ namespace ThPlatform3D.StructPlane.Print
             pts.Add(new Point3d(extents.MaxPoint.X, extents.MaxPoint.Y, 0.0));
             pts.Add(new Point3d(extents.MinPoint.X, extents.MaxPoint.Y, 0.0));
             return pts.CreatePolyline();
-        }
-
-        private void CreateBlock(AcadDatabase acadDb, List<DBObjectCollection> beamTextObjs)
-        {
-            beamTextObjs.Where(o=>o.Count>0).ForEach(o =>
-            {
-                // o 中的文字都是平行的
-                var clones = o.Clone();
-                var blkName = clones.GetMultiTextString();
-                if(!string.IsNullOrEmpty(blkName))
-                {
-                    AdjustPosition(clones);
-                    CreateBlock(acadDb, clones, blkName);
-                }
-            });
         }
 
         private void AdjustPosition(DBObjectCollection dbTexts)
