@@ -122,7 +122,11 @@ namespace ThCADExtension
         {
             return Path.Combine(SupportPath(), "地上给水排水平面图模板.dwg");
         }
-
+        // 排水总图
+        public static string PSZTPath()
+        {
+            return Path.Combine(SupportPath(), "FL3ZKPHF_W80-室外给排水总图-500.dwg");
+        }
 
         /// <summary>
         /// 电力配电系统图元素

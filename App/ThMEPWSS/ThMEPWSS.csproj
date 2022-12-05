@@ -64,6 +64,11 @@
     <Compile Include="DrainageADPrivate\Service\ThCalculateDimService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTermianlService.cs" />
     <Compile Include="DrainageADPrivate\Service\ThDrainageADTreeService.cs" />
+    <Compile Include="DrainageGeneralPlan\Cmd\ThDrainageGeneralPlanCmdEntrance.cs" />
+    <Compile Include="DrainageGeneralPlan\Cmd\ThDrainageGeneralPlanCmd.cs" />
+    <Compile Include="DrainageGeneralPlan\Service\ThDrainageGeneralPlanDataService.cs" />
+    <Compile Include="DrainageGeneralPlan\Service\ThDrainageGeneralPlanPreService.cs" />
+    <Compile Include="DrainageGeneralPlan\Utils\ThDrainageGeneralPlanCommon.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\CoordinateTransformation.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\FloorFramedSpliter.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\TangentPipeConvertion.cs" />
