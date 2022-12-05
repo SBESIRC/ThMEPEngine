@@ -1,0 +1,210 @@
+﻿<cus:ThCustomWindow x:Class="Tianhua.Platform3D.UI.UI.ViewManagerUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:s="clr-namespace:System;assembly=mscorlib"             
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+                    Title="视图管理"                    
+                    SizeToContent="WidthAndHeight"
+                    MinWidth="1000"
+                    MinHeight="500" 
+                    MaxWidth="1000"
+                    MaxHeight="500"
+                    Background="#F2F2F2"
+                    Closing="ThCustomWindow_Closing"
+             mc:Ignorable="d">
+    <Window.Resources>
+        <Style x:Key="dgCellStyle1" TargetType="DataGridCell">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Grid>
+                            <TextBlock />
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="dgCellStyle2" TargetType="DataGridCell">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DataGridCell">
+                        <Grid>
+                            <TextBlock />
+                            <ContentPresenter  Margin="0,0,5,0"  HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>            
+        </Style>        
+    </Window.Resources>
+    <Grid Margin="5">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center">
+            <Label Content="单体" VerticalAlignment="Center"/>
+            <ComboBox Name="cbBuildingNo" Width="80" Height="20"
+                      ItemsSource="{Binding BuildingNos,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedValue="{Binding SelectedBuildingNo,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectionChanged="cbBuildingNo_SelectionChanged"/>
+            <Label Margin="10,0,0,0" Content="视图类型"/>
+            <ComboBox Name="cbViewType" Width="80" Height="20"
+                      ItemsSource="{Binding ViewTypes,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedValue="{Binding SelectedViewType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectionChanged="cbViewType_SelectionChanged"/>
+            <Label Margin="10,0,0,0" Content="出图比例"/>
+            <ComboBox Name="cbViewScale" Width="80" Height="20"
+                      ItemsSource="{Binding ViewScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedValue="{Binding SelectedViewScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectionChanged="cbViewScale_SelectionChanged"/>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Image x:Name="imgAddView" Margin="0,0,0,0" Width="16" Height="16" Source="/Tianhua.Platform3D.UI;component/Resources/Images/add.png" MouseUp="imgAddView_MouseUp"></Image>
+                <Label Content="新增视图"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Image x:Name="imgEraseView" Margin="0,0,0,0" Width="16" Height="16" Source="/Tianhua.Platform3D.UI;component/Resources/Images/erase.png" MouseUp="imgEraseView_MouseUp"></Image>
+                <Label Content="删除视图"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <Image x:Name="imgEditView" Margin="0,0,0,0" Width="16" Height="16" Source="/Tianhua.Platform3D.UI;component/Resources/Images/edit.png" MouseUp="imgEditView_MouseUp"></Image>
+                <Label Content="编辑视图"/>
+            </StackPanel>
+        </StackPanel>
+        <DataGrid Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Name="dgViewManager" AutoGenerateColumns="False" 
+                  BorderThickness="1,1,0,0" SelectionMode="Extended" SelectionUnit="FullRow" ColumnWidth="*"
+                  CanUserAddRows="False" HorizontalGridLinesBrush="#B5B5B5" VerticalGridLinesBrush="#B5B5B5"
+                  ItemsSource="{Binding ViewDetailInfos,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="{x:Type DataGridColumnHeader}">
+                    <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    <Setter Property="Background" Value="White"/>
+                    <Setter Property="Foreground" Value="Black"/>
+                    <Setter Property="BorderThickness" Value="0,0,1,1" />
+                    <Setter Property="FontWeight" Value="Normal"/>
+                    <Setter Property="BorderBrush" Value="#808080" />
+                    <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+                    <Setter Property="Height" Value="20"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="文件名称" Width="150" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding FileName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle2}" Header="单体" Width="50" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding BuildingNo,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle2}" Header="专业" Width="50" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding Major,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="楼层" Width="50" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="视图类型" Width="60" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding ViewType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="视图名称" Width="150" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding ViewName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="方向" Width="50" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding Direction,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="剖切高度" Width="60" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding SectionElevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="底高度" Width="50" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding BottomElevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="顶高度" Width="50" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding TopElevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="室外地坪" Width="60" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding OutDoorFloorElevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="出图比例" Width="60" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding ViewScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn CellStyle="{StaticResource dgCellStyle1}" Header="视图状态" Width="120" CanUserSort="False" CanUserResize="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Height="20" VerticalAlignment="Stretch" Text="{Binding ViewState,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center"/>
+                                <Image />
+                            </StackPanel>                            
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal" HorizontalAlignment="Left">
+            <Button Margin="0,0,0,0" Name="btnSelectAll" Content="全选" Width="50" Height="20" Click="btnSelectAll_Click"/>
+            <Button Margin="20,0,0,0" Name="btnCancelSelectAll" Content="取消全选" Width="50" Height="20" Click="btnCancelSelectAll_Click" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Margin="0,0,0,0" Name="btnInsertSelectedView" Content="插入选中视图" Width="80" Height="20" Click="btnInsertSelectedView_Click"/>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

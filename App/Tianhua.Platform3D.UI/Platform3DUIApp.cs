@@ -65,6 +65,15 @@ namespace Tianhua.Platform3D.UI
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THVM", CommandFlags.Modal)]
+        public void THVM()
+        {
+            using (var cmd = new ThViewManagerCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
         #region 平台CAD相关事件
         private void PlatformAddEvents() 
         {

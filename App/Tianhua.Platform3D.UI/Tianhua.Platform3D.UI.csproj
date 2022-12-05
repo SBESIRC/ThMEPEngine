@@ -32,7 +32,9 @@
   <ItemGroup>
     <Compile Include="Command\ThArchitecturePlaneCmd.cs" />
     <Compile Include="Command\ThStructurePlaneCmd.cs" />
+    <Compile Include="Command\ThViewManagerCmd.cs" />
     <Compile Include="Converter\EnumBooleanConverter.cs" />
+    <Compile Include="Converter\StringToBitmapImageConverter.cs" />
     <Compile Include="EventMonitor\Platform3DMainEvent.cs" />
     <Compile Include="Interfaces\IMultiDocument.cs" />
     <Compile Include="Platform3DMainService.cs" />
@@ -56,6 +58,15 @@
     </Compile>
     <Compile Include="UI\BuildingStoreyTableUI.xaml.cs">
       <DependentUpon>BuildingStoreyTableUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\PQKInputUI.xaml.cs">
+      <DependentUpon>PQKInputUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ViewDetailUI.xaml.cs">
+      <DependentUpon>ViewDetailUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ViewManagerUI.xaml.cs">
+      <DependentUpon>ViewManagerUI.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\EditStoreyUI.xaml.cs">
       <DependentUpon>EditStoreyUI.xaml</DependentUpon>
@@ -97,7 +108,10 @@
     <Compile Include="ViewModels\RelatePaperVM.cs" />
     <Compile Include="ViewModels\StoreyNameInputVM.cs" />
     <Compile Include="ViewModels\StoreyElevationSetVM.cs" />
+    <Compile Include="ViewModels\PQKInputVM.cs" />
     <Compile Include="ViewModels\TextInputVM.cs" />
+    <Compile Include="ViewModels\ViewDetailVM.cs" />
+    <Compile Include="ViewModels\ViewManagerVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="StructurePlane\DrawingParameterSetUI.xaml">
@@ -117,6 +131,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\BuildingStoreyTableUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\PQKInputUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\ViewDetailUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\ViewManagerUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -206,7 +232,7 @@
     <Resource Include="Resources\Images\user.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Model\" />
+    <Resource Include="Resources\Images\locate.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\show.png" />
@@ -229,6 +255,17 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Images\structurePlane.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\add.png" />
+    <Resource Include="Resources\Images\edit.png" />
+    <Resource Include="Resources\Images\erase.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Images\normal.png" />
+    <Resource Include="Resources\Images\unGeneratedData.png" />
+    <Resource Include="Resources\Images\waitToInsert.png" />
+    <Resource Include="Resources\Images\waitToUpdate.png" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

@@ -1,0 +1,191 @@
+﻿<cus:ThCustomWindow x:Class="Tianhua.Platform3D.UI.UI.ViewDetailUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:s="clr-namespace:System;assembly=mscorlib"      
+             xmlns:converters="clr-namespace:Tianhua.Platform3D.UI.Converter"       
+             xmlns:local="clr-namespace:Tianhua.Platform3D.UI.UI"
+                    Title="视图详情"                    
+                    SizeToContent="WidthAndHeight"
+                    MinWidth="400"
+                    MinHeight="240"
+                    Background="#F2F2F2"
+                    Closing="ThCustomWindow_Closing"
+             mc:Ignorable="d">
+    <Window.Resources>
+        <converters:ViewDirectionBooleanConverter x:Key="viewDirectionConverter"/>
+        <Style x:Key="labelStyle" TargetType="{x:Type Label}">
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="comboxStyle" TargetType="{x:Type ComboBox}">
+            <Setter Property="Height" Value="20"/>
+        </Style>
+        <Style x:Key="textBoxStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Height" Value="20"/>
+        </Style>
+        <Style x:Key="buttonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Height" Value="20"/>
+        </Style>
+    </Window.Resources>
+    <StackPanel Orientation="Vertical" Margin="5">
+        <Grid x:Name="commonGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="0.3*"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="0.3*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource labelStyle}" Content="视图名称:"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource textBoxStyle}" IsEnabled="False"
+                     Text="{Binding ViewDetailInfo.ViewName,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Grid.Row="0" Grid.Column="3" Style="{StaticResource labelStyle}" Content="视图类型:"/>
+            <ComboBox Grid.Row="0" Grid.Column="4" x:Name="cbViewType" Style="{StaticResource comboxStyle}" 
+                      ItemsSource="{Binding ViewTypes,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding ViewDetailInfo.ViewType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectionChanged="cbViewType_SelectionChanged"/>
+
+            <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource labelStyle}" Content="单体子项:"/>
+            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="cbBuildingNo" Style="{StaticResource comboxStyle}" 
+                      ItemsSource="{Binding BuildingNos,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding ViewDetailInfo.BuildingNo,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectionChanged="cbBuildingNo_SelectionChanged"/>
+            <Label Grid.Row="1" Grid.Column="3" Style="{StaticResource labelStyle}"  Content="视图比例:"/>
+            <ComboBox Grid.Row="1" Grid.Column="4" Style="{StaticResource comboxStyle}" x:Name="cbViewScale"
+                      ItemsSource="{Binding ViewScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding ViewDetailInfo.ViewScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectionChanged="cbViewScale_SelectionChanged"/>
+
+            <Label Grid.Row="2" Grid.Column="0" Style="{StaticResource labelStyle}" Content="专业数据:"/>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <CheckBox Content="结构" IsThreeState="False" 
+                          IsChecked="{Binding ViewDetailInfo.StructureMajorData,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                <CheckBox Content="PC" IsThreeState="False"
+                          IsChecked="{Binding ViewDetailInfo.PCMajorData,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            </StackPanel>
+            <Label Grid.Row="2" Grid.Column="3" Style="{StaticResource labelStyle}"  Content="视图模板:"/>
+            <ComboBox Grid.Row="2" Grid.Column="4" Style="{StaticResource comboxStyle}"
+                      ItemsSource="{Binding ViewTemplates,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding ViewDetailInfo.ViewTemplate,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+        </Grid>
+        <Grid x:Name="outDoorFloorGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="0.3*"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="0.3*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Content="室外地坪:" Style="{StaticResource labelStyle}"/>
+            <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource textBoxStyle}" 
+                     Text="{Binding ViewDetailInfo.OutDoorFloorElevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+        </Grid>
+        <Grid x:Name="viewZoneGrid" Margin="0,20,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="0.3*"/>
+                <ColumnDefinition Width="40"/>
+                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="0.3*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource labelStyle}" Content="视图区间"/>
+            <Label Grid.Row="1" Grid.Column="0" Style="{StaticResource labelStyle}"  Content="标高:"/>
+            <ComboBox Margin="0,3,0,0" Grid.Row="1" Grid.Column="1"  x:Name="cbFloor"
+                      Style="{StaticResource comboxStyle}" Height="20" VerticalAlignment="Top"
+                      ItemsSource="{Binding Floors,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding ViewDetailInfo.Floor,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectionChanged="cbFloor_SelectionChanged"/>
+            <Label  Grid.Row="1" Grid.Column="3" Style="{StaticResource labelStyle}"  Content="剖切高度:"/>
+            <TextBox Grid.Row="1" Grid.Column="4" Style="{StaticResource textBoxStyle}" 
+                     Text="{Binding ViewDetailInfo.SectionElevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            <Label Grid.Row="2" Grid.Column="0" Style="{StaticResource labelStyle}"  Content="底高度:"/>
+            <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource textBoxStyle}" 
+                     Text="{Binding ViewDetailInfo.BottomElevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            <Label  Grid.Row="2" Grid.Column="3" Style="{StaticResource labelStyle}"  Content="顶高度:"/>
+            <TextBox  Grid.Row="2" Grid.Column="4" Style="{StaticResource textBoxStyle}"
+                      Text="{Binding ViewDetailInfo.TopElevation,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+        </Grid>
+        <StackPanel x:Name="viewSectionDirectionSP1" Orientation="Vertical">
+            <Label Margin="11,0,0,0" Content="视图剖切方向："/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <RadioButton Margin="10,0,0,0" GroupName="ViewSectionDirection" Content="前视图" IsThreeState="False"
+                             IsChecked="{Binding ViewDetailInfo.ViewSectionDirection,Converter={StaticResource viewDirectionConverter},ConverterParameter=0}"/>
+                <RadioButton Margin="30,0,0,0" GroupName="ViewSectionDirection" Content="后视图" IsThreeState="False"
+                             IsChecked="{Binding ViewDetailInfo.ViewSectionDirection,Converter={StaticResource viewDirectionConverter},ConverterParameter=1}"/>
+                <RadioButton Margin="30,0,0,0" GroupName="ViewSectionDirection" Content="左视图" IsThreeState="False" 
+                             IsChecked="{Binding ViewDetailInfo.ViewSectionDirection,Converter={StaticResource viewDirectionConverter},ConverterParameter=2}"/>
+                <RadioButton Margin="30,0,0,0" GroupName="ViewSectionDirection" Content="右视图" IsThreeState="False" 
+                             IsChecked="{Binding ViewDetailInfo.ViewSectionDirection,Converter={StaticResource viewDirectionConverter},ConverterParameter=3}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="21,5,0,0">
+                <Label Content="剖面框:"/>
+                <ComboBox Style="{StaticResource comboxStyle}" Width="85"
+                          ItemsSource="{Binding ViewDetailInfo.SectionFrames,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          SelectedItem="{Binding ViewDetailInfo.SectionFrame,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                <StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+                    <Image x:Name="imgQuickLocate" Margin="0,0,0,0" Width="16" Height="16" Source="/Tianhua.Platform3D.UI;component/Resources/Images/locate.png" MouseUp="imgQuickLocate_MouseUp"></Image>
+                    <Label Content="快速定位"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Image x:Name="imgCreateSection" Margin="20,0,0,0" Width="16" Height="16" Source="/Tianhua.Platform3D.UI;component/Resources/Images/add.png" MouseUp="imgCreateSection_MouseUp"></Image>
+                    <Label Content="新建剖面框"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Margin="0,5,0,0" Name="viewSectionDirectionSP2">
+            <Label Margin="15,0,0,0" Content="楼层裁切："/>
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <CheckBox Margin="20,0,0,0" Content="采用楼层裁切" IsThreeState="False" VerticalAlignment="Center"
+                          IsChecked="{Binding ViewDetailInfo.UseFloorSection,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Content="裁切间距:"/>
+                <TextBox Width="80" Height="20" Text="{Binding ViewDetailInfo.SectionDistance,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                <Button Margin="20,0,0,0" x:Name="btnFloorSectionSelect" Content="楼层裁切选择" Width="90" Height="20" Click="btnFloorSectionSelect_Click" />
+            </StackPanel>
+        </StackPanel>
+        <StackPanel  Name="elevationViewSectionDirectionSP">
+            <Label Margin="11,0,0,0" Content="视图剖切方向："/>
+            <StackPanel Margin="36,0,0,0" Orientation="Horizontal">
+                <StackPanel Orientation="Vertical" Margin="10,0,0,0">
+                    <CheckBox Content="前视图" IsThreeState="False" 
+                              IsChecked="{Binding ViewDetailInfo.Front,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    <Label Margin="24,0,0,0" Content="(南)" HorizontalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="30,0,0,0">
+                    <CheckBox Content="后视图" IsThreeState="False" 
+                              IsChecked="{Binding ViewDetailInfo.Back,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    <Label Margin="24,0,0,0" Content="(北)" HorizontalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="30,0,0,0">
+                    <CheckBox Content="左视图" IsThreeState="False" 
+                              IsChecked="{Binding ViewDetailInfo.Left,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    <Label Margin="24,0,0,0" Content="(西)" HorizontalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Margin="30,0,0,0">
+                    <CheckBox Content="右视图" IsThreeState="False" 
+                              IsChecked="{Binding ViewDetailInfo.Right,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                    <Label Margin="24,0,0,0" Content="(东)" HorizontalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel>
+            <Button Grid.Row="7" Grid.Column="3" Margin="10,10,0,5" x:Name="btnOk" HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                Content="确定" Style="{StaticResource buttonStyle}" Width="50" Click="btnOk_Click"/>
+        </StackPanel>
+    </StackPanel>
+</cus:ThCustomWindow>

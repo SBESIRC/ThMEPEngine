@@ -2,6 +2,7 @@
 using System.Windows.Data;
 using System.Globalization;
 using Tianhua.Platform3D.UI.StructurePlane;
+using ThPlatform3D.Model;
 
 namespace Tianhua.Platform3D.UI.Converter
 {
@@ -57,6 +58,24 @@ namespace Tianhua.Platform3D.UI.Converter
                 return null;
             }
             return (DrawingTypeOps)int.Parse(parameter.ToString());
+        }
+    }
+    public class ViewDirectionBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            ViewDirection s = (ViewDirection)value;
+            return s == (ViewDirection)int.Parse(parameter.ToString());
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isChecked = (bool)value;
+            if (!isChecked)
+            {
+                return null;
+            }
+            return (ViewDirection)int.Parse(parameter.ToString());
         }
     }
 }

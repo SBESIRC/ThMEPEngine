@@ -7,6 +7,8 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO.SVG;
 using System.Text.RegularExpressions;
+using Autodesk.AutoCAD.Geometry;
+using ThPlatform3D.Model;
 
 namespace ThPlatform3D.Common
 {
@@ -394,6 +396,40 @@ namespace ThPlatform3D.Common
         public static void AddRange(this ObjectIdCollection first, ObjectIdCollection second)
         {
             second.OfType<ObjectId>().ForEach(o => first.Add(o));
+        }
+
+        public static Vector3d ToVector3d(this ViewDirection vd)
+        {
+            switch (vd)
+            {
+                case ViewDirection.Front:
+                    return Vector3d.YAxis;
+                case ViewDirection.Back:
+                    return Vector3d.YAxis.Negate();
+                case ViewDirection.Left:
+                    return Vector3d.XAxis;
+                case ViewDirection.Right:
+                    return Vector3d.XAxis.Negate();
+                default:
+                    return new Vector3d();
+            }            
+        }
+
+        public static string GetViewDirectionName(this ViewDirection vd)
+        {
+            switch (vd)
+            {
+                case ViewDirection.Front:
+                    return "前视图";
+                case ViewDirection.Back:
+                    return "后视图";
+                case ViewDirection.Left:
+                    return "左视图";
+                case ViewDirection.Right:
+                    return "右视图";
+                default:
+                    return "";
+            }
         }
     }
 }
