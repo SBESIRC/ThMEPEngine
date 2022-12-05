@@ -70,7 +70,7 @@ namespace Tianhua.Platform3D.UI
         {
             using (var cmd = new ThViewManagerCmd())
             {
-                cmd.Execute();
+                //cmd.Execute();
             }
         }
 
