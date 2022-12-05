@@ -137,6 +137,8 @@
     <Compile Include="OTools\Vector2DEx.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ShortestPath\PathCorrector.cs" />
+    <Compile Include="ShortestPath\ShortestPathGenerator.cs" />
     <Compile Include="Tools\General.Utils.cs" />
     <Compile Include="Tools\ListEx.cs" />
     <Compile Include="Tools\PolygonEx.cs" />

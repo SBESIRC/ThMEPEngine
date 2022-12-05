@@ -45,5 +45,10 @@ namespace ThParkingStall.Core.OTools
                 else return false;
             }
         }
+
+        public static double CrossProduct(this Vector2D vector , Vector2D other)
+        {
+            return (vector.X * other.Y) - (vector.Y * other.X);
+        }
     }
 }
